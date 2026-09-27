@@ -1,0 +1,5 @@
+export { default as Scoreboard } from "./Scoreboard.vue"
+export { default as CommentaryFeed } from "./CommentaryFeed.vue"
+export { default as StatsPanel } from "./StatsPanel.vue"
+export { default as SubSheet } from "./SubSheet.vue"
+export { default as LiveTacticsSheet } from "./LiveTacticsSheet.vue"
