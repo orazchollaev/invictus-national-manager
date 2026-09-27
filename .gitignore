@@ -39,3 +39,4 @@ graphify-out/
 
 # Local environment (e.g. LONGRUN=1 for the long simulation test)
 .env
+*.tsbuildinfo
