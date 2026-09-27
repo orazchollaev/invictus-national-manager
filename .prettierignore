@@ -1,0 +1,18 @@
+# Nuxt generated
+.nuxt
+.output
+dist
+
+# Dependencies
+node_modules
+
+# Native platform (generated/build artifacts)
+android
+
+# Logs
+*.log
+
+# Lock files — let package manager handle formatting
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
