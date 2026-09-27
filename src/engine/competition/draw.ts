@@ -51,20 +51,40 @@ export function drawGroups(
   const fits = (g: string[], t: string) =>
     !family || g.filter((x) => family(x) === family(t)).length < max(family(t))
 
+  /**
+   * One pot into its open groups. The most constrained teams go first, and a pot
+   * that cannot be placed legally is re-drawn: placing teams one by one in draw
+   * order can leave the last team only groups it is not allowed in.
+   */
+  const placePot = (pot: string[], open: number[], strict: boolean): Map<string, number> | null => {
+    const out = new Map<string, number>()
+    let free = open.slice()
+    const options = (t: string) => free.filter((i) => fits(groups[i], t))
+    const order = strict ? [...pot].sort((a, b) => options(a).length - options(b).length) : pot
+    for (const team of order) {
+      if (!free.length) free = groups.map((_, i) => i)
+      const ok = options(team)
+      if (!ok.length && strict) return null
+      const pool = ok.length ? ok : free
+      const choice = pool[Math.floor(rng() * pool.length)]
+      out.set(team, choice)
+      free = free.filter((i) => i !== choice)
+    }
+    return out
+  }
+
   let cursor = 0
   for (let level = 0; cursor < rest.length; level++) {
     const size = level === 0 ? count - fixed.length : count
-    const pot = shuffle(rng, rest.slice(cursor, cursor + size))
+    const potTeams = rest.slice(cursor, cursor + size)
     cursor += size
-    let open = groups.map((_, i) => i).filter((i) => groups[i].length === level)
-    for (const team of pot) {
-      if (!open.length) open = groups.map((_, i) => i)
-      const ok = open.filter((i) => fits(groups[i], team))
-      const pool = ok.length ? ok : open
-      const choice = pool[Math.floor(rng() * pool.length)]
-      groups[choice].push(team)
-      open = open.filter((i) => i !== choice)
+    const open = groups.map((_, i) => i).filter((i) => groups[i].length === level)
+    let placed: Map<string, number> | null = null
+    for (let attempt = 0; attempt < 100 && !placed; attempt++) {
+      placed = placePot(shuffle(rng, potTeams), open, true)
     }
+    placed ??= placePot(shuffle(rng, potTeams), open, false)!
+    for (const [team, g] of placed) groups[g].push(team)
   }
   return groups
 }
