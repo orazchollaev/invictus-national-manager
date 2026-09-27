@@ -1,0 +1,125 @@
+.notice {
+  background: color-mix(in srgb, var(--accent-2) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+  border-left: 3px solid var(--accent-2);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-base);
+  color: var(--text);
+  border-radius: var(--radius);
+  margin-bottom: var(--sp-3);
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+.phase-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-base);
+  font-family: var(--font-ui);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -1px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition:
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.phase-tab[data-state="active"] {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  color: var(--on-accent);
+  background-color: var(--accent);
+}
+
+.phase-tab.disabled,
+.phase-tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Compact tab bar: tournament detail page has several tabs sharing one
+   strip, so `size="sm"` on AppTabs trims padding and type size. */
+.tabs--sm .phase-tab {
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
+}
+
+/* ── Data tables ─────────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-base);
+}
+
+.data-table th {
+  text-align: start;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: var(--sp-3) var(--sp-4) var(--sp-2);
+  border-bottom: 1px solid var(--border-light);
+  font-family: var(--font-ui);
+}
+
+.data-table td {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* ── Settings copy ───────────────────────────────────────────── */
+.section-intro {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--sp-3);
+  line-height: 1.5;
+}
+
+.danger-label {
+  color: var(--danger);
+}
+
+/* ── Inline empty state ──────────────────────────────────────────
+   One-line zero state inside a dense panel: a table body, a picker list, a
+   timeline. `AppEmptyState` is the full-panel version with icon, title and
+   animation; this is its compact sibling. Nine components used to hand-roll
+   this rule and had already drifted apart on padding, font size and colour. */
+.empty-inline {
+  margin: 0;
+  padding: var(--sp-4) var(--sp-3);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .phase-tab {
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--fs-sm);
+  }
+}

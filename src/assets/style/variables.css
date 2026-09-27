@@ -1,0 +1,168 @@
+/* ── Shared tokens ───────────────────────────────────────────────
+   What every design language agrees on: the accent and status palette,
+   type below the heading sizes, the 4px spacing scale, safe-area,
+   layout and stacking.
+
+   The neutrals, shape, elevation, motion and the heading sizes are NOT
+   here — they differ per platform look and are defined in design.css
+   under [data-design="ios"] / [data-design="android"]. This file does
+   not stand on its own: <html> always carries a data-design value
+   (index.html sets the default, the settings store keeps it current). */
+:root {
+  --accent: #0b7264;
+  --accent-hover: #095c51;
+  --accent-subtle: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-2: #e08b1f;
+  --on-accent: #ffffff;
+
+  /* ── Status ──────────────────────────────────────────────────── */
+  --danger: #d93a30;
+  --success: #0f8f6f;
+  --warning: #e08b1f;
+  --live: #2eb85c;
+  --draw: var(--text-muted);
+
+  --gold: #c9a227;
+  --gold-soft: color-mix(in srgb, var(--gold) 20%, transparent);
+  --gold-faint: color-mix(in srgb, var(--gold) 12%, transparent);
+  --gold-glow: color-mix(in srgb, var(--gold) 40%, transparent);
+  --gold-text: #b8860b;
+  --medal-gold: var(--accent-2);
+  --medal-silver: #9aa09b;
+  --medal-bronze: #a8551a;
+  --pos-2: #3a6fc9;
+  --pos-3: #8e57c4;
+
+  /* ── Draw slip ───────────────────────────────────────────────────
+     The draw-ceremony paper is a physical object, not a surface: it is
+     white card stock in light and dark alike, so these are intentionally
+     NOT redefined in the dark block. They live here rather than inline so
+     the one place that renders paper reads from the palette like everything
+     else. */
+  --paper-face: linear-gradient(to bottom, #ffffff 0%, #f3f4f8 49%, #e7e9f0 51%, #f6f7fa 100%);
+  --paper-text: #1a2234;
+  --paper-border: #c2c7d4;
+
+  /* ── Pitch ─────────────────────────────────────────────────────
+     Grass is grass in light and dark alike, so these are not redefined
+     in the dark theme. */
+  --pitch-a: #2f7d3b;
+  --pitch-b: #2a7336;
+  --pitch-line: rgba(255, 255, 255, 0.35);
+  --pitch-ink: #ffffff;
+  --pitch-token: #ffffff;
+  --pitch-token-text: #1c2a1f;
+  --pitch-shadow: rgba(0, 0, 0, 0.35);
+  --fit-good: #4cd07d;
+  --fit-near: #f2c14e;
+  --fit-off: #ef5b4c;
+
+  --scrim: rgba(18, 21, 19, 0.45);
+  --scrim-strong: rgba(18, 21, 19, 0.62);
+
+  --font: "IBM Plex Sans Variable", sans-serif;
+  --font-ui: "IBM Plex Sans Variable", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace;
+
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+
+  /* ── Spacing — strict 4px scale ──────────────────────────────── */
+  --sp-1: 4px;
+  --sp-1-5: 6px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* ── Touch ───────────────────────────────────────────────────────
+     Minimum comfortable tap size on a phone. Icon buttons are painted much
+     smaller than this by design, so they grow their *hit area* instead, with
+     an invisible centred pseudo-element:
+
+       .some-icon-btn { position: relative; }
+       .some-icon-btn::after {
+         content: "";
+         position: absolute;
+         inset: 50% auto auto 50%;
+         width: max(100%, var(--tap-min));
+         height: max(100%, var(--tap-min));
+         transform: translate(-50%, -50%);
+       }
+
+     Only for controls that stand alone — in a tight cluster the expanded
+     boxes would overlap and steal each other's taps. */
+  --tap-min: 44px;
+
+  /* ── Shape ───────────────────────────────────────────────────── */
+  --radius-pill: 999px;
+
+  /* ── Elevation ───────────────────────────────────────────────── */
+
+  --elev-0: none;
+  --elev-1: var(--shadow-sm);
+  --elev-2: var(--shadow-md);
+  --elev-3: var(--shadow-lg);
+
+  /* ── Motion ──────────────────────────────────────────────────── */
+
+  /* ── Safe area ───────────────────────────────────────────────────
+     Android WebView only maps display-cutout insets into `env()`; the
+     status/navigation bars come back as 0 even though the app draws
+     edge-to-edge (forced from API 35). MainActivity measures the real
+     insets and writes --safe-area-inset-* onto <html>, so always read
+     the safe area through these tokens — never `env()` directly. */
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+
+  /* ── Layout ──────────────────────────────────────────────────── */
+  --header-height: 52px;
+  --sticky-top: calc(var(--header-height) + var(--safe-top));
+
+  /* Floating mobile bottom nav. --mobile-nav-offset is the height any
+     bottom-anchored element must clear to sit above it: the pill, the
+     gap under it, and the system navigation bar. */
+  --mobile-nav-height: 58px;
+  --mobile-nav-gap: var(--sp-2);
+  --mobile-nav-offset: calc(var(--mobile-nav-height) + var(--mobile-nav-gap) + var(--safe-bottom));
+
+  /* ── Stacking order ──────────────────────────────────────────── */
+  --z-sticky: 9;
+  --z-header: 10;
+  /* Fixed bottom bars sit above the header but below the floating nav. */
+  --z-bottom-bar: 90;
+  --z-mobile-nav: 95;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+  --z-modal: 1000;
+  --z-toast: 9000;
+}
+
+[data-theme="dark"] {
+  --accent: #2fb5a1;
+  --accent-hover: #4ecbb8;
+  --accent-subtle: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-2: #f0aa46;
+  --on-accent: #12141a;
+
+  --danger: #f0736a;
+  --success: #34c39c;
+  --warning: #f0aa46;
+  --live: #4ecb78;
+
+  --gold: #d9b843;
+  --gold-text: #e8c860;
+  --medal-silver: #c9cec9;
+  --medal-bronze: #d1802b;
+  --pos-2: #78a6ea;
+  --pos-3: #b391e0;
+
+  --scrim: rgba(0, 0, 0, 0.55);
+  --scrim-strong: rgba(0, 0, 0, 0.7);
+}

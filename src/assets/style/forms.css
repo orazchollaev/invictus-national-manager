@@ -1,0 +1,278 @@
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.form-section-title {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--sp-3);
+}
+
+.form-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+.form-section-header .form-section-title {
+  margin-bottom: 0;
+}
+
+/* ── Rows & labels ───────────────────────────────────────────── */
+.form-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.form-label {
+  font-size: var(--fs-base);
+  color: var(--text);
+  width: 140px;
+  flex-shrink: 0;
+}
+.form-label--md {
+  width: 160px;
+}
+.form-label--lg {
+  width: 200px;
+}
+
+.form-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* ── Hint box ────────────────────────────────────────────────── */
+.hint-box {
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.hint-box--top {
+  margin-bottom: var(--sp-3);
+}
+.hint-box--bottom {
+  margin-top: var(--sp-3);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.stepper button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: var(--fs-md);
+  line-height: 1;
+  display: flex;
+  justify-content: center;
+}
+.stepper button:first-child {
+  border-right: 1px solid var(--border);
+}
+.stepper button:last-child {
+  border-left: 1px solid var(--border);
+}
+.stepper-val {
+  width: 40px;
+  text-align: center;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  font-family: var(--font-ui);
+}
+
+/* ── Toggle ──────────────────────────────────────────────────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  cursor: pointer;
+  user-select: none;
+}
+.toggle-label {
+  font-size: var(--fs-base);
+  font-weight: 600;
+}
+.toggle-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+@media (max-width: 600px) {
+  .form-card {
+    padding: var(--sp-3);
+  }
+  .form-label,
+  .form-label--md,
+  .form-label--lg {
+    width: auto;
+    flex: 1 1 100%;
+  }
+  .form-row {
+    row-gap: var(--sp-2);
+  }
+  .toggle-label {
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+  }
+}
+
+.config-button-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Power slider ────────────────────────────────────────────────
+   The 0-100 strength control on the team and player forms. Both draw it in
+   the owner's colour, so the caller sets --power-color on an ancestor. */
+.power-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+.power-slider:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.power-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, var(--power-color) var(--pct), var(--border) var(--pct));
+}
+.power-slider::-moz-range-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, var(--power-color) var(--pct), var(--border) var(--pct));
+}
+
+.power-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 3px solid var(--power-color);
+  box-shadow: var(--elev-1);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.power-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 3px solid var(--power-color);
+  box-shadow: var(--elev-1);
+}
+
+.power-slider:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+.power-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--focus-ring);
+}
+.power-slider:focus-visible::-moz-range-thumb {
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Design languages ────────────────────────────────────────────
+   iOS: a hairline track under a large white puck — the thumb is the
+   control, the track is just a line. */
+[data-design="ios"] .power-slider::-webkit-slider-runnable-track {
+  height: 4px;
+}
+[data-design="ios"] .power-slider::-moz-range-track {
+  height: 4px;
+}
+[data-design="ios"] .power-slider::-webkit-slider-thumb {
+  width: 26px;
+  height: 26px;
+  margin-top: -11px;
+  border: none;
+  background: #ffffff;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.14),
+    0 3px 8px rgba(0, 0, 0, 0.16);
+}
+[data-design="ios"] .power-slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: #ffffff;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.14),
+    0 3px 8px rgba(0, 0, 0, 0.16);
+}
+[data-design="ios"] .power-slider:active::-webkit-slider-thumb {
+  transform: none;
+}
+
+/* M3: the handle is a short vertical bar, not a knob, and the track is
+   split into an active and an inactive half with rounded ends. */
+[data-design="android"] .power-slider::-webkit-slider-runnable-track {
+  height: 16px;
+}
+[data-design="android"] .power-slider::-moz-range-track {
+  height: 16px;
+}
+[data-design="android"] .power-slider::-webkit-slider-thumb {
+  width: 4px;
+  height: 28px;
+  margin-top: -6px;
+  border: none;
+  border-radius: 2px;
+  background: var(--power-color);
+  box-shadow: none;
+}
+[data-design="android"] .power-slider::-moz-range-thumb {
+  width: 4px;
+  height: 28px;
+  border: none;
+  border-radius: 2px;
+  background: var(--power-color);
+  box-shadow: none;
+}
+[data-design="android"] .power-slider:active::-webkit-slider-thumb {
+  transform: scaleY(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .power-slider::-webkit-slider-thumb {
+    transition: none;
+  }
+}

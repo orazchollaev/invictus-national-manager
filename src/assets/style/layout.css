@@ -1,0 +1,140 @@
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--sp-4);
+}
+
+.page-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-5);
+}
+
+.page-title {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* ── Detail page header ──────────────────────────────────────── */
+.t-header {
+  margin-bottom: var(--sp-4);
+}
+
+.t-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.t-header h1 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0 var(--sp-1);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Row holding an AppSearchInput plus whatever sits beside it (view toggle, clear). */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+/* ── Back navigation ─────────────────────────────────────────── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-base);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: none;
+}
+
+/* ── Vertical rhythm ─────────────────────────────────────────── */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.stack--sm {
+  gap: var(--sp-2);
+}
+.stack--lg {
+  gap: var(--sp-4);
+}
+
+/* ── Common row helpers ──────────────────────────────────────── */
+.t-list,
+.t-list-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.t-list-inner {
+  position: relative;
+}
+
+.btn-row {
+  display: flex;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: var(--sp-2);
+  }
+
+  .page-top {
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-2);
+  }
+
+  .page-title,
+  .t-header h1 {
+    font-size: var(--fs-lg);
+  }
+
+  .t-header {
+    margin-bottom: var(--sp-2);
+  }
+
+  .t-header-top {
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+
+  .btn-row {
+    flex-wrap: wrap;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+  .modal-actions > * {
+    width: 100%;
+  }
+}
