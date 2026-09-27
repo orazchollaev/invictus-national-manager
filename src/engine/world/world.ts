@@ -638,11 +638,12 @@ export class World {
       p.assists += line.assists
       p.morale = Math.min(100, p.morale + (line.rating >= 7.5 ? 4 : line.rating < 5.5 ? -3 : 1))
     }
+    // A suspension is served by the nation's next match, whether or not the player
+    // is in the squad — otherwise a suspended player could never be picked again.
+    const sentOff = new Set(report.lines.filter((l) => l.red).map((l) => l.playerId))
     for (const nationId of [f.home, f.away]) {
-      for (const id of s.nations[nationId].squad) {
-        const p = s.players[id]
-        if (p?.banned && !report.lines.some((l) => l.playerId === id && l.red))
-          p.banned = Math.max(0, p.banned - 1)
+      for (const p of this.pool(nationId)) {
+        if (p.banned && !sentOff.has(p.id)) p.banned = Math.max(0, p.banned - 1)
       }
     }
 
