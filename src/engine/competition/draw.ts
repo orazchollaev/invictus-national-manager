@@ -2,12 +2,13 @@ import { shuffle, type Rng } from "../rng"
 
 /**
  * Round-robin rounds by the circle method. With an odd count one team rests each
- * round. `legs` 2 repeats the rounds with home and away swapped. Home and away
- * alternate for each team as evenly as the method allows.
+ * round — never the first team in the first round, so a host always opens. `legs` 2
+ * repeats the rounds with home and away swapped. Home and away alternate for each
+ * team as evenly as the method allows.
  */
 export function roundRobin(teams: string[], legs: 1 | 2): [string, string][][] {
   const list = teams.slice()
-  if (list.length % 2) list.push("")
+  if (list.length % 2) list.splice(1, 0, "")
   const n = list.length
   const rounds: [string, string][][] = []
   const arr = list.slice()

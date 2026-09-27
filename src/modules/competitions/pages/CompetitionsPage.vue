@@ -7,6 +7,8 @@ import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 import { formatShort } from "@/engine/calendar/dates"
 import type { CompetitionInstance } from "@/engine/competition/types"
+import { competitionDef } from "@/engine/competition/defs"
+import { AWARDED_HOSTS } from "@/data/start"
 
 const world = useWorldStore()
 const filter = ref("all")
@@ -44,6 +46,14 @@ const finished = computed(() =>
     .sort((a, b) => (a.end > b.end ? -1 : 1))
     .slice(0, 20)
 )
+
+/** The host's flag, or for a qualifier the finals' host. */
+function hostOf(c: CompetitionInstance): string | undefined {
+  if (c.hosts[0]) return c.hosts[0]
+  const id = competitionDef(c.defId).finals?.(c.year)
+  if (!id) return undefined
+  return world.world?.state.competitions[id]?.hosts[0] ?? AWARDED_HOSTS[id]?.[0]
+}
 
 const kindLabel: Record<string, string> = {
   "world-cup": "World Cup",
@@ -121,7 +131,7 @@ const kindLabel: Record<string, string> = {
               </div>
             </div>
             <NationFlag v-if="c.outcome.winner" :id="c.outcome.winner" :size="22" />
-            <NationFlag v-else-if="c.hosts[0]" :id="c.hosts[0]" :size="18" />
+            <NationFlag v-else-if="hostOf(c)" :id="hostOf(c)!" :size="18" />
           </RouterLink>
         </div>
       </template>

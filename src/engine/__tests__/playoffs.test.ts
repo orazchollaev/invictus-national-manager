@@ -52,6 +52,31 @@ describe("play-off places", { timeout: 600000 }, () => {
     for (const f of fixtures) expect(isPlaceholder(f.home) || isPlaceholder(f.away)).toBe(false)
   })
 
+  it("plays Asia's five rounds, and Asian Cup qualifying for the rest", () => {
+    until("2029-12-01")
+    const q = w.state.competitions["wcq-afc-2030"]
+    const stage = (k: string) => q.stages.find((s) => s.key === k)!
+    expect(q.status).toBe("done")
+    expect(stage("r1").rounds![0].ties.filter((t) => t.fixtures.length === 2)).toHaveLength(10)
+    expect(stage("r2").groups!.map((g) => g.teams.length)).toEqual(Array(9).fill(4))
+    expect(stage("r3").groups!.map((g) => g.teams.length)).toEqual([6, 6, 6])
+    expect(stage("r4").groups!.map((g) => g.teams.length)).toEqual([3, 3])
+    expect(stage("r5").rounds![0].ties).toHaveLength(1)
+    expect(q.outcome.qualified).toHaveLength(8)
+    expect(q.outcome.interconf).toHaveLength(1)
+
+    // Everyone the second round left behind plays Asian Cup qualifying.
+    const acq = w.state.competitions["asian-cupq-2031"]
+    expect(acq.status).toBe("active")
+    const third = acq.stages.find((s) => s.key === "groups")!.groups!
+    const inThird = third.flatMap((g) => g.teams)
+    for (const g of stage("r2").groups!) {
+      const table = g.teams
+      expect(table.filter((t) => inThird.includes(t))).toHaveLength(2)
+    }
+    expect(third).toHaveLength(6)
+  })
+
   it("draws the 2030 World Cup with qualifiers and placeholders only", () => {
     until("2029-12-20")
     const teams = teamsOf("wc-2030")
@@ -66,6 +91,27 @@ describe("play-off places", { timeout: 600000 }, () => {
         earned.add(t)
     }
     for (const t of teams) expect(earned.has(t), t).toBe(true)
+    // The six hosts head groups A to F; Uruguay's centenary match opens alone.
+    const groups = w.state.competitions["wc-2030"].stages[0].groups!
+    expect(groups.slice(0, 6).map((g) => g.teams[0])).toEqual([
+      "URU",
+      "ARG",
+      "PAR",
+      "ESP",
+      "POR",
+      "MAR",
+    ])
+    const fixtures = groups.flatMap((g) => g.fixtures).map((id) => w.state.fixtures[id])
+    const opener = fixtures.filter((f) => f.date === "2030-06-11")
+    expect(opener).toHaveLength(1)
+    expect(opener[0].home).toBe("URU")
+  })
+
+  it("fills the Asian Cup 2031 from the second round and Asian Cup qualifying", () => {
+    until("2030-03-31")
+    const acq = w.state.competitions["asian-cupq-2031"]
+    expect(acq.status).toBe("done")
+    expect(acq.outcome.qualified).toHaveLength(6)
   })
 
   it("lets a Nations League group winner into the UEFA play-offs", () => {

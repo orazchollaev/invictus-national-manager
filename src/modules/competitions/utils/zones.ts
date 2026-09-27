@@ -1,6 +1,7 @@
 import type { CompetitionInstance } from "@/engine/competition/types"
 import type { CompContext } from "@/engine/competition/runtime"
-import { WC_PLACES, worldCupHosts } from "@/engine/competition/defs/fifa"
+import { WC_PLACES, afcFourthRoundGroups, worldCupHosts } from "@/engine/competition/defs/fifa"
+import { AWARDED_HOSTS } from "@/data/start"
 
 /** What finishing in a table position leads to. */
 export type Zone =
@@ -18,9 +19,9 @@ export type Zone =
   | "third"
   | "champion"
   | "wc-ac"
-  | "playoff-ac"
-  | "cup"
-  | "ofc"
+  | "acq"
+  | "next"
+  | "host-group"
 
 export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
   qf: { label: "Quarter-finals", tone: "var(--pos-2)" },
@@ -36,23 +37,39 @@ export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
   advance: { label: "Knockout stage", tone: "var(--success)" },
   third: { label: "Knockout stage if among the best thirds", tone: "var(--warning)" },
   champion: { label: "Champions", tone: "var(--gold)" },
-  "wc-ac": { label: "World Cup and Asian Cup", tone: "var(--success)" },
-  "playoff-ac": { label: "World Cup play-off (best placed) and Asian Cup", tone: "var(--warning)" },
-  cup: { label: "Asian Cup (best third-placed)", tone: "var(--pos-3)" },
-  ofc: { label: "World Cup, or inter-confederation play-off", tone: "var(--success)" },
+  "wc-ac": { label: "Third round and Asian Cup", tone: "var(--success)" },
+  acq: { label: "Asian Cup qualifying", tone: "var(--pos-3)" },
+  next: { label: "Next round", tone: "var(--warning)" },
+  "host-group": { label: "Qualifies if the host finishes above", tone: "var(--warning)" },
 }
 
 const letterOf = (name: string) => name.replace(/\d+$/, "")
 
+/** The group of a stage holds one of the finals' hosts (AFCON qualifying). */
+function hostGroup(
+  inst: CompetitionInstance,
+  stageKey: string,
+  groupName: string,
+  ctx: CompContext
+) {
+  const finals = ctx.instance(inst.id.replace("afconq", "afcon"))
+  const hosts = finals?.hosts ?? AWARDED_HOSTS[inst.id.replace("afconq", "afcon")] ?? []
+  const group = inst.stages
+    .find((s) => s.key === stageKey)
+    ?.groups?.find((g) => g.name === groupName)
+  return !!group?.teams.some((t) => hosts.includes(t))
+}
+
 /**
- * Zone per table position (index 0 = top) for one group of a competition. Each
- * entry mirrors the rules in engine/competition/defs; keep the two in step.
+ * Zone per table position (index 0 = top) for one group of a competition's stage.
+ * Each entry mirrors the rules in engine/competition/defs; keep the two in step.
  */
 export function zonesFor(
   inst: CompetitionInstance,
   groupName: string,
   size: number,
-  ctx: CompContext
+  ctx: CompContext,
+  stageKey = "groups"
 ): (Zone | null)[] {
   const z = (...list: (Zone | null)[]) => Array.from({ length: size }, (_, i) => list[i] ?? null)
   /** `top` from first place down, and `zone` for last place. */
@@ -88,12 +105,23 @@ export function zonesFor(
     case "wcq-uefa":
     case "wcq-caf":
       return z("through", "playoff")
-    case "wcq-afc":
-      return z("wc-ac", "playoff-ac", "cup")
+    case "wcq-afc": {
+      const two = afcFourthRoundGroups(inst.year, ctx) === 2
+      switch (stageKey) {
+        case "r2":
+          return z("wc-ac", "wc-ac", "acq", "acq")
+        case "r3":
+          return two ? z("through", "through", "next", "next") : z("through", "through", "next")
+        case "r4":
+          return z("through", two ? "next" : "ic")
+        default:
+          return z()
+      }
+    }
     case "wcq-concacaf":
       return z("through", "ic")
     case "wcq-ofc":
-      return z("ofc")
+      return z("advance", "advance")
     case "wcq-conmebol": {
       const hosts = worldCupHosts(inst.year, ctx).filter((h) => ctx.confedOf(h) === "CONMEBOL")
       const direct = WC_PLACES.CONMEBOL - hosts.length
@@ -104,7 +132,11 @@ export function zonesFor(
     case "euroq":
       return z("through", "through", "playoff")
     case "afconq":
-      return z("through", "maybe")
+      return hostGroup(inst, stageKey, groupName, ctx)
+        ? z("through", "host-group")
+        : z("through", "through")
+    case "asian-cupq":
+      return z("through")
 
     // Finals where the best third-placed teams also go through.
     case "wc":
@@ -115,6 +147,7 @@ export function zonesFor(
     case "cosafa":
       return z("advance", "maybe")
     case "wafu":
+    case "cafa":
       return z("advance")
 
     // Round-robin tournaments: the table is the result.

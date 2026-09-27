@@ -4,13 +4,21 @@
  * booked for something else in the same weeks are left out.
  *
  *  - FIFA Arab Cup: December 2029 and 2033 in Qatar, then every four years.
- *  - Arabian Gulf Cup: every two years, December.
+ *  - Arabian Gulf Cup: every two years, December (2026: Saudi Arabia).
  *  - ASEAN Championship: every two years from 2028, July–August.
  *  - EAFF E-1: every two years from 2027, July.
+ *  - CAFA Nations Cup: every two years from 2027, in the September window (as in
+ *    2025), so clubs must release players.
+ *  - WAFF Championship: West Asia's; irregular since 2019 — here every four years
+ *    from 2027, in the summer, out of the Arab Cup's way.
  *  - SAFF Championship, COSAFA Cup, CECAFA Cup, WAFU Cup, Baltic Cup.
+ *
+ * Not modelled: the African Nations Championship (home-based players only) and the
+ * dormant UNAF and UNIFFAC tournaments.
  */
 import type { ISODate } from "@/engine/types"
 import { addDays, iso } from "@/engine/calendar/dates"
+import { window } from "@/engine/calendar/windows"
 import type { CompContext, CompetitionDef } from "../runtime"
 import { AWARDED_HOSTS } from "@/data/start"
 import { finalsDef, type FinalsOptions } from "./builders"
@@ -138,6 +146,47 @@ export const eafE1 = regional({
   members: member("EAFF"),
 })
 
+/**
+ * Central Asia: two groups of three, the winners meet in the final. Played in the
+ * first half of the September window, before anything the second half holds.
+ */
+export const cafaNationsCup = regional({
+  id: "cafa",
+  short: "CAFA Nations Cup",
+  confed: "AFC",
+  name: (y) => `CAFA Nations Cup ${y}`,
+  editions: everyNYears(2027, 2),
+  offWindow: false,
+  teams: 6,
+  groups: 2,
+  perGroup: 1,
+  bestThirds: 0,
+  thirdPlace: false,
+  start: (y) => addDays(window(y, "sep").start, 1),
+  drawDate: (y) => iso(y, 6, 25),
+  span: 8,
+  gap: 2,
+  members: member("CAFA"),
+})
+
+export const waffChampionship = regional({
+  id: "waff",
+  short: "WAFF Championship",
+  confed: "AFC",
+  name: (y) => `WAFF Championship ${y}`,
+  editions: everyNYears(2027, 4),
+  teams: 8,
+  groups: 2,
+  perGroup: 2,
+  bestThirds: 0,
+  thirdPlace: false,
+  start: (y) => iso(y, 7, 30),
+  drawDate: (y) => iso(y, 5, 20),
+  span: 16,
+  gap: 3,
+  members: member("WAFF"),
+})
+
 export const saffChampionship = regional({
   id: "saff",
   short: "SAFF Championship",
@@ -235,6 +284,8 @@ export const REGIONAL_DEFS: CompetitionDef[] = [
   gulfCup,
   aseanChampionship,
   eafE1,
+  cafaNationsCup,
+  waffChampionship,
   saffChampionship,
   cosafaCup,
   cecafaCup,

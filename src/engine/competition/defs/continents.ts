@@ -2,14 +2,18 @@
  * The other confederations' championships and their qualifying:
  *  - Africa Cup of Nations: 2027 (Kenya, Tanzania, Uganda; 19 June – 17 July), then
  *    every four years from 2028 (CAF, December 2025). 2027 qualifying is the real draw.
+ *    Hosts play qualifying too; a group with a host sends only its best other team.
  *  - AFC Asian Cup: 2027 in Saudi Arabia (7 January – 5 February, real groups), then
- *    every four years; later editions qualify through the World Cup qualifying groups.
+ *    every four years. The top two of each World Cup qualifying second-round group
+ *    qualify; everyone else plays Asian Cup qualifying: first-round losers in a
+ *    play-off round, then a third round with the second round's third- and
+ *    fourth-placed teams, whose group winners take the last places.
  *  - Copa América: every four years from 2028, CONMEBOL plus six CONCACAF guests.
  *  - CONCACAF Gold Cup: odd years; CONCACAF Nations League in the autumn after a World Cup.
  *  - OFC Nations Cup: every four years from 2028.
  */
 import type { CompContext, CompetitionDef } from "../runtime"
-import { finishers, standingsOf } from "../runtime"
+import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance } from "../types"
 import { iso } from "@/engine/calendar/dates"
 import { slots, window } from "@/engine/calendar/windows"
@@ -17,6 +21,7 @@ import { AFCON_2027_QUALIFYING, ASIAN_CUP_2027, AWARDED_HOSTS } from "@/data/sta
 import { finalsDef, qualifierDef } from "./builders"
 import { everyNYears, pickHosts } from "./helpers"
 import { nationsLeagueDef } from "./nationsLeague"
+import { afcFirstRoundLosers, afcSecondRound } from "./fifa"
 
 function hostsOf(key: string, ctx: CompContext, pool: string[], count = 1) {
   return AWARDED_HOSTS[key] ?? pickHosts(ctx, key, pool, count)
@@ -54,16 +59,33 @@ export const afcon: CompetitionDef = finalsDef({
   },
 })
 
+const afconHosts = (year: number, ctx: CompContext) =>
+  ctx.instance(`afcon-${year}`)?.hosts ?? AWARDED_HOSTS[`afcon-${year}`] ?? []
+
+/**
+ * The top two of each group qualify, but a group with a host sends only its best
+ * other team: the host already has that place (as for Kenya, Tanzania and Uganda).
+ */
 function afconQualify(inst: CompetitionInstance, ctx: CompContext) {
-  const hosts =
-    ctx.instance(`afcon-${inst.year}`)?.hosts ?? AWARDED_HOSTS[`afcon-${inst.year}`] ?? []
-  const tables = standingsOf(inst, "groups", ctx).map((t) =>
-    t.filter((r) => !hosts.includes(r.team))
-  )
-  const places = 24 - hosts.length
-  const winners = finishers(tables, 0).map((r) => r.team)
-  const runners = finishers(tables, 1).map((r) => r.team)
-  return { qualified: [...winners, ...runners].slice(0, places) }
+  const hosts = afconHosts(inst.year, ctx)
+  const qualified: string[] = []
+  for (const table of standingsOf(inst, "groups", ctx)) {
+    const hosted = table.some((r) => hosts.includes(r.team))
+    const others = table.filter((r) => !hosts.includes(r.team))
+    qualified.push(...others.slice(0, hosted ? 1 : 2).map((r) => r.team))
+  }
+  return { qualified: qualified.slice(0, 24 - hosts.length) }
+}
+
+/** Every CAF member, hosts included, best ranked first — hosts spared the preliminary round. */
+function afconEntrants(inst: CompetitionInstance, ctx: CompContext) {
+  const ranked = caf(ctx)
+  const hosts = afconHosts(inst.year, ctx).filter((h) => ranked.includes(h))
+  // With 48 group places, the rest of the lowest ranked play off first.
+  const spared = Math.min(ranked.length, 96 - ranked.length)
+  const out = ranked.filter((t) => !hosts.includes(t))
+  for (const h of hosts) out.splice(Math.min(ranked.indexOf(h), spared - 1), 0, h)
+  return out
 }
 
 export const afconQualifying: CompetitionDef = qualifierDef({
@@ -72,16 +94,14 @@ export const afconQualifying: CompetitionDef = qualifierDef({
   confed: "CAF",
   name: (y) => `Africa Cup of Nations ${y} Qualifying`,
   editions: afconYears,
-  entrants: (inst, ctx) => {
-    const hosts =
-      AWARDED_HOSTS[`afcon-${inst.year}`] ?? ctx.instance(`afcon-${inst.year}`)?.hosts ?? []
-    return caf(ctx)
-      .filter((t) => !hosts.includes(t))
-      .slice(0, 48)
-  },
+  finals: (y) => `afcon-${y}`,
+  entrants: afconEntrants,
   groups: () => 12,
   groupSize: 4,
   fixedGroups: (y) => (y === 2027 ? AFCON_2027_QUALIFYING : undefined),
+  // The lowest ranked play two-legged ties in the June window before the groups.
+  prelimDates: (y) => slots(y === 2028 ? 2027 : y - 2, ["jun"]),
+  prelimDrawDate: (y) => iso(y === 2028 ? 2027 : y - 2, 3, 1),
   groupDrawDate: (y) => (y === 2027 ? "2026-07-01" : y === 2028 ? "2027-07-15" : iso(y - 2, 7, 15)),
   groupDates: (y) => {
     if (y === 2027) {
@@ -116,16 +136,102 @@ export const asianCup: CompetitionDef = finalsDef({
   importance: ["continental", "continental-ko"],
   eligible: (t, ctx) => ctx.confedOf(t) === "AFC",
   entrants(inst, ctx) {
-    // Qualification rides on the World Cup qualifying groups played before it.
     const wcq = ctx.instance(`wcq-afc-${inst.year - 1}`)
-    const list = [...inst.hosts]
-    if (wcq?.status === "done") {
-      const tables = standingsOf(wcq, "groups", ctx)
-      for (let pos = 0; pos < 5; pos++) list.push(...finishers(tables, pos).map((r) => r.team))
-    }
-    return [...new Set(list)].slice(0, 24)
+    const q = ctx.instance(`asian-cupq-${inst.year}`)
+    const earned = [
+      ...(wcq ? afcSecondRound(wcq, ctx).top : []),
+      ...(q?.outcome.qualified ?? []),
+    ].filter((t) => !inst.hosts.includes(t))
+    const list = [
+      ...inst.hosts,
+      ...[...new Set(earned)].sort((a, b) => ctx.points(b) - ctx.points(a)),
+    ]
+    return list.slice(0, 24)
   },
 })
+
+/** Places left for Asian Cup qualifying: 24, less the hosts and the second round's top two. */
+function asianCupDirect(year: number, ctx: CompContext): string[] {
+  const hosts = ctx.instance(`asian-cup-${year}`)?.hosts ?? AWARDED_HOSTS[`asian-cup-${year}`] ?? []
+  const wcq = ctx.instance(`wcq-afc-${year - 1}`)
+  return [...new Set([...hosts, ...(wcq ? afcSecondRound(wcq, ctx).top : [])])]
+}
+
+/**
+ * Asian Cup qualifying for everyone the World Cup's second round left behind, as for
+ * 2027: a two-legged play-off round for the first-round losers (September), then a
+ * third round of groups of four, home and away, from March to the next March. The
+ * group winners qualify.
+ */
+export const asianCupQualifying: CompetitionDef = {
+  id: "asian-cupq",
+  short: "Asian Cup Qualifying",
+  confed: "AFC",
+  kind: "qualifier",
+  name: (y) => `AFC Asian Cup ${y} Qualifying`,
+  editions: everyNYears(2031, 4),
+  finals: (y) => `asian-cup-${y}`,
+  plan(inst, ctx) {
+    const y = inst.year
+    const wcq = (c: CompContext) => c.instance(`wcq-afc-${y - 1}`)
+    const [sep1, sep2] = window(y - 3, "sep").slots
+    const [, , oct1, oct2] = window(y - 2, "sep").slots
+    return [
+      {
+        key: "playoff",
+        name: "Play-off round",
+        drawDate: iso(y - 3, 7, 20),
+        importance: "qualifier",
+        entrants: (c) => {
+          const w = wcq(c)
+          const direct = asianCupDirect(y, c)
+          return (w ? afcFirstRoundLosers(w) : [])
+            .filter((t) => !direct.includes(t))
+            .sort((a, b) => c.points(b) - c.points(a))
+        },
+        knockout: {
+          rounds: [{ name: "Play-off round", dates: [sep1, sep2] }],
+          pairing: "pots",
+          venue: "home-away",
+        },
+      },
+      {
+        key: "groups",
+        name: "Third round",
+        drawDate: iso(y - 3, 12, 10),
+        importance: "qualifier",
+        entrants: (c, i) => {
+          const w = wcq(c)
+          const direct = asianCupDirect(y, c)
+          const list = [
+            ...(w ? afcSecondRound(w, c).rest : []),
+            ...knockoutResult(i, "playoff").finalWinners,
+          ].filter((t) => !direct.includes(t))
+          return [...new Set(list)].sort((a, b) => c.points(b) - c.points(a))
+        },
+        groups: {
+          // A group per place left.
+          count: Math.max(1, 24 - asianCupDirect(y, ctx).length),
+          legs: 2,
+          dates: [
+            slots(y - 2, ["mar"])[1],
+            slots(y - 2, ["jun"])[1],
+            oct1,
+            oct2,
+            slots(y - 2, ["nov"])[1],
+            slots(y - 1, ["mar"])[1],
+          ],
+          venue: "home-away",
+          tiebreak: "gd",
+        },
+      },
+    ]
+  },
+  finalize(inst, ctx) {
+    const tables = standingsOf(inst, "groups", ctx)
+    return { qualified: finishers(tables, 0).map((r) => r.team) }
+  },
+}
 
 // ── The Americas ────────────────────────────────────────────────────────────
 
@@ -234,6 +340,7 @@ export const CONTINENT_DEFS: CompetitionDef[] = [
   afcon,
   afconQualifying,
   asianCup,
+  asianCupQualifying,
   copaAmerica,
   goldCup,
   concacafNationsLeague,

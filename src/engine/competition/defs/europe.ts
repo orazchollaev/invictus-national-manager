@@ -69,6 +69,7 @@ export const euroQualifying: CompetitionDef = qualifierDef({
   confed: "UEFA",
   name: (y) => `UEFA Euro ${y} Qualifying`,
   editions: euroYears,
+  finals: (y) => `euro-${y}`,
   entrants: (inst, ctx) => {
     const hosts = autoHosts(inst.year, ctx)
     return ctx.ranked((t) => ctx.confedOf(t) === "UEFA" && !hosts.includes(t))

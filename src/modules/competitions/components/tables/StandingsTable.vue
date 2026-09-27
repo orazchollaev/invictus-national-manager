@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import type { Standing } from "@/engine/competition/types"
+import { AppChip } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 import { ZONE_INFO, type Zone } from "@/modules/competitions/utils/zones"
@@ -10,6 +11,8 @@ const props = defineProps<{
   title: string
   /** What each position leads to (qualify, play-off, relegation…). */
   zones?: (Zone | null)[]
+  /** The finals' hosts, marked in the table (also in their qualifying groups). */
+  hosts?: string[]
 }>()
 
 const world = useWorldStore()
@@ -48,7 +51,12 @@ const tone = (i: number) => {
       :style="{ '--zone': tone(i) }"
     >
       <span class="pos">{{ i + 1 }}</span>
-      <span class="team"><NationFlag :id="r.team" :size="18" name /></span>
+      <span class="team">
+        <NationFlag :id="r.team" :size="18" name />
+        <AppChip v-if="hosts?.includes(r.team)" size="xs" variant="accent" class="host">
+          Host
+        </AppChip>
+      </span>
       <span>{{ r.p }}</span>
       <span>{{ r.w }}</span>
       <span>{{ r.d }}</span>
@@ -105,6 +113,12 @@ const tone = (i: number) => {
   text-align: start;
   min-width: 0;
   display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.host {
+  flex-shrink: 0;
 }
 
 .pos {

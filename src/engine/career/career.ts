@@ -14,18 +14,6 @@ import { competitionDef } from "../competition/defs"
 import { standingsOf } from "../competition/runtime"
 import type { World } from "../world/world"
 
-/** Which finals a qualifier leads to. */
-const QUALIFIES_FOR: Record<string, (year: number) => string> = {
-  "wcq-uefa": (y) => `wc-${y}`,
-  "wcq-caf": (y) => `wc-${y}`,
-  "wcq-afc": (y) => `wc-${y}`,
-  "wcq-concacaf": (y) => `wc-${y}`,
-  "wcq-conmebol": (y) => `wc-${y}`,
-  "wcq-ofc": (y) => `wc-${y}`,
-  euroq: (y) => `euro-${y}`,
-  afconq: (y) => `afcon-${y}`,
-}
-
 /** "FIFA World Cup 2030" from "wc-2030". */
 function finalsName(instanceId: string): string {
   const year = Number(instanceId.slice(instanceId.lastIndexOf("-") + 1))
@@ -78,7 +66,9 @@ export function refreshObjectives(world: World) {
   for (const inst of Object.values(world.state.competitions)) {
     if (inst.status === "done" || have.has(inst.id)) continue
     if (!involved(inst, me, world)) continue
-    const target = QUALIFIES_FOR[inst.defId]?.(inst.year)
+    // Already asked of us through World Cup qualifying's second round.
+    if (inst.defId === "asian-cupq" && have.has(`wcq-afc-${inst.year - 1}`)) continue
+    const target = competitionDef(inst.defId).finals?.(inst.year)
     let obj: BoardObjective | null = null
     if (target) {
       const finalsDef = target.split("-").slice(0, -1).join("-")
@@ -164,7 +154,7 @@ export function refreshObjectives(world: World) {
       }
     }
     if (obj) career.objectives.push(obj)
-    // Asia's World Cup qualifying groups also decide the next Asian Cup.
+    // Asia's World Cup qualifying second round also decides the next Asian Cup.
     if (inst.defId === "wcq-afc" && rank <= 26) {
       career.objectives.push({
         id: `${inst.id}:asian-cup`,
@@ -202,14 +192,15 @@ function evaluate(
   switch (obj.kind) {
     case "qualify": {
       if (obj.target === "asian-cup") {
-        // Group winners, runners-up and (nearly all) third-placed teams go through.
-        const groups = inst.stages.find((s) => s.key === "groups")
-        if (groups?.status !== "done") return "open"
-        const table = standingsOf(inst, "groups", world.ctx()).find((t) =>
-          t.some((r) => r.team === me)
-        )
-        const pos = table?.findIndex((r) => r.team === me) ?? 99
-        return pos <= 2 ? "met" : "failed"
+        // The second round's top two go through; everyone else through Asian Cup qualifying.
+        const year = inst.year + 1
+        if (world.state.competitions[`asian-cup-${year}`]?.hosts.includes(me)) return "met"
+        if (inst.stages.find((s) => s.key === "r2")?.status !== "done") return "open"
+        const table = standingsOf(inst, "r2", world.ctx()).find((t) => t.some((r) => r.team === me))
+        if ((table?.findIndex((r) => r.team === me) ?? 99) <= 1) return "met"
+        const q = world.state.competitions[`asian-cupq-${year}`]
+        if (q?.status !== "done") return "open"
+        return q.outcome.qualified?.includes(me) ? "met" : "failed"
       }
       if (inst.status !== "done") return "open"
       return inst.outcome.qualified?.includes(me) ? "met" : "failed"

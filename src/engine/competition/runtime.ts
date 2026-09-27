@@ -45,8 +45,13 @@ export interface GroupPlan {
   dates: ISODate[]
   /** A real draw, used instead of drawing. */
   fixed?: string[][]
-  /** Teams placed first in the opening groups (hosts). */
+  /** Teams placed first in the opening groups, in order: A, B, C… (hosts). */
   seeded?: string[]
+  /**
+   * The first of these in the draw plays the opening match on its own; the rest of
+   * the first matchday follows the next day (hosts, in order).
+   */
+  opening?: string[]
   /** Keep confederations apart (World Cup): at most one per group, two for UEFA. */
   spreadConfeds?: boolean
   venue: "home-away" | "neutral"
@@ -58,8 +63,12 @@ export interface GroupPlan {
 export interface KnockoutPlan {
   /** Each round's dates: one for a single match, two for home and away legs. */
   rounds: { name: string; dates: ISODate[] }[]
-  /** bracket: seeds split by group; seeded: 1 v n; draw: random; ordered: as listed. */
-  pairing: "bracket" | "seeded" | "draw" | "ordered"
+  /**
+   * bracket: seeds split by group; seeded: 1 v n, the top seeds taking any byes;
+   * pots: the better half drawn against the rest, no byes (preliminary rounds);
+   * draw: random; ordered: as listed.
+   */
+  pairing: "bracket" | "seeded" | "pots" | "draw" | "ordered"
   thirdPlace?: ISODate
   venue: "home-away" | "neutral"
 }
@@ -96,6 +105,8 @@ export interface CompetitionDef {
   provisional?(inst: CompetitionInstance, ctx: CompContext): string[]
   /** The team a placeholder slot of this competition turned into, once decided. */
   placeholderWinner?(inst: CompetitionInstance, slot: number): string | undefined
+  /** The finals a qualifying competition leads to, as an instance id ("wc-2030"). */
+  finals?(year: number): string
 }
 
 // ── Creation ────────────────────────────────────────────────────────────────
@@ -189,6 +200,7 @@ function drawGroupStage(
       family: gp.spreadConfeds ? ctx.confedOf : undefined,
       maxPerFamily: (c) => (c === "UEFA" ? 2 : 1),
     })
+  const opener = gp.opening?.find((t) => teams.some((g) => g.includes(t)))
   let n = 0
   stage.groups = teams.map((list, gi) => {
     const name = gp.names?.[gi] ?? String.fromCharCode(65 + gi)
@@ -196,7 +208,9 @@ function drawGroupStage(
     roundRobin(list, gp.legs).forEach((pairs, r) => {
       for (const [h, a] of pairs) {
         const v = venueFor(inst, h, a, gp.venue)
-        const date = freeDate(ctx, v.home, v.away, roundDate(gp.dates, r))
+        const day = roundDate(gp.dates, r)
+        const alone = !opener || r > 0 || h === opener || a === opener
+        const date = freeDate(ctx, v.home, v.away, alone ? day : addDays(day, 1))
         const f: Fixture = {
           id: fixtureId(inst, stage.key, n++),
           compId: inst.id,
@@ -236,6 +250,15 @@ function drawKnockoutStage(
   if (kp.pairing === "ordered") {
     pairs = []
     for (let i = 0; i < entrants.length; i += 2) pairs.push([entrants[i], entrants[i + 1] ?? null])
+  } else if (kp.pairing === "pots") {
+    const half = Math.ceil(entrants.length / 2)
+    const top = shuffle(rng, entrants.slice(0, half))
+    const bottom = shuffle(rng, entrants.slice(half))
+    // Who hosts the first leg is drawn too.
+    pairs = top.map((t, i): [string, string | null] => {
+      const b = bottom[i] ?? null
+      return b && rng() < 0.5 ? [b, t] : [t, b]
+    })
   } else if (kp.pairing === "draw") {
     const s = shuffle(rng, entrants)
     pairs = []

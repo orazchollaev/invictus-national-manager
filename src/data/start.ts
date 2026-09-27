@@ -60,14 +60,19 @@ export const ASIAN_CUP_2027: string[][] = [
   ["JPN", "QAT", "THA", "IDN"],
 ]
 
-/** Hosts of tournaments already awarded. Later editions are awarded in-game. */
+/**
+ * Hosts of tournaments already awarded. Later editions are awarded in-game. The
+ * order matters: hosts head groups A, B, C… and the first plays the opening match
+ * (2030: the centenary opener in Montevideo).
+ */
 export const AWARDED_HOSTS: Record<string, string[]> = {
-  "wc-2030": ["ESP", "POR", "MAR", "ARG", "URU", "PAR"],
+  "wc-2030": ["URU", "ARG", "PAR", "ESP", "POR", "MAR"],
   "wc-2034": ["KSA"],
   "euro-2028": ["ENG", "SCO", "WAL", "IRL"],
   "euro-2032": ["ITA", "TUR"],
   "afcon-2027": ["KEN", "TAN", "UGA"],
   "asian-cup-2027": ["KSA"],
+  "gulf-cup-2026": ["KSA"],
   "arab-cup-2029": ["QAT"],
   "arab-cup-2033": ["QAT"],
 }

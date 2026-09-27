@@ -76,7 +76,9 @@ export function finalsDef(o: FinalsOptions): CompetitionDef {
             legs: o.legs ?? 1,
             dates: sched.groups,
             fixed: o.fixedGroups?.(inst.year),
+            // Hosts head groups A, B, C… and the first of them opens the tournament.
             seeded: inst.hosts,
+            opening: (o.venue ?? "neutral") === "neutral" ? inst.hosts : undefined,
             spreadConfeds: o.spreadConfeds,
             venue: o.venue ?? "neutral",
             tiebreak,
@@ -125,6 +127,8 @@ export interface QualifierOptions {
   confed: Confed
   name(year: number): string
   editions(from: number, to: number): number[]
+  /** The finals this qualifies for, as an instance id. */
+  finals(year: number): string
   /** Teams entering, best ranked first (hosts and the suspended already removed). */
   entrants(inst: CompetitionInstance, ctx: CompContext): string[]
   /** Group winners that qualify (a group per direct place, unless `groups` says otherwise). */
@@ -144,6 +148,8 @@ export interface QualifierOptions {
     rounds: (year: number) => { name: string; dates: ISODate[] }[]
     teamsPerPath: 2 | 4
     drawDate(year: number): ISODate
+    /** Single-venue play-offs (CAF, OFC); home and away otherwise. */
+    venue?: "home-away" | "neutral"
     /** Winners go to the inter-confederation play-off instead of qualifying. */
     toInterconf?: boolean
     /**
@@ -179,6 +185,7 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
     kind: "qualifier",
     name: o.name,
     editions: o.editions,
+    finals: o.finals,
     plan(inst, ctx) {
       const plans: StagePlan[] = []
       const groupCount = o.groups(inst, ctx)
@@ -205,7 +212,7 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
           },
           knockout: {
             rounds: [{ name: "Preliminary round", dates: o.prelimDates!(inst.year) }],
-            pairing: "seeded",
+            pairing: "pots",
             venue: "home-away",
           },
         })
@@ -252,7 +259,7 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
           knockout: {
             rounds: p.rounds(inst.year),
             pairing: p.entrants ? "ordered" : "seeded",
-            venue: "home-away",
+            venue: p.venue ?? "home-away",
           },
         })
       }

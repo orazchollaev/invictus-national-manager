@@ -11,11 +11,41 @@ import { groupStandings } from "@/engine/competition/tables"
 import { formatDate } from "@/engine/calendar/dates"
 import type { Fixture, StageState } from "@/engine/competition/types"
 import { zonesFor } from "@/modules/competitions/utils/zones"
+import { AWARDED_HOSTS } from "@/data/start"
 
 const route = useRoute()
 const router = useRouter()
 const world = useWorldStore()
 const inst = world.derive((w) => w.state.competitions[String(route.params.id)] ?? null, null)
+
+/** "FIFA World Cup 2030" for "wc-2030", whether or not the edition exists yet. */
+function editionName(id: string) {
+  const dash = id.lastIndexOf("-")
+  return competitionDef(id.slice(0, dash)).name(Number(id.slice(dash + 1)))
+}
+
+/** The finals a qualifying competition leads to, with its hosts. */
+const finals = world.derive((w) => {
+  const c = w.state.competitions[String(route.params.id)]
+  const id = c && competitionDef(c.defId).finals?.(c.year)
+  if (!id) return null
+  const f = w.state.competitions[id]
+  return { id, name: editionName(id), hosts: f?.hosts ?? AWARDED_HOSTS[id] ?? [], exists: !!f }
+}, null)
+
+/** The qualifying competitions that lead to these finals. */
+const qualifying = world.derive(
+  (w) =>
+    Object.values(w.state.competitions)
+      .filter((c) => competitionDef(c.defId).finals?.(c.year) === String(route.params.id))
+      .map((c) => ({ id: c.id, short: c.short })),
+  [] as { id: string; short: string }[]
+)
+
+/** Hosts to mark in the tables: this tournament's, or its finals' for a qualifier. */
+const hosts = computed(() =>
+  inst.value?.hosts.length ? inst.value.hosts : (finals.value?.hosts ?? [])
+)
 
 const stageKey = ref("")
 watch(
@@ -65,7 +95,7 @@ const tables = computed(() => {
 /** What each position in a group leads to, for the coloured markers. */
 function zones(groupName: string, size: number) {
   const w = world.world
-  return w && inst.value ? zonesFor(inst.value, groupName, size, w.ctx()) : []
+  return w && inst.value ? zonesFor(inst.value, groupName, size, w.ctx(), stageKey.value) : []
 }
 
 const fx = (id: string) => world.world?.state.fixtures[id]
@@ -84,11 +114,35 @@ const openGroup = ref<string | null>(null)
     :title="inst.name"
     :subtitle="`${formatDate(inst.start)} – ${formatDate(inst.end)}`"
   >
-    <AppCard v-if="inst.hosts.length || inst.outcome.winner" padding="md" class="meta">
-      <div v-if="inst.hosts.length" class="meta-row">
-        <span class="muted">Hosts</span>
+    <AppCard
+      v-if="hosts.length || finals || qualifying.length || inst.outcome.winner"
+      padding="md"
+      class="meta"
+    >
+      <div v-if="hosts.length" class="meta-row wrap">
+        <span class="muted">{{ inst.hosts.length ? "Hosts" : "Finals hosts" }}</span>
         <span class="hosts">
-          <NationFlag v-for="h in inst.hosts" :id="h" :key="h" :size="20" name="short" link />
+          <NationFlag v-for="h in hosts" :id="h" :key="h" :size="20" name="short" link />
+        </span>
+      </div>
+      <div v-if="finals" class="meta-row">
+        <span class="muted">Qualifying for</span>
+        <RouterLink v-if="finals.exists" :to="`/competitions/${finals.id}`" class="link">
+          {{ finals.name }}
+        </RouterLink>
+        <span v-else>{{ finals.name }}</span>
+      </div>
+      <div v-if="qualifying.length" class="meta-row wrap">
+        <span class="muted">Qualifying</span>
+        <span class="hosts">
+          <RouterLink
+            v-for="q in qualifying"
+            :key="q.id"
+            :to="`/competitions/${q.id}`"
+            class="link"
+          >
+            {{ q.short }}
+          </RouterLink>
         </span>
       </div>
       <div v-if="inst.outcome.winner" class="meta-row">
@@ -142,6 +196,7 @@ const openGroup = ref<string | null>(null)
           :rows="t.rows"
           :title="t.group.name.length <= 2 ? `Group ${t.group.name}` : t.group.name"
           :zones="zones(t.group.name, t.rows.length)"
+          :hosts="hosts"
         />
         <button
           class="toggle"
@@ -214,6 +269,13 @@ const openGroup = ref<string | null>(null)
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--sp-2);
+}
+
+.link {
+  color: var(--accent);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-align: end;
 }
 
 .muted {
