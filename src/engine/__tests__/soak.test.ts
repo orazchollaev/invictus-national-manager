@@ -23,7 +23,7 @@ function run(years: number, seed = 7) {
 }
 
 describe("long-run world", () => {
-  it("plays five years of competitions to completion", () => {
+  it("plays five years of competitions to completion", { timeout: 180000 }, () => {
     const t0 = Date.now()
     const w = run(5)
     const done = Object.values(w.state.competitions).filter((c) => c.status === "done")

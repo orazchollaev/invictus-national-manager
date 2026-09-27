@@ -48,6 +48,13 @@ describe("table zones match what actually happens", () => {
         ...inst.hosts,
         ...(AWARDED_HOSTS[inst.id.replace("afconq", "afcon")] ?? []),
       ])
+      // Teams can also reach play-offs through the Nations League (UEFA), from any position.
+      const playoffRoute = new Set(
+        (inst.stages.find((st) => st.key === "playoff")?.rounds?.[0]?.ties ?? []).flatMap((t) => [
+          t.home,
+          t.away,
+        ])
+      )
       const tierOf = (t: string) =>
         Object.entries(inst.outcome.tiers ?? {}).find(([, list]) => list.includes(t))?.[0]
 
@@ -76,7 +83,7 @@ describe("table zones match what actually happens", () => {
               inst.defId !== "wcq-afc"
             )
               problems.push(`${where}: did not qualify`)
-            if (zone === null && qualified.has(r.team))
+            if (zone === null && qualified.has(r.team) && !playoffRoute.has(r.team))
               problems.push(`${where}: qualified without a marker`)
           } else if (knockout.size) {
             if (zone === "advance" && !knockout.has(r.team))
