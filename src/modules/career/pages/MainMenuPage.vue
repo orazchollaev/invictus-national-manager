@@ -92,9 +92,11 @@ async function resume() {
 }
 
 .brand-logo {
+  display: block;
   width: 88px;
   height: 88px;
-  color: var(--accent);
+  margin: 0 auto;
+  border-radius: 22%;
 }
 
 .brand-title {
