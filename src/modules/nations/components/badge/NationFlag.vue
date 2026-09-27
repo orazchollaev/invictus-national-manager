@@ -2,6 +2,11 @@
 import { computed } from "vue"
 import { flagUrl } from "@/lib/flags"
 import { NATION_DEFS } from "@/modules/world/services/statics"
+import {
+  isPlaceholder,
+  placeholderLabel,
+  placeholderShort,
+} from "@/engine/competition/placeholders"
 
 const props = withDefaults(
   defineProps<{
@@ -16,9 +21,13 @@ const props = withDefaults(
 )
 
 const def = computed(() => NATION_DEFS.find((n) => n.id === props.id))
-const label = computed(
-  () => (props.name === "short" ? def.value?.id : def.value?.name) ?? props.id ?? "TBD"
-)
+/** A place still to be decided in a draw ("UEFA play-off Path A winner"). */
+const pending = computed(() => isPlaceholder(props.id))
+const label = computed(() => {
+  if (pending.value)
+    return props.name === "short" ? placeholderShort(props.id!) : placeholderLabel(props.id!)
+  return (props.name === "short" ? def.value?.id : def.value?.name) ?? props.id ?? "TBD"
+})
 </script>
 
 <template>
@@ -39,8 +48,10 @@ const label = computed(
     <span
       v-else
       class="nation-flag nation-flag--empty"
-      :style="{ width: `${size}px`, height: `${size}px` }"
-    ></span>
+      :style="{ width: `${size}px`, height: `${size}px`, fontSize: `${Math.round(size * 0.55)}px` }"
+    >
+      {{ pending ? "?" : "" }}
+    </span>
     <span v-if="name" class="nation-name">{{ label }}</span>
   </component>
 </template>
@@ -61,7 +72,12 @@ const label = computed(
 }
 
 .nation-flag--empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--border-light);
+  color: var(--text-muted);
+  font-weight: 800;
 }
 
 .nation-name {

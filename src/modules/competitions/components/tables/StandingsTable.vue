@@ -42,7 +42,7 @@ const tone = (i: number) => {
     <RouterLink
       v-for="(r, i) in rows"
       :key="r.team"
-      :to="`/nation/${r.team}`"
+      :to="r.team.startsWith('?') ? '' : `/nation/${r.team}`"
       class="row"
       :class="{ mine: r.team === world.me }"
       :style="{ '--zone': tone(i) }"
