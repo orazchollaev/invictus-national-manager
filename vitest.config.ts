@@ -3,7 +3,9 @@ import vue from "@vitejs/plugin-vue"
 import { fileURLToPath, URL } from "node:url"
 
 export default defineConfig({
-  plugins: [vue()],
+  // Leave absolute URLs such as <img src="/logo.png"> (served from public/) alone:
+  // as imports they resolve to file:///logo.png, which Node cannot load.
+  plugins: [vue({ template: { transformAssetUrls: { includeAbsolute: false } } })],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
