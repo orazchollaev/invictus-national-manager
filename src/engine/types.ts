@@ -1,0 +1,109 @@
+/**
+ * Domain types shared by the engine and the app. The engine owns them because it is
+ * the only layer every other one depends on; modules re-export what they need.
+ */
+
+/** Calendar date as `YYYY-MM-DD`. Lexical order is chronological order. */
+export type ISODate = string
+
+export type Confed = "UEFA" | "CAF" | "AFC" | "CONCACAF" | "CONMEBOL" | "OFC"
+export const CONFEDS: Confed[] = ["UEFA", "CONMEBOL", "CONCACAF", "CAF", "AFC", "OFC"]
+
+export type Position = "GK" | "CB" | "LB" | "RB" | "DM" | "CM" | "AM" | "LW" | "RW" | "ST"
+export const POSITIONS: Position[] = ["GK", "CB", "LB", "RB", "DM", "CM", "AM", "LW", "RW", "ST"]
+
+/** Coarse grouping used for event weights (who scores, who gets booked). */
+export type PositionGroup = "GK" | "DEF" | "MID" | "FWD"
+
+export type Foot = "L" | "R" | "B"
+
+/** 1–20 each, hidden-ish traits that shape development, discipline and nerve. */
+export interface Personality {
+  professionalism: number
+  ambition: number
+  temperament: number
+  consistency: number
+  bigMatch: number
+  injuryProne: number
+  loyalty: number
+}
+
+export type ClubRole = "star" | "starter" | "rotation" | "bench" | "reserve"
+
+export interface Club {
+  id: string
+  name: string
+  /** Nation whose league the club plays in. */
+  nationId: string
+  /** 1 = elite, 5 = semi-professional. */
+  tier: number
+}
+
+export interface Injury {
+  /** First day the player is fit again. */
+  until: ISODate
+  label: string
+}
+
+export interface PlayerSeason {
+  /** Season start year: 2026 means 2026-27. */
+  season: number
+  ca: number
+  clubId: string
+  caps: number
+  goals: number
+}
+
+export interface Player {
+  id: string
+  nationId: string
+  first: string
+  last: string
+  born: ISODate
+  pos: Position
+  /** Positions the player can cover without the out-of-position penalty. */
+  alt: Position[]
+  foot: Foot
+  /** Current ability, 1–99 with one decimal. */
+  ca: number
+  /** Potential ability, 1–99. Development pulls `ca` toward it. */
+  pa: number
+  pers: Personality
+  clubId: string
+  role: ClubRole
+  /** Recent club form, −5 (awful) … +5 (superb). */
+  form: number
+  /** Match sharpness from club minutes, 0–100. */
+  sharp: number
+  /** Happiness with the national team set-up, 0–100. */
+  morale: number
+  injury: Injury | null
+  caps: number
+  goals: number
+  assists: number
+  /** Retired from international football but still playing for a club. */
+  intlRetired?: boolean
+  /** Last time he was named in a national squad. */
+  lastCall?: ISODate
+  /** Matches still to serve for a red card. */
+  banned?: number
+  yellows?: number
+  history: PlayerSeason[]
+}
+
+export interface NationDef {
+  id: string
+  name: string
+  flag: string
+  confed: Confed
+  subFeds: string[]
+  color: string
+  /** Long-run quality anchor for the player pool, 1–100. */
+  youthLevel: number
+  /** FIFA ranking points at the start date. */
+  points: number
+  /** Suspended from competitions (still a member). */
+  banned?: boolean
+  /** Naming cultures its players are drawn from, with weights. */
+  cultures: [string, number][]
+}
