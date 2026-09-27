@@ -193,13 +193,19 @@ export class World {
     const ctx = this.ctx()
     const year = yearOf(this.state.date)
     for (const def of COMPETITION_DEFS) {
-      for (const y of def.editions(year - 4, year + 5)) {
+      for (const y of def.editions(year - 4, year + 7)) {
         const id = `${def.id}-${y}`
         if (this.state.competitions[id]) continue
         const inst = createInstance(def, y, ctx)
         const firstDraw = def.plan(inst, ctx)[0]?.drawDate ?? inst.start
         if (inst.end < this.state.date) continue
-        if (daysBetween(this.state.date, firstDraw) > 420) continue
+        // Hosts are chosen years ahead, so finals exist (and are announced) early;
+        // qualifying competitions appear about a year before their first draw.
+        const early =
+          inst.kind === "qualifier"
+            ? daysBetween(this.state.date, firstDraw) > 420
+            : daysBetween(this.state.date, inst.start) > 6 * 365
+        if (early) continue
         this.state.competitions[id] = inst
         this.announceHosts(inst)
       }
