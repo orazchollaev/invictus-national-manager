@@ -83,8 +83,10 @@ export interface BoardObjective {
   comp: string
   compInstance: string
   kind: "qualify" | "reach" | "win" | "avoid-relegation" | "promotion"
-  /** For "reach": knockout depth, 0 = group stage exit acceptable, 1 = last 16/32… */
+  /** For "reach": the knockout round to get to ("knockout", "Quarter-finals"…). */
   stage?: string
+  /** For "qualify": qualification for another event than the usual one. */
+  target?: "asian-cup"
   text: string
   status: "open" | "met" | "failed"
   critical: boolean

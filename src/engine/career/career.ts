@@ -10,6 +10,8 @@ import { addDays } from "../calendar/dates"
 import { expectedResult, IMPORTANCE_WEIGHT } from "../ranking"
 import { clamp, deriveSeed, makeRng, pick } from "../rng"
 import type { BoardObjective } from "../world/types"
+import { competitionDef } from "../competition/defs"
+import { standingsOf } from "../competition/runtime"
 import type { World } from "../world/world"
 
 /** Which finals a qualifier leads to. */
@@ -22,6 +24,13 @@ const QUALIFIES_FOR: Record<string, (year: number) => string> = {
   "wcq-ofc": (y) => `wc-${y}`,
   euroq: (y) => `euro-${y}`,
   afconq: (y) => `afcon-${y}`,
+}
+
+/** "FIFA World Cup 2030" from "wc-2030". */
+function finalsName(instanceId: string): string {
+  const year = Number(instanceId.slice(instanceId.lastIndexOf("-") + 1))
+  const defId = instanceId.slice(0, instanceId.lastIndexOf("-"))
+  return competitionDef(defId).name(year)
 }
 
 const FINALS_PLACES: Record<string, number> = {
@@ -84,7 +93,7 @@ export function refreshObjectives(world: World) {
           comp: inst.defId,
           compInstance: inst.id,
           kind: "qualify",
-          text: `Qualify for the ${inst.name.replace(/ Qualifying.*$/, "").replace(/^World Cup/, "World Cup")}`,
+          text: `Qualify for the ${finalsName(target)}`,
           status: "open",
           critical: rank <= places * 0.7,
         }
@@ -155,6 +164,19 @@ export function refreshObjectives(world: World) {
       }
     }
     if (obj) career.objectives.push(obj)
+    // Asia's World Cup qualifying groups also decide the next Asian Cup.
+    if (inst.defId === "wcq-afc" && rank <= 26) {
+      career.objectives.push({
+        id: `${inst.id}:asian-cup`,
+        comp: inst.defId,
+        compInstance: inst.id,
+        kind: "qualify",
+        target: "asian-cup",
+        text: `Qualify for the AFC Asian Cup ${inst.year + 1}`,
+        status: "open",
+        critical: rank <= 16,
+      })
+    }
   }
 }
 
@@ -178,9 +200,20 @@ function evaluate(
 ): "met" | "failed" | "open" {
   const me = world.state.career.nationId!
   switch (obj.kind) {
-    case "qualify":
+    case "qualify": {
+      if (obj.target === "asian-cup") {
+        // Group winners, runners-up and (nearly all) third-placed teams go through.
+        const groups = inst.stages.find((s) => s.key === "groups")
+        if (groups?.status !== "done") return "open"
+        const table = standingsOf(inst, "groups", world.ctx()).find((t) =>
+          t.some((r) => r.team === me)
+        )
+        const pos = table?.findIndex((r) => r.team === me) ?? 99
+        return pos <= 2 ? "met" : "failed"
+      }
       if (inst.status !== "done") return "open"
       return inst.outcome.qualified?.includes(me) ? "met" : "failed"
+    }
     case "win":
       if (inst.status !== "done") return "open"
       return inst.outcome.winner === me ? "met" : "failed"
