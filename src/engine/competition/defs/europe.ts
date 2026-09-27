@@ -10,11 +10,11 @@ import { iso, addDays } from "@/engine/calendar/dates"
 import { slots, window } from "@/engine/calendar/windows"
 import { AWARDED_HOSTS, NATIONS_LEAGUE_2026 } from "@/data/start"
 import type { CompContext, CompetitionDef } from "../runtime"
-import { knockoutResult } from "../runtime"
+import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance } from "../types"
 import { finalsDef, qualifierDef } from "./builders"
 import { everyNYears, pickHosts } from "./helpers"
-import { nationsLeagueDef } from "./nationsLeague"
+import { leagueRanking, nationsLeagueDef } from "./nationsLeague"
 
 const euroYears = everyNYears(2028, 4)
 
@@ -48,15 +48,17 @@ export const euro: CompetitionDef = finalsDef({
   bestThirds: 4,
   thirdPlace: false,
   start: (y) => iso(y, 6, 9),
-  drawDate: (y) => iso(y, 4, 2),
+  // December, before the March play-offs: their winners are drawn as placeholders.
+  drawDate: (y) => iso(y - 1, 12, 2),
   hosts: euroHosts,
   importance: ["continental", "continental-ko"],
   tiebreak: "h2h",
   eligible: (t, ctx) => ctx.confedOf(t) === "UEFA",
   entrants(inst, ctx) {
     const q = ctx.instance(`euroq-${inst.year}`)
+    const known = q ? (euroQualifying.provisional?.(q, ctx) ?? []) : []
     const hosts = autoHosts(inst.year, ctx)
-    const rest = (q?.outcome.qualified ?? []).filter((t) => !hosts.includes(t))
+    const rest = known.filter((t) => !hosts.includes(t))
     return [...hosts, ...rest.sort((a, b) => ctx.points(b) - ctx.points(a))]
   },
 })
@@ -78,8 +80,45 @@ export const euroQualifying: CompetitionDef = qualifierDef({
   tiebreak: "h2h",
   runnersUpQualify: true,
   playoff: {
-    paths: (inst, ctx) => Math.max(0, 24 - autoHosts(inst.year, ctx).length - 20),
+    paths: euroPaths,
     teamsPerPath: 4,
+    /**
+     * Play-off places come from the Nations League, as for Euro 2024: one path per
+     * league, A first, each made of that league's four best-ranked teams that did not
+     * qualify through the groups. A league short of teams is topped up with the next
+     * best-ranked teams.
+     */
+    entrants(inst, ctx) {
+      const paths = euroPaths(inst, ctx)
+      const tables = standingsOf(inst, "groups", ctx, "h2h")
+      const qualified = new Set([
+        ...autoHosts(inst.year, ctx),
+        ...finishers(tables, 0).map((r) => r.team),
+        ...finishers(tables, 1).map((r) => r.team),
+      ])
+      const nl = ctx.instance(`unl-${inst.year - 2}`)
+      const ranking = (nl ? leagueRanking(nl, ctx) : []).filter((x) => !qualified.has(x.team))
+      const fallback = [2, 3].flatMap((pos) => finishers(tables, pos).map((r) => r.team))
+      const used = new Set<string>()
+      const out: string[] = []
+      "ABCD"
+        .slice(0, paths)
+        .split("")
+        .forEach((letter) => {
+          const path = ranking
+            .filter((x) => x.letter === letter && !used.has(x.team))
+            .map((x) => x.team)
+          for (const t of [...ranking.map((x) => x.team), ...fallback]) {
+            if (path.length >= 4) break
+            if (!used.has(t) && !path.includes(t)) path.push(t)
+          }
+          const seeds = path.slice(0, 4)
+          seeds.forEach((t) => used.add(t))
+          // Seed 1 v 4 and 2 v 3, the winners meeting in the path final.
+          out.push(seeds[0], seeds[3], seeds[1], seeds[2])
+        })
+      return out.filter(Boolean)
+    },
     rounds: (y) => {
       const [semi, final] = slots(y, ["mar"])
       return [
@@ -90,6 +129,11 @@ export const euroQualifying: CompetitionDef = qualifierDef({
     drawDate: (y) => iso(y - 1, 11, 24),
   },
 })
+
+/** Euro play-off paths: the places left after the hosts and the top two of each group. */
+function euroPaths(inst: CompetitionInstance, ctx: CompContext): number {
+  return Math.max(0, 24 - autoHosts(inst.year, ctx).length - 20)
+}
 
 export const uefaNationsLeague: CompetitionDef = nationsLeagueDef({
   id: "unl",

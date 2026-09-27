@@ -14,7 +14,9 @@ import { AWARDED_HOSTS } from "@/data/start"
 import type { CompContext, CompetitionDef } from "../runtime"
 import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance } from "../types"
-import { finalsDef, qualifierDef } from "./builders"
+import { finalsDef, pathOrder, qualifierDef } from "./builders"
+import { leagueRanking } from "./nationsLeague"
+import { makePlaceholder } from "../placeholders"
 import { everyNYears, fillFromRanking, pickHosts } from "./helpers"
 
 export const WC_PLACES: Record<Confed, number> = {
@@ -74,12 +76,22 @@ export const worldCup: CompetitionDef = finalsDef({
   importance: ["world-cup", "world-cup-ko"],
   eligible: () => true,
   entrants(inst, ctx) {
+    // Places still being played for in March are drawn as placeholders
+    // ("UEFA play-off Path A winner") and filled in when they are decided.
     const list = [...inst.hosts]
-    for (const id of ["uefa", "caf", "afc", "concacaf", "conmebol", "ofc"]) {
-      const q = ctx.instance(`wcq-${id}-${inst.year}`)
-      list.push(...(q?.outcome.qualified ?? []))
+    const sources: [string, CompetitionDef][] = [
+      ["wcq-uefa", wcqUefa],
+      ["wcq-caf", wcqCaf],
+      ["wcq-afc", wcqAfc],
+      ["wcq-concacaf", wcqConcacaf],
+      ["wcq-conmebol", wcqConmebol],
+      ["wcq-ofc", wcqOfc],
+      ["wcq-ic", wcqInterconf],
+    ]
+    for (const [id, def] of sources) {
+      const q = ctx.instance(`${id}-${inst.year}`)
+      if (q) list.push(...(def.provisional?.(q, ctx) ?? q.outcome.qualified ?? []))
     }
-    list.push(...(ctx.instance(`wcq-ic-${inst.year}`)?.outcome.qualified ?? []))
     // Seeding: hosts first, then by ranking.
     const hosts = list.filter((t) => inst.hosts.includes(t))
     const rest = list
@@ -102,12 +114,37 @@ export const wcqUefa: CompetitionDef = qualifierDef({
   groupDrawDate: (y) => iso(y - 2, 12, 10),
   groupDates: (y) => slots(y - 1, ["sep", "nov"]),
   tiebreak: "h2h",
+  maxDirect: (inst, ctx) => directPlaces(inst.year, "UEFA", ctx),
   playoff: {
-    paths: (inst, ctx) => {
-      const groups = Math.ceil(confedEntrants("UEFA")(inst, ctx).length / 4)
-      return Math.max(0, directPlaces(inst.year, "UEFA", ctx) - groups)
-    },
+    paths: uefaPaths,
     teamsPerPath: 4,
+    /**
+     * The best runners-up, plus — as in the 2026 cycle — the best Nations League group
+     * winners who finished outside the top two, one per path, as the lowest seeds.
+     */
+    entrants(inst, ctx) {
+      const paths = uefaPaths(inst, ctx)
+      const want = paths * 4
+      const tables = standingsOf(inst, "groups", ctx, "h2h")
+      const winners = new Set(finishers(tables, 0).map((r) => r.team))
+      const runners = finishers(tables, 1).map((r) => r.team)
+      const hosts = worldCupHosts(inst.year, ctx)
+      const nl = ctx.instance(`unl-${inst.year - 2}`)
+      const nlWinners = (nl ? leagueRanking(nl, ctx) : [])
+        .filter(
+          (x) =>
+            x.pos === 0 &&
+            !winners.has(x.team) &&
+            !runners.includes(x.team) &&
+            !hosts.includes(x.team)
+        )
+        .map((x) => x.team)
+      const nlPlaces = Math.min(paths, nlWinners.length)
+      const pool = [...runners.slice(0, want - nlPlaces), ...nlWinners.slice(0, nlPlaces)]
+      for (const r of finishers(tables, 2))
+        if (pool.length < want && !pool.includes(r.team)) pool.push(r.team)
+      return pathOrder(pool, paths)
+    },
     rounds: (y) => {
       const [semi, final] = slots(y, ["mar"])
       return [
@@ -117,14 +154,13 @@ export const wcqUefa: CompetitionDef = qualifierDef({
     },
     drawDate: (y) => iso(y - 1, 11, 25),
   },
-  qualify(inst, ctx) {
-    const direct = directPlaces(inst.year, "UEFA", ctx)
-    const winners = finishers(standingsOf(inst, "groups", ctx, "h2h"), 0).map((r) => r.team)
-    const qualified = winners.slice(0, direct)
-    qualified.push(...knockoutResult(inst, "playoff").finalWinners)
-    return { qualified: qualified.slice(0, direct), interconf: [] }
-  },
 })
+
+/** UEFA play-off paths: the places left after the group winners. */
+function uefaPaths(inst: CompetitionInstance, ctx: CompContext): number {
+  const groups = Math.ceil(confedEntrants("UEFA")(inst, ctx).length / 4)
+  return Math.max(0, directPlaces(inst.year, "UEFA", ctx) - groups)
+}
 
 export const wcqCaf: CompetitionDef = qualifierDef({
   id: "wcq-caf",
@@ -278,6 +314,14 @@ export const wcqInterconf: CompetitionDef = {
   },
   finalize(inst) {
     return { qualified: knockoutResult(inst, "knockout").finalWinners }
+  },
+  provisional(inst) {
+    return inst.status === "done"
+      ? (inst.outcome.qualified ?? [])
+      : [makePlaceholder(inst.id, 0), makePlaceholder(inst.id, 1)]
+  },
+  placeholderWinner(inst, slot) {
+    return knockoutResult(inst, "knockout").finalWinners[slot]
   },
 }
 

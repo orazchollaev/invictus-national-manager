@@ -269,3 +269,23 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
     },
   }
 }
+
+/**
+ * The Nations League overall ranking, as UEFA uses it for play-off places: league by
+ * league (A first), within a league by group position, then by record.
+ */
+export function leagueRanking(
+  inst: CompetitionInstance,
+  ctx: CompContext
+): { team: string; letter: string; pos: number }[] {
+  const byLetter = tablesByLetter(inst, ctx)
+  const out: { team: string; letter: string; pos: number }[] = []
+  for (const letter of Object.keys(byLetter).sort()) {
+    const tables = byLetter[letter]
+    const depth = Math.max(...tables.map((t) => t.length))
+    for (let pos = 0; pos < depth; pos++) {
+      for (const r of at(tables, pos)) out.push({ team: r.team, letter, pos })
+    }
+  }
+  return out
+}
