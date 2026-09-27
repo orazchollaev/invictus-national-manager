@@ -1,0 +1,140 @@
+<script setup lang="ts">
+import { computed } from "vue"
+import { useRouter } from "vue-router"
+import { AppButton, AppCard, AppEmptyState, AppSectionHeader } from "@/components/ui"
+import { PageShell, StatPill } from "@/modules/core/components"
+import { NationFlag } from "@/modules/nations/components/badge"
+import { useWorldStore } from "@/modules/world/store"
+import { formatDate } from "@/engine/calendar/dates"
+import { showConfirm } from "@/composables/useDialog"
+
+const router = useRouter()
+const world = useWorldStore()
+const career = world.derive((w) => w.state.career, null)
+const objectives = computed(() => career.value?.objectives ?? [])
+const history = computed(() => [...(career.value?.history ?? [])].reverse())
+
+async function accept(nationId: string) {
+  const name = world.world?.def(nationId).name
+  const leaving = career.value?.nationId
+    ? ` You will leave ${world.world?.def(career.value.nationId).name}.`
+    : ""
+  if (!(await showConfirm(`Become head coach of ${name}?${leaving}`, { confirmLabel: "Accept" })))
+    return
+  world.takeJob(nationId)
+  router.push("/home")
+}
+
+const statusTone = (s: string) =>
+  s === "met" ? "var(--success)" : s === "failed" ? "var(--danger)" : "var(--text-muted)"
+</script>
+
+<template>
+  <PageShell back title="Career" :subtitle="career?.managerName">
+    <AppCard v-if="career" padding="md" class="stats">
+      <div class="stat">
+        <span class="muted">Confidence</span>
+        <strong>{{ career.nationId ? `${career.confidence}%` : "—" }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">Reputation</span>
+        <strong>{{ Math.round(career.reputation) }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">In charge since</span>
+        <strong>{{ career.nationId ? formatDate(career.since) : "—" }}</strong>
+      </div>
+    </AppCard>
+
+    <template v-if="career?.offers.length">
+      <AppSectionHeader title="Job offers" />
+      <AppCard v-for="o in career.offers" :key="o.nationId" padding="md" class="offer">
+        <NationFlag :id="o.nationId" :size="32" name link />
+        <span class="muted">until {{ formatDate(o.expires) }}</span>
+        <div class="offer-actions">
+          <AppButton variant="text" @click="world.turnDown(o.nationId)">Decline</AppButton>
+          <AppButton variant="filled" @click="accept(o.nationId)">Accept</AppButton>
+        </div>
+      </AppCard>
+    </template>
+
+    <AppSectionHeader title="Objectives" />
+    <AppEmptyState v-if="!objectives.length" title="No objectives right now" />
+    <div v-else class="list">
+      <div v-for="o in objectives" :key="o.id" class="row">
+        <span class="row-text">{{ o.text }}</span>
+        <StatPill v-if="o.critical" value="Key" tone="var(--danger)" />
+        <StatPill :value="o.status" :tone="statusTone(o.status)" wide />
+      </div>
+    </div>
+
+    <AppSectionHeader title="Record" />
+    <div class="list">
+      <div v-for="(h, i) in history" :key="i" class="row">
+        <NationFlag :id="h.nationId" :size="22" name />
+        <span class="muted">{{ h.played }}P {{ h.won }}W {{ h.drawn }}D {{ h.lost }}L</span>
+        <span class="muted">{{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}</span>
+      </div>
+    </div>
+  </PageShell>
+</template>
+
+<style scoped>
+.stats :deep(.card-body) {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.offer :deep(.card-body) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.offer :deep(.nation) {
+  flex: 1;
+  font-weight: 700;
+}
+
+.offer-actions {
+  display: flex;
+  gap: var(--sp-2);
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.list {
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.row :deep(.nation) {
+  flex: 1;
+}
+
+.row-text {
+  flex: 1;
+}
+</style>
