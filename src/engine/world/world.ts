@@ -37,6 +37,12 @@ import { ageOn, fullName } from "../players/ability"
 import { indexClubs, summerMove, type ClubIndex } from "../players/clubs"
 import { nationTop } from "../players/quality"
 import {
+  isPlaceholder,
+  makePlaceholder,
+  placeholderConfed,
+  placeholderLabel,
+} from "../competition/placeholders"
+import {
   baselineReputation,
   ensureFederation,
   homeBoost,
@@ -128,11 +134,12 @@ export class World {
   }
 
   nation(id: string): NationState {
-    return this.state.nations[id]
+    return this.state.nations[id] ?? placeholderNation(id)
   }
 
+  /** A nation's static facts; a placeholder gets a stand-in with its label as name. */
   def(id: string): NationDef {
-    return this.defs.get(id)!
+    return this.defs.get(id) ?? placeholderDef(id)
   }
 
   fixturesOn(date: ISODate): Fixture[] {
@@ -161,7 +168,8 @@ export class World {
     return {
       date: s.date,
       seed: s.seed,
-      confedOf: (t) => this.def(t)?.confed ?? ("UEFA" as Confed),
+      confedOf: (t) =>
+        isPlaceholder(t) ? (placeholderConfed(t) as Confed) : (this.def(t)?.confed ?? "UEFA"),
       subFeds: (t) => this.def(t)?.subFeds ?? [],
       points: (t) => s.nations[t]?.points ?? 0,
       ranked: (filter) =>
@@ -271,7 +279,11 @@ export class World {
   nextDay() {
     const s = this.state
     this.catchUp()
-    for (const f of this.fixturesOn(s.date)) if (!f.result && !this.isUserFixture(f)) this.playAi(f)
+    for (const f of this.fixturesOn(s.date)) {
+      if (f.result || this.isUserFixture(f) || isPlaceholder(f.home) || isPlaceholder(f.away))
+        continue
+      this.playAi(f)
+    }
     this.advanceCompetitions()
 
     s.date = addDays(s.date, 1)
@@ -411,6 +423,7 @@ export class World {
       for (const f of this.fixturesOn(d)) {
         if (f.result) continue
         for (const n of [f.home, f.away]) {
+          if (isPlaceholder(n)) continue
           const key = this.squadKey(f, n)
           if (this.state.nations[n].squadFor === key || due.has(n)) continue
           const inst = this.state.competitions[key]
@@ -880,6 +893,7 @@ export class World {
 
   onCompetitionDone(id: string) {
     this.recordHonour(id)
+    this.resolvePlaceholders(id)
     const inst = this.state.competitions[id]
     if (inst) reputationAfter(inst, this.state.nations)
     afterCompetition(this, id)
@@ -956,6 +970,53 @@ export class World {
     )
   }
 
+  /**
+   * A competition that decides placeholder places has finished: put the winners
+   * into every group, tie and fixture that was drawn with their placeholder.
+   */
+  private resolvePlaceholders(compId: string) {
+    const inst = this.state.competitions[compId]
+    const def = inst ? competitionDef(inst.defId) : undefined
+    if (!inst || !def?.placeholderWinner) return
+    const map = new Map<string, string>()
+    for (let slot = 0; slot < 8; slot++) {
+      const team = def.placeholderWinner(inst, slot)
+      if (team) map.set(makePlaceholder(compId, slot), team)
+    }
+    if (!map.size) return
+    const swap = (t: string | null) => (t && map.get(t)) ?? t
+    let used = false
+    for (const c of Object.values(this.state.competitions)) {
+      for (const st of c.stages) {
+        for (const g of st.groups ?? []) {
+          if (g.teams.some((t) => map.has(t))) used = true
+          g.teams = g.teams.map((t) => swap(t)!)
+        }
+        for (const r of st.rounds ?? [])
+          for (const tie of r.ties) {
+            tie.home = swap(tie.home)
+            tie.away = swap(tie.away)
+          }
+      }
+    }
+    for (const fx of Object.values(this.state.fixtures)) {
+      fx.home = swap(fx.home)!
+      fx.away = swap(fx.away)!
+    }
+    if (!used) return
+    this.reindex()
+    const me = this.userNation
+    for (const [ph, team] of map) {
+      this.news(
+        "tournament",
+        `${this.def(team).name} take their place`,
+        `${this.def(team).name} win the ${placeholderLabel(ph).replace(/ winner$/, "")} and fill that place in the draw.`,
+        team === me,
+        `/nation/${team}`
+      )
+    }
+  }
+
   /** The user has watched (or skipped) the draw he was stopped for. */
   clearDraw() {
     this.state.pendingDraw = null
@@ -967,6 +1028,38 @@ export class World {
     s.news.unshift(item)
     if (s.news.length > 300) s.news.length = 300
     return item
+  }
+}
+
+function placeholderDef(id: string): NationDef {
+  return {
+    id,
+    name: isPlaceholder(id) ? placeholderLabel(id) : id,
+    flag: "",
+    confed: isPlaceholder(id)
+      ? ((placeholderConfed(id) === "PLAYOFF" ? "UEFA" : placeholderConfed(id)) as Confed)
+      : "UEFA",
+    subFeds: [],
+    color: "#5b6b7a",
+    youthLevel: 0,
+    points: 0,
+    cultures: [],
+  }
+}
+
+function placeholderNation(id: string): NationState {
+  return {
+    id,
+    points: 0,
+    youthLevel: 0,
+    coach: "",
+    formation: "4-2-3-1",
+    squad: [],
+    squadFor: null,
+    results: [],
+    pointsHistory: [],
+    reputation: 1,
+    stadium: 1,
   }
 }
 

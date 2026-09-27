@@ -9,6 +9,7 @@ import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, CompetitionKind, CompetitionOutcome, Importance } from "../types"
 import type { Tiebreak } from "../tables"
 import { bracketSeeds, fillFromRanking, finalsOutcome, finalsSchedule, roundNames } from "./helpers"
+import { makePlaceholder } from "../placeholders"
 
 export interface FinalsOptions {
   id: string
@@ -145,7 +146,14 @@ export interface QualifierOptions {
     drawDate(year: number): ISODate
     /** Winners go to the inter-confederation play-off instead of qualifying. */
     toInterconf?: boolean
+    /**
+     * Who plays the play-offs, path by path in tie order (Nations League routes).
+     * Defaults to the best runners-up (then thirds), seeded.
+     */
+    entrants?(inst: CompetitionInstance, ctx: CompContext): string[]
   }
+  /** Most group winners that qualify directly (fewer places than groups). */
+  maxDirect?(inst: CompetitionInstance, ctx: CompContext): number
   /** Best runners-up sent straight to the inter-confederation play-off. */
   runnersUpToInterconf?: number
   /** Also qualify the best runners-up directly (Euro qualifying). */
@@ -231,6 +239,7 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
           drawDate: p.drawDate(inst.year),
           importance,
           entrants: (c, i) => {
+            if (p.entrants) return p.entrants(i, c)
             const tables = standingsOf(i, "groups", c, tiebreak)
             const want = p.paths(i, c) * p.teamsPerPath
             const winnersIn = o.runnersUpQualify ? 2 : 1
@@ -240,35 +249,77 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
             ]
             return pool.slice(0, want)
           },
-          knockout: { rounds: p.rounds(inst.year), pairing: "seeded", venue: "home-away" },
+          knockout: {
+            rounds: p.rounds(inst.year),
+            pairing: p.entrants ? "ordered" : "seeded",
+            venue: "home-away",
+          },
         })
       }
       return plans
     },
     finalize(inst, ctx) {
-      if (o.qualify) return o.qualify(inst, ctx)
-      const tables = standingsOf(inst, "groups", ctx, tiebreak)
-      const out: CompetitionOutcome = { qualified: [], interconf: [] }
-      if (tables.length === 1) {
-        const table = tables[0]
-        const direct = o.direct?.(inst, ctx) ?? 1
-        out.qualified = table.slice(0, direct).map((r) => r.team)
-        if (o.nextToInterconf && table[direct]) out.interconf = [table[direct].team]
-        out.placings = table.map((r) => r.team)
-      } else {
-        out.qualified = finishers(tables, 0).map((r) => r.team)
-        if (o.runnersUpQualify) out.qualified.push(...finishers(tables, 1).map((r) => r.team))
-        if (o.runnersUpToInterconf)
-          out.interconf = finishers(tables, 1)
-            .slice(0, o.runnersUpToInterconf)
-            .map((r) => r.team)
-      }
-      if (o.playoff) {
-        const winners = knockoutResult(inst, "playoff").finalWinners
-        if (o.playoff.toInterconf) out.interconf!.push(...winners)
-        else out.qualified!.push(...winners)
-      }
-      return out
+      return outcome(inst, ctx, true)
+    },
+    /**
+     * The places known so far — once the groups are over — with a placeholder for
+     * each play-off path still to be played.
+     */
+    provisional(inst, ctx) {
+      if (inst.status === "done") return inst.outcome.qualified ?? []
+      if (inst.stages.find((st) => st.key === "groups")?.status !== "done") return []
+      const known = outcome(inst, ctx, false).qualified ?? []
+      if (!o.playoff || o.playoff.toInterconf) return known
+      const paths = o.playoff.paths(inst, ctx)
+      return [...known, ...Array.from({ length: paths }, (_, i) => makePlaceholder(inst.id, i))]
+    },
+    placeholderWinner(inst, slot) {
+      return knockoutResult(inst, "playoff").finalWinners[slot]
     },
   }
+
+  function outcome(
+    inst: CompetitionInstance,
+    ctx: CompContext,
+    withPlayoff: boolean
+  ): CompetitionOutcome {
+    if (o.qualify) return o.qualify(inst, ctx)
+    const tables = standingsOf(inst, "groups", ctx, tiebreak)
+    const out: CompetitionOutcome = { qualified: [], interconf: [] }
+    if (tables.length === 1) {
+      const table = tables[0]
+      const direct = o.direct?.(inst, ctx) ?? 1
+      out.qualified = table.slice(0, direct).map((r) => r.team)
+      if (o.nextToInterconf && table[direct]) out.interconf = [table[direct].team]
+      out.placings = table.map((r) => r.team)
+    } else {
+      out.qualified = finishers(tables, 0).map((r) => r.team)
+      if (o.maxDirect) out.qualified = out.qualified.slice(0, o.maxDirect(inst, ctx))
+      if (o.runnersUpQualify) out.qualified.push(...finishers(tables, 1).map((r) => r.team))
+      if (o.runnersUpToInterconf)
+        out.interconf = finishers(tables, 1)
+          .slice(0, o.runnersUpToInterconf)
+          .map((r) => r.team)
+    }
+    if (o.playoff && withPlayoff) {
+      const winners = knockoutResult(inst, "playoff").finalWinners
+      if (o.playoff.toInterconf) out.interconf!.push(...winners)
+      else out.qualified!.push(...winners)
+    }
+    return out
+  }
+}
+
+/**
+ * Four teams per path in tie order — seed 1 v 4 and 2 v 3, the winners meeting in
+ * the path final — from a list ranked best first.
+ */
+export function pathOrder(ranked: string[], paths: number): string[] {
+  const pot = (k: number) => ranked.slice(k * paths, (k + 1) * paths)
+  const out: string[] = []
+  for (let i = 0; i < paths; i++) {
+    const back = paths - 1 - i
+    out.push(pot(0)[i], pot(3)[back], pot(1)[back], pot(2)[i])
+  }
+  return out.filter(Boolean)
 }

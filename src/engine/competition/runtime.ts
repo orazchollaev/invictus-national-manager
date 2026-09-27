@@ -89,6 +89,13 @@ export interface CompetitionDef {
   hosts?(year: number, ctx: CompContext): string[]
   plan(inst: CompetitionInstance, ctx: CompContext): StagePlan[]
   finalize(inst: CompetitionInstance, ctx: CompContext): CompetitionOutcome
+  /**
+   * Teams with a place so far, and placeholders for places still being decided —
+   * what a finals draw uses when it comes before the last play-offs.
+   */
+  provisional?(inst: CompetitionInstance, ctx: CompContext): string[]
+  /** The team a placeholder slot of this competition turned into, once decided. */
+  placeholderWinner?(inst: CompetitionInstance, slot: number): string | undefined
 }
 
 // ── Creation ────────────────────────────────────────────────────────────────
