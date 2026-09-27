@@ -1,0 +1,93 @@
+import { describe, expect, it } from "vitest"
+import nations from "@/data/nations.json"
+import clubRows from "@/data/clubs.json"
+import playerRows from "@/data/players.json"
+import type { NationDef } from "@/engine/types"
+import { clubsFromRows, createWorld, type ClubRow, type PlayerRow } from "@/engine/world/create"
+import { competitionDef } from "@/engine/competition/defs"
+import { groupStandings } from "@/engine/competition/tables"
+import { AWARDED_HOSTS } from "@/data/start"
+import { zonesFor } from "../utils/zones"
+
+/**
+ * The coloured markers on a table promise where a position leads. This plays four
+ * years and checks every finished competition kept those promises.
+ */
+describe("table zones match what actually happens", () => {
+  it("for every group of every finished competition", { timeout: 300000 }, () => {
+    const w = createWorld(
+      { seed: 17, start: "2026-09-01", managerName: "Z", nationality: "TUR", nationId: "TUR" },
+      { nations: nations as NationDef[], clubs: clubsFromRows(clubRows as ClubRow[]) },
+      playerRows as unknown as Record<string, PlayerRow[]>
+    )
+    w.state.career.nationId = null
+    while (w.state.date < "2030-08-01") w.nextDay()
+
+    const ctx = w.ctx()
+    const problems: string[] = []
+    let checked = 0
+
+    for (const inst of Object.values(w.state.competitions)) {
+      if (inst.status !== "done") continue
+      const plans = competitionDef(inst.defId).plan(inst, ctx)
+      const groupStage = inst.stages.find((s) => s.kind === "groups" && s.groups?.length)
+      if (!groupStage) continue
+      const rule = plans.find((p) => p.key === groupStage.key)?.groups?.tiebreak ?? "gd"
+
+      const knockout = new Set(
+        inst.stages
+          .filter((s) => s.kind === "knockout" && s.key !== "playoffs")
+          .flatMap((s) => s.rounds?.[0]?.ties.flatMap((t) => [t.home, t.away]) ?? [])
+          .filter((t): t is string => !!t)
+      )
+      const qualified = new Set([
+        ...(inst.outcome.qualified ?? []),
+        ...(inst.outcome.interconf ?? []),
+      ])
+      const hosts = new Set([
+        ...inst.hosts,
+        ...(AWARDED_HOSTS[inst.id.replace("afconq", "afcon")] ?? []),
+      ])
+      const tierOf = (t: string) =>
+        Object.entries(inst.outcome.tiers ?? {}).find(([, list]) => list.includes(t))?.[0]
+
+      for (const g of groupStage.groups!) {
+        const rows = groupStandings(g, ctx.fixture, rule, ctx.points)
+        const zones = zonesFor(inst, g.name, rows.length, ctx)
+        rows.forEach((r, pos) => {
+          const zone = zones[pos]
+          const where = `${inst.id} ${g.name} #${pos + 1} ${r.team} (${zone ?? "none"})`
+          checked++
+          if (inst.kind === "nations-league") {
+            const letter = g.name.replace(/\d+$/, "")
+            const now = tierOf(r.team)
+            if (zone === "up" && !(now && now < letter))
+              problems.push(`${where}: not promoted (${now})`)
+            if (zone === "down" && !(now && now > letter))
+              problems.push(`${where}: not relegated (${now})`)
+            if (zone === "qf" && !knockout.has(r.team))
+              problems.push(`${where}: not in the quarter-finals`)
+            if (zone === null && now !== letter) problems.push(`${where}: moved to ${now}`)
+          } else if (inst.kind === "qualifier") {
+            if (hosts.has(r.team)) return
+            if (
+              (zone === "through" || zone === "wc-ac") &&
+              !qualified.has(r.team) &&
+              inst.defId !== "wcq-afc"
+            )
+              problems.push(`${where}: did not qualify`)
+            if (zone === null && qualified.has(r.team))
+              problems.push(`${where}: qualified without a marker`)
+          } else if (knockout.size) {
+            if (zone === "advance" && !knockout.has(r.team))
+              problems.push(`${where}: did not reach the knockout stage`)
+            if (zone === null && knockout.has(r.team))
+              problems.push(`${where}: reached the knockout stage unmarked`)
+          }
+        })
+      }
+    }
+    expect(checked).toBeGreaterThan(500)
+    expect(problems).toEqual([])
+  })
+})
