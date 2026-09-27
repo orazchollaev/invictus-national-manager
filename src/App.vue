@@ -1,0 +1,106 @@
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, watch } from "vue"
+import { useRouter } from "vue-router"
+import { App } from "@capacitor/app"
+import { AppHeader, AppMobileBottomNav, ErrorBoundary } from "@/components/layout"
+import { AppDialog } from "@/components/ui"
+import { useSettingsStore } from "@/modules/settings/store"
+import { useWorldStore } from "@/modules/world/store"
+import { useStatusBar } from "@/composables/useStatusBar"
+import { BusyOverlay } from "@/modules/core/components"
+
+const settings = useSettingsStore()
+const world = useWorldStore()
+const { setTheme } = useStatusBar()
+watch(() => settings.theme, setTheme, { immediate: true })
+
+const router = useRouter()
+const ROOT_PATHS = ["/home", "/squad", "/competitions", "/inbox", "/more", "/menu"]
+
+/** Full-screen flows hide the bottom navigation. */
+const FULLSCREEN = [
+  /^\/match\//,
+  /^\/new$/,
+  /^\/menu$/,
+  /^\/load$/,
+  /^\/squad\/callup$/,
+  /^\/draw\//,
+]
+// Without a game loaded there is nothing for the header or the tabs to open.
+const hideNav = computed(
+  () => !world.world || FULLSCREEN.some((p) => p.test(router.currentRoute.value.path))
+)
+
+let backButtonListener: (() => void) | null = null
+
+onMounted(async () => {
+  const handle = await App.addListener("backButton", () => {
+    const path = router.currentRoute.value.path
+    if (ROOT_PATHS.includes(path)) App.exitApp()
+    else router.back()
+  })
+  backButtonListener = () => handle.remove()
+
+  // Save when the app goes to the background: Android may kill it there.
+  const state = await App.addListener("appStateChange", ({ isActive }) => {
+    if (!isActive) void world.autoSave()
+  })
+  const prev = backButtonListener
+  backButtonListener = () => {
+    prev()
+    state.remove()
+  }
+})
+
+onUnmounted(() => backButtonListener?.())
+</script>
+
+<template>
+  <div class="app-root">
+    <AppHeader v-if="!hideNav" />
+    <main class="app-main" :class="{ 'app-main--no-nav': hideNav }">
+      <ErrorBoundary>
+        <RouterView v-slot="{ Component }">
+          <Transition name="page" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </RouterView>
+      </ErrorBoundary>
+    </main>
+    <AppDialog />
+    <BusyOverlay />
+    <Transition name="mobile-nav">
+      <AppMobileBottomNav v-if="!hideNav" />
+    </Transition>
+  </div>
+</template>
+
+<style>
+.app-root {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.app-main::after {
+  content: "";
+  display: block;
+  height: calc(var(--mobile-nav-offset) + var(--sp-4));
+}
+
+.app-main--no-nav::after {
+  height: var(--safe-bottom);
+}
+
+.mobile-nav-enter-active,
+.mobile-nav-leave-active {
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+
+.mobile-nav-enter-from,
+.mobile-nav-leave-to {
+  transform: translateY(120%);
+  opacity: 0;
+}
+</style>
