@@ -1,0 +1,2535 @@
+[
+  {
+    "id": "ESP",
+    "name": "Spain",
+    "flag": "es",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#AA151B",
+    "youthLevel": 98,
+    "points": 1995.88,
+    "cultures": [
+      ["spanish", 92],
+      ["west-african-franco", 4],
+      ["latam", 4]
+    ]
+  },
+  {
+    "id": "ARG",
+    "name": "Argentina",
+    "flag": "ar",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#43A1D5",
+    "youthLevel": 95,
+    "points": 1970.37,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "FRA",
+    "name": "France",
+    "flag": "fr",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#003189",
+    "youthLevel": 94,
+    "points": 1948.97,
+    "cultures": [
+      ["french", 60],
+      ["west-african-franco", 22],
+      ["maghreb", 12],
+      ["caribbean-franco", 6]
+    ]
+  },
+  {
+    "id": "ENG",
+    "name": "England",
+    "flag": "gb-eng",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#CF081F",
+    "youthLevel": 93,
+    "points": 1922.83,
+    "cultures": [
+      ["english", 78],
+      ["caribbean-anglo", 12],
+      ["west-african-anglo", 10]
+    ]
+  },
+  {
+    "id": "BRA",
+    "name": "Brazil",
+    "flag": "br",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#009B3A",
+    "youthLevel": 93,
+    "points": 1804.92,
+    "cultures": [["brazilian", 100]]
+  },
+  {
+    "id": "MAR",
+    "name": "Morocco",
+    "flag": "ma",
+    "confed": "CAF",
+    "subFeds": ["UNAF", "UAFA"],
+    "color": "#C1272D",
+    "youthLevel": 79,
+    "points": 1803.99,
+    "cultures": [["maghreb", 100]]
+  },
+  {
+    "id": "POR",
+    "name": "Portugal",
+    "flag": "pt",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#006600",
+    "youthLevel": 85,
+    "points": 1787.85,
+    "cultures": [
+      ["portuguese", 85],
+      ["lusophone-african", 15]
+    ]
+  },
+  {
+    "id": "BEL",
+    "name": "Belgium",
+    "flag": "be",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#EF3340",
+    "youthLevel": 80,
+    "points": 1778.36,
+    "cultures": [
+      ["dutch", 45],
+      ["french", 30],
+      ["west-african-franco", 20],
+      ["maghreb", 5]
+    ]
+  },
+  {
+    "id": "NED",
+    "name": "Netherlands",
+    "flag": "nl",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#FF6600",
+    "youthLevel": 83,
+    "points": 1775.54,
+    "cultures": [
+      ["dutch", 75],
+      ["dutch-caribbean", 15],
+      ["maghreb", 10]
+    ]
+  },
+  {
+    "id": "MEX",
+    "name": "Mexico",
+    "flag": "mx",
+    "confed": "CONCACAF",
+    "subFeds": ["NAFU"],
+    "color": "#006847",
+    "youthLevel": 74,
+    "points": 1754.3,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "COL",
+    "name": "Colombia",
+    "flag": "co",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#FCD116",
+    "youthLevel": 78,
+    "points": 1739.89,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "GER",
+    "name": "Germany",
+    "flag": "de",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#1A1A1A",
+    "youthLevel": 88,
+    "points": 1726.22,
+    "cultures": [
+      ["german", 78],
+      ["turkish", 8],
+      ["west-african-franco", 6],
+      ["slavic-south", 8]
+    ]
+  },
+  {
+    "id": "CRO",
+    "name": "Croatia",
+    "flag": "hr",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#E63946",
+    "youthLevel": 77,
+    "points": 1723.05,
+    "cultures": [["slavic-south", 100]]
+  },
+  {
+    "id": "SUI",
+    "name": "Switzerland",
+    "flag": "ch",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#D52B1E",
+    "youthLevel": 74,
+    "points": 1710.88,
+    "cultures": [
+      ["german", 50],
+      ["french", 20],
+      ["italian", 10],
+      ["slavic-south", 10],
+      ["albanian", 10]
+    ]
+  },
+  {
+    "id": "ITA",
+    "name": "Italy",
+    "flag": "it",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#008C45",
+    "youthLevel": 82,
+    "points": 1704.73,
+    "cultures": [
+      ["italian", 94],
+      ["latam", 6]
+    ]
+  },
+  {
+    "id": "USA",
+    "name": "United States",
+    "flag": "us",
+    "confed": "CONCACAF",
+    "subFeds": ["NAFU"],
+    "color": "#0A3161",
+    "youthLevel": 72,
+    "points": 1690.33,
+    "cultures": [
+      ["english", 70],
+      ["latam", 20],
+      ["west-african-anglo", 10]
+    ]
+  },
+  {
+    "id": "JPN",
+    "name": "Japan",
+    "flag": "jp",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#000555",
+    "youthLevel": 72,
+    "points": 1673.68,
+    "cultures": [["japanese", 100]]
+  },
+  {
+    "id": "SEN",
+    "name": "Senegal",
+    "flag": "sn",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#00853F",
+    "youthLevel": 73,
+    "points": 1653.43,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "NOR",
+    "name": "Norway",
+    "flag": "no",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#EF2B2D",
+    "youthLevel": 73,
+    "points": 1651.29,
+    "cultures": [
+      ["nordic", 88],
+      ["west-african-anglo", 6],
+      ["east-african", 6]
+    ]
+  },
+  {
+    "id": "URU",
+    "name": "Uruguay",
+    "flag": "uy",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#0038A8",
+    "youthLevel": 74,
+    "points": 1634.7,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "DEN",
+    "name": "Denmark",
+    "flag": "dk",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#C60C30",
+    "youthLevel": 73,
+    "points": 1619.47,
+    "cultures": [
+      ["nordic", 90],
+      ["west-african-anglo", 5],
+      ["slavic-south", 5]
+    ]
+  },
+  {
+    "id": "IRN",
+    "name": "Iran",
+    "flag": "ir",
+    "confed": "AFC",
+    "subFeds": ["CAFA"],
+    "color": "#239F40",
+    "youthLevel": 67,
+    "points": 1609.85,
+    "cultures": [["persian", 100]]
+  },
+  {
+    "id": "AUT",
+    "name": "Austria",
+    "flag": "at",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#ED2939",
+    "youthLevel": 71,
+    "points": 1598.82,
+    "cultures": [
+      ["german", 80],
+      ["slavic-south", 12],
+      ["turkish", 8]
+    ]
+  },
+  {
+    "id": "EGY",
+    "name": "Egypt",
+    "flag": "eg",
+    "confed": "CAF",
+    "subFeds": ["UNAF", "UAFA"],
+    "color": "#CE1126",
+    "youthLevel": 66,
+    "points": 1597.04,
+    "cultures": [["arabic-egypt", 100]]
+  },
+  {
+    "id": "ECU",
+    "name": "Ecuador",
+    "flag": "ec",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#FFD100",
+    "youthLevel": 69,
+    "points": 1592.59,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "NGA",
+    "name": "Nigeria",
+    "flag": "ng",
+    "confed": "CAF",
+    "subFeds": ["WAFU-B"],
+    "color": "#008751",
+    "youthLevel": 72,
+    "points": 1585.02,
+    "cultures": [["west-african-anglo", 100]]
+  },
+  {
+    "id": "TUR",
+    "name": "Turkey",
+    "flag": "tr",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#E30A17",
+    "youthLevel": 71,
+    "points": 1582.54,
+    "cultures": [
+      ["turkish", 96],
+      ["german", 4]
+    ]
+  },
+  {
+    "id": "AUS",
+    "name": "Australia",
+    "flag": "au",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#FFCD00",
+    "youthLevel": 66,
+    "points": 1581.51,
+    "cultures": [
+      ["english", 75],
+      ["slavic-south", 10],
+      ["greek", 5],
+      ["italian", 5],
+      ["east-african", 5]
+    ]
+  },
+  {
+    "id": "ALG",
+    "name": "Algeria",
+    "flag": "dz",
+    "confed": "CAF",
+    "subFeds": ["UNAF", "UAFA"],
+    "color": "#006233",
+    "youthLevel": 67,
+    "points": 1576.8,
+    "cultures": [["maghreb", 100]]
+  },
+  {
+    "id": "CAN",
+    "name": "Canada",
+    "flag": "ca",
+    "confed": "CONCACAF",
+    "subFeds": ["NAFU"],
+    "color": "#FF0000",
+    "youthLevel": 66,
+    "points": 1571.34,
+    "cultures": [
+      ["english", 60],
+      ["french", 15],
+      ["caribbean-anglo", 15],
+      ["west-african-anglo", 10]
+    ]
+  },
+  {
+    "id": "CIV",
+    "name": "Ivory Coast",
+    "flag": "ci",
+    "confed": "CAF",
+    "subFeds": ["WAFU-B"],
+    "color": "#FF8200",
+    "youthLevel": 69,
+    "points": 1565.47,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "KOR",
+    "name": "South Korea",
+    "flag": "kr",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#C21920",
+    "youthLevel": 67,
+    "points": 1558.72,
+    "cultures": [["korean", 100]]
+  },
+  {
+    "id": "UKR",
+    "name": "Ukraine",
+    "flag": "ua",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#005BBB",
+    "youthLevel": 69,
+    "points": 1549.29,
+    "cultures": [["slavic-east", 100]]
+  },
+  {
+    "id": "PAR",
+    "name": "Paraguay",
+    "flag": "py",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#D52B1E",
+    "youthLevel": 66,
+    "points": 1542.48,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "RUS",
+    "name": "Russia",
+    "flag": "ru",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#0039A6",
+    "youthLevel": 67,
+    "points": 1529.6,
+    "banned": true,
+    "cultures": [
+      ["slavic-east", 92],
+      ["caucasus", 8]
+    ]
+  },
+  {
+    "id": "POL",
+    "name": "Poland",
+    "flag": "pl",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#DC143C",
+    "youthLevel": 65,
+    "points": 1526.18,
+    "cultures": [["slavic-west", 100]]
+  },
+  {
+    "id": "SWE",
+    "name": "Sweden",
+    "flag": "se",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#006AA7",
+    "youthLevel": 67,
+    "points": 1525.58,
+    "cultures": [
+      ["nordic", 78],
+      ["slavic-south", 8],
+      ["east-african", 8],
+      ["arabic-levant", 6]
+    ]
+  },
+  {
+    "id": "WAL",
+    "name": "Wales",
+    "flag": "gb-wls",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#D30731",
+    "youthLevel": 59,
+    "points": 1516.95,
+    "cultures": [["english", 100]]
+  },
+  {
+    "id": "HUN",
+    "name": "Hungary",
+    "flag": "hu",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#436F4D",
+    "youthLevel": 62,
+    "points": 1506.39,
+    "cultures": [["hungarian", 100]]
+  },
+  {
+    "id": "SRB",
+    "name": "Serbia",
+    "flag": "rs",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#C6363C",
+    "youthLevel": 66,
+    "points": 1502.13,
+    "cultures": [["slavic-south", 100]]
+  },
+  {
+    "id": "COD",
+    "name": "DR Congo",
+    "flag": "cd",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#007FFF",
+    "youthLevel": 63,
+    "points": 1495.48,
+    "cultures": [["central-african", 100]]
+  },
+  {
+    "id": "SCO",
+    "name": "Scotland",
+    "flag": "gb-sct",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#003087",
+    "youthLevel": 63,
+    "points": 1491.22,
+    "cultures": [["english", 100]]
+  },
+  {
+    "id": "CMR",
+    "name": "Cameroon",
+    "flag": "cm",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#007A5E",
+    "youthLevel": 63,
+    "points": 1481.24,
+    "cultures": [
+      ["central-african", 70],
+      ["west-african-franco", 30]
+    ]
+  },
+  {
+    "id": "PAN",
+    "name": "Panama",
+    "flag": "pa",
+    "confed": "CONCACAF",
+    "subFeds": ["UNCAF"],
+    "color": "#C8102E",
+    "youthLevel": 60,
+    "points": 1478.41,
+    "cultures": [
+      ["latam", 80],
+      ["caribbean-anglo", 20]
+    ]
+  },
+  {
+    "id": "SVK",
+    "name": "Slovakia",
+    "flag": "sk",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#0B4EA2",
+    "youthLevel": 61,
+    "points": 1473.66,
+    "cultures": [
+      ["slavic-west", 88],
+      ["hungarian", 12]
+    ]
+  },
+  {
+    "id": "GRE",
+    "name": "Greece",
+    "flag": "gr",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#0D5EAF",
+    "youthLevel": 65,
+    "points": 1473.19,
+    "cultures": [
+      ["greek", 96],
+      ["albanian", 4]
+    ]
+  },
+  {
+    "id": "VEN",
+    "name": "Venezuela",
+    "flag": "ve",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#FFCC00",
+    "youthLevel": 64,
+    "points": 1469.18,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "CZE",
+    "name": "Czech Republic",
+    "flag": "cz",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#D7141A",
+    "youthLevel": 61,
+    "points": 1467.26,
+    "cultures": [["slavic-west", 100]]
+  },
+  {
+    "id": "CHI",
+    "name": "Chile",
+    "flag": "cl",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#D52B1E",
+    "youthLevel": 65,
+    "points": 1458.2,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "PER",
+    "name": "Peru",
+    "flag": "pe",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#D91023",
+    "youthLevel": 61,
+    "points": 1457.69,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "CRC",
+    "name": "Costa Rica",
+    "flag": "cr",
+    "confed": "CONCACAF",
+    "subFeds": ["UNCAF"],
+    "color": "#002B7F",
+    "youthLevel": 56,
+    "points": 1456.03,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "ROU",
+    "name": "Romania",
+    "flag": "ro",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#FCD116",
+    "youthLevel": 59,
+    "points": 1455.89,
+    "cultures": [
+      ["romanian", 92],
+      ["hungarian", 8]
+    ]
+  },
+  {
+    "id": "MLI",
+    "name": "Mali",
+    "flag": "ml",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#14B53A",
+    "youthLevel": 58,
+    "points": 1455.59,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "RSA",
+    "name": "South Africa",
+    "flag": "za",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#007749",
+    "youthLevel": 56,
+    "points": 1451.24,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "IRL",
+    "name": "Ireland",
+    "flag": "ie",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#169B62",
+    "youthLevel": 61,
+    "points": 1441.1,
+    "cultures": [
+      ["english", 92],
+      ["west-african-anglo", 8]
+    ]
+  },
+  {
+    "id": "SVN",
+    "name": "Slovenia",
+    "flag": "si",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#005DA4",
+    "youthLevel": 61,
+    "points": 1441.09,
+    "cultures": [["slavic-south", 100]]
+  },
+  {
+    "id": "TUN",
+    "name": "Tunisia",
+    "flag": "tn",
+    "confed": "CAF",
+    "subFeds": ["UNAF", "UAFA"],
+    "color": "#E70013",
+    "youthLevel": 54,
+    "points": 1426.58,
+    "cultures": [["maghreb", 100]]
+  },
+  {
+    "id": "KSA",
+    "name": "Saudi Arabia",
+    "flag": "sa",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#006C35",
+    "youthLevel": 57,
+    "points": 1425.52,
+    "cultures": [["arabic-gulf", 100]]
+  },
+  {
+    "id": "QAT",
+    "name": "Qatar",
+    "flag": "qa",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#8A1538",
+    "youthLevel": 49,
+    "points": 1411.06,
+    "cultures": [
+      ["arabic-gulf", 80],
+      ["west-african-franco", 10],
+      ["maghreb", 10]
+    ]
+  },
+  {
+    "id": "UZB",
+    "name": "Uzbekistan",
+    "flag": "uz",
+    "confed": "AFC",
+    "subFeds": ["CAFA"],
+    "color": "#0099B5",
+    "youthLevel": 58,
+    "points": 1409.73,
+    "cultures": [["central-asian", 100]]
+  },
+  {
+    "id": "BIH",
+    "name": "Bosnia and Herzegovina",
+    "flag": "ba",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#002395",
+    "youthLevel": 57,
+    "points": 1408.93,
+    "cultures": [["slavic-south", 100]]
+  },
+  {
+    "id": "BFA",
+    "name": "Burkina Faso",
+    "flag": "bf",
+    "confed": "CAF",
+    "subFeds": ["WAFU-B"],
+    "color": "#009E49",
+    "youthLevel": 53,
+    "points": 1406.99,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "IRQ",
+    "name": "Iraq",
+    "flag": "iq",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#007A3D",
+    "youthLevel": 55,
+    "points": 1404.17,
+    "cultures": [["arabic-levant", 100]]
+  },
+  {
+    "id": "CPV",
+    "name": "Cape Verde",
+    "flag": "cv",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#003893",
+    "youthLevel": 56,
+    "points": 1402.97,
+    "cultures": [["lusophone-african", 100]]
+  },
+  {
+    "id": "GHA",
+    "name": "Ghana",
+    "flag": "gh",
+    "confed": "CAF",
+    "subFeds": ["WAFU-B"],
+    "color": "#CE1126",
+    "youthLevel": 59,
+    "points": 1387,
+    "cultures": [["west-african-anglo", 100]]
+  },
+  {
+    "id": "HON",
+    "name": "Honduras",
+    "flag": "hn",
+    "confed": "CONCACAF",
+    "subFeds": ["UNCAF"],
+    "color": "#001489",
+    "youthLevel": 53,
+    "points": 1378.97,
+    "cultures": [
+      ["latam", 85],
+      ["caribbean-anglo", 15]
+    ]
+  },
+  {
+    "id": "ALB",
+    "name": "Albania",
+    "flag": "al",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#DA291C",
+    "youthLevel": 57,
+    "points": 1376.03,
+    "cultures": [["albanian", 100]]
+  },
+  {
+    "id": "UAE",
+    "name": "United Arab Emirates",
+    "flag": "ae",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#00732F",
+    "youthLevel": 53,
+    "points": 1370.47,
+    "cultures": [["arabic-gulf", 100]]
+  },
+  {
+    "id": "MKD",
+    "name": "North Macedonia",
+    "flag": "mk",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#D20000",
+    "youthLevel": 54,
+    "points": 1369.16,
+    "cultures": [
+      ["slavic-south", 75],
+      ["albanian", 25]
+    ]
+  },
+  {
+    "id": "NIR",
+    "name": "Northern Ireland",
+    "flag": "gb-nir",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#006A4E",
+    "youthLevel": 57,
+    "points": 1365.3,
+    "cultures": [["english", 100]]
+  },
+  {
+    "id": "JAM",
+    "name": "Jamaica",
+    "flag": "jm",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#009B3A",
+    "youthLevel": 52,
+    "points": 1357.84,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "GEO",
+    "name": "Georgia",
+    "flag": "ge",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#E41E20",
+    "youthLevel": 56,
+    "points": 1355.26,
+    "cultures": [["caucasus", 100]]
+  },
+  {
+    "id": "JOR",
+    "name": "Jordan",
+    "flag": "jo",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "UAFA"],
+    "color": "#E70013",
+    "youthLevel": 56,
+    "points": 1350.41,
+    "cultures": [["arabic-levant", 100]]
+  },
+  {
+    "id": "ISL",
+    "name": "Iceland",
+    "flag": "is",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#02529C",
+    "youthLevel": 53,
+    "points": 1342.77,
+    "cultures": [["icelandic", 100]]
+  },
+  {
+    "id": "FIN",
+    "name": "Finland",
+    "flag": "fi",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#003580",
+    "youthLevel": 52,
+    "points": 1341.92,
+    "cultures": [
+      ["finnish", 88],
+      ["east-african", 6],
+      ["slavic-east", 6]
+    ]
+  },
+  {
+    "id": "ISR",
+    "name": "Israel",
+    "flag": "il",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#0038B8",
+    "youthLevel": 56,
+    "points": 1333.9,
+    "cultures": [
+      ["hebrew", 80],
+      ["arabic-levant", 20]
+    ]
+  },
+  {
+    "id": "BOL",
+    "name": "Bolivia",
+    "flag": "bo",
+    "confed": "CONMEBOL",
+    "subFeds": [],
+    "color": "#007A33",
+    "youthLevel": 55,
+    "points": 1326,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "KOS",
+    "name": "Kosovo",
+    "flag": "xk",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#244AA5",
+    "youthLevel": 60,
+    "points": 1319.12,
+    "cultures": [["albanian", 100]]
+  },
+  {
+    "id": "OMA",
+    "name": "Oman",
+    "flag": "om",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#DB161B",
+    "youthLevel": 48,
+    "points": 1306.9,
+    "cultures": [["arabic-gulf", 100]]
+  },
+  {
+    "id": "MNE",
+    "name": "Montenegro",
+    "flag": "me",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#C40308",
+    "youthLevel": 48,
+    "points": 1301.98,
+    "cultures": [
+      ["slavic-south", 85],
+      ["albanian", 15]
+    ]
+  },
+  {
+    "id": "GUI",
+    "name": "Guinea",
+    "flag": "gn",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#CE1126",
+    "youthLevel": 47,
+    "points": 1295.6,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "CUW",
+    "name": "Curacao",
+    "flag": "cw",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 48,
+    "points": 1285.64,
+    "cultures": [["dutch-caribbean", 100]]
+  },
+  {
+    "id": "SYR",
+    "name": "Syria",
+    "flag": "sy",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "UAFA"],
+    "color": "#CE1126",
+    "youthLevel": 48,
+    "points": 1283.05,
+    "cultures": [["arabic-levant", 100]]
+  },
+  {
+    "id": "GAB",
+    "name": "Gabon",
+    "flag": "ga",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#009E60",
+    "youthLevel": 44,
+    "points": 1272.51,
+    "cultures": [
+      ["central-african", 60],
+      ["west-african-franco", 40]
+    ]
+  },
+  {
+    "id": "BUL",
+    "name": "Bulgaria",
+    "flag": "bg",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#00966E",
+    "youthLevel": 46,
+    "points": 1271.68,
+    "cultures": [["slavic-south", 100]]
+  },
+  {
+    "id": "NZL",
+    "name": "New Zealand",
+    "flag": "nz",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#00247D",
+    "youthLevel": 50,
+    "points": 1269.8,
+    "cultures": [
+      ["english", 75],
+      ["pacific", 25]
+    ]
+  },
+  {
+    "id": "ANG",
+    "name": "Angola",
+    "flag": "ao",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#CC092F",
+    "youthLevel": 51,
+    "points": 1265.58,
+    "cultures": [["lusophone-african", 100]]
+  },
+  {
+    "id": "HAI",
+    "name": "Haiti",
+    "flag": "ht",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#D21034",
+    "youthLevel": 50,
+    "points": 1264.58,
+    "cultures": [["caribbean-franco", 100]]
+  },
+  {
+    "id": "UGA",
+    "name": "Uganda",
+    "flag": "ug",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#000000",
+    "youthLevel": 44,
+    "points": 1264.09,
+    "cultures": [["east-african", 100]]
+  },
+  {
+    "id": "ZAM",
+    "name": "Zambia",
+    "flag": "zm",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#198A00",
+    "youthLevel": 42,
+    "points": 1255.82,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "CHN",
+    "name": "China",
+    "flag": "cn",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#EE1C25",
+    "youthLevel": 45,
+    "points": 1254.81,
+    "cultures": [["chinese", 100]]
+  },
+  {
+    "id": "BHR",
+    "name": "Bahrain",
+    "flag": "bh",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#CE1126",
+    "youthLevel": 43,
+    "points": 1254.41,
+    "cultures": [["arabic-gulf", 100]]
+  },
+  {
+    "id": "BEN",
+    "name": "Benin",
+    "flag": "bj",
+    "confed": "CAF",
+    "subFeds": ["WAFU-B"],
+    "color": "#008751",
+    "youthLevel": 45,
+    "points": 1252.17,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "THA",
+    "name": "Thailand",
+    "flag": "th",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#2D2A4A",
+    "youthLevel": 43,
+    "points": 1250.8,
+    "cultures": [["thai", 100]]
+  },
+  {
+    "id": "PLE",
+    "name": "Palestine",
+    "flag": "ps",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "UAFA"],
+    "color": "#5b6b7a",
+    "youthLevel": 47,
+    "points": 1243.71,
+    "cultures": [["arabic-levant", 100]]
+  },
+  {
+    "id": "BLR",
+    "name": "Belarus",
+    "flag": "by",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#C8313E",
+    "youthLevel": 48,
+    "points": 1242.88,
+    "cultures": [["slavic-east", 100]]
+  },
+  {
+    "id": "GUA",
+    "name": "Guatemala",
+    "flag": "gt",
+    "confed": "CONCACAF",
+    "subFeds": ["UNCAF"],
+    "color": "#4997D0",
+    "youthLevel": 48,
+    "points": 1238.74,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "LUX",
+    "name": "Luxembourg",
+    "flag": "lu",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#00A3E0",
+    "youthLevel": 47,
+    "points": 1232.82,
+    "cultures": [
+      ["french", 40],
+      ["portuguese", 35],
+      ["german", 25]
+    ]
+  },
+  {
+    "id": "VIE",
+    "name": "Vietnam",
+    "flag": "vn",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#DA251D",
+    "youthLevel": 46,
+    "points": 1227.2,
+    "cultures": [["vietnamese", 100]]
+  },
+  {
+    "id": "SLV",
+    "name": "El Salvador",
+    "flag": "sv",
+    "confed": "CONCACAF",
+    "subFeds": ["UNCAF"],
+    "color": "#0047AB",
+    "youthLevel": 41,
+    "points": 1225.34,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "TJK",
+    "name": "Tajikistan",
+    "flag": "tj",
+    "confed": "AFC",
+    "subFeds": ["CAFA"],
+    "color": "#CC0000",
+    "youthLevel": 38,
+    "points": 1224.19,
+    "cultures": [
+      ["persian", 40],
+      ["central-asian", 60]
+    ]
+  },
+  {
+    "id": "TRI",
+    "name": "Trinidad and Tobago",
+    "flag": "tt",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#DA291C",
+    "youthLevel": 42,
+    "points": 1219.59,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "MOZ",
+    "name": "Mozambique",
+    "flag": "mz",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#007168",
+    "youthLevel": 41,
+    "points": 1218.62,
+    "cultures": [
+      ["lusophone-african", 60],
+      ["southern-african", 40]
+    ]
+  },
+  {
+    "id": "MAD",
+    "name": "Madagascar",
+    "flag": "mg",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#FC3E32",
+    "youthLevel": 42,
+    "points": 1202.69,
+    "cultures": [["malagasy", 100]]
+  },
+  {
+    "id": "EQG",
+    "name": "Equatorial Guinea",
+    "flag": "gq",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#E32118",
+    "youthLevel": 41,
+    "points": 1195.2,
+    "cultures": [
+      ["central-african", 60],
+      ["spanish", 10],
+      ["west-african-franco", 30]
+    ]
+  },
+  {
+    "id": "KGZ",
+    "name": "Kyrgyzstan",
+    "flag": "kg",
+    "confed": "AFC",
+    "subFeds": ["CAFA"],
+    "color": "#E8112D",
+    "youthLevel": 38,
+    "points": 1192.16,
+    "cultures": [["central-asian", 100]]
+  },
+  {
+    "id": "ARM",
+    "name": "Armenia",
+    "flag": "am",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#D90012",
+    "youthLevel": 42,
+    "points": 1189.63,
+    "cultures": [["caucasus", 100]]
+  },
+  {
+    "id": "COM",
+    "name": "Comoros",
+    "flag": "km",
+    "confed": "CAF",
+    "subFeds": ["COSAFA", "UAFA"],
+    "color": "#FFC61E",
+    "youthLevel": 41,
+    "points": 1187.91,
+    "cultures": [["comorian", 100]]
+  },
+  {
+    "id": "KEN",
+    "name": "Kenya",
+    "flag": "ke",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#000000",
+    "youthLevel": 40,
+    "points": 1185.08,
+    "cultures": [["east-african", 100]]
+  },
+  {
+    "id": "LBY",
+    "name": "Libya",
+    "flag": "ly",
+    "confed": "CAF",
+    "subFeds": ["UNAF", "UAFA"],
+    "color": "#000000",
+    "youthLevel": 43,
+    "points": 1182.08,
+    "cultures": [["maghreb", 100]]
+  },
+  {
+    "id": "KAZ",
+    "name": "Kazakhstan",
+    "flag": "kz",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#00A3DD",
+    "youthLevel": 44,
+    "points": 1180.78,
+    "cultures": [
+      ["central-asian", 75],
+      ["slavic-east", 25]
+    ]
+  },
+  {
+    "id": "TAN",
+    "name": "Tanzania",
+    "flag": "tz",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#1EB53A",
+    "youthLevel": 36,
+    "points": 1180.27,
+    "cultures": [["east-african", 100]]
+  },
+  {
+    "id": "MTN",
+    "name": "Mauritania",
+    "flag": "mr",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A", "UAFA"],
+    "color": "#006233",
+    "youthLevel": 40,
+    "points": 1176.68,
+    "cultures": [
+      ["west-african-franco", 50],
+      ["maghreb", 50]
+    ]
+  },
+  {
+    "id": "NIG",
+    "name": "Niger",
+    "flag": "ne",
+    "confed": "CAF",
+    "subFeds": ["WAFU-B"],
+    "color": "#E05206",
+    "youthLevel": 42,
+    "points": 1175.33,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "LBN",
+    "name": "Lebanon",
+    "flag": "lb",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "UAFA"],
+    "color": "#ED1C24",
+    "youthLevel": 37,
+    "points": 1172.22,
+    "cultures": [["arabic-levant", 100]]
+  },
+  {
+    "id": "GAM",
+    "name": "Gambia",
+    "flag": "gm",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#CE1126",
+    "youthLevel": 43,
+    "points": 1159.64,
+    "cultures": [
+      ["west-african-anglo", 60],
+      ["west-african-franco", 40]
+    ]
+  },
+  {
+    "id": "SDN",
+    "name": "Sudan",
+    "flag": "sd",
+    "confed": "CAF",
+    "subFeds": ["CECAFA", "UAFA"],
+    "color": "#D21034",
+    "youthLevel": 40,
+    "points": 1157.22,
+    "cultures": [["arabic-sudan", 100]]
+  },
+  {
+    "id": "IDN",
+    "name": "Indonesia",
+    "flag": "id",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#FF0000",
+    "youthLevel": 39,
+    "points": 1157.14,
+    "cultures": [
+      ["malay", 80],
+      ["dutch", 20]
+    ]
+  },
+  {
+    "id": "TOG",
+    "name": "Togo",
+    "flag": "tg",
+    "confed": "CAF",
+    "subFeds": ["WAFU-B"],
+    "color": "#006A4E",
+    "youthLevel": 41,
+    "points": 1152.76,
+    "cultures": [["west-african-franco", 100]]
+  },
+  {
+    "id": "PRK",
+    "name": "North Korea",
+    "flag": "kp",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#024FA2",
+    "youthLevel": 40,
+    "points": 1151.05,
+    "cultures": [["korean", 100]]
+  },
+  {
+    "id": "NAM",
+    "name": "Namibia",
+    "flag": "na",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#003580",
+    "youthLevel": 38,
+    "points": 1148.84,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "SLE",
+    "name": "Sierra Leone",
+    "flag": "sl",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#1EB53A",
+    "youthLevel": 38,
+    "points": 1147.56,
+    "cultures": [["west-african-anglo", 100]]
+  },
+  {
+    "id": "FRO",
+    "name": "Faroe Islands",
+    "flag": "fo",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#003897",
+    "youthLevel": 40,
+    "points": 1136.59,
+    "cultures": [["nordic", 100]]
+  },
+  {
+    "id": "CYP",
+    "name": "Cyprus",
+    "flag": "cy",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#D57800",
+    "youthLevel": 37,
+    "points": 1133.25,
+    "cultures": [["greek", 100]]
+  },
+  {
+    "id": "SUR",
+    "name": "Suriname",
+    "flag": "sr",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#377E3F",
+    "youthLevel": 44,
+    "points": 1132.43,
+    "cultures": [["dutch-caribbean", 100]]
+  },
+  {
+    "id": "AZE",
+    "name": "Azerbaijan",
+    "flag": "az",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#00B5E2",
+    "youthLevel": 38,
+    "points": 1132,
+    "cultures": [
+      ["turkish", 85],
+      ["caucasus", 15]
+    ]
+  },
+  {
+    "id": "EST",
+    "name": "Estonia",
+    "flag": "ee",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#4891D9",
+    "youthLevel": 40,
+    "points": 1130.64,
+    "cultures": [
+      ["baltic", 75],
+      ["slavic-east", 25]
+    ]
+  },
+  {
+    "id": "RWA",
+    "name": "Rwanda",
+    "flag": "rw",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#00A1DE",
+    "youthLevel": 39,
+    "points": 1126.62,
+    "cultures": [["east-african", 100]]
+  },
+  {
+    "id": "MWI",
+    "name": "Malawi",
+    "flag": "mw",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#000000",
+    "youthLevel": 34,
+    "points": 1122.05,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "ZIM",
+    "name": "Zimbabwe",
+    "flag": "zw",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#006400",
+    "youthLevel": 40,
+    "points": 1119.78,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "NCA",
+    "name": "Nicaragua",
+    "flag": "ni",
+    "confed": "CONCACAF",
+    "subFeds": ["UNCAF"],
+    "color": "#0067C6",
+    "youthLevel": 37,
+    "points": 1114.63,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "GNB",
+    "name": "Guinea-Bissau",
+    "flag": "gw",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#CE1126",
+    "youthLevel": 36,
+    "points": 1108.38,
+    "cultures": [["lusophone-african", 100]]
+  },
+  {
+    "id": "KUW",
+    "name": "Kuwait",
+    "flag": "kw",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#007A3D",
+    "youthLevel": 36,
+    "points": 1106.47,
+    "cultures": [["arabic-gulf", 100]]
+  },
+  {
+    "id": "CGO",
+    "name": "Congo",
+    "flag": "cg",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#009543",
+    "youthLevel": 31,
+    "points": 1105.96,
+    "cultures": [["central-african", 100]]
+  },
+  {
+    "id": "PHI",
+    "name": "Philippines",
+    "flag": "ph",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#0038A8",
+    "youthLevel": 27,
+    "points": 1100.95,
+    "cultures": [
+      ["filipino", 70],
+      ["english", 15],
+      ["spanish", 15]
+    ]
+  },
+  {
+    "id": "MAS",
+    "name": "Malaysia",
+    "flag": "my",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#FFCC00",
+    "youthLevel": 34,
+    "points": 1086.22,
+    "cultures": [
+      ["malay", 85],
+      ["south-asian", 15]
+    ]
+  },
+  {
+    "id": "LVA",
+    "name": "Latvia",
+    "flag": "lv",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#9E3039",
+    "youthLevel": 34,
+    "points": 1085.66,
+    "cultures": [
+      ["baltic", 70],
+      ["slavic-east", 30]
+    ]
+  },
+  {
+    "id": "IND",
+    "name": "India",
+    "flag": "in",
+    "confed": "AFC",
+    "subFeds": ["SAFF"],
+    "color": "#FF9933",
+    "youthLevel": 28,
+    "points": 1084.93,
+    "cultures": [["south-asian", 100]]
+  },
+  {
+    "id": "CTA",
+    "name": "Central African Republic",
+    "flag": "cf",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#003082",
+    "youthLevel": 32,
+    "points": 1080.82,
+    "cultures": [["central-african", 100]]
+  },
+  {
+    "id": "LBR",
+    "name": "Liberia",
+    "flag": "lr",
+    "confed": "CAF",
+    "subFeds": ["WAFU-A"],
+    "color": "#BF0A30",
+    "youthLevel": 35,
+    "points": 1080.44,
+    "cultures": [["west-african-anglo", 100]]
+  },
+  {
+    "id": "TKM",
+    "name": "Turkmenistan",
+    "flag": "tm",
+    "confed": "AFC",
+    "subFeds": ["CAFA"],
+    "color": "#009A44",
+    "youthLevel": 31,
+    "points": 1078.65,
+    "cultures": [["central-asian", 100]]
+  },
+  {
+    "id": "BDI",
+    "name": "Burundi",
+    "flag": "bi",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#CE1126",
+    "youthLevel": 34,
+    "points": 1078.01,
+    "cultures": [["east-african", 100]]
+  },
+  {
+    "id": "ETH",
+    "name": "Ethiopia",
+    "flag": "et",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#078930",
+    "youthLevel": 34,
+    "points": 1077.52,
+    "cultures": [["ethiopian", 100]]
+  },
+  {
+    "id": "DOM",
+    "name": "Dominican Republic",
+    "flag": "do",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#002D62",
+    "youthLevel": 35,
+    "points": 1076.5,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "YEM",
+    "name": "Yemen",
+    "flag": "ye",
+    "confed": "AFC",
+    "subFeds": ["WAFF", "GULF", "UAFA"],
+    "color": "#CE1126",
+    "youthLevel": 31,
+    "points": 1065.24,
+    "cultures": [["arabic-gulf", 100]]
+  },
+  {
+    "id": "LES",
+    "name": "Lesotho",
+    "flag": "ls",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#00205B",
+    "youthLevel": 30,
+    "points": 1064.29,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "BOT",
+    "name": "Botswana",
+    "flag": "bw",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#75AADB",
+    "youthLevel": 34,
+    "points": 1063.63,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "SGP",
+    "name": "Singapore",
+    "flag": "sg",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#ED2939",
+    "youthLevel": 29,
+    "points": 1057.95,
+    "cultures": [
+      ["malay", 60],
+      ["chinese", 25],
+      ["south-asian", 15]
+    ]
+  },
+  {
+    "id": "LTU",
+    "name": "Lithuania",
+    "flag": "lt",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#FDB913",
+    "youthLevel": 34,
+    "points": 1056.85,
+    "cultures": [["baltic", 100]]
+  },
+  {
+    "id": "GUY",
+    "name": "Guyana",
+    "flag": "gy",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#009E49",
+    "youthLevel": 35,
+    "points": 1049.32,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "NCL",
+    "name": "New Caledonia",
+    "flag": "nc",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#0055A4",
+    "youthLevel": 32,
+    "points": 1036.95,
+    "cultures": [
+      ["french", 50],
+      ["pacific", 50]
+    ]
+  },
+  {
+    "id": "SKN",
+    "name": "Saint Kitts and Nevis",
+    "flag": "kn",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#009E49",
+    "youthLevel": 23,
+    "points": 1036.33,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "SOL",
+    "name": "Solomon Islands",
+    "flag": "sb",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#0051BA",
+    "youthLevel": 26,
+    "points": 1031.89,
+    "cultures": [["melanesian", 100]]
+  },
+  {
+    "id": "PUR",
+    "name": "Puerto Rico",
+    "flag": "pr",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 26,
+    "points": 1024.3,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "FIJ",
+    "name": "Fiji",
+    "flag": "fj",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#68BFE5",
+    "youthLevel": 24,
+    "points": 1024.17,
+    "cultures": [
+      ["pacific", 70],
+      ["south-asian", 30]
+    ]
+  },
+  {
+    "id": "HKG",
+    "name": "Hong Kong",
+    "flag": "hk",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#5b6b7a",
+    "youthLevel": 25,
+    "points": 1024.16,
+    "cultures": [
+      ["chinese", 90],
+      ["english", 10]
+    ]
+  },
+  {
+    "id": "TAH",
+    "name": "Tahiti",
+    "flag": "pf",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#5b6b7a",
+    "youthLevel": 29,
+    "points": 1019.04,
+    "cultures": [
+      ["french", 40],
+      ["pacific", 60]
+    ]
+  },
+  {
+    "id": "MYA",
+    "name": "Myanmar",
+    "flag": "mm",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#FECB00",
+    "youthLevel": 22,
+    "points": 1009.39,
+    "cultures": [["burmese", 100]]
+  },
+  {
+    "id": "MDA",
+    "name": "Moldova",
+    "flag": "md",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#003F87",
+    "youthLevel": 32,
+    "points": 1008.24,
+    "cultures": [
+      ["romanian", 80],
+      ["slavic-east", 20]
+    ]
+  },
+  {
+    "id": "VAN",
+    "name": "Vanuatu",
+    "flag": "vu",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#009543",
+    "youthLevel": 26,
+    "points": 1002.53,
+    "cultures": [["melanesian", 100]]
+  },
+  {
+    "id": "MLT",
+    "name": "Malta",
+    "flag": "mt",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#CF142B",
+    "youthLevel": 32,
+    "points": 992.79,
+    "cultures": [["maltese", 100]]
+  },
+  {
+    "id": "ATG",
+    "name": "Antigua and Barbuda",
+    "flag": "ag",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#CE1126",
+    "youthLevel": 14,
+    "points": 986.58,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "GRN",
+    "name": "Grenada",
+    "flag": "gd",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#007A5E",
+    "youthLevel": 23,
+    "points": 981.82,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "CUB",
+    "name": "Cuba",
+    "flag": "cu",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#002A8F",
+    "youthLevel": 31,
+    "points": 981.42,
+    "cultures": [["latam", 100]]
+  },
+  {
+    "id": "SWZ",
+    "name": "Swaziland",
+    "flag": "sz",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#3E5EB9",
+    "youthLevel": 26,
+    "points": 979.01,
+    "cultures": [["southern-african", 100]]
+  },
+  {
+    "id": "LCA",
+    "name": "Saint Lucia",
+    "flag": "lc",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#6DC8F3",
+    "youthLevel": 18,
+    "points": 976.71,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "BER",
+    "name": "Bermuda",
+    "flag": "bm",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 24,
+    "points": 975.05,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "PNG",
+    "name": "Papua New Guinea",
+    "flag": "pg",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#D21034",
+    "youthLevel": 26,
+    "points": 974.9,
+    "cultures": [["melanesian", 100]]
+  },
+  {
+    "id": "SSD",
+    "name": "South Sudan",
+    "flag": "ss",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#000000",
+    "youthLevel": 24,
+    "points": 970.94,
+    "cultures": [["east-african", 100]]
+  },
+  {
+    "id": "VIN",
+    "name": "Saint Vincent and the Grenadines",
+    "flag": "vc",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#0072CE",
+    "youthLevel": 27,
+    "points": 968.27,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "AFG",
+    "name": "Afghanistan",
+    "flag": "af",
+    "confed": "AFC",
+    "subFeds": ["CAFA"],
+    "color": "#000000",
+    "youthLevel": 18,
+    "points": 968.07,
+    "cultures": [["persian", 100]]
+  },
+  {
+    "id": "AND",
+    "name": "Andorra",
+    "flag": "ad",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#0055A4",
+    "youthLevel": 22,
+    "points": 946.43,
+    "cultures": [
+      ["spanish", 70],
+      ["portuguese", 15],
+      ["french", 15]
+    ]
+  },
+  {
+    "id": "MDV",
+    "name": "Maldives",
+    "flag": "mv",
+    "confed": "AFC",
+    "subFeds": ["SAFF"],
+    "color": "#D21034",
+    "youthLevel": 10,
+    "points": 943.92,
+    "cultures": [["maldivian", 100]]
+  },
+  {
+    "id": "TPE",
+    "name": "Taiwan",
+    "flag": "tw",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#000095",
+    "youthLevel": 11,
+    "points": 923.78,
+    "cultures": [["chinese", 100]]
+  },
+  {
+    "id": "CAM",
+    "name": "Cambodia",
+    "flag": "kh",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#032EA1",
+    "youthLevel": 13,
+    "points": 922.32,
+    "cultures": [["khmer-lao", 100]]
+  },
+  {
+    "id": "MSR",
+    "name": "Montserrat",
+    "flag": "ms",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 18,
+    "points": 916.75,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "NEP",
+    "name": "Nepal",
+    "flag": "np",
+    "confed": "AFC",
+    "subFeds": ["SAFF"],
+    "color": "#DC143C",
+    "youthLevel": 14,
+    "points": 914.54,
+    "cultures": [["south-asian", 100]]
+  },
+  {
+    "id": "MRI",
+    "name": "Mauritius",
+    "flag": "mu",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#EA2839",
+    "youthLevel": 21,
+    "points": 911.49,
+    "cultures": [["mauritian", 100]]
+  },
+  {
+    "id": "BRB",
+    "name": "Barbados",
+    "flag": "bb",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#00267F",
+    "youthLevel": 16,
+    "points": 909.89,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "BLZ",
+    "name": "Belize",
+    "flag": "bz",
+    "confed": "CONCACAF",
+    "subFeds": ["UNCAF"],
+    "color": "#171696",
+    "youthLevel": 21,
+    "points": 907,
+    "cultures": [
+      ["caribbean-anglo", 50],
+      ["latam", 50]
+    ]
+  },
+  {
+    "id": "BAN",
+    "name": "Bangladesh",
+    "flag": "bd",
+    "confed": "AFC",
+    "subFeds": ["SAFF"],
+    "color": "#006A4E",
+    "youthLevel": 15,
+    "points": 902.93,
+    "cultures": [["south-asian", 100]]
+  },
+  {
+    "id": "DMA",
+    "name": "Dominica",
+    "flag": "dm",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#006B3F",
+    "youthLevel": 15,
+    "points": 897.69,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "CHA",
+    "name": "Chad",
+    "flag": "td",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#002664",
+    "youthLevel": 21,
+    "points": 896.85,
+    "cultures": [
+      ["central-african", 60],
+      ["arabic-sudan", 40]
+    ]
+  },
+  {
+    "id": "ERI",
+    "name": "Eritrea",
+    "flag": "er",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#239F40",
+    "youthLevel": 27,
+    "points": 887.06,
+    "cultures": [["ethiopian", 100]]
+  },
+  {
+    "id": "LAO",
+    "name": "Laos",
+    "flag": "la",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#CE1126",
+    "youthLevel": 6,
+    "points": 885.03,
+    "cultures": [["khmer-lao", 100]]
+  },
+  {
+    "id": "COK",
+    "name": "Cook Islands",
+    "flag": "ck",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#003F87",
+    "youthLevel": 1,
+    "points": 877.53,
+    "cultures": [["pacific", 100]]
+  },
+  {
+    "id": "SRI",
+    "name": "Sri Lanka",
+    "flag": "lk",
+    "confed": "AFC",
+    "subFeds": ["SAFF"],
+    "color": "#8D153A",
+    "youthLevel": 10,
+    "points": 876.86,
+    "cultures": [["south-asian", 100]]
+  },
+  {
+    "id": "SAM",
+    "name": "Samoa",
+    "flag": "ws",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#CE1126",
+    "youthLevel": 5,
+    "points": 876.41,
+    "cultures": [["pacific", 100]]
+  },
+  {
+    "id": "ARU",
+    "name": "Aruba",
+    "flag": "aw",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 17,
+    "points": 875.61,
+    "cultures": [["dutch-caribbean", 100]]
+  },
+  {
+    "id": "MNG",
+    "name": "Mongolia",
+    "flag": "mn",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#E31C23",
+    "youthLevel": 5,
+    "points": 874.47,
+    "cultures": [["mongolian", 100]]
+  },
+  {
+    "id": "ASA",
+    "name": "American Samoa",
+    "flag": "as",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#002868",
+    "youthLevel": 13,
+    "points": 871.61,
+    "cultures": [
+      ["pacific", 80],
+      ["english", 20]
+    ]
+  },
+  {
+    "id": "BHU",
+    "name": "Bhutan",
+    "flag": "bt",
+    "confed": "AFC",
+    "subFeds": ["SAFF"],
+    "color": "#FF9933",
+    "youthLevel": 1,
+    "points": 870.81,
+    "cultures": [["south-asian", 100]]
+  },
+  {
+    "id": "MAC",
+    "name": "Macau",
+    "flag": "mo",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#5b6b7a",
+    "youthLevel": 12,
+    "points": 858.03,
+    "cultures": [
+      ["chinese", 80],
+      ["portuguese", 20]
+    ]
+  },
+  {
+    "id": "BRU",
+    "name": "Brunei",
+    "flag": "bn",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#F7E017",
+    "youthLevel": 1,
+    "points": 857.73,
+    "cultures": [["malay", 100]]
+  },
+  {
+    "id": "STP",
+    "name": "Sao Tome and Principe",
+    "flag": "st",
+    "confed": "CAF",
+    "subFeds": ["UNIFFAC"],
+    "color": "#12AD2B",
+    "youthLevel": 19,
+    "points": 855.44,
+    "cultures": [["lusophone-african", 100]]
+  },
+  {
+    "id": "DJI",
+    "name": "Djibouti",
+    "flag": "dj",
+    "confed": "CAF",
+    "subFeds": ["CECAFA", "UAFA"],
+    "color": "#6AB2E7",
+    "youthLevel": 14,
+    "points": 853.58,
+    "cultures": [
+      ["somali", 60],
+      ["west-african-franco", 40]
+    ]
+  },
+  {
+    "id": "CAY",
+    "name": "Cayman Islands",
+    "flag": "ky",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 8,
+    "points": 850.06,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "PAK",
+    "name": "Pakistan",
+    "flag": "pk",
+    "confed": "AFC",
+    "subFeds": ["SAFF"],
+    "color": "#01411C",
+    "youthLevel": 12,
+    "points": 840.28,
+    "cultures": [["south-asian", 100]]
+  },
+  {
+    "id": "SOM",
+    "name": "Somalia",
+    "flag": "so",
+    "confed": "CAF",
+    "subFeds": ["CECAFA", "UAFA"],
+    "color": "#4189DD",
+    "youthLevel": 15,
+    "points": 839.17,
+    "cultures": [["somali", 100]]
+  },
+  {
+    "id": "TGA",
+    "name": "Tonga",
+    "flag": "to",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#C10000",
+    "youthLevel": 1,
+    "points": 835.64,
+    "cultures": [["pacific", 100]]
+  },
+  {
+    "id": "TLS",
+    "name": "East Timor",
+    "flag": "tl",
+    "confed": "AFC",
+    "subFeds": ["AFF"],
+    "color": "#DA291C",
+    "youthLevel": 3,
+    "points": 831,
+    "cultures": [
+      ["lusophone-african", 40],
+      ["malay", 60]
+    ]
+  },
+  {
+    "id": "GIB",
+    "name": "Gibraltar",
+    "flag": "gi",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#DA291C",
+    "youthLevel": 17,
+    "points": 820.26,
+    "cultures": [
+      ["english", 70],
+      ["spanish", 30]
+    ]
+  },
+  {
+    "id": "GUM",
+    "name": "Guam",
+    "flag": "gu",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#0033A0",
+    "youthLevel": 3,
+    "points": 819.54,
+    "cultures": [
+      ["pacific", 50],
+      ["english", 30],
+      ["filipino", 20]
+    ]
+  },
+  {
+    "id": "SEY",
+    "name": "Seychelles",
+    "flag": "sc",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#003D88",
+    "youthLevel": 9,
+    "points": 804.16,
+    "cultures": [["mauritian", 100]]
+  },
+  {
+    "id": "TCA",
+    "name": "Turks and Caicos Islands",
+    "flag": "tc",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 1,
+    "points": 803.98,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "LIE",
+    "name": "Liechtenstein",
+    "flag": "li",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#002B7F",
+    "youthLevel": 11,
+    "points": 797.7,
+    "cultures": [["german", 100]]
+  },
+  {
+    "id": "BAH",
+    "name": "Bahamas",
+    "flag": "bs",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#00778B",
+    "youthLevel": 1,
+    "points": 786.82,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "VIR",
+    "name": "United States Virgin Islands",
+    "flag": "vi",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 1,
+    "points": 779.76,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "VGB",
+    "name": "British Virgin Islands",
+    "flag": "vg",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 3,
+    "points": 777.41,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "AIA",
+    "name": "Anguilla",
+    "flag": "ai",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 1,
+    "points": 760.25,
+    "cultures": [["caribbean-anglo", 100]]
+  },
+  {
+    "id": "SMR",
+    "name": "San Marino",
+    "flag": "sm",
+    "confed": "UEFA",
+    "subFeds": [],
+    "color": "#6AB2E7",
+    "youthLevel": 6,
+    "points": 721.2,
+    "cultures": [["italian", 100]]
+  }
+]
