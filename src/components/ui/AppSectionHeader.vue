@@ -22,7 +22,7 @@ defineProps<{
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-2) var(--sp-3) var(--sp-2) 0 !important;
   background: var(--bg);
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
