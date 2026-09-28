@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.0.2](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.1...v0.0.2) (2026-09-28)
+
+### 🚀 New Features
+
+- **core:** job offer and hosting popups ([0265b11](https://github.com/orazchollaev/invictus-national-manager/commit/0265b113e3b0c0426895e3b1610d24aedc9e2963))
+- **engine:** real concacaf nations league, gold cup route and non-fifa teams ([adb8cf5](https://github.com/orazchollaev/invictus-national-manager/commit/adb8cf510f23dfb8ded9912f06e0480a9d658061))
+- **engine:** stadiums, hosting requirements and job offer interrupts ([621d6e9](https://github.com/orazchollaev/invictus-national-manager/commit/621d6e9613268fe7bcd2214eea276851c73ec86b))
+- **engine:** uefa formats from the 2026-27 nations league onwards ([c311ce3](https://github.com/orazchollaev/invictus-national-manager/commit/c311ce35e6e5fb52054a8845e4a2a82101cd826d))
+- **stadiums:** stadiums page with hosting readiness and bids ([2f1403a](https://github.com/orazchollaev/invictus-national-manager/commit/2f1403a3656dfed8c36b13c9c799a93f42eb903d))
+
+### 🐛 Bug Fixes
+
+- **data:** real 2026-27 nations league and concacaf league c draws ([b0bfdc5](https://github.com/orazchollaev/invictus-national-manager/commit/b0bfdc58e12bc75cf7564f0bfd630adaf3a0e592))
+- **home:** keep a draw's fixtures hidden until it has been watched ([2e775f9](https://github.com/orazchollaev/invictus-national-manager/commit/2e775f9c32f346ec8fbf26ea6243a93cb2c7191b))
+- **layout:** remove stray scroll on android caused by 100vh ([437a9e9](https://github.com/orazchollaev/invictus-national-manager/commit/437a9e9ee836a2d4b7f0d7f9bc4c66fd2a4016e7)), references [#app](https://github.com/orazchollaev/invictus-national-manager/issues/app)
+- **squad:** make the tactics player picker scroll and filter by position ([e8b2d13](https://github.com/orazchollaev/invictus-national-manager/commit/e8b2d13cb50f7acc8d147bec5b5dd03e03a83896))
+
+### 🔧 Maintenance
+
+- **android:** add firebase analytics ([4ec1398](https://github.com/orazchollaev/invictus-national-manager/commit/4ec13985cf1c1447c54d7c6ba204ff404b3fc6df))
+
+### 📚 Documentation
+
+- add readme ([fbec9cb](https://github.com/orazchollaev/invictus-national-manager/commit/fbec9cb4d0d9c747d2fbcc1fff8606d5a4a21cb9))
+- stadiums, hosting and uefa format changes ([92a8ee9](https://github.com/orazchollaev/invictus-national-manager/commit/92a8ee95cc7cb42fbafdf9f5e4c63b275445e688))
+
+### 🎨 Styles
+
+- **ui:** fade-only page transitions and tighter section headers ([3357191](https://github.com/orazchollaev/invictus-national-manager/commit/3357191ad3b48ac6ed60095046244812fc3d129c))
+
 ## 0.0.1 (2026-09-27)
 
 ### 🚀 New Features
