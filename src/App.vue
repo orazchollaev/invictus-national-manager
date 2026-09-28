@@ -58,7 +58,9 @@ onUnmounted(() => backButtonListener?.())
 
 <template>
   <div class="app-root">
-    <AppHeader v-if="!hideNav" />
+    <Transition name="app-header">
+      <AppHeader v-if="!hideNav" />
+    </Transition>
     <main class="app-main" :class="{ 'app-main--no-nav': hideNav }">
       <ErrorBoundary>
         <RouterView v-slot="{ Component }">
@@ -106,6 +108,19 @@ onUnmounted(() => backButtonListener?.())
 .mobile-nav-enter-from,
 .mobile-nav-leave-to {
   transform: translateY(120%);
+  opacity: 0;
+}
+
+.app-header-enter-active,
+.app-header-leave-active {
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+
+.app-header-enter-from,
+.app-header-leave-to {
+  transform: translateY(-100%);
   opacity: 0;
 }
 </style>
