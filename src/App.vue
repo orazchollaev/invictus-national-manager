@@ -8,6 +8,7 @@ import { useSettingsStore } from "@/modules/settings/store"
 import { useWorldStore } from "@/modules/world/store"
 import { useStatusBar } from "@/composables/useStatusBar"
 import { BusyOverlay } from "@/modules/core/components"
+import { GamePopups } from "@/modules/core/components/popups"
 
 const settings = useSettingsStore()
 const world = useWorldStore()
@@ -68,6 +69,7 @@ onUnmounted(() => backButtonListener?.())
       </ErrorBoundary>
     </main>
     <AppDialog />
+    <GamePopups />
     <BusyOverlay />
     <Transition name="mobile-nav">
       <AppMobileBottomNav v-if="!hideNav" />
