@@ -51,6 +51,19 @@ import {
   yearlyFederation,
 } from "./federation"
 import {
+  completeProjects,
+  ensureStadiums,
+  hostCheck,
+  hostLevelOf,
+  hostRequirement,
+  initialStadiums,
+  prepareToHost,
+  stadiumLevel,
+  withProjects,
+  yearlyInvestment,
+  type HostLevel,
+} from "./stadiums"
+import {
   clubWeek,
   developSeason,
   intakeSize,
@@ -96,7 +109,10 @@ export class World {
     for (const n of statics.nations) this.defs.set(n.id, n)
     for (const c of statics.clubs) this.clubs.set(c.id, c)
     this.clubIndex = indexClubs(statics.clubs)
-    for (const n of Object.values(state.nations)) ensureFederation(n)
+    for (const n of Object.values(state.nations)) {
+      ensureFederation(n)
+      ensureStadiums(n, this.defs.get(n.id), state.date)
+    }
     this.reindex()
   }
 
@@ -200,12 +216,28 @@ export class World {
         this.busyIndex.has(`${team}|${addDays(date, -1)}`) ||
         this.busyIndex.has(`${team}|${addDays(date, 1)}`),
       stature: (t) => (s.nations[t]?.reputation ?? 5) * (s.nations[t]?.stadium ?? 3),
+      readiness: (teams, level) => this.hostReadiness(teams, level),
+      bid: (t, level) => t === s.career.nationId && !!s.career.bids?.includes(level),
       busyBetween: (team, from, to) => {
         for (let d = from; d <= to; d = addDays(d, 1))
           if (this.busyIndex.has(`${team}|${d}`)) return true
         return false
       },
     }
+  }
+
+  /**
+   * How far these nations' grounds together — counting what they are building —
+   * meet a tournament level's requirements (the first nation's confederation's).
+   */
+  hostReadiness(teams: string[], level: HostLevel): number {
+    const first = teams.find((t) => this.state.nations[t])
+    if (!first) return 0
+    const req = hostRequirement(level, this.def(first).confed)
+    const grounds = teams.flatMap((t) =>
+      this.state.nations[t] ? withProjects(this.state.nations[t]) : []
+    )
+    return hostCheck(grounds, req).score
   }
 
   /** Create the editions that are due (and not already over). */
@@ -261,6 +293,8 @@ export class World {
   advance(maxDays = 60): Interrupt {
     if (this.state.pendingCallup) return this.state.pendingCallup
     if (this.state.pendingDraw) return { kind: "draw", ...this.state.pendingDraw }
+    if (this.state.pendingOffer) return { kind: "offer", nationId: this.state.pendingOffer }
+    if (this.state.pendingHosting) return { kind: "hosting", compId: this.state.pendingHosting }
     for (let i = 0; i < maxDays; i++) {
       const due = this.userMatchDue()
       if (due) return { kind: "match", fixtureId: due.id }
@@ -269,6 +303,11 @@ export class World {
       // nextDay() may have set it; TypeScript still believes the check above.
       const draw = this.state.pendingDraw as WorldState["pendingDraw"]
       if (draw) return { kind: "draw", ...draw }
+      // News the user must see before the calendar moves on.
+      const offer = this.state.pendingOffer
+      if (offer) return { kind: "offer", nationId: offer }
+      const hosting = this.state.pendingHosting
+      if (hosting) return { kind: "hosting", compId: hosting }
       const match = this.userMatchDue()
       if (match) return { kind: "match", fixtureId: match.id }
       if (this.state.career.offers.length && this.state.career.nationId === null)
@@ -306,6 +345,7 @@ export class World {
     this.advanceCompetitions()
     if (d === 1) {
       this.monthEnd()
+      this.openStadiums()
       refreshObjectives(this)
     }
     expireOffers(this)
@@ -875,12 +915,25 @@ export class World {
       }
 
       // The federation's standing feeds the academies and the stadiums.
-      if (yearlyFederation(nation, def) && (nationId === me || nation.stadium >= 4)) {
+      yearlyFederation(nation, def)
+      const started = yearlyInvestment(
+        nation,
+        baselineReputation(def.points),
+        s.date,
+        streamFor(s.seed, "stadiums", nationId, year)
+      )
+      if (started && nationId === me) {
+        const seats = started.capacity.toLocaleString("en")
         this.news(
-          "season",
-          `${def.name} open new stadiums`,
-          `The ${def.name} federation has upgraded its stadiums (level ${nation.stadium}/5).`,
-          nationId === me
+          "stadium",
+          started.kind === "build"
+            ? `Work begins on the ${started.name}`
+            : `${started.name} to be expanded`,
+          started.kind === "build"
+            ? `The federation is building a ${seats}-seat stadium in ${started.city}, due to open on ${started.done}.`
+            : `The ${started.name} in ${started.city} will hold ${seats} once the work is done, on ${started.done}.`,
+          true,
+          "/stadiums"
         )
       }
     }
@@ -902,6 +955,26 @@ export class World {
           true,
           "/squad"
         )
+    }
+  }
+
+  /** Month start: grounds whose work is done open their doors. */
+  private openStadiums() {
+    const me = this.userNation
+    for (const n of Object.values(this.state.nations)) {
+      if (!n.projects?.length) continue
+      for (const p of completeProjects(n, this.state.date)) {
+        const mine = n.id === me
+        if (!mine && p.capacity < 60000) continue
+        const comp = p.forComp ? this.state.competitions[p.forComp]?.name : undefined
+        this.news(
+          "stadium",
+          p.kind === "build" ? `${this.def(n.id).name} open the ${p.name}` : `${p.name} expanded`,
+          `The ${p.name} in ${p.city} now holds ${p.capacity.toLocaleString("en")}${comp ? `, ready for the ${comp}` : ""}.`,
+          mine,
+          mine ? "/stadiums" : `/stadiums/${n.id}`
+        )
+      }
     }
   }
 
@@ -978,6 +1051,21 @@ export class World {
     const list =
       names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0]
     const me = this.userNation
+    // Hosts build what they still lack, finished a few months before kick-off.
+    const level = hostLevelOf(inst.kind)
+    const hosts = inst.hosts.map((h) => this.state.nations[h]).filter(Boolean)
+    if (level && hosts.length && inst.start > this.state.date) {
+      prepareToHost(
+        hosts,
+        hostRequirement(level, this.def(inst.hosts[0]).confed),
+        this.state.date,
+        addDays(inst.start, -120),
+        streamFor(this.state.seed, "host-build", inst.id),
+        inst.id
+      )
+    }
+    if (me && inst.hosts.includes(me) && inst.start > this.state.date)
+      this.state.pendingHosting = inst.id
     const mine =
       !!me &&
       (inst.hosts.includes(me) || inst.kind === "world-cup" || inst.confed === this.def(me)?.confed)
@@ -1042,6 +1130,16 @@ export class World {
     this.state.pendingDraw = null
   }
 
+  /** The user has seen the job offer he was stopped for. */
+  clearOffer() {
+    this.state.pendingOffer = null
+  }
+
+  /** The user has seen the news that his nation will host a tournament. */
+  clearHosting() {
+    this.state.pendingHosting = null
+  }
+
   news(kind: NewsKind, title: string, body: string, mine: boolean, link?: string) {
     const s = this.state
     const item: NewsItem = { id: s.nextNewsId++, date: s.date, kind, title, body, mine, link }
@@ -1080,13 +1178,21 @@ function placeholderNation(id: string): NationState {
     pointsHistory: [],
     reputation: 1,
     stadium: 1,
+    stadiums: [],
+    projects: [],
   }
 }
 
 /** Nations drawn into a fresh world with their starting ranking points. */
-export function initialNationState(def: NationDef, rngSeed: number): NationState {
+export function initialNationState(
+  def: NationDef,
+  rngSeed: number,
+  date: ISODate = "2026-09-01"
+): NationState {
   const rng = makeRng(deriveSeed(rngSeed, "coach", def.id))
   const formations = ["4-2-3-1", "4-3-3", "4-4-2", "3-5-2", "4-1-4-1"] as const
+  const reputation = baselineReputation(def.points)
+  const grounds = initialStadiums(def, reputation, date)
   return {
     id: def.id,
     points: def.points,
@@ -1097,7 +1203,9 @@ export function initialNationState(def: NationDef, rngSeed: number): NationState
     squadFor: null,
     results: [],
     pointsHistory: [],
-    reputation: baselineReputation(def.points),
-    stadium: initialStadium(baselineReputation(def.points)),
+    reputation,
+    stadium: grounds.stadiums.length ? stadiumLevel(grounds.stadiums) : initialStadium(reputation),
+    stadiums: grounds.stadiums,
+    projects: grounds.projects,
   }
 }

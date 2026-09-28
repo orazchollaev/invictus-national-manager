@@ -154,7 +154,7 @@ export function createWorld(
     userTeam: null,
   }
   for (const def of statics.nations) {
-    const n = initialNationState(def, opts.seed)
+    const n = initialNationState(def, opts.seed, opts.start)
     n.coach = def.id === opts.nationId ? opts.managerName : coachName(def, opts.seed)
     state.nations[def.id] = n
   }

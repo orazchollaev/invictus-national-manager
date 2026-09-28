@@ -433,6 +433,7 @@ export function makeOffers(world: World, unemployed = false) {
     const n = pool.splice(Math.floor(rng() * Math.min(pool.length, 12)), 1)[0]
     if (c.offers.some((o) => o.nationId === n)) continue
     c.offers.push({ nationId: n, expires })
+    world.state.pendingOffer = n
     world.news(
       "job",
       `Job offer: ${world.def(n).name}`,
@@ -456,6 +457,7 @@ export function acceptOffer(world: World, nationId: string) {
   }
   c.nationId = nationId
   c.offers = []
+  world.state.pendingOffer = null
   c.confidence = 60
   c.since = date
   c.objectives = []
@@ -482,11 +484,14 @@ export function acceptOffer(world: World, nationId: string) {
 
 export function declineOffer(world: World, nationId: string) {
   world.state.career.offers = world.state.career.offers.filter((o) => o.nationId !== nationId)
+  if (world.state.pendingOffer === nationId) world.state.pendingOffer = null
 }
 
 export function expireOffers(world: World) {
   const c = world.state.career
   c.offers = c.offers.filter((o) => o.expires >= world.state.date)
+  if (world.state.pendingOffer && !c.offers.some((o) => o.nationId === world.state.pendingOffer))
+    world.state.pendingOffer = null
   // Out of work for a while: someone always calls eventually.
   if (!c.nationId && !c.offers.length && c.sacked && world.state.date.slice(8) === "01")
     makeOffers(world, true)

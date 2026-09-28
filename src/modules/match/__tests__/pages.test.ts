@@ -40,6 +40,8 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
   let fixtureId = ""
   for (let g = 0; g < 20 && !fixtureId; g++) {
     const i = w.advance(30)
+    if (i.kind === "offer") w.clearOffer()
+    if (i.kind === "hosting") w.clearHosting()
     if (i.kind === "draw") w.clearDraw()
     if (i.kind === "callup")
       w.setSquad(i.nationId, i.squadFor, pickSquad(w.pool(i.nationId), w.state.date, 26))

@@ -23,7 +23,7 @@ import { everyNYears, pickHosts } from "./helpers"
 import { afcFirstRoundLosers, afcSecondRound } from "./fifa"
 
 function hostsOf(key: string, ctx: CompContext, pool: string[], count = 1) {
-  return AWARDED_HOSTS[key] ?? pickHosts(ctx, key, pool, count)
+  return AWARDED_HOSTS[key] ?? pickHosts(ctx, key, pool, count, "continental")
 }
 
 // ── Africa ──────────────────────────────────────────────────────────────────

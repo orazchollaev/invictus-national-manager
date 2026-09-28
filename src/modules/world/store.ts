@@ -3,6 +3,7 @@ import { markRaw, ref, shallowRef, computed } from "vue"
 import { World } from "@/engine/world/world"
 import { createWorld } from "@/engine/world/create"
 import type { Interrupt, UserTeam, WorldState } from "@/engine/world/types"
+import type { HostLevel } from "@/engine/world/stadiums"
 import type { Fixture } from "@/engine/competition/types"
 import type { MatchReport } from "@/engine/match/types"
 import { acceptOffer, declineOffer } from "@/engine/career/career"
@@ -148,7 +149,9 @@ export const useWorldStore = defineStore(
         }
         interrupt.value = result
         touch()
-        await autoSave()
+        // Not awaited: the save serialises the world at once, and the screen the
+        // interrupt asks for (a draw, a match) should not wait for the disk.
+        void autoSave()
       } finally {
         busy.value = false
       }
@@ -217,6 +220,7 @@ export const useWorldStore = defineStore(
     function takeJob(nationId: string) {
       if (!world.value) return
       acceptOffer(world.value, nationId)
+      interrupt.value = { kind: "none" }
       touch()
       void autoSave()
     }
@@ -224,7 +228,34 @@ export const useWorldStore = defineStore(
     function turnDown(nationId: string) {
       if (!world.value) return
       declineOffer(world.value, nationId)
+      if (interrupt.value.kind === "offer") interrupt.value = { kind: "none" }
       touch()
+    }
+
+    /** The job-offer popup was closed without a decision: the offer still stands. */
+    function seenOffer() {
+      world.value?.clearOffer()
+      if (interrupt.value.kind === "offer") interrupt.value = { kind: "none" }
+      touch()
+    }
+
+    /** The "we will host" popup was closed. */
+    function seenHosting() {
+      world.value?.clearHosting()
+      if (interrupt.value.kind === "hosting") interrupt.value = { kind: "none" }
+      touch()
+    }
+
+    /** Put in (or withdraw) the federation's bid to host tournaments of a level. */
+    function setBid(level: HostLevel, on: boolean) {
+      const c = world.value?.state.career
+      if (!c) return
+      const bids = new Set(c.bids ?? [])
+      if (on) bids.add(level)
+      else bids.delete(level)
+      c.bids = [...bids]
+      touch()
+      void autoSave()
     }
 
     function markRead(ids: number[]) {
@@ -265,6 +296,9 @@ export const useWorldStore = defineStore(
       finishUserMatch,
       takeJob,
       turnDown,
+      seenOffer,
+      seenHosting,
+      setBid,
       markRead,
       close,
     }

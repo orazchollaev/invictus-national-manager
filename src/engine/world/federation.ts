@@ -4,8 +4,8 @@
  * Reputation rises with trophies and qualifications and drifts back towards what the
  * ranking suggests. It feeds the academies — a federation above its natural standing
  * produces better youngsters (bounded, so no country is transformed overnight) — and,
- * with the stadiums, decides who gets to host tournaments. Stadiums are rebuilt as the
- * reputation grows and give a slightly bigger home advantage.
+ * with the stadiums (stadiums.ts), decides who gets to host tournaments. The
+ * stadiums' level gives a slightly bigger home advantage.
  */
 import type { NationDef } from "../types"
 import type { CompetitionInstance } from "../competition/types"
@@ -61,19 +61,12 @@ export function reputationAfter(inst: CompetitionInstance, nations: Record<strin
 }
 
 /**
- * Once a year: reputation drifts towards the ranking's view, stadiums follow the
- * reputation up, and the academies' level follows the reputation (within ±6 of
- * where the nation started). Returns true when new stadiums opened.
+ * Once a year: reputation drifts towards the ranking's view and the academies' level
+ * follows the reputation (within ±6 of where the nation started).
  */
-export function yearlyFederation(n: NationState, def: NationDef): boolean {
+export function yearlyFederation(n: NationState, def: NationDef) {
   const base = baselineReputation(n.points)
   n.reputation = Math.round(clamp(n.reputation + (base - n.reputation) * 0.15, 1, 10) * 10) / 10
-
-  let built = false
-  if (n.stadium < 5 && n.reputation >= n.stadium * 2 + 0.5) {
-    n.stadium++
-    built = true
-  }
 
   const target = clamp(
     def.youthLevel + (n.reputation - baselineReputation(def.points)) * 1.5,
@@ -82,5 +75,4 @@ export function yearlyFederation(n: NationState, def: NationDef): boolean {
   )
   const step = clamp(target - n.youthLevel, -0.6, 0.6)
   n.youthLevel = Math.round((n.youthLevel + step) * 10) / 10
-  return built
 }

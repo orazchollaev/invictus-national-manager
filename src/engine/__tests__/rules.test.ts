@@ -85,6 +85,8 @@ describe("world events", () => {
     const seen: string[] = []
     while (w.state.date < "2028-01-01") {
       const i = w.advance(40)
+      if (i.kind === "offer") w.clearOffer()
+      if (i.kind === "hosting") w.clearHosting()
       if (i.kind === "draw") {
         seen.push(`${i.compId}:${i.stageKey}`)
         w.clearDraw()
@@ -139,16 +141,13 @@ describe("federations", () => {
     expect(w.state.nations.MAR.reputation).toBeGreaterThan(before + 1)
   })
 
-  it("builds stadiums and lifts academies as reputation grows, within bounds", () => {
+  it("lifts academies as reputation grows, within bounds", () => {
     const w = newWorld()
     const n = w.state.nations.CPV
     const def = w.def("CPV")
     n.reputation = 10
     n.points = 1900
-    const stadium = n.stadium
-    let built = false
-    for (let y = 0; y < 30; y++) built = yearlyFederation(n, def) || built
-    expect(built || stadium === 5).toBe(true)
+    for (let y = 0; y < 30; y++) yearlyFederation(n, def)
     expect(n.youthLevel).toBeLessThanOrEqual(def.youthLevel + 6)
     expect(n.youthLevel).toBeGreaterThan(def.youthLevel)
   })
@@ -165,6 +164,8 @@ describe("career", () => {
     const w = newWorld("KOR")
     while (w.state.date < "2027-09-01") {
       const i = w.advance(60)
+      if (i.kind === "offer") w.clearOffer()
+      if (i.kind === "hosting") w.clearHosting()
       if (i.kind === "draw") w.clearDraw()
       else if (i.kind === "callup") w.aiCallUp(i.nationId, i.squadFor)
       else if (i.kind === "match") {

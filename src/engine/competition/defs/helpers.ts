@@ -5,6 +5,7 @@ import type { CompContext } from "../runtime"
 import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
 import type { Tiebreak } from "../tables"
+import type { HostLevel } from "@/engine/world/stadiums"
 
 export function everyNYears(first: number, n: number) {
   return (from: number, to: number) => {
@@ -106,25 +107,47 @@ export function finalsOutcome(
 
 /**
  * Pick hosts for an edition no one has been awarded yet: weighted towards stronger,
- * bigger football nations, deterministic for the world seed.
+ * bigger football nations whose stadiums can stage it, deterministic for the world
+ * seed. A bid (the user's federation) counts four times over. A World Cup or
+ * continental host whose grounds fall short is joined by co-hosts from its
+ * confederation until together they meet the requirements (up to three for a World
+ * Cup, two otherwise).
  */
 export function pickHosts(
   ctx: CompContext,
   key: string,
   candidates: string[],
-  count = 1
+  count = 1,
+  level: HostLevel = "regional"
 ): string[] {
   const rng = makeRng(deriveSeed(ctx.seed, "hosts", key))
-  const pool = candidates.slice(0, Math.max(count, 16))
+  const ready = (t: string) => ctx.readiness([t], level)
+  const bidders = candidates.filter((t) => ctx.bid(t, level) && ready(t) >= 0.5)
+  let pool = [...new Set([...candidates.slice(0, Math.max(count, 16)), ...bidders])]
+  const able = pool.filter((t) => ready(t) >= 0.5)
+  if (able.length >= count) pool = able
+  const weight = (t: string) =>
+    Math.max(1, ctx.points(t) - 900) ** 1.5 *
+    ctx.stature(t) *
+    (0.2 + ready(t) ** 2) *
+    (ctx.bid(t, level) ? 4 : 1)
   const out: string[] = []
   while (out.length < count && pool.length) {
-    const choice = pickWeighted(
-      rng,
-      pool,
-      (t) => Math.max(1, ctx.points(t) - 900) ** 1.5 * ctx.stature(t)
-    )
+    const choice = pickWeighted(rng, pool, weight)
     out.push(choice)
     pool.splice(pool.indexOf(choice), 1)
+  }
+  if (count === 1 && out.length && level !== "regional") {
+    const most = level === "world-cup" ? 3 : 2
+    const confed = ctx.confedOf(out[0])
+    while (out.length < most && ctx.readiness(out, level) < 1) {
+      const partners = candidates
+        .filter((t) => !out.includes(t) && ctx.confedOf(t) === confed && ready(t) > 0.2)
+        .sort((a, b) => ready(b) - ready(a))
+        .slice(0, 8)
+      if (!partners.length) break
+      out.push(pickWeighted(rng, partners, weight))
+    }
   }
   return out
 }

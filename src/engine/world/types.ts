@@ -28,8 +28,36 @@ export interface NationState {
   pointsHistory: [ISODate, number][]
   /** Federation standing 1–10: success raises it, and with it the academies. */
   reputation: number
-  /** Stadium quality 1–5: home advantage and the chance to host tournaments. */
+  /** Stadium level 1–5, from the grounds below: home advantage. */
   stadium: number
+  /** Grounds city by city, biggest first. */
+  stadiums?: Stadium[]
+  /** Grounds being built or expanded. */
+  projects?: StadiumProject[]
+}
+
+export interface Stadium {
+  id: string
+  name: string
+  city: string
+  capacity: number
+  /** Year it opened, for grounds built in the game. */
+  opened?: number
+}
+
+export interface StadiumProject {
+  id: string
+  kind: "build" | "expand"
+  /** The ground being expanded. */
+  stadiumId?: string
+  name: string
+  city: string
+  /** Capacity once finished. */
+  capacity: number
+  started: ISODate
+  done: ISODate
+  /** The tournament it is being built for. */
+  forComp?: string
 }
 
 export type NewsKind =
@@ -45,6 +73,7 @@ export type NewsKind =
   | "ranking"
   | "season"
   | "transfer"
+  | "stadium"
 
 export interface NewsItem {
   id: number
@@ -115,6 +144,8 @@ export interface CareerState {
     left?: "sacked" | "resigned" | "moved"
   }[]
   sacked?: ISODate
+  /** Tournament levels the federation bids to host (the user's nation). */
+  bids?: ("world-cup" | "continental" | "regional")[]
 }
 
 /** Where the loop stopped and why: the UI's cue to take over. */
@@ -129,7 +160,9 @@ export type Interrupt =
     }
   | { kind: "match"; fixtureId: string }
   | { kind: "draw"; compId: string; stageKey: string }
-  | { kind: "offer" }
+  /** A new offer (nationId), or offers waiting while out of work. */
+  | { kind: "offer"; nationId?: string }
+  | { kind: "hosting"; compId: string }
   | { kind: "sacked" }
   | { kind: "news"; count: number }
   | { kind: "none" }
@@ -153,6 +186,10 @@ export interface WorldState {
   pendingCallup: Interrupt | null
   /** A draw involving the user, waiting to be watched. */
   pendingDraw?: { compId: string; stageKey: string } | null
+  /** A job offer that arrived and has not been seen yet. */
+  pendingOffer?: string | null
+  /** A tournament the user's nation was awarded, not yet announced to him. */
+  pendingHosting?: string | null
   /** Friendlies the user asked for, keyed by date. */
   friendlyRequests: Record<ISODate, string>
   /** The user's own team selection and instructions, kept between matches. */

@@ -4,6 +4,7 @@
  * like — its stages, dates and who enters — lives in its definition (defs/).
  */
 import type { Confed, ISODate } from "../types"
+import type { HostLevel } from "../world/stadiums"
 import { addDays } from "../calendar/dates"
 import { makeRng, deriveSeed, shuffle } from "../rng"
 import { drawGroups, roundRobin, seedBracket, bracketOrder } from "./draw"
@@ -38,6 +39,10 @@ export interface CompContext {
   busy(team: string, date: ISODate): boolean
   /** Federation reputation × stadiums: how good a candidate host a nation is. */
   stature(team: string): number
+  /** 0–1: how far these nations' grounds, together, meet a tournament's needs. */
+  readiness(teams: string[], level: HostLevel): number
+  /** The nation has put in a bid to host tournaments of this level. */
+  bid(team: string, level: HostLevel): boolean
   /** A team has any fixture between these dates. */
   busyBetween(team: string, from: ISODate, to: ISODate): boolean
 }
@@ -58,6 +63,8 @@ export interface GroupPlan {
   opening?: string[]
   /** Keep confederations apart (World Cup): at most one per group, two for UEFA. */
   spreadConfeds?: boolean
+  /** Teams to keep in different groups (hosts playing qualifying). */
+  separate?: string[]
   venue: "home-away" | "neutral"
   tiebreak: Tiebreak
   /** Group names; defaults to A, B, C… */
@@ -214,7 +221,11 @@ function drawGroupStage(
     gp.fixed ??
     drawGroups(entrants, gp.count, rng, {
       fixed: gp.seeded?.filter((t) => entrants.includes(t)),
-      family: gp.spreadConfeds ? ctx.confedOf : undefined,
+      family: gp.spreadConfeds
+        ? ctx.confedOf
+        : gp.separate?.length
+          ? (t) => (gp.separate!.includes(t) ? "separate" : t)
+          : undefined,
       maxPerFamily: (c) => (c === "UEFA" ? 2 : 1),
     })
   const opener = gp.opening?.find((t) => teams.some((g) => g.includes(t)))
