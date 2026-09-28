@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { Sparkles } from "@lucide/vue"
-import { AppButton, AppButtonGroup, AppCard, AppField, AppSelect, AppSheet } from "@/components/ui"
+import {
+  AppButton,
+  AppButtonGroup,
+  AppCard,
+  AppField,
+  AppSelect,
+  AppSheet,
+  AppSubTabBar,
+} from "@/components/ui"
 import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { PitchView } from "@/modules/squad/components/pitch"
 import { MENTALITY_OPTIONS } from "@/modules/squad/constants"
@@ -10,9 +18,9 @@ import { PlayerRow } from "@/modules/squad/components/list"
 import { useWorldStore } from "@/modules/world/store"
 import { FORMATIONS, FORMATION_LIST } from "@/engine/match/formations"
 import { aiTeamSheet, pickBench } from "@/engine/ai/squad"
-import { matchAbility, positionFit } from "@/engine/players/ability"
+import { matchAbility, positionFit, positionGroup } from "@/engine/players/ability"
 import type { Formation, Level, Mentality, SheetSlot, Tactics } from "@/engine/match/types"
-import type { Player } from "@/engine/types"
+import type { Player, PositionGroup } from "@/engine/types"
 import { showAlert } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
 import { useSettingsStore } from "@/modules/settings/store"
@@ -66,10 +74,29 @@ function setFormation(f: Formation) {
     team.value.xi.push({ playerId: "", pos: roles[team.value.xi.length] })
 }
 
+const GROUP_OPTIONS = [
+  { value: "ALL", label: "All" },
+  { value: "GK", label: "GK" },
+  { value: "DEF", label: "DEF" },
+  { value: "MID", label: "MID" },
+  { value: "FWD", label: "FWD" },
+]
+
+/** Opens on the tapped slot's line; "ALL" shows the whole squad. */
+const groupFilter = ref<PositionGroup | "ALL">("ALL")
+watch(selectedSlot, (i) => {
+  if (i !== null) groupFilter.value = positionGroup(FORMATIONS[team.value.tactics.formation][i])
+})
+
 const candidates = computed(() => {
   if (selectedSlot.value === null) return []
   const pos = FORMATIONS[team.value.tactics.formation][selectedSlot.value]
-  return [...squad.value].sort(
+  const g = groupFilter.value
+  const pool =
+    g === "ALL"
+      ? squad.value
+      : squad.value.filter((p) => [p.pos, ...p.alt].some((q) => positionGroup(q) === g))
+  return [...pool].sort(
     (a, b) => matchAbility(b) * positionFit(b, pos) - matchAbility(a) * positionFit(a, pos)
   )
 })
@@ -223,8 +250,18 @@ async function save() {
     <AppSheet
       v-if="selectedSlot !== null"
       :title="`Pick a ${FORMATIONS[team.tactics.formation][selectedSlot]}`"
+      max-height="min(640px, 85dvh)"
+      max-height-mobile="85dvh"
       @close="selectedSlot = null"
     >
+      <div class="pick-filter">
+        <AppSubTabBar
+          :model-value="groupFilter"
+          :options="GROUP_OPTIONS"
+          size="sm"
+          @update:model-value="(v) => (groupFilter = v as PositionGroup | 'ALL')"
+        />
+      </div>
       <div class="pick-list">
         <button v-for="p in candidates" :key="p.id" class="pick" @click="choose(p)">
           <PlayerRow :player="p" static compact>
@@ -258,12 +295,26 @@ async function save() {
   gap: var(--sp-3);
 }
 
+.pick-filter {
+  flex-shrink: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border-light);
+}
+
 .pick-list {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .pick {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
   padding: 0;
   border: none;
   background: none;
