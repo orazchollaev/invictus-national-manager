@@ -77,7 +77,10 @@ async function resume() {
 
 <style scoped>
 .menu {
-  min-height: 100vh;
+  /* Viewport minus what <html> pads on top and the no-nav spacer adds below;
+     a plain 100vh overflows by both insets and scrolls on Android. */
+  min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
+  min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
   max-width: 480px;
   margin: 0 auto;
   padding: calc(var(--safe-top) + var(--sp-7)) var(--sp-4) calc(var(--safe-bottom) + var(--sp-5));

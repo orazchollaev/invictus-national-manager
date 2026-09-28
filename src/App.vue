@@ -76,8 +76,11 @@ onUnmounted(() => backButtonListener?.())
 </template>
 
 <style>
+/* 100% rather than 100vh: <html> already pads the status bar (--safe-top),
+   so #app is shorter than the viewport and 100vh would overflow it by that
+   inset, leaving a small scroll on Android. */
 .app-root {
-  min-height: 100vh;
+  min-height: 100%;
   background: var(--bg);
 }
 

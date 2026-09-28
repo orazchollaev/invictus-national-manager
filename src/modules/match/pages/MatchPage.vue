@@ -498,7 +498,10 @@ const pitchSlots = computed(() => {
 }
 
 .live {
-  min-height: 100vh;
+  /* Viewport minus what <html> pads on top and the no-nav spacer adds below;
+     a plain 100vh overflows by both insets and scrolls on Android. */
+  min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
+  min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
   display: flex;
   flex-direction: column;
 }
