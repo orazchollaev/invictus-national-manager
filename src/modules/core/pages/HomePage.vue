@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useRouter } from "vue-router"
-import { Briefcase, ChevronRight, CircleCheck, CircleX, Play, Target, Users } from "@lucide/vue"
+import {
+  Briefcase,
+  ChevronRight,
+  CircleCheck,
+  CircleX,
+  Play,
+  Shuffle,
+  Target,
+  Users,
+} from "@lucide/vue"
 import { AppButton, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import {
@@ -25,6 +34,16 @@ const career = world.derive((w) => w.state.career, null)
 const me = computed(() => world.me)
 const pending = world.derive((w) => w.state.pendingCallup, null)
 const today = world.derive((w) => w.userMatchDue(), null)
+/** A draw waiting to be watched: its fixtures stay hidden until then. */
+const drawReady = world.derive((w) => {
+  const d = w.state.pendingDraw
+  if (!d) return null
+  const inst = w.state.competitions[d.compId]
+  const stage = inst?.stages.find((s) => s.key === d.stageKey)
+  return { ...d, label: inst ? `${inst.name} · ${stage?.name ?? "Draw"}` : "Draw" }
+}, null)
+/** An offer or hosting news on screen: the popup is the next step. */
+const popup = world.derive((w) => !!(w.state.pendingOffer || w.state.pendingHosting), false)
 
 const results = world.derive((w) => {
   const id = w.state.career.nationId
@@ -42,10 +61,12 @@ function go(i: Interrupt) {
   if (i.kind === "callup") router.push("/squad/callup")
   else if (i.kind === "match") router.push(`/match/${i.fixtureId}`)
   else if (i.kind === "draw") router.push(`/draw/${i.compId}/${i.stageKey}`)
-  else if (i.kind === "offer" || i.kind === "sacked") router.push("/career")
+  // A new offer or hosting news shows as a popup where the user is.
+  else if ((i.kind === "offer" && !i.nationId) || i.kind === "sacked") router.push("/career")
 }
 
 async function proceed() {
+  if (popup.value) return
   if (pending.value && settings.assistantPicks) world.assistantCallup()
   else if (pending.value) return router.push("/squad/callup")
   const draw = world.world?.state.pendingDraw
@@ -56,6 +77,7 @@ async function proceed() {
 
 const cta = computed(() => {
   if (pending.value && !settings.assistantPicks) return { label: "Name your squad", icon: Users }
+  if (drawReady.value) return { label: "Watch the draw", icon: Shuffle }
   if (today.value) return { label: "Match day — go to the match", icon: Play }
   const step = settings.advanceStep
   const how = step === "match" ? "to next match" : step === 1 ? "1 day" : `${step} days`
@@ -93,9 +115,22 @@ const cta = computed(() => {
       <ChevronRight :size="18" class="muted" />
     </section>
 
-    <NextMatchCard v-if="me" />
+    <section
+      v-if="drawReady"
+      class="panel alert draw"
+      @click="router.push(`/draw/${drawReady.compId}/${drawReady.stageKey}`)"
+    >
+      <Shuffle :size="20" class="alert-icon" />
+      <div class="alert-text">
+        <div class="panel-title">The draw is ready</div>
+        <div class="muted">{{ drawReady.label }} · watch it to see who we face</div>
+      </div>
+      <ChevronRight :size="18" class="muted" />
+    </section>
+
+    <NextMatchCard v-if="me && !drawReady" />
     <QuickActions v-if="me" />
-    <GroupSnapshot v-if="me" />
+    <GroupSnapshot v-if="me && !drawReady" />
 
     <section v-if="objectives.length" class="panel">
       <AppSectionHeader>
@@ -215,6 +250,15 @@ const cta = computed(() => {
 .alert-icon {
   color: var(--warning);
   flex-shrink: 0;
+}
+
+.alert.draw {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.alert.draw .alert-icon {
+  color: var(--accent);
 }
 
 .alert-text {
