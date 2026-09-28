@@ -9,9 +9,6 @@
  *  - June: Finals — semi-finals, third place and final — for the quarter-final winners.
  *  - Direct movement: A4 down; B1 up, B4 down; C1 up and the two worst C4 down;
  *    D1 up. Play-off winners from the lower league swap places with the losers.
- *
- * With `playoffs: false` (CONCACAF) movement is direct only: the last of each group
- * of the upper league swaps with the winners of the lower.
  */
 import type { Confed, ISODate } from "@/engine/types"
 import { deriveSeed, makeRng } from "@/engine/rng"
@@ -35,8 +32,6 @@ export interface NationsLeagueOptions {
   springDrawDate(year: number): ISODate
   finalsDates(year: number): { semi: ISODate; final: ISODate }
   finalsDrawDate(year: number): ISODate
-  /** UEFA-style promotion/relegation play-offs; otherwise direct swaps. */
-  playoffs: boolean
   /** A real draw for an edition already under way. */
   fixed?(year: number): Record<string, string[][]> | undefined
 }
@@ -183,9 +178,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
             venue: "home-away",
           },
         },
-      ]
-      if (o.playoffs) {
-        plans.push({
+        {
           key: "playoffs",
           name: "Promotion/relegation play-offs",
           after: "league",
@@ -197,8 +190,8 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
             pairing: "ordered",
             venue: "home-away",
           },
-        })
-      }
+        },
+      ]
       plans.push({
         key: "finals",
         name: "Finals",
@@ -229,40 +222,26 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
         if (!tiers[to].includes(team)) tiers[to].push(team)
       }
 
-      if (o.playoffs) {
-        const [A, B, C, D] = letters
-        if (B) for (const r of at(t[A], 3)) move(r.team, A, B)
-        if (B) for (const r of at(t[B], 0)) move(r.team, B, A)
-        if (C) for (const r of at(t[B], 3)) move(r.team, B, C)
-        if (C) for (const r of at(t[C], 0)) move(r.team, C, B)
-        if (D) {
-          // The two worst fourth-placed in C go straight down; the others play off.
-          const playoffSpots = at(t[D], 1).length
-          for (const r of at(t[C], 3).slice(playoffSpots)) move(r.team, C, D)
-          for (const r of at(t[D], 0)) move(r.team, D, C)
-        }
-        // A lower-league team that wins its play-off swaps with the upper-league loser.
-        const stage = inst.stages.find((s) => s.key === "playoffs")
-        for (const tie of stage?.rounds?.[0]?.ties ?? []) {
-          if (!tie.home || !tie.away || tie.winner !== tie.home) continue
-          const lower = letters.find((l) => tiers[l].includes(tie.home!))
-          const upper = letters.find((l) => tiers[l].includes(tie.away!))
-          if (lower && upper && lower > upper) {
-            move(tie.home, lower, upper)
-            move(tie.away, upper, lower)
-          }
-        }
-      } else {
-        for (let i = 0; i < letters.length - 1; i++) {
-          const upper = letters[i]
-          const lower = letters[i + 1]
-          const firsts = at(t[lower], 0)
-          const size = t[upper]?.[0]?.length ?? 4
-          const lasts = at(t[upper], size - 1)
-            .reverse()
-            .slice(0, firsts.length)
-          for (const r of lasts) move(r.team, upper, lower)
-          for (const r of firsts) move(r.team, lower, upper)
+      const [A, B, C, D] = letters
+      if (B) for (const r of at(t[A], 3)) move(r.team, A, B)
+      if (B) for (const r of at(t[B], 0)) move(r.team, B, A)
+      if (C) for (const r of at(t[B], 3)) move(r.team, B, C)
+      if (C) for (const r of at(t[C], 0)) move(r.team, C, B)
+      if (D) {
+        // The two worst fourth-placed in C go straight down; the others play off.
+        const playoffSpots = at(t[D], 1).length
+        for (const r of at(t[C], 3).slice(playoffSpots)) move(r.team, C, D)
+        for (const r of at(t[D], 0)) move(r.team, D, C)
+      }
+      // A lower-league team that wins its play-off swaps with the upper-league loser.
+      const stage = inst.stages.find((s) => s.key === "playoffs")
+      for (const tie of stage?.rounds?.[0]?.ties ?? []) {
+        if (!tie.home || !tie.away || tie.winner !== tie.home) continue
+        const lower = letters.find((l) => tiers[l].includes(tie.home!))
+        const upper = letters.find((l) => tiers[l].includes(tie.away!))
+        if (lower && upper && lower > upper) {
+          move(tie.home, lower, upper)
+          move(tie.away, upper, lower)
         }
       }
       return { winner: ko.winner, runnerUp: ko.runnerUp, third: ko.third, tiers }

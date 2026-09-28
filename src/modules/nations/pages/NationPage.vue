@@ -16,7 +16,7 @@ const world = useWorldStore()
 const id = computed(() => String(route.params.id))
 const def = world.derive((w) => w.defs.get(id.value) ?? null, null)
 const nation = world.derive((w) => w.state.nations[id.value] ?? null, null)
-const rank = world.derive((w) => w.ctx().ranked().indexOf(id.value) + 1, 0)
+const rank = world.derive((w) => w.fifaRank(id.value), 0)
 const tab = ref("overview")
 
 const squad = world.derive((w) => {
@@ -61,7 +61,7 @@ const record = computed(() => {
     v-if="def && nation"
     back
     :title="def.name"
-    :subtitle="`${def.confed} · FIFA #${rank} · ${nation.points.toFixed(0)} pts`"
+    :subtitle="`${def.confed} · ${rank ? `FIFA #${rank} · ${nation.points.toFixed(0)} pts` : 'Not a FIFA member'}`"
   >
     <AppCard padding="md" class="head">
       <NationFlag :id="def.id" :size="56" />

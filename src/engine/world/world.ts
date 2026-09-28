@@ -142,6 +142,16 @@ export class World {
     return this.defs.get(id) ?? placeholderDef(id)
   }
 
+  /** FIFA ranking position, or 0 for a team outside FIFA. */
+  fifaRank(id: string): number {
+    if (this.def(id).nonFifa) return 0
+    return (
+      this.ctx()
+        .ranked((t) => !this.def(t).nonFifa)
+        .indexOf(id) + 1
+    )
+  }
+
   fixturesOn(date: ISODate): Fixture[] {
     return (this.byDate.get(date) ?? []).map((id) => this.state.fixtures[id]).filter(Boolean)
   }
@@ -177,6 +187,8 @@ export class World {
           .filter((n) => !this.def(n.id).banned && (!filter || filter(n.id)))
           .sort((a, b) => b.points - a.points)
           .map((n) => n.id),
+      fifa: (t) => !this.def(t).nonFifa,
+      confedMember: (t) => this.def(t).nonFifa !== "regional",
       instance: (id) => s.competitions[id],
       fixture: (id) => s.fixtures[id],
       addFixture: (f) => {
@@ -337,11 +349,18 @@ export class World {
     const ctx = this.ctx()
     const rng = streamFor(this.state.seed, "friendlies", w.id)
     const nations = ctx.ranked()
+    const live = Object.values(this.state.competitions).filter((c) => c.status !== "done")
     for (const slot of w.slots) {
+      const reserved = new Set(
+        live.flatMap((c) => competitionDef(c.defId).reserved?.(c, ctx, slot) ?? [])
+      )
       const free = shuffle(
         rng,
         nations.filter(
-          (n) => !ctx.busy(n, slot) && rng() < (this.state.nations[n].points > 1150 ? 0.9 : 0.65)
+          (n) =>
+            !ctx.busy(n, slot) &&
+            !reserved.has(n) &&
+            rng() < (this.state.nations[n].points > 1150 ? 0.9 : 0.65)
         )
       )
       const taken = new Set<string>()
@@ -666,17 +685,18 @@ export class World {
       }
     }
 
-    // Ranking.
+    // Ranking: matches against teams outside FIFA do not count.
     const home = s.nations[f.home]
     const away = s.nations[f.away]
     const shootout = r.pens ? (r.pens[0] > r.pens[1] ? "home" : "away") : undefined
-    ;[home.points, away.points] = rankingUpdate(
-      home.points,
-      away.points,
-      { home: r.home, away: r.away, shootout },
-      f.importance,
-      !!f.knockout
-    )
+    if (!this.def(f.home).nonFifa && !this.def(f.away).nonFifa)
+      [home.points, away.points] = rankingUpdate(
+        home.points,
+        away.points,
+        { home: r.home, away: r.away, shootout },
+        f.importance,
+        !!f.knockout
+      )
 
     const comp =
       f.compId === "friendly" ? "Friendly" : (s.competitions[f.compId]?.short ?? f.compId)

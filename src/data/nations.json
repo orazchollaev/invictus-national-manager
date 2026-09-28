@@ -2531,5 +2531,167 @@
     "youthLevel": 6,
     "points": 721.2,
     "cultures": [["italian", 100]]
+  },
+  {
+    "id": "MTQ",
+    "name": "Martinique",
+    "flag": "mq",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 38,
+    "points": 1202.54,
+    "nonFifa": "confederation",
+    "cultures": [
+      ["caribbean-franco", 90],
+      ["french", 10]
+    ]
+  },
+  {
+    "id": "GLP",
+    "name": "Guadeloupe",
+    "flag": "gp",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 41,
+    "points": 1248.31,
+    "nonFifa": "confederation",
+    "cultures": [
+      ["caribbean-franco", 90],
+      ["french", 10]
+    ]
+  },
+  {
+    "id": "GUF",
+    "name": "French Guiana",
+    "flag": "gf",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 32,
+    "points": 1122.03,
+    "nonFifa": "confederation",
+    "cultures": [
+      ["caribbean-franco", 80],
+      ["french", 10],
+      ["brazilian", 10]
+    ]
+  },
+  {
+    "id": "BOE",
+    "name": "Bonaire",
+    "flag": "bq-bo",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 7,
+    "points": 794.07,
+    "nonFifa": "confederation",
+    "cultures": [
+      ["dutch-caribbean", 90],
+      ["latam", 10]
+    ]
+  },
+  {
+    "id": "SXM",
+    "name": "Sint Maarten",
+    "flag": "sx",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 18,
+    "points": 932.2,
+    "nonFifa": "confederation",
+    "cultures": [
+      ["caribbean-anglo", 60],
+      ["dutch-caribbean", 40]
+    ]
+  },
+  {
+    "id": "SMN",
+    "name": "Saint Martin",
+    "flag": "mf",
+    "confed": "CONCACAF",
+    "subFeds": ["CFU"],
+    "color": "#5b6b7a",
+    "youthLevel": 19,
+    "points": 955.08,
+    "nonFifa": "confederation",
+    "cultures": [
+      ["caribbean-franco", 60],
+      ["caribbean-anglo", 40]
+    ]
+  },
+  {
+    "id": "MNP",
+    "name": "Northern Mariana Islands",
+    "flag": "mp",
+    "confed": "AFC",
+    "subFeds": ["EAFF"],
+    "color": "#0072CE",
+    "youthLevel": 1,
+    "points": 472.88,
+    "nonFifa": "confederation",
+    "cultures": [
+      ["pacific", 60],
+      ["filipino", 30],
+      ["english", 10]
+    ]
+  },
+  {
+    "id": "REU",
+    "name": "Réunion",
+    "flag": "re",
+    "confed": "CAF",
+    "subFeds": ["COSAFA"],
+    "color": "#5b6b7a",
+    "youthLevel": 41,
+    "points": 1246.61,
+    "nonFifa": "regional",
+    "cultures": [
+      ["french", 60],
+      ["mauritian", 25],
+      ["malagasy", 15]
+    ]
+  },
+  {
+    "id": "ZAN",
+    "name": "Zanzibar",
+    "flag": "tz-zanzibar",
+    "confed": "CAF",
+    "subFeds": ["CECAFA"],
+    "color": "#5b6b7a",
+    "youthLevel": 40,
+    "points": 1226.27,
+    "nonFifa": "regional",
+    "cultures": [
+      ["east-african", 85],
+      ["arabic-gulf", 15]
+    ]
+  },
+  {
+    "id": "KIR",
+    "name": "Kiribati",
+    "flag": "ki",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#C8102E",
+    "youthLevel": 1,
+    "points": 567.8,
+    "nonFifa": "regional",
+    "cultures": [["pacific", 100]]
+  },
+  {
+    "id": "TUV",
+    "name": "Tuvalu",
+    "flag": "tv",
+    "confed": "OFC",
+    "subFeds": [],
+    "color": "#5BC2E7",
+    "youthLevel": 4,
+    "points": 747.46,
+    "nonFifa": "regional",
+    "cultures": [["pacific", 100]]
   }
 ]

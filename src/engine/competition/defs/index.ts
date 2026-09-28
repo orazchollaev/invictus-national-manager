@@ -2,12 +2,14 @@ import type { CompetitionDef } from "../runtime"
 import { FIFA_DEFS } from "./fifa"
 import { EUROPE_DEFS } from "./europe"
 import { CONTINENT_DEFS } from "./continents"
+import { CONCACAF_DEFS } from "./concacaf"
 import { REGIONAL_DEFS } from "./regional"
 
 export const COMPETITION_DEFS: CompetitionDef[] = [
   ...FIFA_DEFS,
   ...EUROPE_DEFS,
   ...CONTINENT_DEFS,
+  ...CONCACAF_DEFS,
   ...REGIONAL_DEFS,
 ]
 

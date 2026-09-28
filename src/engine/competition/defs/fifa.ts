@@ -4,15 +4,17 @@
  *
  * Places (48): UEFA 16, CAF 9, AFC 8, CONCACAF 6, CONMEBOL 6, OFC 1, play-off 2.
  * Hosts qualify automatically and count against their confederation's places.
- * Qualifying formats for 2030 had not been published at the start date; these follow
- * the 2026 cycle's shape, scaled to the places left after the hosts.
+ * Apart from CONCACAF's, qualifying formats for 2030 had not been published at the
+ * start date; these follow the 2026 cycle's shape, scaled to the places left after
+ * the hosts.
  *
  *  - UEFA: groups in the autumn before (around the Nations League), winners qualify,
  *    runners-up and Nations League group winners play March play-off paths.
  *  - CAF: groups of six, winners qualify; the four best runners-up play a single-venue
  *    play-off for the inter-confederation place.
  *  - AFC: five rounds (see wcqAfc); the first two also decide the Asian Cup.
- *  - CONCACAF: groups, winners qualify, the two best runners-up to the play-off.
+ *  - CONCACAF: its published 2030 format (see wcqConcacaf), kept clear of the
+ *    Nations League's windows.
  *  - CONMEBOL: one league of ten.
  *  - OFC: a preliminary round, two groups of four at one venue, then semi-finals and
  *    a final: the winner qualifies, the runner-up goes to the play-off.
@@ -47,7 +49,7 @@ export function worldCupHosts(year: number, ctx: CompContext): string[] {
   const recent = new Set<Confed>()
   for (const y of [year - 4, year - 8])
     for (const h of worldCupHosts(y, ctx)) recent.add(ctx.confedOf(h))
-  const candidates = ctx.ranked((t) => !recent.has(ctx.confedOf(t)))
+  const candidates = ctx.ranked((t) => ctx.fifa(t) && !recent.has(ctx.confedOf(t)))
   return pickHosts(ctx, `wc-${year}`, candidates, 1)
 }
 
@@ -62,7 +64,7 @@ function directPlaces(year: number, confed: Confed, ctx: CompContext) {
 function confedEntrants(confed: Confed) {
   return (inst: CompetitionInstance, ctx: CompContext) => {
     const hosts = worldCupHosts(inst.year, ctx)
-    return ctx.ranked((t) => ctx.confedOf(t) === confed && !hosts.includes(t))
+    return ctx.ranked((t) => ctx.fifa(t) && ctx.confedOf(t) === confed && !hosts.includes(t))
   }
 }
 
@@ -107,7 +109,7 @@ export const worldCup: CompetitionDef = finalsDef({
     const rest = list
       .filter((t) => !inst.hosts.includes(t))
       .sort((a, b) => ctx.points(b) - ctx.points(a))
-    return fillFromRanking(ctx, [...hosts, ...rest], 48, () => true)
+    return fillFromRanking(ctx, [...hosts, ...rest], 48, (t) => ctx.fifa(t))
   },
 })
 
@@ -264,7 +266,7 @@ export const wcqAfc: CompetitionDef = {
   finals: (y) => `wc-${y}`,
   plan(inst, ctx) {
     const y = inst.year
-    const all = (c: CompContext) => c.ranked((t) => c.confedOf(t) === "AFC")
+    const all = (c: CompContext) => c.ranked((t) => c.fifa(t) && c.confedOf(t) === "AFC")
     const firstRoundTies = (c: CompContext) => Math.max(0, all(c).length - AFC_SECOND_ROUND)
     const [, , oct1, oct2] = window(y - 3, "sep").slots
     const autumn = window(y - 1, "sep").slots
@@ -381,22 +383,128 @@ export const wcqAfc: CompetitionDef = {
   },
 }
 
-export const wcqConcacaf: CompetitionDef = qualifierDef({
+/**
+ * The final round's top places, as many as CONCACAF has, and the next two for the
+ * Play-In: winners, then runners-up, then third-placed, each by record.
+ */
+export function concacafFinalRound(inst: CompetitionInstance, ctx: CompContext) {
+  const tables = standingsOf(inst, "final", ctx)
+  const order = [0, 1, 2].flatMap((pos) => finishers(tables, pos).map((r) => r.team))
+  const places = directPlaces(inst.year, "CONCACAF", ctx)
+  return { qualified: order.slice(0, places), playIn: order.slice(places, places + 2) }
+}
+
+/**
+ * CONCACAF's 2030 format (CONCACAF, February 2026), between its Nations League
+ * editions: a first round of two-legged ties for those ranked 14th and below (first
+ * half of the September–October window), a second round of six groups of four
+ * (September–October to March), a final round of three groups of four (June, then
+ * the next September–October) and a two-legged Play-In in November for the
+ * inter-confederation play-off.
+ */
+export const wcqConcacaf: CompetitionDef = {
   id: "wcq-concacaf",
   short: "WCQ CONCACAF",
   confed: "CONCACAF",
+  kind: "qualifier",
   name: (y) => `World Cup ${y} Qualifying · CONCACAF`,
   editions: wcYears,
   finals: (y) => `wc-${y}`,
-  entrants: confedEntrants("CONCACAF"),
-  groups: (inst, ctx) => Math.max(1, directPlaces(inst.year, "CONCACAF", ctx)),
-  groupSize: 5,
-  prelimDates: (y) => slots(y - 2, ["mar"]),
-  prelimDrawDate: (y) => iso(y - 3, 12, 12),
-  groupDrawDate: (y) => iso(y - 2, 4, 20),
-  groupDates: (y) => [...slots(y - 2, ["jun", "sep", "nov"]), ...slots(y - 1, ["mar"])],
-  runnersUpToInterconf: 2,
-})
+  plan(inst) {
+    const y = inst.year
+    const entrants = confedEntrants("CONCACAF")
+    // Twenty-four play the second round: the best ranked and the first round's winners.
+    const firstRound = (c: CompContext) => {
+      const all = entrants(inst, c)
+      return all.slice(Math.max(0, 48 - all.length))
+    }
+    const sep = window(y - 3, "sep").slots
+    return [
+      {
+        key: "r1",
+        name: "First round",
+        drawDate: iso(y - 3, 7, 1),
+        importance: "qualifier",
+        entrants: (c) => firstRound(c),
+        knockout: {
+          rounds: [{ name: "First round", dates: sep.slice(0, 2) }],
+          pairing: "pots",
+          venue: "home-away",
+        },
+      },
+      {
+        key: "r2",
+        name: "Second round",
+        drawDate: iso(y - 3, 7, 1),
+        importance: "qualifier",
+        entrants: (c, i) => {
+          const first = firstRound(c)
+          const list = [
+            ...entrants(i, c).filter((t) => !first.includes(t)),
+            ...knockoutResult(i, "r1").finalWinners,
+          ]
+          return list.sort((a, b) => c.points(b) - c.points(a))
+        },
+        groups: {
+          count: 6,
+          legs: 2,
+          dates: [...sep.slice(2), ...slots(y - 3, ["nov"]), ...slots(y - 2, ["mar"])],
+          venue: "home-away",
+          tiebreak: "gd",
+        },
+      },
+      {
+        key: "final",
+        name: "Final round",
+        drawDate: iso(y - 2, 4, 20),
+        importance: "qualifier",
+        entrants: (c, i) => {
+          const tables = standingsOf(i, "r2", c)
+          const list = [...finishers(tables, 0), ...finishers(tables, 1)].map((r) => r.team)
+          return list.sort((a, b) => c.points(b) - c.points(a))
+        },
+        groups: {
+          count: 3,
+          legs: 2,
+          dates: [...slots(y - 2, ["jun"]), ...slots(y - 1, ["sep"])],
+          venue: "home-away",
+          tiebreak: "gd",
+        },
+      },
+      {
+        key: "playin",
+        name: "Play-In",
+        // Before November's friendlies are arranged.
+        drawDate: iso(y - 1, 10, 12),
+        importance: "qualifier",
+        // The better placed at home in the second leg.
+        entrants: (c, i) => {
+          const [high, low] = concacafFinalRound(i, c).playIn
+          return high && low ? [low, high] : []
+        },
+        knockout: {
+          rounds: [{ name: "Play-In", dates: slots(y - 1, ["nov"]) }],
+          pairing: "ordered",
+          venue: "home-away",
+        },
+      },
+    ]
+  },
+  // The second round is drawn once the first is over, halfway through the window.
+  reserved(inst, ctx, date) {
+    const r2 = inst.stages.find((s) => s.key === "r2")
+    const days = window(inst.year - 3, "sep").slots.slice(2)
+    return r2?.status === "waiting" && days.includes(date)
+      ? confedEntrants("CONCACAF")(inst, ctx)
+      : []
+  },
+  finalize(inst, ctx) {
+    return {
+      qualified: concacafFinalRound(inst, ctx).qualified,
+      interconf: knockoutResult(inst, "playin").finalWinners,
+    }
+  },
+}
 
 export const wcqConmebol: CompetitionDef = qualifierDef({
   id: "wcq-conmebol",
@@ -481,16 +589,22 @@ export const wcqInterconf: CompetitionDef = {
         importance: "qualifier",
         entrants: (c) => {
           const list: string[] = []
+          const qualified = new Set<string>(worldCupHosts(inst.year, c))
           for (const id of ["caf", "afc", "concacaf", "conmebol", "ofc", "uefa"]) {
-            list.push(...(c.instance(`wcq-${id}-${inst.year}`)?.outcome.interconf ?? []))
+            const q = c.instance(`wcq-${id}-${inst.year}`)
+            list.push(...(q?.outcome.interconf ?? []))
+            q?.outcome.qualified?.forEach((t) => qualified.add(t))
           }
-          // Six teams: the two best ranked get byes to the finals.
+          // Six teams: the two best ranked get byes to the finals. A place no
+          // confederation fills (CONCACAF sends one team from 2030) goes to the best
+          // ranked team still out.
           const ranked = [...new Set(list)].sort((a, b) => c.points(b) - c.points(a))
           return fillFromRanking(
             c,
             ranked,
             6,
-            (t) => c.confedOf(t) !== "UEFA" && !inst.hosts.includes(t)
+            (t) =>
+              c.fifa(t) && c.confedOf(t) !== "UEFA" && !inst.hosts.includes(t) && !qualified.has(t)
           )
         },
         knockout: {

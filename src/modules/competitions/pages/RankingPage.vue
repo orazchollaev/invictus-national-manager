@@ -10,7 +10,7 @@ const confed = ref("all")
 
 const rows = world.derive((w) => {
   const list = Object.values(w.state.nations)
-    .filter((n) => !w.def(n.id).banned)
+    .filter((n) => !w.def(n.id).banned && !w.def(n.id).nonFifa)
     .sort((a, b) => b.points - a.points)
   // Movement since the last monthly snapshot.
   const before = [...list].sort(

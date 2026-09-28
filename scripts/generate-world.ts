@@ -8,11 +8,14 @@
  * Inputs (scripts/raw, fetched once):
  *  - fifa-ranking.json  api.fifa.com men's ranking, 2026-07-20 edition (211 members)
  *  - elo-world.tsv, elo-teams.tsv  eloratings.net, used as the strength signal
+ *  - data/non-fifa.ts  confederation and regional members outside FIFA, appended
+ *    after the FIFA members so their data never shifts
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { NATION_META } from "./data/nation-meta"
+import { NON_FIFA } from "./data/non-fifa"
 import { NAME_ALIASES, NAME_POOLS } from "../src/data/names"
 import { CLUB_PATTERNS, LEAGUES, type ClubFamily } from "./data/leagues"
 import {
@@ -100,16 +103,24 @@ function eloFromPoints(points: number): number {
   return 700 + (points - 700) * 1.18
 }
 
+/** The reverse, for teams outside FIFA: ranking-scale points from their Elo. */
+function pointsFromElo(elo: number): number {
+  return Math.round((700 + (elo - 700) / 1.18) * 100) / 100
+}
+
+const parseCultures = (list: string) =>
+  list.split(",").map((c) => {
+    const [name, w] = c.split(":")
+    return [name, Number(w)] as [string, number]
+  })
+
 const meta = new Map<string, { flag: string; subFeds: string[]; cultures: [string, number][] }>()
 for (const line of NATION_META.trim().split("\n")) {
   const [code, flag, subs, cultures] = line.trim().split(/\s+/)
   meta.set(code, {
     flag,
     subFeds: subs === "-" ? [] : subs.split(","),
-    cultures: cultures.split(",").map((c) => {
-      const [name, w] = c.split(":")
-      return [name, Number(w)] as [string, number]
-    }),
+    cultures: parseCultures(cultures),
   })
 }
 
@@ -160,6 +171,13 @@ const TALENT: Record<string, number> = {
   WAL: -3,
 }
 
+/** Strength blends Elo (what wins matches) with ranking points (what the world sees). */
+function levelOf(id: string, elo: number, points: number): number {
+  const eloLevel = ((elo - 700) / (2280 - 700)) * 100
+  const fifaLevel = ((points - 700) / (2000 - 700)) * 100
+  return clamp(Math.round((eloLevel * 0.7 + fifaLevel * 0.3 + (TALENT[id] ?? 0)) * 10) / 10, 1, 100)
+}
+
 const missingElo: string[] = []
 const nations: BuiltNation[] = fifa.map((row) => {
   const m = meta.get(row.IdCountry)
@@ -171,14 +189,7 @@ const nations: BuiltNation[] = fifa.map((row) => {
     missingElo.push(row.IdCountry)
     elo = eloFromPoints(row.DecimalTotalPoints)
   }
-  // Strength blends Elo (what wins matches) with FIFA points (what the world sees).
-  const eloLevel = ((elo - 700) / (2280 - 700)) * 100
-  const fifaLevel = ((row.DecimalTotalPoints - 700) / (2000 - 700)) * 100
-  const level = clamp(
-    Math.round((eloLevel * 0.7 + fifaLevel * 0.3 + (TALENT[row.IdCountry] ?? 0)) * 10) / 10,
-    1,
-    100
-  )
+  const level = levelOf(row.IdCountry, elo, row.DecimalTotalPoints)
   return {
     id: row.IdCountry,
     name,
@@ -194,6 +205,28 @@ const nations: BuiltNation[] = fifa.map((row) => {
   }
 })
 if (missingElo.length) console.log("Elo fallback from FIFA points:", missingElo.join(" "))
+
+for (const line of NON_FIFA.trim().split("\n")) {
+  const [id, confed, kind, flag, subs, cultures, rawName] = line.trim().split(/\s+/)
+  const name = rawName.replace(/_/g, " ")
+  const elo = eloByName.get(norm(name))
+  if (elo === undefined) throw new Error(`No Elo for ${name}`)
+  const points = pointsFromElo(elo)
+  const level = levelOf(id, elo, points)
+  nations.push({
+    id,
+    name,
+    flag,
+    confed: confed as Confed,
+    subFeds: subs === "-" ? [] : subs.split(","),
+    color: refColors[flag]?.color ?? "#5b6b7a",
+    youthLevel: Math.round(level),
+    points,
+    nonFifa: kind as NationDef["nonFifa"],
+    level,
+    cultures: parseCultures(cultures),
+  })
+}
 
 // ── Clubs ───────────────────────────────────────────────────────────────────
 
@@ -638,7 +671,7 @@ writeFileSync(join(out, "players.json"), JSON.stringify(playersByNation) + "\n")
 
 const total = Object.values(playersByNation).reduce((s, p) => s + p.length, 0)
 console.log(
-  `${nations.length} nations, ${clubs.length} clubs, ${total} players (${POOL_SIZE}/nation)`
+  `${nations.length} nations (${nations.filter((n) => n.nonFifa).length} outside FIFA), ${clubs.length} clubs, ${total} players (${POOL_SIZE}/nation)`
 )
 for (const id of ["ESP", "BRA", "FRA", "ARG", "TUR", "JPN", "USA", "NZL", "IND", "SMR"]) {
   const best = playersByNation[id].map((p) => p[7]).sort((a, b) => b - a)

@@ -54,7 +54,7 @@ async function resume() {
         <Plus :size="22" />
         <span class="item-text">
           <span class="item-label">New game</span>
-          <span class="item-hint">Take charge of any of the 211 FIFA nations</span>
+          <span class="item-hint">Take charge of any of 222 national teams</span>
         </span>
       </button>
       <button class="item" :disabled="!hasSaves" @click="router.push('/load')">

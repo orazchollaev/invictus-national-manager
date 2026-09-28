@@ -25,7 +25,7 @@ const items = [
     label: "Career",
     hint: "Objectives, confidence and job offers",
   },
-  { to: "/rankings", icon: ListOrdered, label: "FIFA ranking", hint: "All 211 nations" },
+  { to: "/rankings", icon: ListOrdered, label: "FIFA ranking", hint: "All 211 FIFA members" },
   {
     to: "/calendar",
     icon: CalendarDays,

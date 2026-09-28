@@ -30,7 +30,9 @@ const query = ref("")
 const chosen = ref<string | null>(null)
 
 const byPoints = [...NATION_DEFS].filter((n) => !n.banned).sort((a, b) => b.points - a.points)
-const rankOf = new Map(byPoints.map((n, i) => [n.id, i + 1]))
+const strengthOf = new Map(byPoints.map((n, i) => [n.id, i + 1]))
+/** FIFA ranking position; teams outside FIFA have none. */
+const rankOf = new Map(byPoints.filter((n) => !n.nonFifa).map((n, i) => [n.id, i + 1]))
 
 const nationalityOptions = [...NATION_DEFS]
   .sort((a, b) => a.name.localeCompare(b.name))
@@ -41,16 +43,16 @@ const list = computed(() => {
   return byPoints.filter((n) => (q ? n.name.toLowerCase().includes(q) : n.confed === confed.value))
 })
 
-/** Stars for how big a job it is, from the ranking. */
+/** Stars for how big a job it is, from the team's strength. */
 function stars(id: string) {
-  const r = rankOf.get(id) ?? 211
+  const r = strengthOf.get(id) ?? byPoints.length
   return r <= 10 ? 5 : r <= 30 ? 4 : r <= 70 ? 3 : r <= 130 ? 2 : 1
 }
 
 const TITLES = [
   ["New game", "Choose a save slot"],
   ["New career", "Tell us about yourself"],
-  ["Choose your nation", "Every FIFA member is open to you"],
+  ["Choose your nation", "Every national team is open to you"],
 ]
 
 function pickSlot(n: number) {
@@ -123,7 +125,7 @@ async function start() {
           :class="{ 'nation-row--on': chosen === n.id }"
           @click="chosen = n.id"
         >
-          <span class="nation-rank">{{ rankOf.get(n.id) }}</span>
+          <span class="nation-rank">{{ rankOf.get(n.id) ?? "—" }}</span>
           <NationFlag :id="n.id" :size="28" name />
           <span class="nation-stars">{{ "★".repeat(stars(n.id)) }}</span>
         </button>

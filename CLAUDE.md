@@ -1,7 +1,8 @@
 # Invictus - National Manager
 
 Vue 3 + TypeScript + Pinia + Capacitor (Android only). Manage one of the 211 FIFA
-members' senior national teams from 1 September 2026, inspired by True Football National
+members' senior national teams — or one of the 11 outside FIFA that play in a
+confederation or regional federation — from 1 September 2026, inspired by True Football National
 Manager. Package manager: **pnpm**. English only.
 
 Full reasoning behind these rules: [`ARCHITECTURE.md`](ARCHITECTURE.md).

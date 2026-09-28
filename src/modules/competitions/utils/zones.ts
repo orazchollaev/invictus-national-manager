@@ -22,6 +22,12 @@ export type Zone =
   | "acq"
   | "next"
   | "host-group"
+  | "up-gc"
+  | "up-pi"
+  | "best-up"
+  | "gcp"
+  | "best-gcp"
+  | "down-pi"
 
 export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
   qf: { label: "Quarter-finals", tone: "var(--pos-2)" },
@@ -41,6 +47,15 @@ export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
   acq: { label: "Asian Cup qualifying", tone: "var(--pos-3)" },
   next: { label: "Next round", tone: "var(--warning)" },
   "host-group": { label: "Qualifies if the host finishes above", tone: "var(--warning)" },
+  "up-gc": { label: "Promoted and qualifies for the Gold Cup", tone: "var(--success)" },
+  "up-pi": { label: "Promoted and Play-In", tone: "var(--success)" },
+  "best-up": { label: "Promoted and Play-In if the best runner-up", tone: "var(--warning)" },
+  gcp: { label: "Gold Cup Prelims", tone: "var(--pos-3)" },
+  "best-gcp": {
+    label: "Gold Cup Prelims if among the two best runners-up",
+    tone: "var(--warning)",
+  },
+  "down-pi": { label: "Relegated, Play-In for the Gold Cup Prelims", tone: "var(--danger)" },
 }
 
 const letterOf = (name: string) => name.replace(/\d+$/, "")
@@ -93,12 +108,11 @@ export function zonesFor(
     case "cnl":
       switch (letterOf(groupName)) {
         case "A":
-          return last("down", "qf", "qf")
+          return z("qf", "qf", "gcp", "gcp", "down-pi", "down-pi")
         case "B":
-          // Only the worst of the fourth-placed makes way for League C's winner.
-          return size >= 4 ? last("risk", "up") : z("up")
+          return size >= 4 ? last("down", "up-gc", "best-gcp") : z("up-gc", "best-gcp")
         default:
-          return z("up")
+          return z("up-pi", "best-up")
       }
 
     // World Cup qualifying (see defs/fifa.ts).
@@ -118,8 +132,15 @@ export function zonesFor(
           return z()
       }
     }
-    case "wcq-concacaf":
-      return z("through", "ic")
+    case "wcq-concacaf": {
+      if (stageKey === "r2") return z("next", "next")
+      const hosts = worldCupHosts(inst.year, ctx).filter((h) => ctx.confedOf(h) === "CONCACAF")
+      const places = WC_PLACES.CONCACAF - hosts.length
+      // Three final-round groups: winners, then the best runners-up, while places last.
+      if (places >= 6) return z("through", "through", "playoff")
+      if (places > 3) return z("through", "maybe", "playoff")
+      return places === 3 ? z("through", "playoff") : z("maybe", "playoff")
+    }
     case "wcq-ofc":
       return z("advance", "advance")
     case "wcq-conmebol": {

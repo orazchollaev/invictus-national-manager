@@ -4,7 +4,7 @@
   <img src="public/logo.png" alt="Invictus - National Manager logo" width="128" height="128" />
 </p>
 
-Take charge of one of the 211 FIFA members' senior national teams and lead it through
+Take charge of one of 222 senior national teams and lead it through
 qualifiers, continental cups and the World Cup. The career starts on 1 September 2026
 and runs for as long as you keep your job.
 
@@ -14,7 +14,9 @@ for Android; it also runs in the browser.
 ## Features
 
 - **Every nation** — all 211 FIFA members, seeded from the official FIFA ranking of
-  20 July 2026 and eloratings.net, each with a pool of 80 fictional players.
+  20 July 2026 and eloratings.net, plus the 11 teams outside FIFA that play in a
+  confederation or regional federation (Martinique, Guadeloupe, Réunion, Zanzibar…),
+  each with a pool of 80 fictional players.
 - **A living calendar** — the real FIFA international windows for 2026–2030, and the same
   shape every year after. Advance one day, a week, a month or straight to the next match.
 - **Real competition structures** — World Cup and every confederation's qualifying route

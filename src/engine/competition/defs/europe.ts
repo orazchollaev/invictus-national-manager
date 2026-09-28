@@ -148,7 +148,6 @@ export const uefaNationsLeague: CompetitionDef = nationsLeagueDef({
     { letter: "C", size: 16, groups: 4 },
     { letter: "D", size: 6, groups: 2 },
   ],
-  playoffs: true,
   leagueDates: (y) => slots(y, ["sep", "nov"]),
   leagueDrawDate: (y) => iso(y, 2, 12),
   finalsDates: (y) => {

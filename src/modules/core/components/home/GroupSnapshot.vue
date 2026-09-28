@@ -29,7 +29,7 @@ const snapshot = world.derive((w) => {
       id: inst.id,
       title: `${inst.short} · ${group.name.length <= 2 ? `Group ${group.name}` : group.name}`,
       rows,
-      zones: zonesFor(inst, group.name, rows.length, ctx),
+      zones: zonesFor(inst, group.name, rows.length, ctx, stage.key),
     }
   }
   return null

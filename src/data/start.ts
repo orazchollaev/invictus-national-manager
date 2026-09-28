@@ -4,6 +4,7 @@
  *
  * Sources (Wikipedia, September 2026):
  *  - 2026–27 UEFA Nations League (league phase groups)
+ *  - 2026–27 CONCACAF Nations League (draw of 23 July 2026; Template:…group tables)
  *  - 2027 Africa Cup of Nations qualification (group stage; Template:…group tables)
  *  - 2027 AFC Asian Cup (group draw)
  *  - 2030 FIFA World Cup (six host nations qualify automatically)
@@ -34,6 +35,34 @@ export const NATIONS_LEAGUE_2026: Record<string, string[][]> = {
     ["AZE", "LTU", "MLT"],
     ["GIB", "LIE", "AND"],
   ],
+}
+
+/**
+ * League A's four best ranked go straight to the quarter-finals (best first); every
+ * group lists its teams by pot, which sets League A's Swiss fixtures.
+ */
+export const CONCACAF_NATIONS_LEAGUE_2026: {
+  byes: string[]
+  groups: Record<string, string[][]>
+} = {
+  byes: ["MEX", "USA", "CAN", "PAN"],
+  groups: {
+    A: [
+      ["CRC", "HAI", "TRI", "CUW", "NCA", "DOM"],
+      ["HON", "JAM", "GUA", "SUR", "MTQ", "SLV"],
+    ],
+    B: [
+      ["GUY", "PUR", "DMA", "CAY"],
+      ["GLP", "BER", "LCA", "BRB"],
+      ["CUB", "GRN", "SKN", "BOE"],
+      ["GUF", "VIN", "BLZ", "SXM"],
+    ],
+    C: [
+      ["MSR", "TCA", "VGB"],
+      ["ATG", "ARU", "AIA"],
+      ["SMN", "BAH", "VIR"],
+    ],
+  },
 }
 
 export const AFCON_2027_QUALIFYING: string[][] = [

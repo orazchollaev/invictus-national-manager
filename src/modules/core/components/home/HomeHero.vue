@@ -19,7 +19,7 @@ const info = world.derive((w) => {
     name: def.name,
     confed: def.confed,
     color: def.color,
-    rank: ranked.indexOf(id) + 1,
+    rank: w.fifaRank(id),
     confedRank,
     points: Math.round(n.points),
     trend: prev !== undefined ? Math.round(n.points - prev) : 0,
@@ -51,8 +51,8 @@ const tone = computed(() => {
 
     <div class="hero-stats">
       <RouterLink to="/rankings" class="stat">
-        <span class="stat-value">#{{ info.rank }}</span>
-        <span class="stat-label">FIFA ranking</span>
+        <span class="stat-value">{{ info.rank ? `#${info.rank}` : "—" }}</span>
+        <span class="stat-label">{{ info.rank ? "FIFA ranking" : "Not a FIFA member" }}</span>
       </RouterLink>
       <div class="stat">
         <span class="stat-value">{{ info.federation.toFixed(1) }}</span>

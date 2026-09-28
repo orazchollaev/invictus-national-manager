@@ -9,7 +9,7 @@
  *    play-off round, then a third round with the second round's third- and
  *    fourth-placed teams, whose group winners take the last places.
  *  - Copa América: every four years from 2028, CONMEBOL plus six CONCACAF guests.
- *  - CONCACAF Gold Cup: odd years; CONCACAF Nations League in the autumn after a World Cup.
+ *    CONCACAF's own competitions are in concacaf.ts.
  *  - OFC Nations Cup: every four years from 2028.
  */
 import type { CompContext, CompetitionDef } from "../runtime"
@@ -20,7 +20,6 @@ import { slots, window } from "@/engine/calendar/windows"
 import { AFCON_2027_QUALIFYING, ASIAN_CUP_2027, AWARDED_HOSTS } from "@/data/start"
 import { finalsDef, qualifierDef } from "./builders"
 import { everyNYears, pickHosts } from "./helpers"
-import { nationsLeagueDef } from "./nationsLeague"
 import { afcFirstRoundLosers, afcSecondRound } from "./fifa"
 
 function hostsOf(key: string, ctx: CompContext, pool: string[], count = 1) {
@@ -31,7 +30,8 @@ function hostsOf(key: string, ctx: CompContext, pool: string[], count = 1) {
 
 const afconYears = (from: number, to: number) =>
   [2027, ...everyNYears(2028, 4)(from, to)].filter((y) => y >= from && y <= to)
-const caf = (ctx: CompContext) => ctx.ranked((t) => ctx.confedOf(t) === "CAF")
+const caf = (ctx: CompContext) =>
+  ctx.ranked((t) => ctx.confedMember(t) && ctx.confedOf(t) === "CAF")
 
 export const afcon: CompetitionDef = finalsDef({
   id: "afcon",
@@ -49,7 +49,7 @@ export const afcon: CompetitionDef = finalsDef({
   drawDate: (y) => iso(y, 4, 20),
   hosts: (y, ctx) => hostsOf(`afcon-${y}`, ctx, caf(ctx)),
   importance: ["continental", "continental-ko"],
-  eligible: (t, ctx) => ctx.confedOf(t) === "CAF",
+  eligible: (t, ctx) => ctx.confedMember(t) && ctx.confedOf(t) === "CAF",
   entrants(inst, ctx) {
     const q = ctx.instance(`afconq-${inst.year}`)?.outcome.qualified ?? []
     return [
@@ -115,7 +115,8 @@ export const afconQualifying: CompetitionDef = qualifierDef({
 
 // ── Asia ────────────────────────────────────────────────────────────────────
 
-const afc = (ctx: CompContext) => ctx.ranked((t) => ctx.confedOf(t) === "AFC")
+const afc = (ctx: CompContext) =>
+  ctx.ranked((t) => ctx.confedMember(t) && ctx.confedOf(t) === "AFC")
 
 export const asianCup: CompetitionDef = finalsDef({
   id: "asian-cup",
@@ -134,7 +135,7 @@ export const asianCup: CompetitionDef = finalsDef({
   hosts: (y, ctx) => hostsOf(`asian-cup-${y}`, ctx, afc(ctx)),
   fixedGroups: (y) => (y === 2027 ? ASIAN_CUP_2027 : undefined),
   importance: ["continental", "continental-ko"],
-  eligible: (t, ctx) => ctx.confedOf(t) === "AFC",
+  eligible: (t, ctx) => ctx.confedMember(t) && ctx.confedOf(t) === "AFC",
   entrants(inst, ctx) {
     const wcq = ctx.instance(`wcq-afc-${inst.year - 1}`)
     const q = ctx.instance(`asian-cupq-${inst.year}`)
@@ -235,7 +236,9 @@ export const asianCupQualifying: CompetitionDef = {
 
 // ── The Americas ────────────────────────────────────────────────────────────
 
-const concacaf = (ctx: CompContext) => ctx.ranked((t) => ctx.confedOf(t) === "CONCACAF")
+// Copa América guests are invited FIFA members.
+const concacaf = (ctx: CompContext) =>
+  ctx.ranked((t) => ctx.fifa(t) && ctx.confedOf(t) === "CONCACAF")
 const conmebol = (ctx: CompContext) => ctx.ranked((t) => ctx.confedOf(t) === "CONMEBOL")
 
 export const copaAmerica: CompetitionDef = finalsDef({
@@ -254,56 +257,14 @@ export const copaAmerica: CompetitionDef = finalsDef({
   drawDate: (y) => iso(y, 3, 5),
   hosts: (y, ctx) => hostsOf(`copa-${y}`, ctx, conmebol(ctx)),
   importance: ["continental", "continental-ko"],
-  eligible: (t, ctx) => ctx.confedOf(t) === "CONMEBOL" || ctx.confedOf(t) === "CONCACAF",
+  eligible: (t, ctx) =>
+    ctx.fifa(t) && (ctx.confedOf(t) === "CONMEBOL" || ctx.confedOf(t) === "CONCACAF"),
   entrants: (inst, ctx) => {
     const south = conmebol(ctx)
     const guests = concacaf(ctx).slice(0, 6)
     const all = [...south, ...guests].sort((a, b) => ctx.points(b) - ctx.points(a))
     return [...inst.hosts, ...all.filter((t) => !inst.hosts.includes(t))]
   },
-})
-
-export const goldCup: CompetitionDef = finalsDef({
-  id: "gold-cup",
-  short: "Gold Cup",
-  confed: "CONCACAF",
-  kind: "continental",
-  name: (y) => `CONCACAF Gold Cup ${y}`,
-  editions: everyNYears(2027, 2),
-  teams: 16,
-  groups: 4,
-  perGroup: 2,
-  bestThirds: 0,
-  thirdPlace: false,
-  start: (y) => iso(y, 6, 17),
-  drawDate: (y) => iso(y, 4, 10),
-  hosts: (y, ctx) => AWARDED_HOSTS[`gold-cup-${y}`] ?? (ctx.points("USA") ? ["USA"] : []),
-  importance: ["continental", "continental-ko"],
-  eligible: (t, ctx) => ctx.confedOf(t) === "CONCACAF",
-  entrants: (inst, ctx) => [...inst.hosts, ...concacaf(ctx).filter((t) => !inst.hosts.includes(t))],
-})
-
-export const concacafNationsLeague: CompetitionDef = nationsLeagueDef({
-  id: "cnl",
-  short: "CONCACAF NL",
-  confed: "CONCACAF",
-  name: (y) => `CONCACAF Nations League ${y}–${String(y + 1).slice(2)}`,
-  editions: everyNYears(2026, 4),
-  tiers: [
-    { letter: "A", size: 16, groups: 4 },
-    { letter: "B", size: 16, groups: 4 },
-    { letter: "C", size: 3, groups: 1 },
-  ],
-  playoffs: false,
-  leagueDates: (y) => slots(y, ["sep", "nov"]),
-  leagueDrawDate: (y) => iso(y, 5, 20),
-  springDates: (y) => slots(y + 1, ["mar"]) as [string, string],
-  springDrawDate: (y) => iso(y, 11, 25),
-  finalsDates: (y) => {
-    const [semi, final] = slots(y + 1, ["jun"])
-    return { semi, final }
-  },
-  finalsDrawDate: (y) => iso(y + 1, 4, 5),
 })
 
 // ── Oceania ─────────────────────────────────────────────────────────────────
@@ -326,13 +287,15 @@ export const ofcNationsCup: CompetitionDef = finalsDef({
     hostsOf(
       `ofc-cup-${y}`,
       ctx,
-      ctx.ranked((t) => ctx.confedOf(t) === "OFC")
+      ctx.ranked((t) => ctx.confedMember(t) && ctx.confedOf(t) === "OFC")
     ),
   importance: ["continental", "continental-ko"],
-  eligible: (t, ctx) => ctx.confedOf(t) === "OFC",
+  eligible: (t, ctx) => ctx.confedMember(t) && ctx.confedOf(t) === "OFC",
   entrants: (inst, ctx) => [
     ...inst.hosts,
-    ...ctx.ranked((t) => ctx.confedOf(t) === "OFC" && !inst.hosts.includes(t)),
+    ...ctx.ranked(
+      (t) => ctx.confedMember(t) && ctx.confedOf(t) === "OFC" && !inst.hosts.includes(t)
+    ),
   ],
 })
 
@@ -342,7 +305,5 @@ export const CONTINENT_DEFS: CompetitionDef[] = [
   asianCup,
   asianCupQualifying,
   copaAmerica,
-  goldCup,
-  concacafNationsLeague,
   ofcNationsCup,
 ]

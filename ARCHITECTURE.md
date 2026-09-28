@@ -29,6 +29,9 @@ next match (Settings → Continue moves on) — painting each day.
 `scripts/generate-world.ts` builds `src/data/{nations,clubs,players}.json` once, from:
 
 - the official FIFA men's ranking of 20 July 2026 (api.fifa.com), all 211 members;
+- `scripts/data/non-fifa.ts`: the 11 confederation and regional members outside FIFA,
+  appended after the FIFA members, with points from their Elo. They never enter World
+  Cup qualifying and their matches do not move the FIFA ranking (`NationDef.nonFifa`);
 - eloratings.net (the strength signal, blended 70/30 with FIFA points);
 - `scripts/data/nation-meta.ts`: flags, regional federations, naming cultures;
 - `src/data/names`: ~55 naming cultures (the runtime needs them for newgens too).

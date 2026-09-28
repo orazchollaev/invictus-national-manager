@@ -68,7 +68,7 @@ const oppForm = world.derive(
   (w) => (opp.value ? [...w.state.nations[opp.value].results].reverse().slice(0, 5) : []),
   []
 )
-const rankOf = (id: string) => (world.world ? world.world.ctx().ranked().indexOf(id) + 1 : 0)
+const rankOf = (id: string) => world.world?.fifaRank(id) ?? 0
 
 // ── Live state ──────────────────────────────────────────────────────────────
 
@@ -282,13 +282,13 @@ const pitchSlots = computed(() => {
         <div class="team">
           <NationFlag :id="fixture.home" :size="52" />
           <strong>{{ world.world?.def(fixture.home).name }}</strong>
-          <span class="muted">#{{ rankOf(fixture.home) }}</span>
+          <span v-if="rankOf(fixture.home)" class="muted">#{{ rankOf(fixture.home) }}</span>
         </div>
         <span class="vs">vs</span>
         <div class="team">
           <NationFlag :id="fixture.away" :size="52" />
           <strong>{{ world.world?.def(fixture.away).name }}</strong>
-          <span class="muted">#{{ rankOf(fixture.away) }}</span>
+          <span v-if="rankOf(fixture.away)" class="muted">#{{ rankOf(fixture.away) }}</span>
         </div>
       </div>
       <p class="muted venue">

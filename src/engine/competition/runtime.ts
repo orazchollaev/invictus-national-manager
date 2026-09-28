@@ -27,6 +27,10 @@ export interface CompContext {
   points(team: string): number
   /** Nations allowed to enter competitions (not suspended), best ranked first. */
   ranked(filter?: (team: string) => boolean): string[]
+  /** A FIFA member: World Cup qualifying and the FIFA ranking are for these only. */
+  fifa(team: string): boolean
+  /** A full member of its confederation, able to enter its competitions. */
+  confedMember(team: string): boolean
   instance(id: string): CompetitionInstance | undefined
   fixture(id: string): Fixture | undefined
   addFixture(f: Fixture): void
@@ -58,6 +62,11 @@ export interface GroupPlan {
   tiebreak: Tiebreak
   /** Group names; defaults to A, B, C… */
   names?: string[]
+  /**
+   * A group's own rounds and dates, when groups play differently (the CONCACAF
+   * Nations League's Swiss groups); otherwise a round robin over `legs` on `dates`.
+   */
+  schedule?(teams: string[], name: string): { rounds: [string, string][][]; dates: ISODate[] }
 }
 
 export interface KnockoutPlan {
@@ -66,7 +75,7 @@ export interface KnockoutPlan {
   /**
    * bracket: seeds split by group; seeded: 1 v n, the top seeds taking any byes;
    * pots: the better half drawn against the rest, no byes (preliminary rounds);
-   * draw: random; ordered: as listed.
+   * draw: random; ordered: as listed, an empty name (BYE) giving the other a bye.
    */
   pairing: "bracket" | "seeded" | "pots" | "draw" | "ordered"
   thirdPlace?: ISODate
@@ -77,8 +86,11 @@ export interface StagePlan {
   key: string
   name: string
   drawDate: ISODate
-  /** Key of the stage this one waits for; defaults to the stage before it. */
-  after?: string
+  /**
+   * Keys of the stages this one waits for; defaults to the stage before it, and
+   * null waits for none (leagues played side by side).
+   */
+  after?: string | string[] | null
   importance: Importance
   entrants(ctx: CompContext, inst: CompetitionInstance): string[]
   groups?: GroupPlan
@@ -107,6 +119,11 @@ export interface CompetitionDef {
   placeholderWinner?(inst: CompetitionInstance, slot: number): string | undefined
   /** The finals a qualifying competition leads to, as an instance id ("wc-2030"). */
   finals?(year: number): string
+  /**
+   * Teams sure to play on a date in a stage not drawn yet (one drawn mid-window);
+   * friendlies are not arranged for them that day.
+   */
+  reserved?(inst: CompetitionInstance, ctx: CompContext, date: ISODate): string[]
 }
 
 // ── Creation ────────────────────────────────────────────────────────────────
@@ -205,10 +222,12 @@ function drawGroupStage(
   stage.groups = teams.map((list, gi) => {
     const name = gp.names?.[gi] ?? String.fromCharCode(65 + gi)
     const ids: string[] = []
-    roundRobin(list, gp.legs).forEach((pairs, r) => {
+    const own = gp.schedule?.(list, name)
+    const dates = own?.dates ?? gp.dates
+    ;(own?.rounds ?? roundRobin(list, gp.legs)).forEach((pairs, r) => {
       for (const [h, a] of pairs) {
         const v = venueFor(inst, h, a, gp.venue)
-        const day = roundDate(gp.dates, r)
+        const day = roundDate(dates, r)
         const alone = !opener || r > 0 || h === opener || a === opener
         const date = freeDate(ctx, v.home, v.away, alone ? day : addDays(day, 1))
         const f: Fixture = {
@@ -249,7 +268,8 @@ function drawKnockoutStage(
 
   if (kp.pairing === "ordered") {
     pairs = []
-    for (let i = 0; i < entrants.length; i += 2) pairs.push([entrants[i], entrants[i + 1] ?? null])
+    for (let i = 0; i < entrants.length; i += 2)
+      pairs.push([entrants[i] || null, entrants[i + 1] || null])
   } else if (kp.pairing === "pots") {
     const half = Math.ceil(entrants.length / 2)
     const top = shuffle(rng, entrants.slice(0, half))
@@ -431,8 +451,13 @@ export function advanceCompetition(
     if (stage.status === "done") continue
     if (stage.status === "waiting") {
       if (ctx.date < plan.drawDate) continue
-      const dependsOn = plan.after ?? (i > 0 ? inst.stages[i - 1].key : null)
-      if (dependsOn && statusOf(dependsOn) !== "done") continue
+      const dependsOn =
+        plan.after === undefined
+          ? i > 0
+            ? [inst.stages[i - 1].key]
+            : []
+          : [plan.after ?? []].flat()
+      if (dependsOn.some((key) => statusOf(key) !== "done")) continue
       if (stage.kind === "groups" && plan.groups) drawGroupStage(inst, stage, plan, ctx)
       else if (plan.knockout) drawKnockoutStage(inst, stage, plan, ctx)
       else stage.status = "done"

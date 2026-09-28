@@ -92,9 +92,9 @@ describe("table zones match what actually happens", () => {
             if (inst.kind === "nations-league") {
               const letter = g.name.replace(/\d+$/, "")
               const now = tierOf(r.team)
-              if (zone === "up" && !(now && now < letter))
+              if (zone?.startsWith("up") && !(now && now < letter))
                 problems.push(`${where}: not promoted (${now})`)
-              if (zone === "down" && !(now && now > letter))
+              if (zone?.startsWith("down") && !(now && now > letter))
                 problems.push(`${where}: not relegated (${now})`)
               if (zone === "qf" && !knockout.has(r.team))
                 problems.push(`${where}: not in the quarter-finals`)

@@ -20,7 +20,6 @@ const next = world.derive<Fixture | null>((w) => {
 const meta = world.derive((w) => {
   const f = next.value
   if (!f) return null
-  const ranked = w.ctx().ranked()
   const comp =
     f.compId === "friendly"
       ? "International friendly"
@@ -29,8 +28,8 @@ const meta = world.derive((w) => {
   const venue = !f.atHome ? "Neutral venue" : f.home === me ? "Home" : "Away"
   return {
     comp,
-    homeRank: ranked.indexOf(f.home) + 1,
-    awayRank: ranked.indexOf(f.away) + 1,
+    homeRank: w.fifaRank(f.home),
+    awayRank: w.fifaRank(f.away),
     homeName: w.def(f.home).name,
     awayName: w.def(f.away).name,
     venue,
@@ -57,7 +56,7 @@ const countdown = computed(() => {
       <div class="team">
         <NationFlag :id="next.home" :size="52" />
         <span class="team-name">{{ meta.homeName }}</span>
-        <span class="team-rank">#{{ meta.homeRank }}</span>
+        <span v-if="meta.homeRank" class="team-rank">#{{ meta.homeRank }}</span>
       </div>
       <div class="vs">
         <span>VS</span>
@@ -66,7 +65,7 @@ const countdown = computed(() => {
       <div class="team">
         <NationFlag :id="next.away" :size="52" />
         <span class="team-name">{{ meta.awayName }}</span>
-        <span class="team-rank">#{{ meta.awayRank }}</span>
+        <span v-if="meta.awayRank" class="team-rank">#{{ meta.awayRank }}</span>
       </div>
     </RouterLink>
 

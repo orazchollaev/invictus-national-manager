@@ -86,7 +86,7 @@ export interface BoardObjective {
   /** For "reach": the knockout round to get to ("knockout", "Quarter-finals"…). */
   stage?: string
   /** For "qualify": qualification for another event than the usual one. */
-  target?: "asian-cup"
+  target?: "asian-cup" | "gold-cup"
   text: string
   status: "open" | "met" | "failed"
   critical: boolean

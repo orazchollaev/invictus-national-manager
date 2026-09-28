@@ -100,10 +100,17 @@ export interface NationDef {
   color: string
   /** Long-run quality anchor for the player pool, 1–100. */
   youthLevel: number
-  /** FIFA ranking points at the start date. */
+  /** FIFA ranking points at the start date (from Elo for teams outside FIFA). */
   points: number
   /** Suspended from competitions (still a member). */
   banned?: boolean
+  /**
+   * Not a FIFA member, so never in World Cup qualifying or the FIFA ranking.
+   * "confederation": a full member of its confederation, playing its competitions;
+   * "regional": an associate member or only in a regional federation — regional
+   * cups and friendlies only.
+   */
+  nonFifa?: "confederation" | "regional"
   /** Naming cultures its players are drawn from, with weights. */
   cultures: [string, number][]
 }

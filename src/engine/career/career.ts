@@ -12,6 +12,7 @@ import { clamp, deriveSeed, makeRng, pick } from "../rng"
 import type { BoardObjective } from "../world/types"
 import { competitionDef } from "../competition/defs"
 import { standingsOf } from "../competition/runtime"
+import { goldCupRoutes } from "../competition/defs/concacaf"
 import type { World } from "../world/world"
 
 /** "FIFA World Cup 2030" from "wc-2030". */
@@ -51,6 +52,9 @@ function involved(inst: CompetitionInstance, nationId: string, world: World): bo
   const def = world.def(nationId)
   if (inst.confed === "FIFA")
     return inst.kind === "qualifier" ? false : inst.hosts.includes(nationId)
+  // Outside FIFA: no World Cup qualifying, and nothing continental without full
+  // membership; anything else shows once the team is drawn in.
+  if (def.nonFifa && (inst.kind === "qualifier" || def.nonFifa === "regional")) return false
   return inst.confed === def.confed && (inst.kind === "qualifier" || inst.kind === "nations-league")
 }
 
@@ -68,6 +72,9 @@ export function refreshObjectives(world: World) {
     if (!involved(inst, me, world)) continue
     // Already asked of us through World Cup qualifying's second round.
     if (inst.defId === "asian-cupq" && have.has(`wcq-afc-${inst.year - 1}`)) continue
+    // Asked of us through the Nations League, once its leagues are drawn.
+    if (inst.defId === "gcq") continue
+    if (inst.defId === "cnl" && inst.stages.every((s) => s.status === "waiting")) continue
     const target = competitionDef(inst.defId).finals?.(inst.year)
     let obj: BoardObjective | null = null
     if (target) {
@@ -89,10 +96,10 @@ export function refreshObjectives(world: World) {
         }
       }
     } else if (inst.kind === "nations-league") {
-      const league = inst.stages[0].groups?.find((g) => g.teams.includes(me))
-      if (league) {
-        const letter = league.name.replace(/\d+$/, "")
-        const members = inst.stages[0]
+      const found = leagueGroup(inst, me)
+      if (found) {
+        const letter = found.group.name.replace(/\d+$/, "")
+        const members = found.stage
           .groups!.filter((g) => g.name.startsWith(letter))
           .flatMap((g) => g.teams)
         const pos = members
@@ -167,6 +174,19 @@ export function refreshObjectives(world: World) {
         critical: rank <= 16,
       })
     }
+    // CONCACAF's Nations League is also the way into the next Gold Cup.
+    if (inst.defId === "cnl" && rank <= 20) {
+      career.objectives.push({
+        id: `${inst.id}:gold-cup`,
+        comp: inst.defId,
+        compInstance: inst.id,
+        kind: "qualify",
+        target: "gold-cup",
+        text: `Qualify for the CONCACAF Gold Cup ${inst.year + 1}`,
+        status: "open",
+        critical: rank <= 8,
+      })
+    }
   }
 }
 
@@ -179,6 +199,15 @@ function reached(inst: CompetitionInstance, nationId: string): string[] {
       if (r.ties.some((t) => t.home === nationId || t.away === nationId)) out.push(r.name)
   }
   return out
+}
+
+/** The Nations League group a team plays in, and the stage it belongs to. */
+function leagueGroup(inst: CompetitionInstance, nationId: string) {
+  for (const stage of inst.stages) {
+    const group = stage.groups?.find((g) => g.teams.includes(nationId))
+    if (group) return { stage, group }
+  }
+  return null
 }
 
 const ORDER = ["groups", "Round of 32", "Round of 16", "Quarter-finals", "Semi-finals", "Final"]
@@ -202,6 +231,16 @@ function evaluate(
         if (q?.status !== "done") return "open"
         return q.outcome.qualified?.includes(me) ? "met" : "failed"
       }
+      if (obj.target === "gold-cup") {
+        // Straight in from the Nations League, or through the Prelims.
+        const routes = goldCupRoutes(inst, world.ctx())
+        if (routes.direct.includes(me)) return "met"
+        if (!routes.settled) return "open"
+        if (!routes.prelims.includes(me)) return "failed"
+        const q = world.state.competitions[`gcq-${inst.year + 1}`]
+        if (q?.status !== "done") return "open"
+        return q.outcome.qualified?.includes(me) ? "met" : "failed"
+      }
       if (inst.status !== "done") return "open"
       return inst.outcome.qualified?.includes(me) ? "met" : "failed"
     }
@@ -217,12 +256,11 @@ function evaluate(
     }
     case "avoid-relegation":
     case "promotion": {
-      const league = inst.stages[0]
-      if (league.status !== "done" || inst.status !== "done") return "open"
+      if (inst.status !== "done") return "open"
       const tiers = inst.outcome.tiers ?? {}
-      const group = league.groups?.find((g) => g.teams.includes(me))
-      if (!group) return "open"
-      const letter = group.name.replace(/\d+$/, "")
+      const found = leagueGroup(inst, me)
+      if (!found) return "open"
+      const letter = found.group.name.replace(/\d+$/, "")
       const now = Object.entries(tiers).find(([, list]) => list.includes(me))?.[0]
       if (obj.kind === "promotion") return now && now < letter ? "met" : "failed"
       return now && now > letter ? "failed" : "met"
