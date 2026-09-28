@@ -29,7 +29,7 @@ src/
     ui/           Design-system primitives. Only place reka-ui may be imported.
   composables/    App-wide composables.
   data/           Static game data: nations, clubs, starting players, name pools,
-                  real draws in progress on the start date (start.ts).
+                  real draws in progress on the start date (start.ts), stadiums.
   engine/         Pure game logic. No Vue, no stores, no DOM. Well tested.
     match/        Minute-by-minute match engine and commentary.
     competition/  Competition runtime and every competition's definition (defs/).
@@ -37,11 +37,11 @@ src/
     players/      Ability, development, retirement, youth intake, clubs.
     ai/           Squad and line-up selection for AI coaches.
     career/       Objectives, confidence, sacking, job offers.
-    world/        The world state and the day-by-day loop.
+    world/        The world state, the day-by-day loop, federations and stadiums.
   i18n/           vue-i18n setup (en only).
   lib/            Infrastructure adapters (IndexedDB, flags).
   modules/        Feature modules (career, competitions, core, match, nations, news,
-                  settings, squad, world).
+                  settings, squad, stadiums, world).
   router/
 ```
 

@@ -12,14 +12,16 @@ one day and runs whatever that day holds:
 1. AI fixtures dated today are played by the match engine.
 2. Competitions advance: draws due today are made, finished rounds produce the next,
    finished competitions produce outcomes (champions, qualifiers, next tiers).
-3. Month start: ranking snapshot, board objectives refreshed.
-4. 1 January: veterans retire and the year's youngsters come through (listed in the inbox).
+3. Month start: ranking snapshot, board objectives refreshed, finished stadium works open.
+4. 1 January: veterans retire and the year's youngsters come through (listed in the inbox);
+   federations decide on new stadium works.
    1 July: season rollover — a season of development and the summer transfers.
 5. Mondays: the abstract club week (form, sharpness, injuries).
 6. 24 days before a window: friendlies arranged for every free date.
 7. 10 days before a nation's next fixture: its squad is named.
 
-`World.advance()` repeats that until the user is needed — his call-up is due, his team
+`World.advance()` repeats that until the user is needed — a job offer arrives or his nation
+is awarded a tournament (both shown as popups wherever he is), his call-up is due, his team
 plays today, or he is out of work with offers waiting — and returns an `Interrupt`.
 The store's `proceed(step)` runs it one day at a time — 1, 7 or 30 days, or up to the
 next match (Settings → Continue moves on) — painting each day.
@@ -92,12 +94,42 @@ Settings persist through `pinia-plugin-persistedstate-2`; the world store opts o
 
 ## Federations
 
-Every nation has a federation reputation (1–10) and stadiums (1–5), in
-`engine/world/federation.ts`. Reputation rises with trophies and qualifications and
-drifts back towards what the ranking points suggest. Once a year it moves the academies'
-level (at most ±6 from where the nation started) and, when high enough, the stadiums are
-rebuilt. Stadiums set the size of the home advantage; reputation × stadiums weights who
-is chosen to host future tournaments. New host decisions are announced in the news.
+Every nation has a federation reputation (1–10), in `engine/world/federation.ts`.
+Reputation rises with trophies and qualifications and drifts back towards what the
+ranking points suggest. Once a year it moves the academies' level (at most ±6 from where
+the nation started).
+
+## Stadiums and hosting
+
+`engine/world/stadiums.ts`, after True Football National Manager. Every nation has grounds
+city by city (`src/data/stadiums.ts`: real grounds and capacities, a national stadium in
+the capital for the rest, and the grounds being built on the start date). Their size sets
+a stadium level (1–5), which gives the home advantage.
+
+Tournaments ask their hosts, together, for a number of grounds above a size and one
+showpiece (World Cup: 12 of 40,000 and one of 80,000; each confederation's cup and the
+regional cups less). Hosts are picked among the nations whose grounds — counting works
+under way — reach at least half of that, weighted by strength, stature and readiness; a
+World Cup or continental host that falls short is joined by co-hosts from its
+confederation. The user's federation can bid, which counts four times over.
+
+Each 1 January a federation may start a project — expanding a ground or building a new
+one, over one to four years — more often the higher its reputation and the more it
+outperforms its ranking. A nation awarded a tournament builds what it still lacks, done
+four months before kick-off. The user's nation being awarded one stops the calendar
+with a popup.
+
+## UEFA formats in transition
+
+The 2026–27 Nations League is the last with four leagues: its promotion and relegation
+fill three leagues of 18 (League D all goes up, nobody leaves C). From 2028–29 each league
+is three groups of six, six matches each (`sixMatchRounds` in competition/draw.ts). Euro
+2028 qualifying is twelve groups of four or five with the hosts playing and two places
+reserved for them. From 2028 the European Qualifiers (`defs/uefaQualifiers.ts`) split UEFA
+into League 1 (three Swiss groups of 12) and League 2 — World Cup 2030 qualifying and
+Euro 2032 qualifying onwards. Where UEFA had not published a detail yet (the split
+between direct places and play-offs, the Nations League quarter-finals with three
+groups), the definitions say how it is modelled.
 
 ## Squads and draws
 
