@@ -35,15 +35,18 @@ export function parsePlaceholder(id: string): {
 }
 
 const PATH = "ABCDEFGH"
+/** Beyond the eight letters (europeanQualifiersDef's League format can draw up
+ * to ten single-leg ties, not the four-team "paths" the letters were named for). */
+const pathName = (slot: number) => PATH[slot] ?? String(slot + 1)
 
 /** What the user reads in a group or a fixture. */
 export function placeholderLabel(id: string): string {
   const { defId, slot } = parsePlaceholder(id)
   switch (defId) {
     case "wcq-uefa":
-      return `UEFA play-off Path ${PATH[slot]} winner`
+      return `UEFA play-off Path ${pathName(slot)} winner`
     case "euroq":
-      return `Play-off Path ${PATH[slot]} winner`
+      return `Play-off Path ${pathName(slot)} winner`
     case "wcq-ic":
       return `Play-off Tournament winner ${slot + 1}`
     default:
@@ -55,7 +58,7 @@ export function placeholderLabel(id: string): string {
 export function placeholderShort(id: string): string {
   const { defId, slot } = parsePlaceholder(id)
   if (defId === "wcq-ic") return `IC ${slot + 1}`
-  return `PO ${PATH[slot]}`
+  return `PO ${pathName(slot)}`
 }
 
 /**

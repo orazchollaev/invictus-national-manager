@@ -94,6 +94,23 @@ export function windowAt(date: ISODate): MatchWindow | undefined {
   return windowsForYear(year).find((w) => date >= w.start && date <= w.end)
 }
 
+/**
+ * The window a date falls in, or — failing that — the window it was nudged out
+ * of. A fixture congestion-shuffled off its slot (competition/runtime.ts
+ * `freeDate`, up to 6 days) can land just past a window's `end`; without this,
+ * it reads as belonging to no window at all rather than the one it was drawn
+ * for, which throws off the squad key it's named under (world.ts `squadKey`).
+ */
+export function windowNear(date: ISODate): MatchWindow | undefined {
+  const w = windowAt(date)
+  if (w) return w
+  for (let d = addDays(date, -1), i = 0; i < 7; i++, d = addDays(d, -1)) {
+    const found = windowAt(d)
+    if (found) return found
+  }
+  return undefined
+}
+
 /** The next window starting on or after a date. */
 export function nextWindow(date: ISODate): MatchWindow {
   const year = Number(date.slice(0, 4))

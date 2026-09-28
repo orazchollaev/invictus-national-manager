@@ -17,7 +17,7 @@ import type {
   Importance,
 } from "../competition/types"
 import { addDays, daysBetween, yearOf } from "../calendar/dates"
-import { windowAt, windowsForYear, type MatchWindow } from "../calendar/windows"
+import { windowNear, windowsForYear, type MatchWindow } from "../calendar/windows"
 import { deriveSeed, makeRng, pick, shuffle, streamFor } from "../rng"
 import { playMatch } from "../match/engine"
 import type { MatchReport, TeamSheet } from "../match/types"
@@ -39,6 +39,7 @@ import { nationTop } from "../players/quality"
 import {
   isPlaceholder,
   makePlaceholder,
+  parsePlaceholder,
   placeholderConfed,
   placeholderLabel,
 } from "../competition/placeholders"
@@ -453,7 +454,7 @@ export class World {
   squadKey(f: Fixture, nationId: string): string {
     const inst = this.state.competitions[f.compId]
     if (inst && SQUAD_KEY_TOURNAMENT.has(inst.kind)) return inst.id
-    const w = windowAt(f.date)
+    const w = windowNear(f.date)
     if (!w) return f.compId
     const cacheKey = `${nationId}|${w.id}`
     let key = this.periodCache.get(cacheKey)
@@ -1086,8 +1087,30 @@ export class World {
     const inst = this.state.competitions[compId]
     const def = inst ? competitionDef(inst.defId) : undefined
     if (!inst || !def?.placeholderWinner) return
+    // The slots actually drawn for this competition — not a fixed range, since a
+    // play-off here can have as many ties as there are places to fill (euroq-2032's
+    // League format runs to ten, past the old fixed-paths cap that once lived here).
+    const slots = new Set<number>()
+    const collect = (t: string | null | undefined) => {
+      if (isPlaceholder(t) && parsePlaceholder(t).compId === compId)
+        slots.add(parsePlaceholder(t).slot)
+    }
+    for (const c of Object.values(this.state.competitions)) {
+      for (const st of c.stages) {
+        for (const g of st.groups ?? []) g.teams.forEach(collect)
+        for (const r of st.rounds ?? [])
+          for (const tie of r.ties) {
+            collect(tie.home)
+            collect(tie.away)
+          }
+      }
+    }
+    for (const fx of Object.values(this.state.fixtures)) {
+      collect(fx.home)
+      collect(fx.away)
+    }
     const map = new Map<string, string>()
-    for (let slot = 0; slot < 8; slot++) {
+    for (const slot of slots) {
       const team = def.placeholderWinner(inst, slot)
       if (team) map.set(makePlaceholder(compId, slot), team)
     }
