@@ -2,6 +2,8 @@ import type { CompetitionInstance } from "@/engine/competition/types"
 import type { CompContext } from "@/engine/competition/runtime"
 import { WC_PLACES, afcFourthRoundGroups, worldCupHosts } from "@/engine/competition/defs/fifa"
 import { AWARDED_HOSTS } from "@/data/start"
+import { isTransitionEdition } from "@/engine/competition/defs/nationsLeague"
+import { qualifierSplit } from "@/engine/competition/defs/uefaQualifiers"
 
 /** What finishing in a table position leads to. */
 export type Zone =
@@ -28,6 +30,8 @@ export type Zone =
   | "gcp"
   | "best-gcp"
   | "down-pi"
+  | "qf-third"
+  | "playoff-risk"
 
 export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
   qf: { label: "Quarter-finals", tone: "var(--pos-2)" },
@@ -56,6 +60,26 @@ export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
     tone: "var(--warning)",
   },
   "down-pi": { label: "Relegated, Play-In for the Gold Cup Prelims", tone: "var(--danger)" },
+  "qf-third": { label: "Quarter-finals if among the two best thirds", tone: "var(--warning)" },
+  "playoff-risk": {
+    label: "Relegation play-off if among the two worst thirds",
+    tone: "var(--warning)",
+  },
+}
+
+/**
+ * League 1 of the European Qualifiers: the direct places, then the positions that
+ * can still reach the play-offs.
+ */
+function europeanQualifierZones(
+  places: number,
+  stageKey: string,
+  z: (...list: (Zone | null)[]) => (Zone | null)[]
+) {
+  if (stageKey === "l2") return z("playoff")
+  const { perGroup, ties } = qualifierSplit(places)
+  const playoffRows = Math.ceil(Math.max(0, ties * 2 - 3) / 3)
+  return z(...Array<Zone>(perGroup).fill("through"), ...Array<Zone>(playoffRows).fill("playoff"))
 }
 
 const letterOf = (name: string) => name.replace(/\d+$/, "")
@@ -94,14 +118,24 @@ export function zonesFor(
   switch (inst.defId) {
     // Nations Leagues (see defs/nationsLeague.ts).
     case "unl":
+      // 2026–27: rebalanced for three leagues of 18 (nobody leaves League C).
+      if (isTransitionEdition(inst.year))
+        switch (letterOf(groupName)) {
+          case "A":
+            return z("qf", "qf", "playoff-risk", "risk")
+          case "B":
+            return z("up", "playoff-up", null, "playoff-down")
+          case "C":
+            return z("up", "playoff-up")
+          default:
+            return z(...Array<Zone>(size).fill("up"))
+        }
+      // From 2028–29: three leagues of 18, groups of six.
       switch (letterOf(groupName)) {
         case "A":
-          return last("down", "qf", "qf", "playoff-down")
+          return last("down", "qf", "qf", "qf-third", null, "playoff-down")
         case "B":
-          return last("down", "up", "playoff-up", "playoff-down")
-        case "C":
-          // The two worst fourth-placed go down, the other two play off.
-          return last("risk", "up", "playoff-up")
+          return last("down", "up", "playoff-up", null, null, "playoff-down")
         default:
           return z("up", "playoff-up")
       }
@@ -116,7 +150,10 @@ export function zonesFor(
       }
 
     // World Cup qualifying (see defs/fifa.ts).
-    case "wcq-uefa":
+    case "wcq-uefa": {
+      const hosts = worldCupHosts(inst.year, ctx).filter((h) => ctx.confedOf(h) === "UEFA")
+      return europeanQualifierZones(WC_PLACES.UEFA - hosts.length, stageKey, z)
+    }
     case "wcq-caf":
       return z("through", "playoff")
     case "wcq-afc": {
@@ -150,8 +187,12 @@ export function zonesFor(
     }
 
     // Continental qualifying.
-    case "euroq":
-      return z("through", "through", "playoff")
+    case "euroq": {
+      // Euro 2028: winners, the eight best runners-up, then play-offs.
+      if (inst.year <= 2028) return z("through", "maybe")
+      const hosts = ctx.instance(`euro-${inst.year}`)?.hosts ?? []
+      return europeanQualifierZones(24 - Math.min(2, hosts.length), stageKey, z)
+    }
     case "afconq":
       return hostGroup(inst, stageKey, groupName, ctx)
         ? z("through", "host-group")

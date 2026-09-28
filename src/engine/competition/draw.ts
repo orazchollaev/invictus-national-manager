@@ -29,6 +29,48 @@ export function roundRobin(teams: string[], legs: 1 | 2): [string, string][][] {
 }
 
 /**
+ * UEFA's six-match groups from 2028 (Nations League and European Qualifiers): a
+ * group of three pots, listed pot by pot, each team playing two opponents from every
+ * pot — its own included — once at home and once away. Pots of two (groups of six)
+ * make the same-pot pair a home-and-away tie; pots of four (groups of twelve) are a
+ * Swiss-style league phase. Six rounds, one match per team each round.
+ *
+ * Returns null when the group cannot be split into three equal pots of two or four.
+ */
+export function sixMatchRounds(teams: string[]): [string, string][][] | null {
+  const k = teams.length / 3
+  if (k !== 2 && k !== 4) return null
+  const pot = (p: number) => teams.slice(p * k, (p + 1) * k)
+  // Own pot: two matchings, each team once at home and once away over the pair.
+  const own = (p: number, second: boolean): [string, string][] => {
+    const t = pot(p)
+    if (k === 2) return [second ? [t[1], t[0]] : [t[0], t[1]]]
+    return second
+      ? [
+          [t[1], t[2]],
+          [t[3], t[0]],
+        ]
+      : [
+          [t[0], t[1]],
+          [t[2], t[3]],
+        ]
+  }
+  // Two pots: P_i hosts Q_i, then Q_(i+1) hosts P_i.
+  const cross = (p: number, q: number, second: boolean): [string, string][] => {
+    const a = pot(p)
+    const b = pot(q)
+    return a.map((t, i) => (second ? [b[(i + 1) % k], t] : [t, b[i]]))
+  }
+  const rounds: [string, string][][] = []
+  for (const second of [false, true]) {
+    rounds.push([...cross(0, 1, second), ...own(2, second)])
+    rounds.push([...cross(0, 2, second), ...own(1, second)])
+    rounds.push([...cross(1, 2, second), ...own(0, second)])
+  }
+  return rounds
+}
+
+/**
  * Split ranked teams into pots and draw them into `count` groups: one team from each
  * pot per group, keeping teams from the same `family` (confederation) apart where the
  * `maxPerFamily` rule allows. `fixed` places teams (hosts) as the first of a group.

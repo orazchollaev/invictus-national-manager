@@ -1,21 +1,39 @@
 /**
- * Nations League builder, after the UEFA format in use since 2024–25:
+ * The UEFA Nations League, in the two shapes it takes from the start date:
  *
- *  - League phase in the autumn: leagues of groups, six matchdays.
- *  - March: the top league's group winners and runners-up play two-legged
- *    quarter-finals; at the same time promotion/relegation play-offs are played
- *    between neighbouring leagues (A3 v B2, B3 v C2, C4 v D2), the lower team at
- *    home first.
- *  - June: Finals — semi-finals, third place and final — for the quarter-final winners.
- *  - Direct movement: A4 down; B1 up, B4 down; C1 up and the two worst C4 down;
- *    D1 up. Play-off winners from the lower league swap places with the losers.
+ * 2026–27, four leagues (16, 16, 16, 6) — the last edition before the change to three
+ * leagues of 18, so promotion and relegation are rebalanced to fill them:
+ *  - League phase (September–November): groups of four (League D: three), home and away.
+ *  - March: League A's group winners and runners-up play two-legged quarter-finals;
+ *    alongside, promotion/relegation play-offs, the lower-league team at home first:
+ *    League A's two best fourth-placed and two worst third-placed against League B's
+ *    runners-up, League B's fourth-placed against League C's runners-up.
+ *  - June: Finals — semi-finals, third place and final.
+ *  - Direct movement: League A's two worst fourth-placed go down; League B's and C's
+ *    group winners go up; every League D team goes up; nobody leaves C.
+ *
+ * From 2028–29, three leagues of 18 (UEFA, 20 May 2026): three groups of six per
+ * league, six matches each — home and away against the other team from its own pot,
+ * once against each team from the other two pots. UEFA has confirmed quarter-finals,
+ * Finals and promotion/relegation play-offs "with no change" without publishing the
+ * details for three groups, so they are modelled as:
+ *  - Quarter-finals: League A's three winners, three runners-up and two best thirds,
+ *    ranked on their results, 1 v 8 … 4 v 5 (the better ranked at home second).
+ *  - Group winners go up and sixth-placed teams go down; runners-up of the lower
+ *    league meet fifth-placed teams of the upper one in the play-offs.
  */
 import type { Confed, ISODate } from "@/engine/types"
 import { deriveSeed, makeRng } from "@/engine/rng"
-import { drawGroups } from "../draw"
+import { drawGroups, roundRobin, seedBracket, sixMatchRounds } from "../draw"
 import type { CompContext, CompetitionDef, StagePlan } from "../runtime"
 import { knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
+
+export interface Tier {
+  letter: string
+  size: number
+  groups: number
+}
 
 export interface NationsLeagueOptions {
   id: string
@@ -24,7 +42,7 @@ export interface NationsLeagueOptions {
   name(year: number): string
   editions(from: number, to: number): number[]
   /** League letters and their sizes, top first; the last takes everyone left. */
-  tiers: { letter: string; size: number; groups: number }[]
+  tiers(year: number): Tier[]
   leagueDates(year: number): ISODate[]
   leagueDrawDate(year: number): ISODate
   /** March: quarter-final legs (and play-offs). */
@@ -38,29 +56,40 @@ export interface NationsLeagueOptions {
 
 export const letterOf = (groupName: string) => groupName.replace(/\d+$/, "")
 
+/** The 2026–27 edition: four leagues, rebalanced to three leagues of 18. */
+export const isTransitionEdition = (year: number) => year === 2026
+
 function prevYear(o: NationsLeagueOptions, year: number): number {
   const list = o.editions(year - 8, year - 1)
   return list.length ? list[list.length - 1] : year
 }
 
 function tierComposition(o: NationsLeagueOptions, inst: CompetitionInstance, ctx: CompContext) {
+  const tiers = o.tiers(inst.year)
   const members = ctx.ranked((t) => ctx.confedOf(t) === o.confed)
   const previous = ctx.instance(`${o.id}-${prevYear(o, inst.year)}`)
   const out: Record<string, string[]> = {}
   if (previous?.outcome.tiers) {
-    const placed = new Set<string>()
-    for (const t of o.tiers) {
-      out[t.letter] = (previous.outcome.tiers[t.letter] ?? []).filter((x) => members.includes(x))
-      out[t.letter].forEach((x) => placed.add(x))
-    }
-    // Newly eligible members start in the bottom league.
-    const last = o.tiers[o.tiers.length - 1].letter
-    for (const m of members) if (!placed.has(m)) out[last].push(m)
+    // Last edition's leagues in league order (a league that no longer exists folds
+    // into the bottom one), cut to this edition's sizes.
+    const letters = Object.keys(previous.outcome.tiers).sort()
+    const order = [
+      ...new Set([
+        ...letters.flatMap((l) => previous.outcome.tiers![l].filter((x) => members.includes(x))),
+        ...members,
+      ]),
+    ]
+    let cursor = 0
+    tiers.forEach((t, i) => {
+      const size = i === tiers.length - 1 ? order.length - cursor : t.size
+      out[t.letter] = order.slice(cursor, cursor + size)
+      cursor += size
+    })
     return out
   }
   let cursor = 0
-  o.tiers.forEach((t, i) => {
-    const size = i === o.tiers.length - 1 ? members.length - cursor : t.size
+  tiers.forEach((t, i) => {
+    const size = i === tiers.length - 1 ? members.length - cursor : t.size
     out[t.letter] = members.slice(cursor, cursor + size)
     cursor += size
   })
@@ -72,7 +101,7 @@ function groupsFor(o: NationsLeagueOptions, inst: CompetitionInstance, ctx: Comp
   const names: string[] = []
   const groups: string[][] = []
   const tiers = fixed ? null : tierComposition(o, inst, ctx)
-  for (const t of o.tiers) {
+  for (const t of o.tiers(inst.year)) {
     const list = fixed
       ? (fixed[t.letter] ?? [])
       : drawGroups(
@@ -97,27 +126,79 @@ function tablesByLetter(inst: CompetitionInstance, ctx: CompContext): Record<str
   return out
 }
 
-const best = (a: Standing, b: Standing) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf
+const best = (a: Standing, b: Standing) => {
+  const pa = a.p ? a.pts / a.p : 0
+  const pb = b.p ? b.pts / b.p : 0
+  return pb - pa || b.gd - a.gd || b.gf - a.gf
+}
 const at = (tables: Standing[][] | undefined, pos: number) =>
   (tables ?? [])
     .map((t) => t[pos])
     .filter((r): r is Standing => !!r)
     .sort(best)
+const teams = (rows: Standing[]) => rows.map((r) => r.team)
 
-/** The play-off pairs, each [lower-league team, upper-league team]. */
-function playoffPairs(o: NationsLeagueOptions, inst: CompetitionInstance, ctx: CompContext) {
+/**
+ * Who goes where after the league phase: straight up, straight down, and the
+ * play-off pairs, each [lower-league team, upper-league team].
+ */
+export function movements(inst: CompetitionInstance, ctx: CompContext, letters: string[]) {
   const t = tablesByLetter(inst, ctx)
-  const [A, B, C, D] = o.tiers.map((x) => x.letter)
+  const up: string[] = []
+  const down: string[] = []
   const pairs: [string, string][] = []
   // The best upper team meets the weakest lower team.
-  const pair = (upper: Standing[], lower: Standing[]) => {
+  const pair = (upper: string[], lower: string[]) => {
     const low = [...lower].reverse()
-    upper.forEach((u, i) => low[i] && pairs.push([low[i].team, u.team]))
+    upper.forEach((u, i) => low[i] && pairs.push([low[i], u]))
   }
-  if (B) pair(at(t[A], 2), at(t[B], 1))
-  if (C) pair(at(t[B], 2), at(t[C], 1))
-  if (D) pair(at(t[C], 3).slice(0, at(t[D], 1).length), at(t[D], 1))
-  return pairs
+  if (isTransitionEdition(inst.year)) {
+    const [A, B, C, D] = letters
+    const fourthsA = teams(at(t[A], 3))
+    const thirdsA = teams(at(t[A], 2))
+    down.push(...fourthsA.slice(2))
+    pair([...thirdsA.slice(2), ...fourthsA.slice(0, 2)], teams(at(t[B], 1)))
+    up.push(...teams(at(t[B], 0)))
+    pair(teams(at(t[B], 3)), teams(at(t[C], 1)))
+    up.push(...teams(at(t[C], 0)))
+    if (D) for (const g of t[D] ?? []) up.push(...teams(g))
+    return { up, down, pairs }
+  }
+  letters.forEach((l, i) => {
+    const lower = letters[i + 1]
+    if (i > 0) up.push(...teams(at(t[l], 0)))
+    if (!lower) return
+    const size = Math.max(0, ...(t[l] ?? []).map((g) => g.length))
+    down.push(...teams(at(t[l], size - 1)))
+    pair(teams(at(t[l], size - 2)), teams(at(t[lower], 1)))
+  })
+  return { up, down, pairs }
+}
+
+/** Quarter-finalists as two-legged ties, [home first, home second]. */
+function quarterFinalists(inst: CompetitionInstance, ctx: CompContext, top: string): string[] {
+  const t = tablesByLetter(inst, ctx)[top] ?? []
+  const out: string[] = []
+  if (t.length === 4) {
+    // Four groups: group 1's winner meets group 2's runner-up, and so on round the
+    // groups; runners-up at home first.
+    t.forEach((g, gi) => {
+      const w = g[0]?.team
+      const r = t[(gi + 1) % t.length]?.[1]?.team
+      if (w && r) out.push(r, w)
+    })
+    return out
+  }
+  const seeds = [...teams(at(t, 0)), ...teams(at(t, 1)), ...teams(at(t, 2)).slice(0, 2)]
+  if (seeds.length < 8) return []
+  const groupOf = new Map<string, number>()
+  t.forEach((g, gi) => g.forEach((r) => groupOf.set(r.team, gi)))
+  const rank = (x: string) => seeds.indexOf(x)
+  for (const [a, b] of seedBracket(seeds, (a, b) => groupOf.get(a) === groupOf.get(b))) {
+    const [high, low] = rank(a) < rank(b) ? [a, b] : [b, a]
+    out.push(low, high)
+  }
+  return out
 }
 
 export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
@@ -131,7 +212,9 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
     plan(inst, ctx) {
       const { semi, final } = o.finalsDates(inst.year)
       const spring = o.springDates(inst.year)
-      const top = o.tiers[0].letter
+      const tiers = o.tiers(inst.year)
+      const top = tiers[0].letter
+      const letters = tiers.map((x) => x.letter)
       const plans: StagePlan[] = [
         {
           key: "league",
@@ -150,6 +233,11 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
             get names() {
               return groupsFor(o, inst, ctx).names
             },
+            // Groups of six play the six-match pattern; the rest a double round robin.
+            schedule: (list) => ({
+              rounds: sixMatchRounds(list) ?? roundRobin(list, 2),
+              dates: o.leagueDates(inst.year),
+            }),
             venue: "home-away",
             tiebreak: "h2h",
           },
@@ -160,18 +248,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
           after: "league",
           drawDate: o.springDrawDate(inst.year),
           importance: "nations-league",
-          // Runners-up at home first; group winners host the second leg. Group 1's
-          // winner meets group 2's runner-up, and so on round the groups.
-          entrants: (c, i) => {
-            const t = tablesByLetter(i, c)[top] ?? []
-            const out: string[] = []
-            t.forEach((g, gi) => {
-              const w = g[0]?.team
-              const r = t[(gi + 1) % t.length]?.[1]?.team
-              if (w && r) out.push(r, w)
-            })
-            return out
-          },
+          entrants: (c, i) => quarterFinalists(i, c, top),
           knockout: {
             rounds: [{ name: "Quarter-finals", dates: spring }],
             pairing: "ordered",
@@ -184,7 +261,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
           after: "league",
           drawDate: o.springDrawDate(inst.year),
           importance: "nations-league",
-          entrants: (c, i) => playoffPairs(o, i, c).flat(),
+          entrants: (c, i) => movements(i, c, letters).pairs.flat(),
           knockout: {
             rounds: [{ name: "Play-offs", dates: spring }],
             pairing: "ordered",
@@ -214,36 +291,36 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
     finalize(inst, ctx) {
       const ko = knockoutResult(inst, "finals")
       const t = tablesByLetter(inst, ctx)
-      const letters = o.tiers.map((x) => x.letter)
+      const letters = o.tiers(inst.year).map((x) => x.letter)
       const tiers: Record<string, string[]> = {}
       for (const l of letters) tiers[l] = (t[l] ?? []).flatMap((tb) => tb.map((r) => r.team))
-      const move = (team: string, from: string, to: string) => {
+      const leagueOf = (team: string) => letters.find((l) => tiers[l].includes(team))
+      const move = (team: string, to: string) => {
+        const from = leagueOf(team)
+        if (!from || !tiers[to]) return
         tiers[from] = tiers[from].filter((x) => x !== team)
         if (!tiers[to].includes(team)) tiers[to].push(team)
       }
-
-      const [A, B, C, D] = letters
-      if (B) for (const r of at(t[A], 3)) move(r.team, A, B)
-      if (B) for (const r of at(t[B], 0)) move(r.team, B, A)
-      if (C) for (const r of at(t[B], 3)) move(r.team, B, C)
-      if (C) for (const r of at(t[C], 0)) move(r.team, C, B)
-      if (D) {
-        // The two worst fourth-placed in C go straight down; the others play off.
-        const playoffSpots = at(t[D], 1).length
-        for (const r of at(t[C], 3).slice(playoffSpots)) move(r.team, C, D)
-        for (const r of at(t[D], 0)) move(r.team, D, C)
+      const step = (team: string, by: number) => {
+        const i = letters.indexOf(leagueOf(team) ?? "")
+        if (i >= 0 && letters[i + by]) move(team, letters[i + by])
       }
+      const m = movements(inst, ctx, letters)
+      for (const team of m.down) step(team, 1)
+      for (const team of m.up) step(team, -1)
       // A lower-league team that wins its play-off swaps with the upper-league loser.
       const stage = inst.stages.find((s) => s.key === "playoffs")
       for (const tie of stage?.rounds?.[0]?.ties ?? []) {
         if (!tie.home || !tie.away || tie.winner !== tie.home) continue
-        const lower = letters.find((l) => tiers[l].includes(tie.home!))
-        const upper = letters.find((l) => tiers[l].includes(tie.away!))
+        const lower = leagueOf(tie.home)
+        const upper = leagueOf(tie.away)
         if (lower && upper && lower > upper) {
-          move(tie.home, lower, upper)
-          move(tie.away, upper, lower)
+          move(tie.home, upper)
+          move(tie.away, lower)
         }
       }
+      // A league emptied by the change of format (League D) is not carried over.
+      for (const l of letters) if (!tiers[l].length) delete tiers[l]
       return { winner: ko.winner, runnerUp: ko.runnerUp, third: ko.third, tiers }
     },
   }

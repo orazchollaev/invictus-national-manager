@@ -36,16 +36,38 @@ describe("zone labels", () => {
     ])
   })
 
-  it("marks relegation on the last place of each Nations League group", () => {
-    expect(zonesFor(inst("unl", "nations-league"), "A1", 4, ctx)).toEqual([
+  it("marks the 2026–27 Nations League's move to three leagues of 18", () => {
+    const unl2026 = { ...inst("unl", "nations-league"), id: "unl-2026", year: 2026 }
+    expect(zonesFor(unl2026, "A1", 4, ctx)).toEqual(["qf", "qf", "playoff-risk", "risk"])
+    expect(zonesFor(unl2026, "B1", 4, ctx)).toEqual(["up", "playoff-up", null, "playoff-down"])
+    // Nobody goes down from League C; all of League D goes up.
+    expect(zonesFor(unl2026, "C1", 4, ctx)).toEqual(["up", "playoff-up", null, null])
+    expect(zonesFor(unl2026, "D1", 3, ctx)).toEqual(["up", "up", "up"])
+  })
+
+  it("marks the groups of six from 2028–29", () => {
+    expect(zonesFor(inst("unl", "nations-league"), "A1", 6, ctx)).toEqual([
       "qf",
       "qf",
+      "qf-third",
+      null,
       "playoff-down",
       "down",
     ])
-    expect(zonesFor(inst("unl", "nations-league"), "D2", 3, ctx)).toEqual([
+    expect(zonesFor(inst("unl", "nations-league"), "B2", 6, ctx)).toEqual([
       "up",
       "playoff-up",
+      null,
+      null,
+      "playoff-down",
+      "down",
+    ])
+    expect(zonesFor(inst("unl", "nations-league"), "C3", 6, ctx)).toEqual([
+      "up",
+      "playoff-up",
+      null,
+      null,
+      null,
       null,
     ])
   })

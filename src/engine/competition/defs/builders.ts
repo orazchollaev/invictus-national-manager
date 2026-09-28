@@ -171,6 +171,8 @@ export interface QualifierOptions {
   tiebreak?: Tiebreak
   importance?: Importance
   fixedGroups?(year: number): string[][] | undefined
+  /** Teams drawn into different groups (hosts playing qualifying). */
+  separate?(year: number, ctx: CompContext): string[]
   /** Custom qualification rule over the final tables. */
   qualify?(inst: CompetitionInstance, ctx: CompContext): CompetitionOutcome
 }
@@ -234,6 +236,7 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
           legs: o.groupLegs ?? 2,
           dates: o.groupDates(inst.year),
           fixed,
+          separate: o.separate?.(inst.year, ctx),
           venue: o.groupVenue ?? "home-away",
           tiebreak,
         },
