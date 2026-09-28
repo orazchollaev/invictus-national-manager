@@ -68,8 +68,10 @@ const record = computed(() => {
       <div class="facts">
         <div>
           <span class="muted">Federation</span>
-          {{ nation.reputation.toFixed(1) }}/10 · stadiums {{ "★".repeat(nation.stadium)
-          }}{{ "☆".repeat(5 - nation.stadium) }}
+          {{ nation.reputation.toFixed(1) }}/10 ·
+          <RouterLink :to="`/stadiums/${def.id}`" class="stadiums-link">
+            stadiums {{ "★".repeat(nation.stadium) }}{{ "☆".repeat(5 - nation.stadium) }}
+          </RouterLink>
         </div>
         <div>
           <span class="muted">Coach</span>
@@ -129,6 +131,11 @@ const record = computed(() => {
 </template>
 
 <style scoped>
+.stadiums-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 .head :deep(.card-body) {
   display: flex;
   gap: var(--sp-3);

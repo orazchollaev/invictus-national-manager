@@ -54,10 +54,10 @@ const tone = computed(() => {
         <span class="stat-value">{{ info.rank ? `#${info.rank}` : "—" }}</span>
         <span class="stat-label">{{ info.rank ? "FIFA ranking" : "Not a FIFA member" }}</span>
       </RouterLink>
-      <div class="stat">
+      <RouterLink to="/stadiums" class="stat">
         <span class="stat-value">{{ info.federation.toFixed(1) }}</span>
         <span class="stat-label">Federation /10 · {{ "★".repeat(info.stadium) }}</span>
-      </div>
+      </RouterLink>
       <div class="stat">
         <span class="stat-value">
           {{ info.points }}

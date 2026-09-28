@@ -58,6 +58,11 @@ const router = createRouter({
     },
 
     { path: "/nation/:id", component: () => import("../modules/nations/pages/NationPage.vue") },
+    { path: "/stadiums", component: () => import("../modules/stadiums/pages/StadiumsPage.vue") },
+    {
+      path: "/stadiums/:id",
+      component: () => import("../modules/stadiums/pages/StadiumsPage.vue"),
+    },
 
     { path: "/inbox", component: () => import("../modules/news/pages/InboxPage.vue") },
     { path: "/more", component: () => import("../modules/core/pages/MorePage.vue") },

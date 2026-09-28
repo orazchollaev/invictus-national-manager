@@ -7,6 +7,7 @@ import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 import { daysBetween, formatDate } from "@/engine/calendar/dates"
 import type { Fixture } from "@/engine/competition/types"
+import { venueOf } from "@/engine/world/stadiums"
 
 const router = useRouter()
 const world = useWorldStore()
@@ -26,6 +27,13 @@ const meta = world.derive((w) => {
       : (w.state.competitions[f.compId]?.name ?? "")
   const me = w.state.career.nationId
   const venue = !f.atHome ? "Neutral venue" : f.home === me ? "Home" : "Away"
+  // Hosted tournaments are played in the hosts' grounds; everything else at the home side's.
+  const inst = w.state.competitions[f.compId]
+  const hosted = inst && inst.kind !== "qualifier" && inst.hosts.length ? inst.hosts : null
+  const grounds = (hosted ?? (f.atHome ? [f.home] : [])).flatMap(
+    (h) => w.state.nations[h]?.stadiums ?? []
+  )
+  const ground = venueOf(grounds, f.id, f.importance !== "friendly")
   return {
     comp,
     homeRank: w.fifaRank(f.home),
@@ -33,6 +41,7 @@ const meta = world.derive((w) => {
     homeName: w.def(f.home).name,
     awayName: w.def(f.away).name,
     venue,
+    ground: ground ? `${ground.name}, ${ground.city}` : "",
   }
 }, null)
 
@@ -70,7 +79,10 @@ const countdown = computed(() => {
     </RouterLink>
 
     <div class="foot">
-      <span class="venue">{{ meta.venue }}</span>
+      <span class="venue">
+        {{ meta.venue }}
+        <small v-if="meta.ground" class="ground">{{ meta.ground }}</small>
+      </span>
       <AppButton variant="tonal" @click="router.push('/squad/tactics')">
         <ClipboardList :size="16" />
         Team &amp; tactics
@@ -175,7 +187,17 @@ const countdown = computed(() => {
 }
 
 .venue {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   font-size: var(--fs-sm);
   color: var(--text-muted);
+}
+
+.ground {
+  font-size: var(--fs-xs);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 </style>

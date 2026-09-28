@@ -4,6 +4,7 @@ import {
   Briefcase,
   CalendarDays,
   FolderOpen,
+  Landmark,
   LogOut,
   ListOrdered,
   Medal,
@@ -24,6 +25,12 @@ const items = [
     icon: Briefcase,
     label: "Career",
     hint: "Objectives, confidence and job offers",
+  },
+  {
+    to: "/stadiums",
+    icon: Landmark,
+    label: "Stadiums",
+    hint: "Grounds, works and bids to host tournaments",
   },
   { to: "/rankings", icon: ListOrdered, label: "FIFA ranking", hint: "All 211 FIFA members" },
   {
