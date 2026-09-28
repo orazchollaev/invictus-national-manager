@@ -3,7 +3,7 @@
  * where a draw has already been made. Everything else is drawn by the game.
  *
  * Sources (Wikipedia, September 2026):
- *  - 2026–27 UEFA Nations League (league phase groups)
+ *  - 2026–27 UEFA Nations League A, B, C and D (league phase groups, by pot)
  *  - 2026–27 CONCACAF Nations League (draw of 23 July 2026; Template:…group tables)
  *  - 2027 Africa Cup of Nations qualification (group stage; Template:…group tables)
  *  - 2027 AFC Asian Cup (group draw)
@@ -12,28 +12,34 @@
 
 export const START_DATE = "2026-09-01"
 
+/**
+ * League phase groups, each listed by pot (pot 1 first), from the League A–D
+ * articles. Summary tables elsewhere list the pots' rows, not the groups — easy to
+ * copy by mistake (this file once had Leagues B and C that way).
+ */
 export const NATIONS_LEAGUE_2026: Record<string, string[][]> = {
   A: [
-    ["BEL", "FRA", "TUR", "ITA"],
-    ["GRE", "GER", "NED", "SRB"],
+    ["FRA", "ITA", "BEL", "TUR"],
+    ["GER", "NED", "SRB", "GRE"],
     ["ESP", "CRO", "ENG", "CZE"],
-    ["NOR", "POR", "DEN", "WAL"],
+    ["POR", "DEN", "NOR", "WAL"],
   ],
   B: [
-    ["SUI", "SCO", "SVN", "MKD"],
-    ["HUN", "POL", "ISR", "BIH"],
-    ["AUT", "UKR", "GEO", "IRL"],
-    ["ROU", "SWE", "KOS", "NIR"],
+    ["SCO", "SUI", "SVN", "MKD"],
+    ["HUN", "UKR", "GEO", "NIR"],
+    ["ISR", "AUT", "IRL", "KOS"],
+    ["POL", "BIH", "ROU", "SWE"],
   ],
   C: [
-    ["ISL", "ALB", "MNE", "KAZ"],
-    ["FIN", "SVK", "BUL", "ARM"],
-    ["BLR", "FRO", "CYP", "EST"],
-    ["LVA", "LUX", "MDA", "SMR"],
+    ["ALB", "FIN", "BLR", "SMR"],
+    ["MNE", "ARM", "CYP", "LVA"],
+    ["KAZ", "SVK", "FRO", "MDA"],
+    ["ISL", "BUL", "EST", "LUX"],
   ],
+  // The last League D: all six go up, the 2028–29 edition having three leagues of 18.
   D: [
-    ["AZE", "LTU", "MLT"],
-    ["GIB", "LIE", "AND"],
+    ["MLT", "GIB", "AND"],
+    ["LTU", "AZE", "LIE"],
   ],
 }
 
@@ -59,8 +65,8 @@ export const CONCACAF_NATIONS_LEAGUE_2026: {
     ],
     C: [
       ["MSR", "TCA", "VGB"],
-      ["ATG", "ARU", "AIA"],
-      ["SMN", "BAH", "VIR"],
+      ["SMN", "ARU", "BAH"],
+      ["ATG", "AIA", "VIR"],
     ],
   },
 }
