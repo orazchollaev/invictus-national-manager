@@ -86,9 +86,11 @@ function suggest() {
 async function confirm() {
   if (selected.value.size < 23) return showAlert("Name at least 23 players.")
   if (counts.value.GK < 3) return showAlert("You need three goalkeepers.")
+  // Suspended players may be named: they sit out the match, not the squad.
   const blocked = unavailableIn(
     [...selected.value].map((id) => world.world?.state.players[id]),
-    world.date
+    world.date,
+    false
   )
   if (blocked.length) return showAlert(`Remove unavailable players first: ${blocked.join("; ")}.`)
   world.confirmCallup([...selected.value])
@@ -144,6 +146,7 @@ async function confirm() {
           </template>
         </PlayerRow>
         <div v-if="unavailableReason(p)" class="reason">{{ unavailableReason(p) }}</div>
+        <div v-else-if="p.banned" class="reason">Suspended for the next match</div>
       </button>
     </div>
 
