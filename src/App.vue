@@ -58,24 +58,18 @@ onUnmounted(() => backButtonListener?.())
 
 <template>
   <div class="app-root">
-    <Transition name="app-header">
-      <AppHeader v-if="!hideNav" />
-    </Transition>
+    <!-- No route, header or tab-bar animations: screens swap in place, without sliding
+         or fading, so nothing on screen moves under the user's eyes. -->
+    <AppHeader v-if="!hideNav" />
     <main class="app-main" :class="{ 'app-main--no-nav': hideNav }">
       <ErrorBoundary>
-        <RouterView v-slot="{ Component }">
-          <Transition name="page" mode="out-in">
-            <component :is="Component" />
-          </Transition>
-        </RouterView>
+        <RouterView />
       </ErrorBoundary>
     </main>
     <AppDialog />
     <GamePopups />
     <BusyOverlay />
-    <Transition name="mobile-nav">
-      <AppMobileBottomNav v-if="!hideNav" />
-    </Transition>
+    <AppMobileBottomNav v-if="!hideNav" />
   </div>
 </template>
 
@@ -96,31 +90,5 @@ onUnmounted(() => backButtonListener?.())
 
 .app-main--no-nav::after {
   height: var(--safe-bottom);
-}
-
-.mobile-nav-enter-active,
-.mobile-nav-leave-active {
-  transition:
-    transform var(--dur) var(--ease),
-    opacity var(--dur) var(--ease);
-}
-
-.mobile-nav-enter-from,
-.mobile-nav-leave-to {
-  transform: translateY(120%);
-  opacity: 0;
-}
-
-.app-header-enter-active,
-.app-header-leave-active {
-  transition:
-    transform var(--dur) var(--ease),
-    opacity var(--dur) var(--ease);
-}
-
-.app-header-enter-from,
-.app-header-leave-to {
-  transform: translateY(-100%);
-  opacity: 0;
 }
 </style>

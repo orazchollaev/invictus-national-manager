@@ -188,16 +188,7 @@
   border-radius: var(--radius);
 }
 
-/* ── Route & list transitions ────────────────────────────────── */
-.page-enter-active,
-.page-leave-active {
-  transition: opacity var(--dur) var(--ease);
-}
-.page-enter-from,
-.page-leave-to {
-  opacity: 0;
-}
-
+/* ── List transitions ────────────────────────────────────────── */
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
