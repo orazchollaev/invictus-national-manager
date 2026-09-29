@@ -29,10 +29,22 @@ const router = createRouter({
     { path: "/new", component: () => import("../modules/career/pages/NewGamePage.vue") },
     { path: "/home", component: () => import("../modules/core/pages/HomePage.vue") },
     { path: "/career", component: () => import("../modules/career/pages/CareerPage.vue") },
+    {
+      path: "/career/review/:id",
+      component: () => import("../modules/career/pages/ReviewPage.vue"),
+    },
+    {
+      path: "/career/farewell",
+      component: () => import("../modules/career/pages/FarewellPage.vue"),
+    },
 
     { path: "/squad", component: () => import("../modules/squad/pages/SquadPage.vue") },
     { path: "/squad/callup", component: () => import("../modules/squad/pages/CallUpPage.vue") },
     { path: "/squad/tactics", component: () => import("../modules/squad/pages/TacticsPage.vue") },
+    {
+      path: "/squad/prospects",
+      component: () => import("../modules/squad/pages/ProspectsPage.vue"),
+    },
     { path: "/player/:id", component: () => import("../modules/squad/pages/PlayerPage.vue") },
 
     { path: "/match/:id", component: () => import("../modules/match/pages/MatchPage.vue") },
