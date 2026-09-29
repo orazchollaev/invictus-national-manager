@@ -55,9 +55,25 @@ export const CAREER_TUNING = {
   /** Each month the board's memory fades: confidence moves this far towards `settle`. */
   driftPerMonth: 1,
   settle: 50,
+  /**
+   * Reputation mostly grows: a little every month in a job, while the board is
+   * not losing faith (confidence at or above `reputationSlump`); below that it
+   * slips. Every loss of reputation counts at `reputationLossScale` of its size,
+   * so only a genuinely bad spell drags a name down.
+   */
+  reputationMonthly: 0.3,
+  reputationSlump: 25,
+  reputationLossScale: 0.5,
 } as const
 
 const T = CAREER_TUNING
+
+/** Move the manager's reputation; losses are softened (see `reputationLossScale`). */
+function nudgeReputation(world: World, delta: number) {
+  const c = world.state.career
+  const d = delta < 0 ? delta * T.reputationLossScale : delta
+  c.reputation = Math.round(clamp(c.reputation + d, 1, 100) * 100) / 100
+}
 
 /** "FIFA World Cup 2030" from "wc-2030". */
 function finalsName(instanceId: string): string {
@@ -496,7 +512,7 @@ export function checkObjectives(world: World) {
       obj.ambition = 0
       obj.broken = true
       nudgeConfidence(world, -T.brokenPromise)
-      career.reputation = clamp(career.reputation - 2, 1, 100)
+      nudgeReputation(world, -2)
       world.news(
         "board",
         "Promise broken",
@@ -514,7 +530,7 @@ export function checkObjectives(world: World) {
     if (status === "met") {
       const reward = raised ? T.raisedReward : lowered ? T.loweredReward : 1
       nudgeConfidence(world, (obj.critical ? T.metCritical : T.met) * reward)
-      career.reputation = clamp(career.reputation + (obj.kind === "win" ? 12 : 5) * reward, 1, 100)
+      nudgeReputation(world, (obj.kind === "win" ? 12 : 5) * reward)
       federationBoost(
         world,
         me,
@@ -536,7 +552,7 @@ export function checkObjectives(world: World) {
       }
     } else {
       nudgeConfidence(world, obj.critical ? T.failedCritical : T.failed)
-      career.reputation = clamp(career.reputation - (obj.critical ? 6 : 3), 1, 100)
+      nudgeReputation(world, obj.critical ? -6 : -3)
       federationBoost(world, me, -0.2, 0)
       world.news(
         "board",
@@ -569,7 +585,7 @@ export function afterUserResult(world: World, f: Fixture) {
   if (f.result.pens) actual = f.result.w === (home ? "home" : "away") ? 0.75 : 0.5
   const weight = IMPORTANCE_WEIGHT[f.importance] / 4
   nudgeConfidence(world, (actual - expected) * weight)
-  career.reputation = clamp(career.reputation + (actual - expected) * weight * 0.15, 1, 100)
+  nudgeReputation(world, (actual - expected) * weight * 0.15)
 
   const h = career.history[career.history.length - 1]
   if (h) {
@@ -696,11 +712,7 @@ export function afterCompetition(world: World, compId: string) {
   if (inst && me && inst.outcome.winner === me) {
     const h = c.history[c.history.length - 1]
     h?.trophies.push(inst.name)
-    c.reputation = clamp(
-      c.reputation + (inst.kind === "world-cup" ? 25 : inst.kind === "continental" ? 12 : 4),
-      1,
-      100
-    )
+    nudgeReputation(world, inst.kind === "world-cup" ? 25 : inst.kind === "continental" ? 12 : 4)
     nudgeConfidence(world, 25)
     award(world, "first-trophy", `Your first trophy: the ${inst.name}.`)
     if (inst.kind === "world-cup")
@@ -806,7 +818,7 @@ export function leaveJob(world: World, reason: "sacked" | "expired") {
   c.ultimatum = null
   c.contractUntil = undefined
   c.contractFor = undefined
-  c.reputation = clamp(c.reputation - (reason === "sacked" ? 8 : 2), 1, 100)
+  nudgeReputation(world, reason === "sacked" ? -8 : -2)
   world.state.pendingCallup = null
   world.state.pendingUltimatum = false
   world.state.pendingSacked = true
@@ -867,10 +879,18 @@ export function decideContract(world: World): "renewed" | "extended" | "expired"
   return "expired"
 }
 
-/** Month start: good and bad runs alike fade from the board's memory. */
+/**
+ * Month start: good and bad runs alike fade from the board's memory, and a month
+ * in the job adds to the manager's name — unless the board is losing faith.
+ */
 export function monthlyDrift(world: World) {
   const c = world.state.career
-  if (!c.nationId || c.confidence === T.settle) return
+  if (!c.nationId) return
+  nudgeReputation(
+    world,
+    c.confidence >= T.reputationSlump ? T.reputationMonthly : -T.reputationMonthly
+  )
+  if (c.confidence === T.settle) return
   const step = Math.min(T.driftPerMonth, Math.abs(T.settle - c.confidence))
   nudgeConfidence(world, c.confidence < T.settle ? step : -step)
 }
@@ -1002,8 +1022,7 @@ export function expireOffers(world: World) {
   if (world.state.pendingOffer && !c.offers.some((o) => o.nationId === world.state.pendingOffer))
     world.state.pendingOffer = null
   // Out of work for a while: someone always calls eventually.
-  if (!c.nationId && !c.offers.length && c.sacked && world.state.date.slice(8) === "01")
-    makeOffers(world, true)
+  if (!c.nationId && !c.offers.length && world.state.date.slice(8) === "01") makeOffers(world, true)
 }
 
 /** Fill the career fields a save from before they existed does not have. */
