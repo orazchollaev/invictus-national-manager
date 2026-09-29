@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { useRouter } from "vue-router"
-import { ClipboardList, Users } from "@lucide/vue"
+import { ClipboardList, Sprout, Users } from "@lucide/vue"
 import { AppButton, AppEmptyState, AppSearchInput, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { PlayerRow } from "@/modules/squad/components/list"
@@ -61,6 +61,14 @@ const list = computed(() => {
     :subtitle="me ? `${squad.length} called up · ${pool.length} eligible players` : ''"
   >
     <template #actions>
+      <AppButton
+        v-if="me"
+        variant="tonal"
+        aria-label="Prospects"
+        @click="router.push('/squad/prospects')"
+      >
+        <Sprout :size="16" />
+      </AppButton>
       <AppButton variant="tonal" @click="router.push('/squad/tactics')">
         <ClipboardList :size="16" />
         Tactics
