@@ -3,6 +3,7 @@ import { computed, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import {
   AppButton,
+  AppButtonGroup,
   AppCard,
   AppField,
   AppSearchInput,
@@ -28,6 +29,18 @@ const nationality = ref("TUR")
 const confed = ref<Confed>("UEFA")
 const query = ref("")
 const chosen = ref<string | null>(null)
+/** Take a job now, or start out of work and wait for offers. */
+const mode = ref<"job" | "free">("job")
+
+/** Starting reputations out of work: it decides which federations call first. */
+const REPUTATIONS = [
+  { value: "25", label: "Unknown", hint: "Small nations, far down the ranking, will call." },
+  { value: "50", label: "Promising", hint: "Mid-ranked nations will be interested." },
+  { value: "75", label: "Respected", hint: "Established nations will want to talk." },
+  { value: "95", label: "Elite", hint: "Some of the world's strongest teams will call." },
+]
+const reputation = ref("50")
+const reputationHint = computed(() => REPUTATIONS.find((r) => r.value === reputation.value)?.hint)
 
 const byPoints = [...NATION_DEFS].filter((n) => !n.banned).sort((a, b) => b.points - a.points)
 const strengthOf = new Map(byPoints.map((n, i) => [n.id, i + 1]))
@@ -66,14 +79,25 @@ function back() {
   else router.back()
 }
 
-const canStart = computed(() => name.value.trim().length >= 2 && !!chosen.value)
+const canStart = computed(
+  () => name.value.trim().length >= 2 && (mode.value === "free" || !!chosen.value)
+)
+
+const startLabel = computed(() => {
+  if (mode.value === "free") return "Start out of work"
+  return chosen.value
+    ? `Take charge of ${NATION_DEFS.find((n) => n.id === chosen.value)?.name}`
+    : "Pick a nation"
+})
 
 async function start() {
-  if (!chosen.value || !slot.value) return
+  if (!canStart.value || !slot.value) return
+  const free = mode.value === "free"
   await world.newGame(slot.value, {
     managerName: name.value.trim(),
     nationality: nationality.value,
-    nationId: chosen.value,
+    nationId: free ? null : chosen.value,
+    reputation: free ? Number(reputation.value) : undefined,
   })
   router.replace("/home")
 }
@@ -100,7 +124,14 @@ async function start() {
             :options="nationalityOptions"
             searchable
             search-placeholder="Search nations"
-          />
+          >
+            <template #value="{ option }">
+              <NationFlag v-if="option" :id="option.value" :size="20" name class="select-nation" />
+            </template>
+            <template #option="{ option }">
+              <NationFlag :id="option.value" :size="20" name class="select-nation" />
+            </template>
+          </AppSelect>
         </AppField>
       </AppCard>
       <AppButton variant="filled" block :disabled="name.trim().length < 2" @click="step = 2">
@@ -109,34 +140,56 @@ async function start() {
     </template>
 
     <template v-else>
-      <AppSearchInput v-model="query" placeholder="Search all nations" />
-      <AppSubTabBar
-        v-if="!query"
-        :model-value="confed"
-        :options="CONFEDS.map((c) => ({ value: c, label: c }))"
-        size="sm"
-        @update:model-value="(v) => (confed = v as Confed)"
+      <AppButtonGroup
+        :model-value="mode"
+        block
+        :options="[
+          { value: 'job', label: 'Take a job' },
+          { value: 'free', label: 'Start out of work' },
+        ]"
+        @update:model-value="(v) => (mode = v as 'job' | 'free')"
       />
-      <div class="nations">
-        <button
-          v-for="n in list"
-          :key="n.id"
-          class="nation-row"
-          :class="{ 'nation-row--on': chosen === n.id }"
-          @click="chosen = n.id"
-        >
-          <span class="nation-rank">{{ rankOf.get(n.id) ?? "—" }}</span>
-          <NationFlag :id="n.id" :size="28" name />
-          <span class="nation-stars">{{ "★".repeat(stars(n.id)) }}</span>
-        </button>
-      </div>
+
+      <AppCard v-if="mode === 'free'" padding="md" class="form">
+        <AppField label="Your reputation" layout="stack">
+          <AppButtonGroup
+            :model-value="reputation"
+            block
+            :options="REPUTATIONS.map((r) => ({ value: r.value, label: r.label }))"
+            @update:model-value="(v) => (reputation = v as string)"
+          />
+        </AppField>
+        <p class="hint">
+          {{ reputationHint }} Offers arrive on day one; decline them all and more will come.
+        </p>
+      </AppCard>
+
+      <template v-else>
+        <AppSearchInput v-model="query" placeholder="Search all nations" />
+        <AppSubTabBar
+          v-if="!query"
+          :model-value="confed"
+          :options="CONFEDS.map((c) => ({ value: c, label: c }))"
+          size="sm"
+          @update:model-value="(v) => (confed = v as Confed)"
+        />
+        <div class="nations">
+          <button
+            v-for="n in list"
+            :key="n.id"
+            class="nation-row"
+            :class="{ 'nation-row--on': chosen === n.id }"
+            @click="chosen = n.id"
+          >
+            <span class="nation-rank">{{ rankOf.get(n.id) ?? "—" }}</span>
+            <NationFlag :id="n.id" :size="28" name />
+            <span class="nation-stars">{{ "★".repeat(stars(n.id)) }}</span>
+          </button>
+        </div>
+      </template>
       <StickyCta>
         <AppButton variant="filled" block :disabled="!canStart" @click="start">
-          {{
-            chosen
-              ? `Take charge of ${NATION_DEFS.find((n) => n.id === chosen)?.name}`
-              : "Pick a nation"
-          }}
+          {{ startLabel }}
         </AppButton>
       </StickyCta>
     </template>
@@ -152,6 +205,16 @@ async function start() {
 
 .input {
   width: 100%;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.select-nation {
+  min-width: 0;
 }
 
 .nations {

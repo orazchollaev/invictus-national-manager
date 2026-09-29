@@ -61,7 +61,13 @@ export const useWorldStore = defineStore(
 
     async function newGame(
       n: number,
-      opts: { managerName: string; nationality: string; nationId: string }
+      opts: {
+        managerName: string
+        nationality: string
+        /** null: start out of work, with `reputation` deciding who calls. */
+        nationId: string | null
+        reputation?: number
+      }
     ) {
       busy.value = true
       busyLabel.value = "Building the world…"

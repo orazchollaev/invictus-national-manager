@@ -12,6 +12,7 @@ import { playMatch } from "../match/engine"
 import { ageOn } from "../players/ability"
 import { addDays } from "../calendar/dates"
 import {
+  acceptOffer,
   afterUserResult,
   ambitionChoices,
   CAREER_TUNING,
@@ -316,6 +317,79 @@ describe("the board's memory", () => {
     c.confidence = CAREER_TUNING.settle
     monthlyDrift(w)
     expect(c.confidence).toBe(CAREER_TUNING.settle)
+  })
+})
+
+describe("reputation", () => {
+  it("grows month by month in a job, and slips only when the board is losing faith", () => {
+    const w = newWorld("TUR")
+    const c = w.state.career
+    c.reputation = 50
+    c.confidence = 60
+    monthlyDrift(w)
+    expect(c.reputation).toBeCloseTo(50 + CAREER_TUNING.reputationMonthly)
+    c.reputation = 50
+    c.confidence = 10
+    monthlyDrift(w)
+    expect(c.reputation).toBeCloseTo(
+      50 - CAREER_TUNING.reputationMonthly * CAREER_TUNING.reputationLossScale
+    )
+  })
+
+  it("loses less than it gains for the same result against expectation", () => {
+    const up = newWorld("SMR")
+    const before = up.state.career.reputation
+    afterUserResult(up, fixture(up, "ESP", "qualifier", 1, 0))
+    const gain = up.state.career.reputation - before
+    const down = newWorld("ESP")
+    const start = down.state.career.reputation
+    afterUserResult(down, fixture(down, "SMR", "qualifier", 0, 1))
+    const loss = start - down.state.career.reputation
+    expect(gain).toBeGreaterThan(0)
+    expect(loss).toBeGreaterThan(0)
+    expect(loss).toBeLessThan(gain)
+  })
+})
+
+describe("starting out of work", () => {
+  const unemployed = (reputation: number) =>
+    createWorld(
+      {
+        seed: 21,
+        start: "2026-09-01",
+        managerName: "Test",
+        nationality: "TUR",
+        nationId: null,
+        reputation,
+      },
+      statics(),
+      playerRows as unknown as Record<string, PlayerRow[]>
+    )
+
+  it("brings offers matching the chosen reputation on day one", () => {
+    const low = unemployed(25)
+    const high = unemployed(95)
+    for (const w of [low, high]) {
+      expect(w.state.career.nationId).toBeNull()
+      expect(w.state.career.history).toEqual([])
+      expect(w.state.career.offers.length).toBeGreaterThan(0)
+      expect(w.advance(1).kind).toBe("offer")
+    }
+    expect(low.state.career.reputation).toBe(25)
+    const rank = (w: World) =>
+      Math.min(...w.state.career.offers.map((o) => w.ctx().ranked().indexOf(o.nationId)))
+    // A bigger name hears from much stronger nations.
+    expect(rank(high)).toBeLessThan(rank(low) - 50)
+  })
+
+  it("keeps the calendar going until a job is taken", () => {
+    const w = unemployed(50)
+    const offer = w.state.career.offers[0].nationId
+    w.clearOffer()
+    acceptOffer(w, offer)
+    expect(w.state.career.nationId).toBe(offer)
+    expect(w.state.career.history).toHaveLength(1)
+    expect(w.state.career.contractUntil).toBeTruthy()
   })
 })
 

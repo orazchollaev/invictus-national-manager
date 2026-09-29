@@ -6,7 +6,7 @@ import { NAME_POOLS } from "@/data/names"
 import { roleAt } from "../players/clubs"
 import { initialNationState, World, type WorldStatics } from "./world"
 import type { WorldState } from "./types"
-import { refreshObjectives, setContract } from "../career/career"
+import { makeOffers, refreshObjectives, setContract } from "../career/career"
 
 export const WORLD_VERSION = 2
 
@@ -92,7 +92,10 @@ export interface NewWorldOptions {
   start: string
   managerName: string
   nationality: string
-  nationId: string
+  /** The nation to take charge of, or null to start out of work. */
+  nationId: string | null
+  /** Starting reputation 1–100 when out of work (a job sets its own). */
+  reputation?: number
 }
 
 /** 20 for the smallest job, 80 for the best-ranked nation. */
@@ -131,23 +134,28 @@ export function createWorld(
       nationality: opts.nationality,
       nationId: opts.nationId,
       confidence: 60,
-      // A manager trusted with a big nation starts with a name to match.
-      reputation: startingReputation(statics.nations, opts.nationId),
+      // A manager trusted with a big nation starts with a name to match; one out
+      // of work starts with the name he chose.
+      reputation: opts.nationId
+        ? startingReputation(statics.nations, opts.nationId)
+        : Math.round(Math.min(100, Math.max(1, opts.reputation ?? 30))),
       since: opts.start,
       objectives: [],
       offers: [],
-      history: [
-        {
-          nationId: opts.nationId,
-          from: opts.start,
-          to: null,
-          played: 0,
-          won: 0,
-          drawn: 0,
-          lost: 0,
-          trophies: [],
-        },
-      ],
+      history: opts.nationId
+        ? [
+            {
+              nationId: opts.nationId,
+              from: opts.start,
+              to: null,
+              played: 0,
+              won: 0,
+              drawn: 0,
+              lost: 0,
+              trophies: [],
+            },
+          ]
+        : [],
     },
     pendingCallup: null,
     friendlyRequests: {},
@@ -170,5 +178,7 @@ export function createWorld(
   }
   refreshObjectives(world)
   setContract(world)
+  // Out of work: federations whose standing matches the chosen name call at once.
+  if (!opts.nationId) makeOffers(world, true)
   return world
 }
