@@ -3,13 +3,15 @@ import { ageOn, matchAbility, positionFit, positionGroup } from "../players/abil
 import { nationTop, peakAt } from "../players/quality"
 import {
   developSeason,
+  INTL_MINUTES_FULL,
   retirementChance,
   intlRetirementChance,
   intakeSize,
   newgen,
   ageFactor,
 } from "../players/lifecycle"
-import { indexClubs, roleAt, tierForAbility } from "../players/clubs"
+import { indexClubs, roleAt, showcased, summerMove, tierForAbility } from "../players/clubs"
+import type { Club } from "../types"
 import { makeRng } from "../rng"
 import type { NationDef } from "../types"
 import { makePlayer } from "./helpers"
@@ -89,6 +91,40 @@ describe("development", () => {
     expect(gained / 200).toBeGreaterThan(3)
   })
 
+  it("develops youngsters faster when they play international football", () => {
+    const season = (minutes: number) => {
+      const r = makeRng(9)
+      let gained = 0
+      for (let i = 0; i < 300; i++) {
+        const p = makePlayer(`y${i}`, "CM", 60, { pa: 82, role: "rotation" })
+        gained += developSeason(p, 19, 3, minutes, r)
+      }
+      return gained / 300
+    }
+    const none = season(0)
+    const some = season(INTL_MINUTES_FULL / 2)
+    const full = season(INTL_MINUTES_FULL)
+    expect(some).toBeGreaterThan(none)
+    expect(full).toBeGreaterThan(some)
+    // A full season of caps is worth roughly a fifth more growth, not a miracle.
+    expect(full / none).toBeGreaterThan(1.12)
+    expect(full / none).toBeLessThan(1.4)
+    // More minutes than the full boost add nothing.
+    expect(season(INTL_MINUTES_FULL * 3)).toBeCloseTo(full, 1)
+  })
+
+  it("develops the user's players a little faster, and keeps veterans going", () => {
+    const grow = (boost: number, age: number, ca: number, pa: number) => {
+      const r = makeRng(21)
+      let total = 0
+      for (let i = 0; i < 300; i++)
+        total += developSeason(makePlayer(`b${i}`, "CM", ca, { pa }), age, 3, 0, r, boost)
+      return total / 300
+    }
+    expect(grow(0.15, 19, 60, 82)).toBeGreaterThan(grow(0, 19, 60, 82) * 1.08)
+    expect(grow(0.15, 33, 80, 80)).toBeGreaterThan(grow(0, 33, 80, 80))
+  })
+
   it("makes veterans decline, keepers later than outfielders", () => {
     const r = makeRng(2)
     let outfield = 0
@@ -140,5 +176,31 @@ describe("clubs", () => {
     expect(roleAt(95, 3, r)).toBe("star")
     expect(roleAt(45, 1, r)).toBe("reserve")
     expect(clubs.get("AAA")?.[0]).toEqual(["c1"])
+  })
+
+  it("moves a young player up after an international breakthrough", () => {
+    const map = new Map<string, Club>([
+      ["c1", { id: "c1", name: "One", nationId: "AAA", tier: 1 }],
+      ["c3", { id: "c3", name: "Three", nationId: "AAA", tier: 3 }],
+      ["c4", { id: "c4", name: "Four", nationId: "AAA", tier: 4 }],
+      ["c5", { id: "c5", name: "Five", nationId: "AAA", tier: 5 }],
+    ])
+    const moves = (showcase: boolean) => {
+      const r = makeRng(12)
+      let up = 0
+      for (let i = 0; i < 300; i++) {
+        // A tier-4 level player at a tier-4 club.
+        const p = makePlayer(`m${i}`, "CM", 60, { clubId: "c4", nationId: "AAA" })
+        summerMove(p, map, clubs, "UEFA", 21, r, showcase)
+        if ((map.get(p.clubId)?.tier ?? 5) < 4) up++
+      }
+      return up
+    }
+    expect(moves(true)).toBeGreaterThan(moves(false) + 100)
+
+    const star = makePlayer("s", "CM", 60, { intlMin: 270, intlRating: [22.5, 3] })
+    expect(showcased(star, 21)).toBe(true)
+    expect(showcased(star, 28)).toBe(false)
+    expect(showcased({ ...star, intlRating: [18, 3] }, 21)).toBe(false)
   })
 })

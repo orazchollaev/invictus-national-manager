@@ -82,13 +82,25 @@ const ROLE_GROWTH: Record<ClubRole, number> = {
   reserve: 0.72,
 }
 
-/** One season of development, applied each 1 July. Returns the change in ability. */
+/**
+ * International minutes that earn a youngster the full boost: about six whole
+ * matches a season make him develop a quarter faster.
+ */
+export const INTL_MINUTES_FULL = 540
+const INTL_BOOST = 0.25
+
+/**
+ * One season of development, applied each 1 July. Returns the change in ability.
+ * `boost` speeds up growth towards potential (0.15 = 15% faster) — the user's nation
+ * gets one.
+ */
 export function developSeason(
   p: Player,
   age: number,
   tier: number,
   intlMinutes: number,
-  rng: Rng
+  rng: Rng,
+  boost = 0
 ): number {
   const a = p.pos === "GK" ? age - 2 : age
   const prof = p.pers.professionalism
@@ -101,17 +113,21 @@ export function developSeason(
       (0.6 + prof / 25) *
       TIER_GROWTH[tier - 1] *
       ROLE_GROWTH[p.role] *
-      (1 + Math.min(0.1, intlMinutes / 5000))
+      (1 + INTL_BOOST * Math.min(1, intlMinutes / INTL_MINUTES_FULL)) *
+      (1 + boost)
     delta = gap * clamp(rate + gauss(rng, 0, 0.06), 0, 0.7)
   } else if (a <= 27) {
-    delta = gap * 0.18 * (0.6 + prof / 25) + gauss(rng, 0, 0.7)
+    delta = gap * 0.18 * (0.6 + prof / 25) * (1 + boost) + gauss(rng, 0, 0.7)
   } else if (a <= 30) {
     delta = gauss(rng, -0.3, 0.8)
   } else {
-    delta = -(0.8 + (a - 30) * 0.7) * (1.15 - prof / 40) + gauss(rng, 0, 0.6)
+    // The same care keeps veterans going a little longer.
+    delta = -(0.8 + (a - 30) * 0.7) * (1.15 - prof / 40) * (1 - boost) + gauss(rng, 0, 0.6)
   }
   // Late bloomers and those who never kick on.
   if (a <= 22 && rng() < 0.03) p.pa = Math.min(96, p.pa + randInt(rng, 2, 6))
+  // Trusted with real international football, some youngsters find another level.
+  if (a <= 21 && intlMinutes >= 270 && rng() < 0.05) p.pa = Math.min(96, p.pa + randInt(rng, 2, 5))
   if (a >= 21 && a <= 26 && rng() < 0.12)
     p.pa = Math.max(Math.round(p.ca), p.pa - randInt(rng, 2, 5))
   const before = p.ca

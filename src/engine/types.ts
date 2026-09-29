@@ -88,6 +88,10 @@ export interface Player {
   /** Matches still to serve for a red card. */
   banned?: number
   yellows?: number
+  /** International minutes this season: they speed a youngster's development. */
+  intlMin?: number
+  /** International match ratings this season: [sum, count]. */
+  intlRating?: [number, number]
   history: PlayerSeason[]
 }
 

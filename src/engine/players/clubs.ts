@@ -177,19 +177,33 @@ export function findClub(
   return pick(rng, anyLeague[4])
 }
 
-/** Summer move: players whose level has drifted from their club's move on. */
+/**
+ * A season that put a young player in the shop window: regular international
+ * minutes at a good rating.
+ */
+export function showcased(p: Player, age: number): boolean {
+  const [sum, n] = p.intlRating ?? [0, 0]
+  return age <= 25 && (p.intlMin ?? 0) >= 180 && n > 0 && sum / n >= 7
+}
+
+/**
+ * Summer move: players whose level has drifted from their club's move on. A
+ * `showcase` season (see showcased()) draws interest from a level higher up.
+ */
 export function summerMove(
   p: Player,
   clubs: Map<string, Club>,
   index: ClubIndex,
   confed: Confed,
   age: number,
-  rng: Rng
+  rng: Rng,
+  showcase = false
 ): boolean {
   const current = clubs.get(p.clubId)
-  const ideal = tierForAbility(p.ca, rng)
   const tier = current?.tier ?? 5
-  const moving = tier !== ideal && rng() < (ideal < tier ? 0.55 : 0.4)
+  let ideal = tierForAbility(p.ca, rng)
+  if (showcase && ideal >= tier && tier > 1) ideal = tier - 1
+  const moving = tier !== ideal && rng() < (ideal < tier ? (showcase ? 0.75 : 0.55) : 0.4)
   const restless = rng() < 0.06
   if (moving || restless || !current) {
     const target = moving ? ideal : tier
