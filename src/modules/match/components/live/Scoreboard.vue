@@ -90,6 +90,10 @@ defineProps<{
 }
 
 .board-clock {
+  /* One line always, so penalties or an aggregate never push the screen down. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-align: center;
   font-size: var(--fs-sm);
   font-weight: 700;

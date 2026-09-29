@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, shallowRef, triggerRef } from "vue"
+import { computed, onBeforeUnmount, ref, shallowRef, triggerRef, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { ArrowLeftRight, ClipboardList, FastForward, Pause, Play, SkipForward } from "@lucide/vue"
+import {
+  ArrowLeftRight,
+  CalendarClock,
+  ClipboardList,
+  FastForward,
+  Pause,
+  Play,
+  SkipForward,
+  TriangleAlert,
+} from "@lucide/vue"
 import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -34,6 +43,7 @@ import { FORMATIONS } from "@/engine/match/formations"
 import { formatDate } from "@/engine/calendar/dates"
 import { resultLetter } from "@/modules/core/utils/format"
 import { useHaptic } from "@/composables/useHaptic"
+import { showConfirm } from "@/composables/useDialog"
 
 const route = useRoute()
 const router = useRouter()
@@ -70,6 +80,14 @@ const oppForm = world.derive(
 )
 const rankOf = (id: string) => world.world?.fifaRank(id) ?? 0
 
+/** Only today's match can be played; any other is a preview. */
+const due = world.derive((w) => w.userMatchDue()?.id === String(route.params.id), false)
+/** What stops the saved eleven taking the field (the assistant needs none). */
+const problems = world.derive(
+  (w) => (fixture.value && !settings.assistantPicks ? w.lineupProblems(fixture.value) : []),
+  [] as string[]
+)
+
 // ── Live state ──────────────────────────────────────────────────────────────
 
 const match = shallowRef<MatchState | null>(null)
@@ -94,10 +112,19 @@ const names = {
       : "",
 }
 
-function kickOff() {
+/** Start the match, if it is today and the eleven is ready. Returns whether it started. */
+async function kickOff(): Promise<boolean> {
   const w = world.world
   const f = fixture.value
-  if (!w || !f || !mine.value) return
+  if (!w || !f || !mine.value || !due.value) return false
+  if (problems.value.length) {
+    const fix = await showConfirm(
+      `Your starting eleven is not ready: ${problems.value.join("; ")}.`,
+      { confirmLabel: "Fix the eleven" }
+    )
+    if (fix) router.push("/squad/tactics")
+    return false
+  }
   // With the assistant in charge of selection, he names the eleven too.
   const own = settings.assistantPicks ? w.aiSheet(f[mine.value], f) : w.userSheet(f)
   const home = mine.value === "home" ? own : w.aiSheet(f.home, f)
@@ -105,7 +132,17 @@ function kickOff() {
   match.value = createMatch({ ...w.matchSetup(f, home, away), managed: mine.value })
   running.value = true
   loop()
+  return true
 }
+
+// A match already played has a report, not a kick-off.
+watch(
+  fixture,
+  (f) => {
+    if (f?.result && !match.value) router.replace(`/report/${f.id}`)
+  },
+  { immediate: true }
+)
 
 function refresh() {
   triggerRef(match)
@@ -160,9 +197,8 @@ function skipToEnd() {
   refresh()
 }
 
-function quickResult() {
-  kickOff()
-  skipToEnd()
+async function quickResult() {
+  if (await kickOff()) skipToEnd()
 }
 
 function doSub(outId: string, inId: string) {
@@ -317,16 +353,33 @@ const pitchSlots = computed(() => {
       <div class="muted">Coach: {{ world.world?.nation(opp).coach }}</div>
     </AppCard>
 
+    <div v-if="!due" class="notice">
+      <CalendarClock :size="20" class="notice-icon" />
+      <span>
+        Match day is {{ formatDate(fixture.date) }}. Keep the calendar moving until then — you can
+        set up your team and tactics now.
+      </span>
+    </div>
+    <div v-else-if="problems.length" class="notice notice--bad">
+      <TriangleAlert :size="20" class="notice-icon" />
+      <div>
+        <strong>Your starting eleven is not ready</strong>
+        <ul class="problems">
+          <li v-for="p in problems" :key="p">{{ p }}</li>
+        </ul>
+      </div>
+    </div>
+
     <AppButton variant="tonal" block @click="router.push('/squad/tactics')">
       <ClipboardList :size="16" />
       Team and tactics
     </AppButton>
-    <div class="actions">
-      <AppButton variant="outlined" @click="quickResult">
+    <div v-if="due" class="actions">
+      <AppButton variant="outlined" :disabled="problems.length > 0" @click="quickResult">
         <SkipForward :size="16" />
         Instant result
       </AppButton>
-      <AppButton variant="filled" @click="kickOff">
+      <AppButton variant="filled" :disabled="problems.length > 0" @click="kickOff">
         <Play :size="16" />
         Kick off
       </AppButton>
@@ -495,6 +548,38 @@ const pitchSlots = computed(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--sp-2);
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  background: var(--surface);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.notice-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.notice--bad {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  color: var(--text);
+}
+
+.notice--bad .notice-icon {
+  color: var(--danger);
+}
+
+.problems {
+  margin: var(--sp-1) 0 0;
+  padding-inline-start: var(--sp-4);
 }
 
 .live {
