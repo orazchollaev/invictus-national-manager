@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { Hospital } from "@lucide/vue"
 import type { Player } from "@/engine/types"
+import { useWorldStore } from "@/modules/world/store"
 import type { Formation } from "@/engine/match/types"
 import { positionFit } from "@/engine/players/ability"
 import { FORMATIONS } from "@/engine/match/formations"
@@ -18,8 +20,19 @@ const props = defineProps<{
 
 const emit = defineEmits<{ select: [index: number] }>()
 
+const world = useWorldStore()
 const coords = computed(() => slotPositions(props.formation))
 const roles = computed(() => FORMATIONS[props.formation])
+
+/** Why the player in a slot cannot play today, for the badge on his token. */
+function status(i: number) {
+  const id = props.slots[i]
+  const p = id ? props.player(id) : undefined
+  return {
+    injured: !!p?.injury && p.injury.until > world.date,
+    banned: !!p?.banned,
+  }
+}
 
 function fitClass(i: number) {
   const id = props.slots[i]
@@ -52,6 +65,12 @@ function fitClass(i: number) {
         </template>
         <template v-else-if="slots[i]">{{ Math.round(player(slots[i]!)?.ca ?? 0) }}</template>
         <template v-else>+</template>
+        <span v-if="status(i).injured || status(i).banned" class="slot-badges">
+          <span v-if="status(i).injured" class="badge-injury" role="img" aria-label="Injured">
+            <Hospital :size="10" />
+          </span>
+          <span v-if="status(i).banned" class="badge-card" role="img" aria-label="Suspended"></span>
+        </span>
       </span>
       <span class="slot-name">{{ slots[i] ? player(slots[i]!)?.last : roles[i] }}</span>
       <span class="slot-role">{{ roles[i] }}</span>
@@ -121,6 +140,7 @@ function fitClass(i: number) {
 }
 
 .slot-dot {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,6 +175,36 @@ function fitClass(i: number) {
 .slot--on .slot-dot {
   outline: 3px solid var(--pitch-ink);
   outline-offset: 2px;
+}
+
+/* Unavailable: a hospital for an injury, a red card for a suspension, bottom left. */
+.slot-badges {
+  position: absolute;
+  left: -8px;
+  bottom: -6px;
+  display: flex;
+  gap: 2px;
+}
+
+.badge-injury {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--danger);
+  box-shadow: 0 1px 3px var(--pitch-shadow);
+}
+
+.badge-card {
+  width: 11px;
+  height: 15px;
+  border-radius: 2px;
+  background: var(--danger);
+  border: 1px solid var(--surface);
+  box-shadow: 0 1px 3px var(--pitch-shadow);
 }
 
 .slot-name {
