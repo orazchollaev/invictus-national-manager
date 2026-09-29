@@ -22,9 +22,7 @@ describe("a manager's first months", () => {
     let played = 0
     for (let guard = 0; guard < 60 && played < 8; guard++) {
       const i = w.advance(30)
-      if (i.kind === "offer") w.clearOffer()
-      if (i.kind === "hosting") w.clearHosting()
-      if (i.kind === "draw") w.clearDraw()
+      if (w.settle(i)) continue
       if (i.kind === "callup") {
         const squad = pickSquad(w.pool(i.nationId), w.state.date, 26, [], (p) =>
           w.released(p, w.state.competitions[i.squadFor]?.id)
@@ -66,10 +64,8 @@ describe("call-ups", () => {
         // This test is about call-ups, not job security.
         w.state.career.confidence = 100
         const i = w.advance(60)
-        if (i.kind === "offer") w.clearOffer()
-        if (i.kind === "hosting") w.clearHosting()
-        if (i.kind === "draw") w.clearDraw()
-        else if (i.kind === "callup") {
+        if (w.settle(i)) continue
+        if (i.kind === "callup") {
           if (w.state.date >= "2030-05-01") calls.push(`${w.state.date} ${i.squadFor}`)
           w.setSquad(i.nationId, i.squadFor, pickSquad(w.pool(i.nationId), w.state.date, 26))
         } else if (i.kind === "match") {

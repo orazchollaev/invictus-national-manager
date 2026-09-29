@@ -6,9 +6,9 @@ import { NAME_POOLS } from "@/data/names"
 import { roleAt } from "../players/clubs"
 import { initialNationState, World, type WorldStatics } from "./world"
 import type { WorldState } from "./types"
-import { refreshObjectives } from "../career/career"
+import { refreshObjectives, setContract } from "../career/career"
 
-export const WORLD_VERSION = 1
+export const WORLD_VERSION = 2
 
 /** Compact rows as written by scripts/generate-world.ts. */
 export type PlayerRow = [
@@ -169,5 +169,6 @@ export function createWorld(
     if (addDays(w.start, -24) < opts.start && w.start >= opts.start) world.arrangeFriendlies(w)
   }
   refreshObjectives(world)
+  setContract(world)
   return world
 }

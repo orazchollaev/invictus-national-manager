@@ -20,7 +20,7 @@ import { addDays, daysBetween, yearOf } from "../calendar/dates"
 import { windowNear, windowsForYear, type MatchWindow } from "../calendar/windows"
 import { deriveSeed, makeRng, pick, shuffle, streamFor } from "../rng"
 import { playMatch } from "../match/engine"
-import type { MatchReport, TeamSheet } from "../match/types"
+import type { MatchReport, Side, TeamSheet } from "../match/types"
 import { rankingUpdate } from "../ranking"
 import {
   aiMentality,
@@ -34,7 +34,7 @@ import {
 import { FORMATIONS } from "../match/formations"
 import { matchAbility, positionFit } from "../players/ability"
 import { ageOn, fullName } from "../players/ability"
-import { indexClubs, summerMove, type ClubIndex } from "../players/clubs"
+import { indexClubs, showcased, summerMove, type ClubIndex } from "../players/clubs"
 import { nationTop } from "../players/quality"
 import {
   isPlaceholder,
@@ -73,13 +73,28 @@ import {
   newgen,
   retirementChance,
 } from "../players/lifecycle"
-import type { Interrupt, NationState, NewsItem, NewsKind, WorldState } from "./types"
+import type {
+  FriendlyChoice,
+  Interrupt,
+  NationState,
+  NewsItem,
+  NewsKind,
+  WorldState,
+} from "./types"
 import {
   afterCompetition,
   afterUserResult,
+  checkContract,
+  checkObjectives,
+  ensureCareer,
   expireOffers,
+  monthlyDrift,
+  playerMoments,
   refreshObjectives,
+  setAmbition,
+  youthObjective,
 } from "../career/career"
+import { checkMilestones } from "../career/milestones"
 
 export interface WorldStatics {
   nations: NationDef[]
@@ -92,6 +107,12 @@ const DECISIVE_IMPORTANCE: Importance[] = [
   "nations-league-finals",
 ]
 const SQUAD_KEY_TOURNAMENT = new Set(["world-cup", "continental", "regional", "super-cup"])
+
+/**
+ * The user's nation plays and grows a little above its means, so good management
+ * shows: a small lift in ability points in every match, and faster development.
+ */
+export const USER_EDGE = { match: 0.8, growth: 0.15 } as const
 
 export class World {
   state: WorldState
@@ -115,6 +136,8 @@ export class World {
       ensureStadiums(n, this.defs.get(n.id), state.date)
     }
     this.reindex()
+    ensureCareer(this)
+    this.settleHeldFriendlies()
   }
 
   // ── Indexes ───────────────────────────────────────────────────────────────
@@ -292,29 +315,76 @@ export class World {
    * and call-ups stop the loop; everything else plays itself.
    */
   advance(maxDays = 60): Interrupt {
-    if (this.state.pendingCallup) return this.state.pendingCallup
-    if (this.state.pendingDraw) return { kind: "draw", ...this.state.pendingDraw }
-    if (this.state.pendingOffer) return { kind: "offer", nationId: this.state.pendingOffer }
-    if (this.state.pendingHosting) return { kind: "hosting", compId: this.state.pendingHosting }
+    const waiting = this.pendingInterrupt()
+    if (waiting) return waiting
     for (let i = 0; i < maxDays; i++) {
       const due = this.userMatchDue()
       if (due) return { kind: "match", fixtureId: due.id }
       this.nextDay()
-      if (this.state.pendingCallup) return this.state.pendingCallup
-      // nextDay() may have set it; TypeScript still believes the check above.
-      const draw = this.state.pendingDraw as WorldState["pendingDraw"]
-      if (draw) return { kind: "draw", ...draw }
-      // News the user must see before the calendar moves on.
-      const offer = this.state.pendingOffer
-      if (offer) return { kind: "offer", nationId: offer }
-      const hosting = this.state.pendingHosting
-      if (hosting) return { kind: "hosting", compId: hosting }
+      const next = this.pendingInterrupt()
+      if (next) return next
       const match = this.userMatchDue()
       if (match) return { kind: "match", fixtureId: match.id }
       if (this.state.career.offers.length && this.state.career.nationId === null)
         return { kind: "offer" }
     }
     return { kind: "none" }
+  }
+
+  /**
+   * What the user must see or decide before the calendar moves on, most pressing
+   * first: his squad, his draw, the end of a competition or of his job, a warning,
+   * then news and choices.
+   */
+  pendingInterrupt(): Interrupt | null {
+    const s = this.state
+    if (s.pendingCallup) return s.pendingCallup
+    if (s.pendingDraw) return { kind: "draw", ...s.pendingDraw }
+    if (s.pendingReview) return { kind: "review", id: s.pendingReview }
+    if (s.pendingSacked) return { kind: "sacked" }
+    if (s.pendingUltimatum) return { kind: "ultimatum" }
+    if (s.pendingOffer) return { kind: "offer", nationId: s.pendingOffer }
+    if (s.pendingHosting) return { kind: "hosting", compId: s.pendingHosting }
+    const board = s.career.objectives.find((o) => o.agreed === false)
+    if (board) return { kind: "board", objectiveId: board.id }
+    if (s.pendingIntake) return { kind: "intake" }
+    return null
+  }
+
+  /**
+   * Answer an interrupt the way the assistant would: agree objectives as asked
+   * and close anything that is only news. The
+   * user's squad and matches are not settled here. Returns whether it was.
+   */
+  settle(i: Interrupt): boolean {
+    switch (i.kind) {
+      case "draw":
+        this.clearDraw()
+        return true
+      case "offer":
+        this.clearOffer()
+        return true
+      case "hosting":
+        this.clearHosting()
+        return true
+      case "review":
+        this.clearReview()
+        return true
+      case "sacked":
+        this.clearSacked()
+        return true
+      case "ultimatum":
+        this.clearUltimatum()
+        return true
+      case "board":
+        setAmbition(this, i.objectiveId, 0)
+        return true
+      case "intake":
+        this.clearIntake()
+        return true
+      default:
+        return false
+    }
   }
 
   /** The user's unplayed match today, if any. */
@@ -347,9 +417,14 @@ export class World {
     if (d === 1) {
       this.monthEnd()
       this.openStadiums()
+      monthlyDrift(this)
+      // Objectives with a deadline (debuts by the year's end) are judged by date.
+      checkObjectives(this)
       refreshObjectives(this)
+      checkMilestones(this, true)
     }
     expireOffers(this)
+    checkContract(this)
     if (m === 1 && d === 1) this.yearTurn()
     if (m === 7 && d === 1) this.seasonRollover()
     if (new Date(date + "T00:00:00Z").getUTCDay() === 1) this.clubWeek()
@@ -386,11 +461,28 @@ export class World {
     }
   }
 
+  /**
+   * How much two nations have seen of each other lately, as a score penalty: each
+   * meeting in the last two years, and more for a friendly in the last eight months.
+   */
+  private recentPenalty(a: string, b: string): number {
+    const date = this.state.date
+    let penalty = 0
+    for (const r of this.state.nations[a]?.results ?? []) {
+      if (r.opp !== b) continue
+      const days = daysBetween(r.date, date)
+      if (days <= 730) penalty += 220
+      if (r.comp === "Friendly" && days <= 240) penalty += 400
+    }
+    return penalty
+  }
+
   arrangeFriendlies(w: MatchWindow) {
     const ctx = this.ctx()
     const rng = streamFor(this.state.seed, "friendlies", w.id)
     const nations = ctx.ranked()
     const live = Object.values(this.state.competitions).filter((c) => c.status !== "done")
+    const me = this.userNation
     for (const slot of w.slots) {
       const reserved = new Set(
         live.flatMap((c) => competitionDef(c.defId).reserved?.(c, ctx, slot) ?? [])
@@ -401,7 +493,7 @@ export class World {
           (n) =>
             !ctx.busy(n, slot) &&
             !reserved.has(n) &&
-            rng() < (this.state.nations[n].points > 1150 ? 0.9 : 0.65)
+            (n === me || rng() < (this.state.nations[n].points > 1150 ? 0.9 : 0.65))
         )
       )
       const taken = new Set<string>()
@@ -415,31 +507,66 @@ export class World {
             b,
             score:
               Math.abs(this.state.nations[b].points - pa) +
-              (this.def(b).confed === confed ? 0 : 180) +
+              (this.def(b).confed === confed ? 0 : 110) +
+              this.recentPenalty(a, b) +
               rng() * 120,
           }))
           .sort((x, y) => x.score - y.score)
         if (!options.length) continue
-        const b = pick(rng, options.slice(0, 3)).b
+        const b = pick(rng, options.slice(0, 5)).b
         taken.add(a)
         taken.add(b)
-        const [home, away] =
+        const home =
           rng() < 0.5 + (this.state.nations[a].points - this.state.nations[b].points) / 2000
-            ? [a, b]
-            : [b, a]
-        const f: Fixture = {
-          id: `friendly:${slot}:${home}`,
-          compId: "friendly",
-          stage: "friendly",
-          label: "International friendly",
-          date: slot,
-          home,
-          away,
-          atHome: true,
-          importance: "friendly",
-        }
-        ctx.addFixture(f)
+        this.addFriendly(slot, home ? a : b, home ? b : a)
       }
+    }
+  }
+
+  private addFriendly(slot: ISODate, home: string, away: string) {
+    this.ctx().addFixture({
+      id: `friendly:${slot}:${home}`,
+      compId: "friendly",
+      stage: "friendly",
+      label: "International friendly",
+      date: slot,
+      home,
+      away,
+      atHome: true,
+      importance: "friendly",
+    })
+  }
+
+  /**
+   * Saves from when the user picked friendly opponents may still hold dates
+   * waiting for a pick: the federation takes the first on each list, and the
+   * teams passed over are paired up among themselves.
+   */
+  private settleHeldFriendlies() {
+    const held = this.state.pendingFriendly ?? []
+    delete this.state.pendingFriendly
+    for (const choice of held) this.settleHeldFriendly(choice)
+  }
+
+  private settleHeldFriendly(choice: FriendlyChoice) {
+    const { slot } = choice
+    const me = this.userNation
+    const ctx = this.ctx()
+    const taken = choice.options[0]
+    const rest = choice.options.slice(1).map((o) => o.nationId)
+    if (me && taken && !ctx.busy(me, slot) && !ctx.busy(taken.nationId, slot))
+      this.addFriendly(slot, taken.home ? me : taken.nationId, taken.home ? taken.nationId : me)
+    // The two closest of the rest still get a match.
+    const free = rest.filter((n) => !ctx.busy(n, slot))
+    const pts = (n: string) => this.state.nations[n].points
+    let pair: [string, string] | null = null
+    for (let i = 0; i < free.length; i++)
+      for (let j = i + 1; j < free.length; j++)
+        if (!pair || Math.abs(pts(free[i]) - pts(free[j])) < Math.abs(pts(pair[0]) - pts(pair[1])))
+          pair = [free[i], free[j]]
+    if (pair) {
+      const [a, b] = pts(pair[0]) >= pts(pair[1]) ? pair : [pair[1], pair[0]]
+      this.addFriendly(slot, a, b)
     }
   }
 
@@ -584,6 +711,30 @@ export class World {
     )
   }
 
+  /**
+   * What is wrong with the user's saved eleven for a fixture: empty positions, and
+   * players who are not in the squad, injured or suspended. Empty when there is no
+   * saved eleven (the best available is picked for him).
+   */
+  lineupProblems(f: Fixture): string[] {
+    const me = this.userNation
+    const ut = this.state.userTeam
+    if (!me || !ut) return []
+    const squad = new Set(this.state.nations[me].squad)
+    const out: string[] = []
+    FORMATIONS[ut.tactics.formation].forEach((pos, i) => {
+      const id = ut.xi[i]?.playerId
+      const p = id ? this.state.players[id] : undefined
+      if (!p) return out.push(`No one is playing ${pos}`)
+      const name = `${p.first} ${p.last}`
+      if (!squad.has(p.id)) out.push(`${name} (${pos}) is not in the squad`)
+      else if (p.injury && p.injury.until > f.date)
+        out.push(`${name} (${pos}) is injured (${p.injury.label})`)
+      else if (p.banned) out.push(`${name} (${pos}) is suspended`)
+    })
+    return out
+  }
+
   /** Players the user can pick for a fixture: his squad, fit and not suspended. */
   userSquad(f: Fixture): Player[] {
     const me = this.userNation!
@@ -650,7 +801,10 @@ export class World {
   }
 
   matchSetup(f: Fixture, home: TeamSheet, away: TeamSheet) {
+    const me = this.userNation
+    const side: Side | null = !me ? null : f.home === me ? "home" : f.away === me ? "away" : null
     return {
+      edge: side ? { side, value: USER_EDGE.match } : undefined,
       id: f.id,
       date: f.date,
       home,
@@ -708,7 +862,8 @@ export class World {
     f.events = events
     if (keepFull) s.reports[f.id] = report
 
-    // Players: caps, goals, and bans served.
+    // Players: debuts and landmarks, then caps, goals, minutes and bans served.
+    if (this.isUserFixture(f)) playerMoments(this, f, report)
     for (const line of report.lines) {
       const p = s.players[line.playerId]
       if (!p) continue
@@ -716,6 +871,11 @@ export class World {
       p.goals += line.goals
       p.assists += line.assists
       p.morale = Math.min(100, p.morale + (line.rating >= 7.5 ? 4 : line.rating < 5.5 ? -3 : 1))
+      p.intlMin = (p.intlMin ?? 0) + line.minutes
+      if (line.minutes >= 30) {
+        const [sum, n] = p.intlRating ?? [0, 0]
+        p.intlRating = [Math.round((sum + line.rating) * 10) / 10, n + 1]
+      }
     }
     // A suspension is served by the nation's next match, whether or not the player
     // is in the squad — otherwise a suspended player could never be picked again.
@@ -750,8 +910,14 @@ export class World {
 
     this.strengthCache.delete(f.home)
     this.strengthCache.delete(f.away)
-    if (f.compId !== "friendly") this.advanceCompetitions(f.compId)
+    // The result counts for the manager before it can finish the competition, so
+    // the competition's review sees it.
     this.onResult(f)
+    if (f.compId !== "friendly") {
+      this.advanceCompetitions(f.compId)
+      // Through to the next round: a "reach" objective may be met now.
+      if (this.isUserFixture(f)) checkObjectives(this)
+    }
   }
 
   // ── Calendar events ───────────────────────────────────────────────────────
@@ -803,6 +969,8 @@ export class World {
     const season = yearOf(s.date)
     const me = this.userNation
     const rng = streamFor(s.seed, "season", season)
+    const watched = new Set(s.career.watchlist ?? [])
+    const progress: string[] = []
     for (const [nationId, players] of this.playersByNation()) {
       const def = this.def(nationId)
       for (const p of players) {
@@ -816,19 +984,44 @@ export class World {
           goals: p.goals,
         })
         if (p.history.length > 25) p.history.shift()
-        developSeason(p, age, tier, 0, rng)
-        const moved = summerMove(p, this.clubs, this.clubIndex, def.confed, age, rng)
-        if (moved && nationId === me && p.lastCall) {
+        const gained = developSeason(
+          p,
+          age,
+          tier,
+          p.intlMin ?? 0,
+          rng,
+          nationId === me ? USER_EDGE.growth : 0
+        )
+        const showcase = showcased(p, age)
+        const moved = summerMove(p, this.clubs, this.clubIndex, def.confed, age, rng, showcase)
+        const newTier = this.clubs.get(p.clubId)?.tier ?? 5
+        if (moved && nationId === me && (p.lastCall || watched.has(p.id))) {
+          const club = this.clubs.get(p.clubId)?.name ?? "a new club"
+          const breakthrough = showcase && newTier < tier
           this.news(
             "transfer",
-            `${fullName(p)} on the move`,
-            `${fullName(p)} joins ${this.clubs.get(p.clubId)?.name ?? "a new club"}.`,
+            breakthrough ? `${fullName(p)} earns a big move` : `${fullName(p)} on the move`,
+            breakthrough
+              ? `${fullName(p)} joins ${club} on the back of his international breakthrough.`
+              : `${fullName(p)} joins ${club}.`,
             true
           )
         }
+        if (nationId === me && watched.has(p.id))
+          progress.push(`${fullName(p)} ${gained >= 0 ? "+" : ""}${gained.toFixed(1)}`)
+        delete p.intlMin
+        delete p.intlRating
       }
     }
     this.strengthCache.clear()
+    if (progress.length)
+      this.news(
+        "wonderkid",
+        "Your prospects this season",
+        `How the youngsters you are watching developed: ${progress.join("; ")}.`,
+        true,
+        "/squad/prospects"
+      )
     this.news(
       "season",
       `Season ${season}–${String(season + 1).slice(2)} begins`,
@@ -848,6 +1041,7 @@ export class World {
     const rng = streamFor(s.seed, "year", year)
     const retiredNames: string[] = []
     const newNames: string[] = []
+    const intake: string[] = []
 
     for (const [nationId, players] of this.playersByNation()) {
       const def = this.def(nationId)
@@ -902,6 +1096,7 @@ export class World {
         s.players[id] = p
         remaining.push(p)
         if (nationId === me) {
+          intake.push(id)
           newNames.push(
             `${fullName(p)} (${p.pos}, ${ageOn(p.born, s.date)}, ${this.clubs.get(p.clubId)?.name ?? "—"})`
           )
@@ -954,9 +1149,14 @@ export class World {
           `${newNames.length} youngsters come through`,
           `The new generation eligible for us: ${newNames.join("; ")}.`,
           true,
-          "/squad"
+          "/squad/prospects"
         )
+      if (intake.length) s.pendingIntake = { year, ids: intake }
+      youthObjective(this)
     }
+    // Players who have left the game drop off the watchlist.
+    const c = s.career
+    if (c.watchlist?.length) c.watchlist = c.watchlist.filter((id) => s.players[id])
   }
 
   /** Month start: grounds whose work is done open their doors. */
@@ -1161,6 +1361,35 @@ export class World {
   /** The user has seen the news that his nation will host a tournament. */
   clearHosting() {
     this.state.pendingHosting = null
+  }
+
+  /** The user has read the federation's review of a competition. */
+  clearReview() {
+    this.state.pendingReview = null
+  }
+
+  /** The user has seen that he lost his job. */
+  clearSacked() {
+    this.state.pendingSacked = false
+  }
+
+  /** The user has seen his final warning. */
+  clearUltimatum() {
+    this.state.pendingUltimatum = false
+  }
+
+  /** The user has seen the year's youngsters. */
+  clearIntake() {
+    this.state.pendingIntake = null
+  }
+
+  /** Add or remove a player from the manager's watchlist. */
+  toggleWatch(playerId: string) {
+    const c = this.state.career
+    const list = (c.watchlist ??= [])
+    c.watchlist = list.includes(playerId)
+      ? list.filter((id) => id !== playerId)
+      : [...list, playerId]
   }
 
   news(kind: NewsKind, title: string, body: string, mine: boolean, link?: string) {

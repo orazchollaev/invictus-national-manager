@@ -85,12 +85,9 @@ describe("world events", () => {
     const seen: string[] = []
     while (w.state.date < "2028-01-01") {
       const i = w.advance(40)
-      if (i.kind === "offer") w.clearOffer()
-      if (i.kind === "hosting") w.clearHosting()
-      if (i.kind === "draw") {
-        seen.push(`${i.compId}:${i.stageKey}`)
-        w.clearDraw()
-      } else if (i.kind === "callup") w.aiCallUp(i.nationId, i.squadFor)
+      if (i.kind === "draw") seen.push(`${i.compId}:${i.stageKey}`)
+      if (w.settle(i)) continue
+      if (i.kind === "callup") w.aiCallUp(i.nationId, i.squadFor)
       else if (i.kind === "match") {
         w.state.career.nationId = null
         break
@@ -164,10 +161,8 @@ describe("career", () => {
     const w = newWorld("KOR")
     while (w.state.date < "2027-09-01") {
       const i = w.advance(60)
-      if (i.kind === "offer") w.clearOffer()
-      if (i.kind === "hosting") w.clearHosting()
-      if (i.kind === "draw") w.clearDraw()
-      else if (i.kind === "callup") w.aiCallUp(i.nationId, i.squadFor)
+      if (w.settle(i)) continue
+      if (i.kind === "callup") w.aiCallUp(i.nationId, i.squadFor)
       else if (i.kind === "match") {
         w.state.career.nationId = "KOR"
         w.state.career.confidence = 100
