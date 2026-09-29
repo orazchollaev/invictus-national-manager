@@ -6,7 +6,7 @@ import type { Interrupt, UserTeam, WorldState } from "@/engine/world/types"
 import type { HostLevel } from "@/engine/world/stadiums"
 import type { Fixture } from "@/engine/competition/types"
 import type { MatchReport } from "@/engine/match/types"
-import { acceptOffer, declineOffer } from "@/engine/career/career"
+import { acceptOffer, declineOffer, setAmbition } from "@/engine/career/career"
 import { pickSquad } from "@/engine/ai/squad"
 import { randomSeed } from "@/engine/rng"
 import { START_DATE } from "@/data/start"
@@ -138,8 +138,12 @@ export const useWorldStore = defineStore(
           if (result.kind === "callup" && settings.assistantPicks) {
             assistantCallup()
             result = { kind: "none" }
-          } else if (result.kind === "draw" && !settings.watchDraws) {
-            w.clearDraw()
+          } else if (
+            (result.kind === "draw" && !settings.watchDraws) ||
+            (result.kind === "board" && settings.assistantBoard) ||
+            (result.kind === "intake" && !settings.showIntake)
+          ) {
+            w.settle(result)
             result = { kind: "none" }
           }
           busyLabel.value = w.state.date
@@ -246,6 +250,47 @@ export const useWorldStore = defineStore(
       touch()
     }
 
+    /** Clear an interrupt the user has dealt with, and save. */
+    function settled(kind: Interrupt["kind"]) {
+      if (interrupt.value.kind === kind) interrupt.value = { kind: "none" }
+      touch()
+      void autoSave()
+    }
+
+    /** The manager's word on a new objective. Returns false if the board refuses. */
+    function agreeObjective(objectiveId: string, level: -1 | 0 | 1): boolean {
+      const w = world.value
+      if (!w || !setAmbition(w, objectiveId, level)) return false
+      settled("board")
+      return true
+    }
+
+    function seenReview() {
+      world.value?.clearReview()
+      settled("review")
+    }
+
+    function seenSacked() {
+      world.value?.clearSacked()
+      settled("sacked")
+    }
+
+    function seenUltimatum() {
+      world.value?.clearUltimatum()
+      settled("ultimatum")
+    }
+
+    function seenIntake() {
+      world.value?.clearIntake()
+      settled("intake")
+    }
+
+    function toggleWatch(playerId: string) {
+      world.value?.toggleWatch(playerId)
+      touch()
+      void autoSave()
+    }
+
     /** Put in (or withdraw) the federation's bid to host tournaments of a level. */
     function setBid(level: HostLevel, on: boolean) {
       const c = world.value?.state.career
@@ -298,6 +343,12 @@ export const useWorldStore = defineStore(
       turnDown,
       seenOffer,
       seenHosting,
+      agreeObjective,
+      seenReview,
+      seenSacked,
+      seenUltimatum,
+      seenIntake,
+      toggleWatch,
       setBid,
       markRead,
       close,

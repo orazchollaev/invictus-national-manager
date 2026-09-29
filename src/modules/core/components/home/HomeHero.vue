@@ -2,6 +2,7 @@
 import { computed } from "vue"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
+import { formatDate } from "@/engine/calendar/dates"
 
 const world = useWorldStore()
 
@@ -28,6 +29,8 @@ const info = world.derive((w) => {
     stadium: n.stadium,
     confidence: c.confidence,
     reputation: Math.round(c.reputation),
+    warning: c.ultimatum?.matches ?? 0,
+    contract: c.contractUntil,
   }
 }, null)
 
@@ -69,6 +72,14 @@ const tone = computed(() => {
       </div>
     </div>
 
+    <RouterLink v-if="info.warning" to="/career" class="warning">
+      <strong>Final warning</strong>
+      <span>
+        {{ info.warning }} competitive {{ info.warning === 1 ? "match" : "matches" }} to lift
+        confidence to 40%
+      </span>
+    </RouterLink>
+
     <RouterLink to="/career" class="meters">
       <div class="meter">
         <div class="meter-head">
@@ -87,6 +98,7 @@ const tone = computed(() => {
         <div class="meter-bar"><span :style="{ width: `${info.reputation}%` }"></span></div>
       </div>
     </RouterLink>
+    <div v-if="info.contract" class="contract">Contract until {{ formatDate(info.contract) }}</div>
   </section>
 </template>
 
@@ -172,6 +184,43 @@ const tone = computed(() => {
   color: var(--text-muted);
 }
 
+.warning {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  text-decoration: none;
+  animation: warn 1.6s var(--ease) infinite alternate;
+}
+
+.warning strong {
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: var(--fs-xs);
+}
+
+@keyframes warn {
+  from {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  to {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 35%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .warning {
+    animation: none;
+  }
+}
+
 .meters {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -179,6 +228,12 @@ const tone = computed(() => {
   margin-top: var(--sp-4);
   color: var(--text);
   text-decoration: none;
+}
+
+.contract {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
 }
 
 .meter-head {

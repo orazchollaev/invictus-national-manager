@@ -65,6 +65,12 @@ const settings = useSettingsStore()
       <AppField label="Watch my draws" hint="Stop for draws involving your team">
         <AppToggle v-model="settings.watchDraws" aria-label="Watch my draws" />
       </AppField>
+      <AppField label="Accept the board's targets" hint="Skip the meeting on each new objective">
+        <AppToggle v-model="settings.assistantBoard" aria-label="Accept the board's targets" />
+      </AppField>
+      <AppField label="Show the youth intake" hint="Stop on 1 January for the new generation">
+        <AppToggle v-model="settings.showIntake" aria-label="Show the youth intake" />
+      </AppField>
       <AppField label="Autosave" layout="stack">
         <AppButtonGroup
           :model-value="settings.autoSave"

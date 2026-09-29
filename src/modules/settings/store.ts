@@ -21,6 +21,10 @@ export const useSettingsStore = defineStore("settings", () => {
   const assistantPicks = ref(false)
   /** Stop for the user's draws and show them live. */
   const watchDraws = ref(true)
+  /** Agree every objective as the board sets it, without a meeting. */
+  const assistantBoard = ref(false)
+  /** Stop on 1 January to show the year's youngsters. */
+  const showIntake = ref(true)
   /** Stop the commentary on goals and red cards so they are not scrolled past. */
   const pauseOnKeyEvents = ref(true)
   /** Show the minor commentary lines (fouls, corners, offsides) in the feed. */
@@ -50,6 +54,8 @@ export const useSettingsStore = defineStore("settings", () => {
     autoSave.value = "always"
     assistantPicks.value = false
     watchDraws.value = true
+    assistantBoard.value = false
+    showIntake.value = true
     pauseOnKeyEvents.value = true
     verboseCommentary.value = true
   }
@@ -62,6 +68,8 @@ export const useSettingsStore = defineStore("settings", () => {
     autoSave,
     assistantPicks,
     watchDraws,
+    assistantBoard,
+    showIntake,
     pauseOnKeyEvents,
     verboseCommentary,
     resetAll,

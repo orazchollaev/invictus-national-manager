@@ -6,6 +6,7 @@ import {
   ChevronRight,
   CircleCheck,
   CircleX,
+  Landmark,
   Play,
   Shuffle,
   Target,
@@ -42,8 +43,28 @@ const drawReady = world.derive((w) => {
   const stage = inst?.stages.find((s) => s.key === d.stageKey)
   return { ...d, label: inst ? `${inst.name} · ${stage?.name ?? "Draw"}` : "Draw" }
 }, null)
-/** An offer or hosting news on screen: the popup is the next step. */
-const popup = world.derive((w) => !!(w.state.pendingOffer || w.state.pendingHosting), false)
+/** A popup on screen (see GamePopups): answering it is the next step. */
+const popup = world.derive(
+  (w) =>
+    !!(
+      w.state.pendingUltimatum ||
+      w.state.pendingOffer ||
+      w.state.pendingHosting ||
+      (!settings.assistantBoard && w.state.career.objectives.some((o) => o.agreed === false)) ||
+      (settings.showIntake && w.state.pendingIntake)
+    ),
+  false
+)
+/** A review or a lost job waiting on its own page. */
+const careerPage = world.derive(
+  (w) =>
+    w.state.pendingReview
+      ? `/career/review/${w.state.pendingReview}`
+      : w.state.pendingSacked
+        ? "/career/farewell"
+        : null,
+  null
+)
 
 const results = world.derive((w) => {
   const id = w.state.career.nationId
@@ -61,11 +82,14 @@ function go(i: Interrupt) {
   if (i.kind === "callup") router.push("/squad/callup")
   else if (i.kind === "match") router.push(`/match/${i.fixtureId}`)
   else if (i.kind === "draw") router.push(`/draw/${i.compId}/${i.stageKey}`)
-  // A new offer or hosting news shows as a popup where the user is.
-  else if ((i.kind === "offer" && !i.nationId) || i.kind === "sacked") router.push("/career")
+  else if (i.kind === "review") router.push(`/career/review/${i.id}`)
+  else if (i.kind === "sacked") router.push("/career/farewell")
+  // Anything else new shows as a popup where the user is.
+  else if (i.kind === "offer" && !i.nationId) router.push("/career")
 }
 
 async function proceed() {
+  if (careerPage.value) return router.push(careerPage.value)
   if (popup.value) return
   if (pending.value && settings.assistantPicks) world.assistantCallup()
   else if (pending.value) return router.push("/squad/callup")
@@ -76,6 +100,9 @@ async function proceed() {
 }
 
 const cta = computed(() => {
+  if (careerPage.value?.startsWith("/career/review"))
+    return { label: "The federation's verdict", icon: Landmark }
+  if (careerPage.value) return { label: "Clear your desk", icon: Briefcase }
   if (pending.value && !settings.assistantPicks) return { label: "Name your squad", icon: Users }
   if (drawReady.value) return { label: "Watch the draw", icon: Shuffle }
   if (today.value) return { label: "Match day — go to the match", icon: Play }
@@ -145,6 +172,10 @@ const cta = computed(() => {
           <CircleX v-else-if="o.status === 'failed'" :size="18" class="obj-icon" />
           <span v-else class="obj-dot"></span>
           <span class="obj-text">{{ o.text }}</span>
+          <StatPill
+            v-if="o.kind === 'debuts' && o.status === 'open'"
+            :value="`${o.progress ?? 0}/${o.count}`"
+          />
           <StatPill v-if="o.critical" value="Key" tone="var(--danger)" />
         </li>
       </ul>
