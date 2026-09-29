@@ -202,6 +202,8 @@ export interface MatchSetup {
   homeAdvantage: boolean
   /** Size of that advantage in ability points (bigger stadiums, bigger lift). */
   homeBoost?: number
+  /** A small lift in ability points for one side: the user's, for the manager's touch. */
+  edge?: { side: Side; value: number }
   /** Ties that need a winner. `aggregate` is earlier legs, from this match's home side. */
   knockout?: { aggregate?: [number, number]; extraTime: boolean }
   /** Finals, deciders: players' big-match temperament comes into play. */
@@ -371,7 +373,10 @@ function units(state: MatchState, side: LiveSide, isHome: boolean): Units {
   const short = 1 - missing * 0.06
   const m = side.tactics.mentality
   const press = side.tactics.pressing - 1
-  const home = isHome && state.setup.homeAdvantage ? (state.setup.homeBoost ?? HOME_BOOST) : 0
+  const edge = state.setup.edge
+  const home =
+    (isHome && state.setup.homeAdvantage ? (state.setup.homeBoost ?? HOME_BOOST) : 0) +
+    (edge && edge.side === (isHome ? "home" : "away") ? edge.value : 0)
   return {
     def: (unit(0) * (1 - 0.03 * m) + home) * short,
     mid: (unit(1) * (1 + 0.02 * press) + home) * short,
