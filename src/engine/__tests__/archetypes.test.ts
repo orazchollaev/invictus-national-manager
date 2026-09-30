@@ -8,63 +8,8 @@ import {
   type Archetype,
 } from "../players/archetypes"
 import { POSITIONS, type Player, type Position } from "../types"
-import { createMatch, playMatch, teamUnits, type MatchState } from "../match/engine"
-import { FORMATIONS } from "../match/formations"
-import type { TeamSheet } from "../match/types"
-import { makePlayer } from "./helpers"
-
-/** A player of `pos` whose id draws `want`, found by trying ids. */
-function playerWith(prefix: string, pos: Position, want: Archetype, ca = 70): Player {
-  for (let n = 0; n < 5000; n++) {
-    const id = `${prefix}${n}`
-    if (archetypeOf({ id, pos }) === want) return makePlayer(id, pos, ca)
-  }
-  throw new Error(`no id draws ${want}`)
-}
-
-/** A 4-2-3-1 side whose players each have the archetype `choose` names for their role. */
-function side(prefix: string, choose: (pos: Position) => Archetype) {
-  const roles = FORMATIONS["4-2-3-1"]
-  const players = roles.map((pos, i) => playerWith(`${prefix}${i}-`, pos, choose(pos)))
-  const bench = (["GK", "CB", "CM", "ST"] as Position[]).map((pos, i) =>
-    playerWith(`${prefix}b${i}-`, pos, archetypesFor(pos)[0], 67)
-  )
-  const sheet: TeamSheet = {
-    nationId: prefix,
-    xi: roles.map((pos, i) => ({ playerId: players[i].id, pos })),
-    bench: bench.map((p) => p.id),
-    tactics: { formation: "4-2-3-1", mentality: 0, pressing: 1, tempo: 1 },
-  }
-  return { players: [...players, ...bench], sheet }
-}
-
-function play(home: ReturnType<typeof side>, away: ReturnType<typeof side>, n: number) {
-  const byId = new Map([...home.players, ...away.players].map((p) => [p.id, p]))
-  return Array.from({ length: n }, (_, i) =>
-    playMatch({
-      id: `m${i}`,
-      date: "2026-09-24",
-      home: home.sheet,
-      away: away.sheet,
-      player: (id) => byId.get(id)!,
-      homeAdvantage: false,
-      seed: i + 1,
-    })
-  )
-}
-
-function stateOf(home: ReturnType<typeof side>, away: ReturnType<typeof side>): MatchState {
-  const byId = new Map([...home.players, ...away.players].map((p) => [p.id, p]))
-  return createMatch({
-    id: "u",
-    date: "2026-09-24",
-    home: home.sheet,
-    away: away.sheet,
-    player: (id) => byId.get(id)!,
-    homeAdvantage: false,
-    seed: 1,
-  })
-}
+import { teamUnits } from "../match/engine"
+import { makePlayer, playMany, sideOf as side, stateOf } from "./helpers"
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
 const first = (pos: Position) => archetypesFor(pos)[0]
@@ -165,7 +110,7 @@ describe("archetypes in the match engine", () => {
     const shots = (striker: Archetype) => {
       const home = side("h", (pos) => (pos === "ST" ? striker : first(pos)))
       const st = home.sheet.xi.find((s) => s.pos === "ST")!.playerId
-      const reports = play(home, side("a", first), 300)
+      const reports = playMany(home, side("a", first), 300)
       return sum(reports.map((r) => r.lines.find((l) => l.playerId === st)?.shots ?? 0))
     }
     expect(shots("poacher")).toBeGreaterThan(shots("target-man") * 1.05)
@@ -217,14 +162,14 @@ describe("archetypes in the match engine", () => {
   it("lets a side of attack-minded types out-shoot one of cautious types", () => {
     const bold = side("h", (pos) => BOLD[pos] ?? first(pos))
     const careful = side("a", (pos) => CAREFUL[pos] ?? first(pos))
-    const reports = play(bold, careful, 400)
+    const reports = playMany(bold, careful, 400)
     expect(sum(reports.map((r) => r.stats[0].xg))).toBeGreaterThan(
       sum(reports.map((r) => r.stats[1].xg)) * 1.05
     )
   })
 
   it("keeps a mixed side level with another mixed side of the same ability", () => {
-    const reports = play(
+    const reports = playMany(
       side("h", first),
       side("a", (pos) => archetypesFor(pos).at(-1)!),
       400

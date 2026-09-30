@@ -30,13 +30,8 @@ export type Archetype =
   | "poacher"
   | "complete-forward"
 
-export interface ArchetypeDef {
-  label: string
-  /** One line for the player card: what he does on the pitch. */
-  blurb: string
-  positions: Position[]
-  /** Share of players of those positions who get it. */
-  weight: number
+/** What a style (an archetype, a role, or both together) changes in a match. */
+export interface Modifiers {
   /** Multiplies his share of the side's defence, midfield and attack. */
   unit: [number, number, number]
   /** Chance of being the one who shoots. */
@@ -55,7 +50,16 @@ export interface ArchetypeDef {
   keeper: number
 }
 
-const NEUTRAL: Omit<ArchetypeDef, "label" | "blurb" | "positions" | "weight"> = {
+export interface ArchetypeDef extends Modifiers {
+  label: string
+  /** One line for the player card: what he does on the pitch. */
+  blurb: string
+  positions: Position[]
+  /** Share of players of those positions who get it. */
+  weight: number
+}
+
+export const NEUTRAL: Modifiers = {
   unit: [1, 1, 1],
   score: 1,
   assist: 1,

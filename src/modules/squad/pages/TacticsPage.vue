@@ -10,19 +10,22 @@ import {
   AppSelect,
   AppSheet,
   AppSubTabBar,
+  AppToggle,
 } from "@/components/ui"
 import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { PitchView } from "@/modules/squad/components/pitch"
-import { MENTALITY_OPTIONS } from "@/modules/squad/constants"
+import { LINE_OPTIONS, MENTALITY_OPTIONS, WIDTH_OPTIONS } from "@/modules/squad/constants"
 import { PlayerRow } from "@/modules/squad/components/list"
 import { useWorldStore } from "@/modules/world/store"
 import { FORMATIONS, FORMATION_LIST } from "@/engine/match/formations"
 import { aiTeamSheet, pickBench } from "@/engine/ai/squad"
 import { matchAbility, positionFit, positionGroup } from "@/engine/players/ability"
-import type { Formation, Level, Mentality, SheetSlot, Tactics } from "@/engine/match/types"
+import { ROLES, type Role } from "@/engine/match/roles"
+import type { Formation, Level, Mentality, Tactics } from "@/engine/match/types"
 import type { Player, PositionGroup } from "@/engine/types"
 import { showAlert } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
+import { carryFormation, placePlayer, roleChoices, setSlotRole } from "@/modules/squad/utils/lineup"
 import { useSettingsStore } from "@/modules/settings/store"
 
 const settings = useSettingsStore()
@@ -59,19 +62,13 @@ function initial() {
 const team = ref(initial())
 const selectedSlot = ref<number | null>(null)
 
-const slots = computed(() =>
-  FORMATIONS[team.value.tactics.formation].map((_, i) => team.value.xi[i]?.playerId ?? null)
-)
+const positions = computed(() => FORMATIONS[team.value.tactics.formation])
+const slots = computed(() => positions.value.map((_, i) => team.value.xi[i]?.playerId || null))
 const inXI = computed(() => new Set(slots.value.filter(Boolean) as string[]))
 
 function setFormation(f: Formation) {
-  const roles = FORMATIONS[f]
   team.value.tactics.formation = f
-  team.value.xi = roles
-    .map((pos, i) => ({ playerId: team.value.xi[i]?.playerId ?? "", pos }))
-    .filter((s) => s.playerId) as SheetSlot[]
-  while (team.value.xi.length < roles.length)
-    team.value.xi.push({ playerId: "", pos: roles[team.value.xi.length] })
+  team.value.xi = carryFormation(team.value.xi, FORMATIONS[f])
 }
 
 const GROUP_OPTIONS = [
@@ -104,13 +101,28 @@ const candidates = computed(() => {
 function choose(p: Player) {
   const i = selectedSlot.value
   if (i === null) return
-  const roles = FORMATIONS[team.value.tactics.formation]
-  const xi = roles.map((pos, k) => ({ playerId: slots.value[k] ?? "", pos }))
-  const current = xi.findIndex((s) => s.playerId === p.id)
-  if (current >= 0) xi[current].playerId = xi[i].playerId // swap places
-  xi[i].playerId = p.id
-  team.value.xi = xi
+  team.value.xi = placePlayer(team.value.xi, positions.value, i, p.id, player)
   selectedSlot.value = null
+}
+
+const roleLabels = computed(() =>
+  positions.value.map((_, i) => {
+    const r = team.value.xi[i]?.role
+    return r ? ROLES[r].label : null
+  })
+)
+
+/** The roles the tapped slot can ask for, and what the current choice means for its player. */
+const slotRoles = computed(() => {
+  const i = selectedSlot.value
+  if (i === null) return null
+  const id = slots.value[i]
+  return roleChoices(positions.value[i], id ? player(id) : undefined, team.value.xi[i]?.role)
+})
+
+function setRole(role: Role | undefined) {
+  const i = selectedSlot.value
+  if (i !== null) team.value.xi = setSlotRole(team.value.xi, positions.value, i, role)
 }
 
 function auto() {
@@ -143,6 +155,18 @@ const pressing = computed({
   get: () => String(team.value.tactics.pressing),
   set: (v: string) => (team.value.tactics.pressing = Number(v) as Level),
 })
+const line = computed({
+  get: () => String(team.value.tactics.line ?? 1),
+  set: (v: string) => (team.value.tactics.line = Number(v) as Level),
+})
+const width = computed({
+  get: () => String(team.value.tactics.width ?? 1),
+  set: (v: string) => (team.value.tactics.width = Number(v) as Level),
+})
+const counter = computed({
+  get: () => team.value.tactics.counter ?? false,
+  set: (v: boolean) => (team.value.tactics.counter = v),
+})
 const tempo = computed({
   get: () => String(team.value.tactics.tempo),
   set: (v: string) => (team.value.tactics.tempo = Number(v) as Level),
@@ -150,7 +174,7 @@ const tempo = computed({
 
 async function save() {
   const xi = FORMATIONS[team.value.tactics.formation]
-    .map((pos, i) => ({ playerId: slots.value[i] ?? "", pos }))
+    .map((pos, i) => ({ playerId: slots.value[i] ?? "", pos, role: team.value.xi[i]?.role }))
     .filter((s) => s.playerId)
   if (xi.length < 11) return showAlert("Fill all eleven positions.")
   const blocked = unavailableIn(
@@ -188,6 +212,7 @@ async function save() {
       :slots="slots"
       :player="player"
       :selected="selectedSlot"
+      :role-labels="roleLabels"
       @select="(i) => (selectedSlot = i)"
     />
 
@@ -216,6 +241,15 @@ async function save() {
             { value: '2', label: 'Direct' },
           ]"
         />
+      </AppField>
+      <AppField label="Defensive line" layout="stack">
+        <AppButtonGroup v-model="line" block :options="LINE_OPTIONS" />
+      </AppField>
+      <AppField label="Width" layout="stack">
+        <AppButtonGroup v-model="width" block :options="WIDTH_OPTIONS" />
+      </AppField>
+      <AppField label="Counter-attack" layout="row">
+        <AppToggle v-model="counter" aria-label="Counter-attack" />
       </AppField>
       <AppField label="Captain" layout="stack">
         <AppSelect
@@ -254,6 +288,33 @@ async function save() {
       max-height-mobile="85dvh"
       @close="selectedSlot = null"
     >
+      <div v-if="slotRoles" class="role-pick">
+        <div class="role-label">Role</div>
+        <div class="role-chips">
+          <button class="role-chip" :class="{ on: !slotRoles.current }" @click="setRole(undefined)">
+            Standard
+          </button>
+          <button
+            v-for="r in slotRoles.options"
+            :key="r.id"
+            class="role-chip"
+            :class="{ on: slotRoles.current === r.id }"
+            @click="setRole(r.id)"
+          >
+            {{ r.label }}
+            <span v-if="r.suits" class="role-suits" title="Suits his style">★</span>
+          </button>
+        </div>
+        <p class="role-blurb">
+          {{ slotRoles.blurb }}
+          <strong v-if="slotRoles.suited">
+            Suits {{ slotRoles.style }}: he plays above himself.
+          </strong>
+          <template v-else-if="slotRoles.style && slotRoles.current">
+            Not his style ({{ slotRoles.style }}).
+          </template>
+        </p>
+      </div>
       <div class="pick-filter">
         <AppSubTabBar
           :model-value="groupFilter"
@@ -293,6 +354,50 @@ async function save() {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
+}
+
+.role-pick {
+  flex-shrink: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.role-label {
+  margin-bottom: var(--sp-1);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.role-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font-size: var(--fs-xs);
+}
+
+.role-chip.on {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.role-suits {
+  color: var(--gold);
+}
+
+.role-blurb {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
 }
 
 .pick-filter {

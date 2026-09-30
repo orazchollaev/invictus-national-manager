@@ -20,8 +20,10 @@ import {
   TIRES_EARLY_AGE,
   archetypeOf,
   type Archetype,
-  type ArchetypeDef,
+  type Modifiers,
 } from "../players/archetypes"
+import { ROLE_SUIT_BONUS, combineStyle, suitsRole, validRole, type Role } from "./roles"
+import { meet, styleOf } from "./matchup"
 import { FORMATIONS } from "./formations"
 import type {
   Formation,
@@ -150,6 +152,12 @@ export interface LivePlayer {
   natural: Position
   alt: Position[]
   arch: Archetype
+  /** What the manager asks of his slot, if anything. */
+  role: Role | null
+  /** Archetype and role together, worked out again whenever either changes. */
+  mod: Modifiers
+  /** His role suits his archetype, so he plays above himself. */
+  suited: boolean
   slot: Position
   base: number
   age: number
@@ -264,13 +272,18 @@ function livePlayer(
   slot: Position,
   date: ISODate,
   started: boolean,
-  minute: number
+  minute: number,
+  role?: Role
 ): LivePlayer {
-  return {
+  const arch = archetypeOf(p)
+  const live: LivePlayer = {
     id: p.id,
     natural: p.pos,
     alt: p.alt,
-    arch: archetypeOf(p),
+    arch,
+    role: null,
+    mod: ARCHETYPES[arch],
+    suited: false,
     slot,
     base: matchAbility(p),
     age: ageOn(p.born, date),
@@ -294,11 +307,13 @@ function livePlayer(
     conceded: 0,
     ratingAdj: 0,
   }
+  assign(live, slot, role)
+  return live
 }
 
 function buildSide(sheet: TeamSheet, setup: MatchSetup, rng: Rng): LiveSide {
   const pitch = sheet.xi.map((s) =>
-    livePlayer(setup.player(s.playerId), s.pos, setup.date, true, 0)
+    livePlayer(setup.player(s.playerId), s.pos, setup.date, true, 0, s.role)
   )
   const bench = sheet.bench.map((id) => {
     const p = setup.player(id)
@@ -344,14 +359,23 @@ export function createMatch(setup: MatchSetup): MatchState {
 
 // ── Strength ────────────────────────────────────────────────────────────────
 
-const style = (p: LivePlayer): ArchetypeDef => ARCHETYPES[p.arch]
+const style = (p: LivePlayer): Modifiers => p.mod
+
+/** Put a player in a slot with a role (or none) and work out what that does to him. */
+function assign(p: LivePlayer, slot: Position, role: Role | null | undefined) {
+  p.slot = slot
+  p.role = validRole(role, slot) ? role : null
+  p.mod = combineStyle(p.arch, p.role)
+  p.suited = suitsRole(p.arch, p.role)
+}
 
 function effective(p: LivePlayer, bigMatch: boolean): number {
   const fit = positionFit({ pos: p.natural, alt: p.alt }, p.slot)
   const fatigue = 0.88 + 0.12 * (p.stamina / 100)
   const nerve = bigMatch ? (p.bigMatch - 10) * 0.3 : 0
+  const suit = p.suited ? ROLE_SUIT_BONUS : 0
   const hurt = p.injured ? 0.5 : 1
-  return Math.max(1, (p.base + nerve) * fit * fatigue * hurt)
+  return Math.max(1, (p.base + nerve + suit) * fit * fatigue * hurt)
 }
 
 export interface Units {
@@ -361,7 +385,7 @@ export interface Units {
   gk: number
 }
 
-function units(state: MatchState, side: LiveSide, isHome: boolean): Units {
+function units(state: MatchState, side: LiveSide, opp: LiveSide, isHome: boolean): Units {
   const bigMatch = !!state.setup.bigMatch
   const sum = [0, 0, 0]
   const wsum = [0, 0, 0]
@@ -389,21 +413,22 @@ function units(state: MatchState, side: LiveSide, isHome: boolean): Units {
   const short = 1 - missing * 0.06
   const m = side.tactics.mentality
   const press = side.tactics.pressing - 1
+  const play = meet(styleOf(side.tactics), styleOf(opp.tactics))
   const edge = state.setup.edge
   const home =
     (isHome && state.setup.homeAdvantage ? (state.setup.homeBoost ?? HOME_BOOST) : 0) +
     (edge && edge.side === (isHome ? "home" : "away") ? edge.value : 0)
   return {
-    def: (unit(0) * keeperUnit[0] * (1 - 0.03 * m) + home) * short,
-    mid: (unit(1) * keeperUnit[1] * (1 + 0.02 * press) + home) * short,
-    att: (unit(2) * keeperUnit[2] * (1 + 0.04 * m) + home) * short,
+    def: (unit(0) * keeperUnit[0] * (1 - 0.03 * m) * play.def + home) * short,
+    mid: (unit(1) * keeperUnit[1] * (1 + 0.02 * press) * play.mid + home) * short,
+    att: (unit(2) * keeperUnit[2] * (1 + 0.04 * m) * play.att + home) * short,
     gk: gk + home * 0.5,
   }
 }
 
 /** A side's strength in each part of the pitch right now (for tests and previews). */
 export function teamUnits(state: MatchState, s: Side): Units {
-  return units(state, sideOf(state, s), s === "home")
+  return units(state, sideOf(state, s), sideOf(state, other(s)), s === "home")
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -575,8 +600,8 @@ function playMinute(state: MatchState, out: MatchEvent[]) {
     }
   }
 
-  const H = units(state, state.home, true)
-  const A = units(state, state.away, false)
+  const H = units(state, state.home, state.away, true)
+  const A = units(state, state.away, state.home, false)
 
   // Who has the ball this minute.
   const pHome = clamp(1 / (1 + Math.exp(-(H.mid - A.mid) / 16)), 0.22, 0.78)
@@ -923,7 +948,7 @@ function sendOff(
     const stand = side.pitch.reduce((a, b) =>
       DEFENDER_WEIGHT[a.slot] > DEFENDER_WEIGHT[b.slot] ? a : b
     )
-    stand.slot = "GK"
+    assign(stand, "GK", null)
   }
 }
 
@@ -977,7 +1002,7 @@ export function substitute(
   if (!leaving || !joining) return null
   side.subsUsed++
   leaving.off = state.minute
-  joining.slot = leaving.slot
+  assign(joining, leaving.slot, leaving.role)
   joining.on = state.minute
   joining.started = false
   side.pitch = side.pitch.map((p) => (p === leaving ? joining : p))
@@ -990,7 +1015,7 @@ export function substitute(
 /** Move a player on the pitch into another role (the manager's drag on the pitch view). */
 export function setSlot(state: MatchState, s: Side, playerId: string, slot: Position) {
   const p = sideOf(state, s).pitch.find((x) => x.id === playerId)
-  if (p) p.slot = slot
+  if (p) assign(p, slot, null)
 }
 
 export function setTactics(state: MatchState, s: Side, tactics: Partial<Tactics>) {
@@ -1022,7 +1047,7 @@ export function changeFormation(state: MatchState, s: Side, formation: Formation
         best = p
     }
     if (best) {
-      best.slot = role
+      assign(best, role, null)
       free.delete(best)
     }
   }

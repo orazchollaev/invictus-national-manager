@@ -32,6 +32,9 @@ for Android; it also runs in the browser.
 - **Player styles** — every player is a Poacher, Target man, Ball winner, Sweeper-keeper…
   with badges for big-game nerve, reliability and fragility. Styles change who scores,
   creates and tackles, so picking the eleven is more than sorting by rating.
+- **Roles and instructions** — ask each slot for a role (Poacher, Wing-back, Ball winner…),
+  set the defensive line, width and counter-attack. Players whose style suits the role play
+  above themselves, and your way of playing works for or against the opponent's.
 - **Minute-by-minute matches** — a match engine that plays possession, attacks, shots
   (xG), fouls, cards, injuries and fatigue, with live text commentary, extra time and
   kick-by-kick shootouts, followed by a match report.

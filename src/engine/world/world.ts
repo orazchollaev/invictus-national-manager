@@ -20,7 +20,9 @@ import { addDays, daysBetween, yearOf } from "../calendar/dates"
 import { windowNear, windowsForYear, type MatchWindow } from "../calendar/windows"
 import { deriveSeed, makeRng, pick, shuffle, streamFor } from "../rng"
 import { playMatch } from "../match/engine"
-import type { MatchReport, Side, TeamSheet } from "../match/types"
+import type { MatchReport, SheetSlot, Side, TeamSheet } from "../match/types"
+import { suggestedRole, validRole } from "../match/roles"
+import { archetypeOf } from "../players/archetypes"
 import { rankingUpdate } from "../ranking"
 import {
   aiMentality,
@@ -753,11 +755,15 @@ export class World {
     const ids = new Set(squad.map((p) => p.id))
     const roles = FORMATIONS[ut.tactics.formation]
     const used = new Set<string>()
-    const xi = roles.map((pos, i) => {
+    const xi = roles.map((pos, i): SheetSlot | null => {
       const pick = ut.xi[i]
       if (pick && ids.has(pick.playerId) && !used.has(pick.playerId)) {
         used.add(pick.playerId)
-        return { playerId: pick.playerId, pos }
+        return {
+          playerId: pick.playerId,
+          pos,
+          role: validRole(pick.role, pos) ? pick.role : undefined,
+        }
       }
       return null
     })
@@ -771,10 +777,10 @@ export class World {
         )[0]
       if (best) {
         used.add(best.id)
-        xi[i] = { playerId: best.id, pos }
+        xi[i] = { playerId: best.id, pos, role: suggestedRole(archetypeOf(best), pos) }
       }
     })
-    const sheetXi = xi.filter((s): s is { playerId: string; pos: (typeof roles)[number] } => !!s)
+    const sheetXi = xi.filter((s): s is SheetSlot => !!s)
     const bench = [
       ...ut.bench.filter((id) => ids.has(id) && !used.has(id)),
       ...pickBench(squad, sheetXi, f.date),

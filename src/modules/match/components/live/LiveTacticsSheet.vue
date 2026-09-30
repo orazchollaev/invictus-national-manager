@@ -1,15 +1,32 @@
 <script setup lang="ts">
-import { ref } from "vue"
-import { AppButton, AppButtonGroup, AppField, AppSelect, AppSheet } from "@/components/ui"
+import { computed, ref } from "vue"
+import {
+  AppButton,
+  AppButtonGroup,
+  AppField,
+  AppSelect,
+  AppSheet,
+  AppToggle,
+} from "@/components/ui"
 import { FORMATION_LIST } from "@/engine/match/formations"
 import type { Formation, Level, Mentality, Tactics } from "@/engine/match/types"
-import { MENTALITY_OPTIONS, PRESSING_OPTIONS, TEMPO_OPTIONS } from "@/modules/squad/constants"
+import {
+  LINE_OPTIONS,
+  MENTALITY_OPTIONS,
+  PRESSING_OPTIONS,
+  TEMPO_OPTIONS,
+  WIDTH_OPTIONS,
+} from "@/modules/squad/constants"
 
 const props = defineProps<{ tactics: Tactics }>()
 const emit = defineEmits<{ close: []; apply: [tactics: Tactics] }>()
 
 const draft = ref<Tactics>({ ...props.tactics })
 const str = (v: number) => String(v)
+const counter = computed({
+  get: () => draft.value.counter ?? false,
+  set: (v: boolean) => (draft.value.counter = v),
+})
 </script>
 
 <template>
@@ -44,6 +61,25 @@ const str = (v: number) => String(v)
           :options="TEMPO_OPTIONS"
           @update:model-value="(v) => (draft.tempo = Number(v) as Level)"
         />
+      </AppField>
+      <AppField label="Defensive line" layout="stack">
+        <AppButtonGroup
+          :model-value="str(draft.line ?? 1)"
+          block
+          :options="LINE_OPTIONS"
+          @update:model-value="(v) => (draft.line = Number(v) as Level)"
+        />
+      </AppField>
+      <AppField label="Width" layout="stack">
+        <AppButtonGroup
+          :model-value="str(draft.width ?? 1)"
+          block
+          :options="WIDTH_OPTIONS"
+          @update:model-value="(v) => (draft.width = Number(v) as Level)"
+        />
+      </AppField>
+      <AppField label="Counter-attack" layout="row">
+        <AppToggle v-model="counter" aria-label="Counter-attack" />
       </AppField>
       <AppButton variant="filled" block @click="emit('apply', draft)">Apply</AppButton>
     </div>

@@ -64,6 +64,19 @@ below and only lopsided ones feel different. Badges (Big-game player, Reliable, 
 Injury-prone, Tires early) are read from character and age and describe effects the engine
 already has.
 
+Each slot can ask for a **role** (`engine/match/roles.ts`: Stopper, Wing-back, Poacher,
+Pressing forward…). A role reshapes the slot like an archetype does, always as a trade-off,
+and a player whose archetype suits it plays two ability points above himself. A sheet
+without roles plays as before; a role the slot cannot ask for is ignored; changing shape
+mid-match clears them. The AI coach gives each player the role that suits him.
+
+Team instructions (defensive line, width, counter-attack, next to mentality, pressing and
+tempo) are read by `engine/match/matchup.ts`: each has a small cost and benefit of its own,
+and meeting the opponent's way of playing adds matchups (balls in behind a high line,
+a patient side pressed, a lone striker against three centre-backs, width against a back
+five). Tests pin that no style is unbeatable and none is a free gain. AI coaches pick a
+habit from their strength and their nation, so opponents differ.
+
 The score is only what those events add up to. Knockout matches go to extra time and a
 kick-by-kick shootout. The AI touchline chases games late, sits on leads and makes
 planned changes; the user's side is left alone (injuries wait for him). Calibration is

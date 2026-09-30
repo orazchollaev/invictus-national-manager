@@ -12,6 +12,7 @@ import playerRows from "@/data/players.json"
 import { buildReport, createMatch, step } from "@/engine/match/engine"
 import { pickSquad } from "@/engine/ai/squad"
 import { ARCHETYPES, archetypeOf } from "@/engine/players/archetypes"
+import { ROLES } from "@/engine/match/roles"
 import type { PlayerRow } from "@/engine/world/create"
 
 const pages: Record<string, () => Promise<unknown>> = {
@@ -110,6 +111,16 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
   // The playing style shows on the player's card and in every list of players.
   const star = w.pool("TUR")[0]
   const style = ARCHETYPES[archetypeOf(star)]
+  // The tactics page offers the team instructions and shows the roles on the pitch.
+  expect(pageHtml["/squad/tactics"]).toContain("Defensive line")
+  expect(pageHtml["/squad/tactics"]).toContain("Counter-attack")
+  expect(pageHtml["/squad/tactics"]).toMatch(
+    new RegExp(
+      Object.values(ROLES)
+        .map((r) => r.label)
+        .join("|")
+    )
+  )
   expect(pageHtml["/player/:id"]).toContain("Playing style")
   expect(pageHtml["/player/:id"]).toContain(style.label)
   expect(pageHtml["/squad"]).toMatch(

@@ -1,6 +1,9 @@
 import type { Player, Position } from "../types"
 import { FORMATIONS } from "../match/formations"
-import type { Formation, TeamSheet } from "../match/types"
+import type { Formation, MatchReport, Tactics, TeamSheet } from "../match/types"
+import { createMatch, playMatch, type MatchState } from "../match/engine"
+import { archetypeOf, archetypesFor, type Archetype } from "../players/archetypes"
+import type { Role } from "../match/roles"
 
 export function makePlayer(
   id: string,
@@ -55,4 +58,71 @@ export function makeTeam(prefix: string, ca: number, formation: Formation = "4-2
     tactics: { formation, mentality: 0, pressing: 1, tempo: 1 },
   }
   return { players, sheet }
+}
+
+// ── Sides built from archetypes and roles ───────────────────────────────────
+
+/** A player of `pos` whose id draws `want`, found by trying ids. */
+export function playerWith(prefix: string, pos: Position, want: Archetype, ca = 70): Player {
+  for (let n = 0; n < 5000; n++) {
+    const id = `${prefix}${n}`
+    if (archetypeOf({ id, pos }) === want) return makePlayer(id, pos, ca)
+  }
+  throw new Error(`no id draws ${want}`)
+}
+
+export interface TestSide {
+  players: Player[]
+  sheet: TeamSheet
+}
+
+/**
+ * A side whose players each have the archetype `choose` names for their role, in the
+ * formation given, with `role` (if any) asked of each slot and `tactics` on top.
+ */
+export function sideOf(
+  prefix: string,
+  choose: (pos: Position) => Archetype,
+  options: {
+    formation?: Formation
+    role?: (pos: Position) => Role | undefined
+    tactics?: Partial<Tactics>
+  } = {}
+): TestSide {
+  const formation = options.formation ?? "4-2-3-1"
+  const roles = FORMATIONS[formation]
+  const players = roles.map((pos, i) => playerWith(`${prefix}${i}-`, pos, choose(pos)))
+  const bench = (["GK", "CB", "CM", "ST"] as Position[]).map((pos, i) =>
+    playerWith(`${prefix}b${i}-`, pos, archetypesFor(pos)[0], 67)
+  )
+  return {
+    players: [...players, ...bench],
+    sheet: {
+      nationId: prefix,
+      xi: roles.map((pos, i) => ({ playerId: players[i].id, pos, role: options.role?.(pos) })),
+      bench: bench.map((p) => p.id),
+      tactics: { formation, mentality: 0, pressing: 1, tempo: 1, ...options.tactics },
+    },
+  }
+}
+
+export function setupOf(home: TestSide, away: TestSide, seed = 1) {
+  const byId = new Map([...home.players, ...away.players].map((p) => [p.id, p]))
+  return {
+    id: `m${seed}`,
+    date: "2026-09-24",
+    home: home.sheet,
+    away: away.sheet,
+    player: (id: string) => byId.get(id)!,
+    homeAdvantage: false,
+    seed,
+  }
+}
+
+export function stateOf(home: TestSide, away: TestSide): MatchState {
+  return createMatch(setupOf(home, away))
+}
+
+export function playMany(home: TestSide, away: TestSide, n: number): MatchReport[] {
+  return Array.from({ length: n }, (_, i) => playMatch(setupOf(home, away, i + 1)))
 }

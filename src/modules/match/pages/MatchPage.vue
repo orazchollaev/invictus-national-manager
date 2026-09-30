@@ -223,6 +223,9 @@ function applyTactics(t: Tactics) {
     mentality: t.mentality,
     pressing: t.pressing,
     tempo: t.tempo,
+    line: t.line,
+    width: t.width,
+    counter: t.counter,
   })
   showTactics.value = false
   refresh()

@@ -1,4 +1,5 @@
 import type { Position } from "../types"
+import type { Role } from "./roles"
 
 export type Side = "home" | "away"
 
@@ -24,12 +25,20 @@ export interface Tactics {
   mentality: Mentality
   pressing: Level
   tempo: Level
+  /** Defensive line: 0 deep, 1 standard, 2 high. Saves that predate it play standard. */
+  line?: Level
+  /** Width of the attack: 0 narrow, 1 standard, 2 wide. */
+  width?: Level
+  /** Sit back and hit the opponent on the break. */
+  counter?: boolean
 }
 
 export interface SheetSlot {
   playerId: string
   /** The role the slot asks for, which may differ from the player's own position. */
   pos: Position
+  /** What the manager asks of the slot; none is the plain version of the position. */
+  role?: Role
 }
 
 export interface TeamSheet {
