@@ -29,6 +29,9 @@ for Android; it also runs in the browser.
 - **Squad and tactics** — call up your squad for each window or tournament, pick the
   eleven, choose from ten formations and set mentality, tempo and pressing. Or let the
   assistant pick the team.
+- **Player styles** — every player is a Poacher, Target man, Ball winner, Sweeper-keeper…
+  with badges for big-game nerve, reliability and fragility. Styles change who scores,
+  creates and tackles, so picking the eleven is more than sorting by rating.
 - **Minute-by-minute matches** — a match engine that plays possession, attacks, shots
   (xG), fouls, cards, injuries and fatigue, with live text commentary, extra time and
   kick-by-kick shootouts, followed by a match report.

@@ -55,6 +55,15 @@ form, home advantage, mentality). Each minute:
   (xG) depends on the edge; the shooter's finishing against the keeper decides it;
 - fouls (pressing, temperament) bring cards and set pieces; players tire and get hurt.
 
+Every player has an **archetype** (`engine/players/archetypes.ts`): Poacher, Target man,
+Ball winner, Sweeper-keeper… drawn once from his id and natural position, so it needs no
+saved state and never changes. It shades his share of the side's defence, midfield and
+attack, who shoots, assists, heads, tackles and fouls, and finishing or shot-stopping by a
+point or two. Factors average out to 1 per position, so mixed squads keep the calibration
+below and only lopsided ones feel different. Badges (Big-game player, Reliable, Erratic,
+Injury-prone, Tires early) are read from character and age and describe effects the engine
+already has.
+
 The score is only what those events add up to. Knockout matches go to extra time and a
 kick-by-kick shootout. The AI touchline chases games late, sits on leads and makes
 planned changes; the user's side is left alone (injuries wait for him). Calibration is

@@ -10,7 +10,8 @@ import {
   CategoryScale,
   Filler,
 } from "chart.js"
-import { AppCard, AppEmptyState, AppSectionHeader } from "@/components/ui"
+import { AppCard, AppChip, AppEmptyState, AppSectionHeader } from "@/components/ui"
+import { ARCHETYPES, archetypeOf, badgesOf } from "@/engine/players/archetypes"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
@@ -32,6 +33,9 @@ const p = world.derive((w) => w.state.players[id.value] ?? null, null)
 const club = computed(() => (p.value ? world.world?.clubs.get(p.value.clubId) : undefined))
 const potential = computed(() => (p.value ? potentialRange(p.value, world.date) : [0, 0]))
 const injured = computed(() => !!p.value?.injury && p.value.injury.until > world.date)
+
+const style = computed(() => ARCHETYPES[archetypeOf(p.value ?? { id: "", pos: "CM" })])
+const badges = computed(() => (p.value ? badgesOf(p.value, world.date) : []))
 
 const traits = computed(() => {
   if (!p.value) return []
@@ -116,6 +120,18 @@ onBeforeUnmount(() => chart?.destroy())
     </AppCard>
 
     <AppCard padding="md">
+      <AppSectionHeader title="Playing style" />
+      <div class="style-name">{{ style.label }}</div>
+      <p class="style-blurb">{{ style.blurb }}</p>
+      <ul v-if="badges.length" class="badges">
+        <li v-for="b in badges" :key="b.id">
+          <AppChip variant="accent" size="sm">{{ b.label }}</AppChip>
+          <span class="badge-text">{{ b.text }}</span>
+        </li>
+      </ul>
+    </AppCard>
+
+    <AppCard padding="md">
       <AppSectionHeader title="Club and condition" />
       <dl class="facts">
         <dt>Club</dt>
@@ -193,6 +209,33 @@ onBeforeUnmount(() => chart?.destroy())
 
 .stat-value {
   font-weight: 700;
+}
+
+.style-name {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.style-blurb {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.badges {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge-text {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
 }
 
 .facts {

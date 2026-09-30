@@ -11,6 +11,7 @@ import { statics } from "@/modules/world/services/statics"
 import playerRows from "@/data/players.json"
 import { buildReport, createMatch, step } from "@/engine/match/engine"
 import { pickSquad } from "@/engine/ai/squad"
+import { ARCHETYPES, archetypeOf } from "@/engine/players/archetypes"
 import type { PlayerRow } from "@/engine/world/create"
 
 const pages: Record<string, () => Promise<unknown>> = {
@@ -22,6 +23,7 @@ const pages: Record<string, () => Promise<unknown>> = {
   "/new": () => import("@/modules/career/pages/NewGamePage.vue"),
   "/competitions/:id": () => import("@/modules/competitions/pages/CompetitionPage.vue"),
   "/squad": () => import("@/modules/squad/pages/SquadPage.vue"),
+  "/player/:id": () => import("@/modules/squad/pages/PlayerPage.vue"),
   "/nation/:id": () => import("@/modules/nations/pages/NationPage.vue"),
   "/career": () => import("@/modules/career/pages/CareerPage.vue"),
   "/inbox": () => import("@/modules/news/pages/InboxPage.vue"),
@@ -63,6 +65,7 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
     }
   }
   const errors: string[] = []
+  const pageHtml: Record<string, string> = {}
   for (const [path, loader] of Object.entries(pages)) {
     const url = path.replace(
       ":id",
@@ -70,7 +73,9 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
         ? "TUR"
         : path.startsWith("/competitions/")
           ? "unl-2026"
-          : fixtureId
+          : path.startsWith("/player")
+            ? w.pool("TUR")[0].id
+            : fixtureId
     )
     const router = createRouter({
       history: createMemoryHistory(),
@@ -94,11 +99,24 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
     await router.push(url)
     await router.isReady()
     try {
-      await renderToString(app)
+      pageHtml[path] = await renderToString(app)
     } catch (e) {
       errors.push(`${url}: ${(e as Error).stack?.split("\n").slice(0, 5).join(" | ")}`)
     }
   }
   console.log(errors.join("\n"))
   expect(errors).toEqual([])
+
+  // The playing style shows on the player's card and in every list of players.
+  const star = w.pool("TUR")[0]
+  const style = ARCHETYPES[archetypeOf(star)]
+  expect(pageHtml["/player/:id"]).toContain("Playing style")
+  expect(pageHtml["/player/:id"]).toContain(style.label)
+  expect(pageHtml["/squad"]).toMatch(
+    new RegExp(
+      Object.values(ARCHETYPES)
+        .map((a) => a.label)
+        .join("|")
+    )
+  )
 })

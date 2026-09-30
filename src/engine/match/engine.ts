@@ -15,6 +15,13 @@
 import type { ISODate, Player, Position } from "../types"
 import { clamp, makeRng, pickWeighted, randInt, type Rng } from "../rng"
 import { ageOn, matchAbility, positionFit } from "../players/ability"
+import {
+  ARCHETYPES,
+  TIRES_EARLY_AGE,
+  archetypeOf,
+  type Archetype,
+  type ArchetypeDef,
+} from "../players/archetypes"
 import { FORMATIONS } from "./formations"
 import type {
   Formation,
@@ -142,6 +149,7 @@ export interface LivePlayer {
   id: string
   natural: Position
   alt: Position[]
+  arch: Archetype
   slot: Position
   base: number
   age: number
@@ -262,6 +270,7 @@ function livePlayer(
     id: p.id,
     natural: p.pos,
     alt: p.alt,
+    arch: archetypeOf(p),
     slot,
     base: matchAbility(p),
     age: ageOn(p.born, date),
@@ -335,6 +344,8 @@ export function createMatch(setup: MatchSetup): MatchState {
 
 // ── Strength ────────────────────────────────────────────────────────────────
 
+const style = (p: LivePlayer): ArchetypeDef => ARCHETYPES[p.arch]
+
 function effective(p: LivePlayer, bigMatch: boolean): number {
   const fit = positionFit({ pos: p.natural, alt: p.alt }, p.slot)
   const fatigue = 0.88 + 0.12 * (p.stamina / 100)
@@ -343,7 +354,7 @@ function effective(p: LivePlayer, bigMatch: boolean): number {
   return Math.max(1, (p.base + nerve) * fit * fatigue * hurt)
 }
 
-interface Units {
+export interface Units {
   def: number
   mid: number
   att: number
@@ -355,15 +366,20 @@ function units(state: MatchState, side: LiveSide, isHome: boolean): Units {
   const sum = [0, 0, 0]
   const wsum = [0, 0, 0]
   let gk = 20
+  // A keeper's style shades the whole side's defence and midfield; an outfielder
+  // standing in goal after a red card brings no such style.
+  let keeperUnit: [number, number, number] = [1, 1, 1]
   for (const p of side.pitch) {
     const e = effective(p, bigMatch)
     if (p.slot === "GK") {
-      gk = e
+      gk = p.natural === "GK" ? e + style(p).keeper : e
+      if (p.natural === "GK") keeperUnit = style(p).unit
       continue
     }
     const w = ROLE_WEIGHTS[p.slot]
+    const u = style(p).unit
     for (let i = 0; i < 3; i++) {
-      sum[i] += w[i] * e
+      sum[i] += w[i] * u[i] * e
       wsum[i] += w[i]
     }
   }
@@ -378,11 +394,16 @@ function units(state: MatchState, side: LiveSide, isHome: boolean): Units {
     (isHome && state.setup.homeAdvantage ? (state.setup.homeBoost ?? HOME_BOOST) : 0) +
     (edge && edge.side === (isHome ? "home" : "away") ? edge.value : 0)
   return {
-    def: (unit(0) * (1 - 0.03 * m) + home) * short,
-    mid: (unit(1) * (1 + 0.02 * press) + home) * short,
-    att: (unit(2) * (1 + 0.04 * m) + home) * short,
+    def: (unit(0) * keeperUnit[0] * (1 - 0.03 * m) + home) * short,
+    mid: (unit(1) * keeperUnit[1] * (1 + 0.02 * press) + home) * short,
+    att: (unit(2) * keeperUnit[2] * (1 + 0.04 * m) + home) * short,
     gk: gk + home * 0.5,
   }
+}
+
+/** A side's strength in each part of the pitch right now (for tests and previews). */
+export function teamUnits(state: MatchState, s: Side): Units {
+  return units(state, sideOf(state, s), s === "home")
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -423,7 +444,12 @@ function choose(
 }
 
 function finishing(p: LivePlayer, bigMatch: boolean): number {
-  return effective(p, bigMatch) + FINISH_BONUS[p.slot]
+  return effective(p, bigMatch) + FINISH_BONUS[p.slot] + style(p).finish
+}
+
+/** A keeper's shot-stopping: his all-round ability shaded by his style. */
+function keeperAbility(p: LivePlayer): number {
+  return effective(p, false) + (p.natural === "GK" ? style(p).keeper : 0)
 }
 
 function keeper(side: LiveSide): LivePlayer | undefined {
@@ -543,7 +569,7 @@ function playMinute(state: MatchState, out: MatchEvent[]) {
         STAMINA_DRAIN *
         (1 + 0.25 * (side.tactics.pressing - 1)) *
         (1 + 0.1 * (side.tactics.tempo - 1)) *
-        (p.age >= 31 ? 1.12 : 1) *
+        (p.age >= TIRES_EARLY_AGE ? 1.12 : 1) *
         (p.slot === "GK" ? 0.3 : 1)
       p.stamina = Math.max(0, p.stamina - drain)
     }
@@ -611,7 +637,7 @@ function attack(state: MatchState, out: MatchEvent[], s: Side, edge: number, gkA
 
   if (rng() < BREAKDOWN * (1 - 0.3 * edge)) {
     const carrier = choose(rng, outfield, (p) => ROLE_WEIGHTS[p.slot][1] + ROLE_WEIGHTS[p.slot][2])
-    const tackler = choose(rng, opp.pitch, (p) => DEFENDER_WEIGHT[p.slot])
+    const tackler = choose(rng, opp.pitch, (p) => DEFENDER_WEIGHT[p.slot] * style(p).tackle)
     if (tackler) tackler.tackles++
     emit(state, out, "attack", s, { playerId: carrier?.id, otherId: tackler?.id })
     // Some moves end with the ball put out for a corner.
@@ -653,10 +679,14 @@ function attack(state: MatchState, out: MatchEvent[], s: Side, edge: number, gkA
   }
   xg *= tempoPenalty
 
-  const shooter = choose(rng, outfield, (p) => SCORER_WEIGHT[p.slot] * (effective(p, false) / 70))!
+  const shooter = choose(
+    rng,
+    outfield,
+    (p) => SCORER_WEIGHT[p.slot] * style(p).score * (effective(p, false) / 70)
+  )!
   const assister =
     rng() < (xg > 0.08 ? 0.8 : 0.45)
-      ? choose(rng, outfield, (p) => ASSIST_WEIGHT[p.slot], shooter)
+      ? choose(rng, outfield, (p) => ASSIST_WEIGHT[p.slot] * style(p).assist, shooter)
       : null
   shot(state, out, s, shooter, assister, xg, gkAbility, blockChance)
 }
@@ -680,7 +710,7 @@ function shot(
   shooter.shots++
 
   if (rng() < blockChance) {
-    const blocker = choose(rng, opp.pitch, (p) => DEFENDER_WEIGHT[p.slot])
+    const blocker = choose(rng, opp.pitch, (p) => DEFENDER_WEIGHT[p.slot] * style(p).tackle)
     if (blocker) blocker.tackles++
     emit(state, out, "shot-blocked", s, { playerId: shooter.id, otherId: blocker?.id, xg })
     if (rng() < 0.45) corner(state, out, s, gkAbility)
@@ -734,10 +764,14 @@ function corner(state: MatchState, out: MatchEvent[], s: Side, gkAbility: number
   emit(state, out, "corner", s)
   if (rng() < 0.28) {
     const outfield = side.pitch.filter((p) => p.slot !== "GK")
-    const header = choose(rng, outfield, (p) => HEADER_WEIGHT[p.slot])
+    const header = choose(rng, outfield, (p) => HEADER_WEIGHT[p.slot] * style(p).header)
     const taker = setPieceTaker(side, header)
     if (header) shot(state, out, s, header, taker, 0.05 + rng() * 0.09, gkAbility, 0.15)
   }
+}
+
+function setPieceValue(p: LivePlayer): number {
+  return p.base * ASSIST_WEIGHT[p.slot] * style(p).assist
 }
 
 function setPieceTaker(side: LiveSide, exclude?: LivePlayer | null): LivePlayer | null {
@@ -746,8 +780,8 @@ function setPieceTaker(side: LiveSide, exclude?: LivePlayer | null): LivePlayer 
   let best: LivePlayer | null = null
   for (const p of side.pitch) {
     if (p === exclude || p.slot === "GK") continue
-    const v = p.base * ASSIST_WEIGHT[p.slot]
-    if (!best || v > best.base * ASSIST_WEIGHT[best.slot]) best = p
+    const v = setPieceValue(p)
+    if (!best || v > setPieceValue(best)) best = p
   }
   return best
 }
@@ -804,7 +838,11 @@ function foul(state: MatchState, out: MatchEvent[], s: Side, defending: boolean)
   const rng = state.rng
   const side = sideOf(state, s)
   const opp = sideOf(state, other(s))
-  const culprit = choose(rng, side.pitch, (p) => FOUL_WEIGHT[p.slot] * (p.temperament / 10))
+  const culprit = choose(
+    rng,
+    side.pitch,
+    (p) => FOUL_WEIGHT[p.slot] * style(p).foul * (p.temperament / 10)
+  )
   const victim = choose(
     rng,
     opp.pitch.filter((p) => p.slot !== "GK"),
@@ -819,14 +857,14 @@ function foul(state: MatchState, out: MatchEvent[], s: Side, defending: boolean)
   if (defending && rng() < 0.18) {
     const attackers = sideOf(state, other(s))
     const gk = keeper(side)
-    const gkAbility = gk ? effective(gk, false) : 20
+    const gkAbility = gk ? keeperAbility(gk) : 20
     emit(state, out, "free-kick", other(s), { playerId: victim?.id })
     if (rng() < 0.35) {
       const taker = setPieceTaker(attackers)
       if (taker) shot(state, out, other(s), taker, null, 0.03 + rng() * 0.06, gkAbility, 0.3)
     } else if (rng() < 0.2) {
       const outfield = attackers.pitch.filter((p) => p.slot !== "GK")
-      const header = choose(rng, outfield, (p) => HEADER_WEIGHT[p.slot])
+      const header = choose(rng, outfield, (p) => HEADER_WEIGHT[p.slot] * style(p).header)
       if (header)
         shot(
           state,
@@ -1077,7 +1115,7 @@ function playShootout(state: MatchState, out: MatchEvent[]) {
   const taken = { home: 0, away: 0 }
   const convert = (s: Side, taker: LivePlayer) => {
     const gk = keeper(sideOf(state, other(s)))
-    const gkAbility = gk ? effective(gk, false) : 20
+    const gkAbility = gk ? keeperAbility(gk) : 20
     const nerve = (taker.bigMatch - 10) * 0.008
     return rng() < clamp(0.74 + (finishing(taker, false) - gkAbility) / 200 + nerve, 0.55, 0.9)
   }

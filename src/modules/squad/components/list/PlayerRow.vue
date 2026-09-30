@@ -2,6 +2,7 @@
 import { computed } from "vue"
 import { Ban, Cross, TrendingDown, TrendingUp } from "@lucide/vue"
 import type { Player } from "@/engine/types"
+import { ARCHETYPES, archetypeOf } from "@/engine/players/archetypes"
 import { StatPill } from "@/modules/core/components"
 import { abilityTone, age, positionTone } from "@/modules/core/utils/format"
 import { useWorldStore } from "@/modules/world/store"
@@ -18,6 +19,7 @@ const world = useWorldStore()
 const date = computed(() => world.date)
 const club = computed(() => world.world?.clubs.get(props.player.clubId))
 const injured = computed(() => !!props.player.injury && props.player.injury.until > date.value)
+const style = computed(() => ARCHETYPES[archetypeOf(props.player)])
 </script>
 
 <template>
@@ -34,6 +36,7 @@ const injured = computed(() => !!props.player.injury && props.player.injury.unti
         <Cross v-if="injured" :size="14" class="prow-icon prow-icon--injury" />
         <Ban v-if="player.banned" :size="14" class="prow-icon prow-icon--ban" />
       </div>
+      <div class="prow-style">{{ style.label }}</div>
       <div v-if="!compact" class="prow-sub">
         {{ age(player, date) }} · {{ club?.name ?? "Free agent" }}
         <template v-if="player.caps">· {{ player.caps }} caps</template>
@@ -75,6 +78,15 @@ const injured = computed(() => !!props.player.injury && props.player.injury.unti
   display: flex;
   align-items: center;
   gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.prow-style {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--accent);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
