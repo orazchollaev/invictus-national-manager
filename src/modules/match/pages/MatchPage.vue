@@ -40,6 +40,7 @@ import {
 } from "@/engine/match/engine"
 import { KEY_EVENTS, type Side, type Tactics } from "@/engine/match/types"
 import { clock } from "@/engine/match/commentary"
+import { laneCounts } from "@/engine/match/lanes"
 import { FORMATIONS } from "@/engine/match/formations"
 import { formatDate } from "@/engine/calendar/dates"
 import { resultLetter } from "@/modules/core/utils/format"
@@ -470,6 +471,7 @@ const pitchSlots = computed(() => {
           v-else-if="tab === 'stats'"
           :home="{ ...match.home.stats, possession: livePossession[0] }"
           :away="{ ...match.away.stats, possession: livePossession[1] }"
+          :lanes="laneCounts(match.events)"
         />
         <div v-else-if="mySide" class="team-panel">
           <PitchView

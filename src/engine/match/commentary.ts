@@ -4,7 +4,7 @@
  * each line is picked from the event's position in the match, so re-opening a
  * report reads the same.
  */
-import type { MatchEvent, MatchEventKind } from "./types"
+import type { Lane, MatchEvent, MatchEventKind } from "./types"
 
 export interface CommentaryNames {
   player: (id: string | undefined) => string
@@ -34,8 +34,8 @@ const T: Partial<Record<MatchEventKind, Template[]>> = {
     "Extra time can't separate them — penalties it is.",
   ],
   attack: [
-    "{p} drives forward for {team}, but {o} steps in.",
-    "{team} work it down the flank, but the cross is cut out by {o}.",
+    "{p} drives forward for {team} {lane}, but {o} steps in.",
+    "{team} work it {lane}, but the final ball is cut out by {o}.",
     "{p} looks for a way through. {o} reads it well.",
     "Patient build-up from {team}, but the final ball goes astray.",
     "{p} tries to thread a pass — intercepted by {o}.",
@@ -144,6 +144,13 @@ export function commentaryLine(ev: MatchEvent, index: number, names: CommentaryN
     .replace(/\{p\}/g, names.player(ev.playerId))
     .replace(/\{o\}/g, names.player(ev.otherId))
     .replace("{assist}", assist)
+    .replace(/{lane}/g, ev.lane ? LANE_PHRASE[ev.lane] : "forward")
+}
+
+const LANE_PHRASE: Record<Lane, string> = {
+  left: "down the left",
+  centre: "through the middle",
+  right: "down the right",
 }
 
 /** Clock label: 45+2', 90', 105+1'. */

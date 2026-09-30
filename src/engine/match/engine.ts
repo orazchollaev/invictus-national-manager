@@ -23,10 +23,12 @@ import {
   type Modifiers,
 } from "../players/archetypes"
 import { ROLE_SUIT_BONUS, combineStyle, suitsRole, validRole, type Role } from "./roles"
-import { meet, styleOf } from "./matchup"
+import { instructionsOf, meet, styleOf } from "./matchup"
+import { LANES, laneAffinity, laneOfSlot, mirror, widthBias } from "./lanes"
 import { FORMATIONS } from "./formations"
 import type {
   Formation,
+  Lane,
   MatchEvent,
   MatchEventKind,
   MatchReport,
@@ -642,6 +644,42 @@ function playMinute(state: MatchState, out: MatchEvent[]) {
 
 // ── Attacks and shots ───────────────────────────────────────────────────────
 
+const involvement = (p: LivePlayer, lane: Lane) => laneAffinity(laneOfSlot(p.slot), lane)
+
+/**
+ * The lane an attack comes down. It follows where the side's attacking players are and
+ * how wide it is asked to play, and leans towards the flank where the opponent is
+ * weakest on the day.
+ */
+function pickLane(state: MatchState, side: LiveSide, opp: LiveSide): Lane {
+  const bigMatch = !!state.setup.bigMatch
+  const bias = widthBias(instructionsOf(side.tactics).width)
+  const defenders = opp.pitch.filter((p) => p.slot !== "GK")
+  const guard = (lane: Lane) => {
+    let sum = 0
+    let weight = 0
+    for (const p of defenders) {
+      const w = DEFENDER_WEIGHT[p.slot] * involvement(p, mirror(lane))
+      sum += w * effective(p, bigMatch)
+      weight += w
+    }
+    return weight ? sum / weight : 0
+  }
+  const guards = LANES.map(guard)
+  const mean = guards.reduce((a, b) => a + b, 0) / guards.length
+  const weights = LANES.map((lane, i) => {
+    let threat = 0
+    for (const p of side.pitch) {
+      if (p.slot === "GK") continue
+      const w = ROLE_WEIGHTS[p.slot]
+      threat += (w[2] + 0.5 * w[1]) * involvement(p, lane)
+    }
+    const exposure = guards[i] ? clamp(mean / guards[i], 0.85, 1.2) : 1
+    return threat * bias[lane] * exposure
+  })
+  return pickWeighted(state.rng, LANES.slice(), (lane) => weights[LANES.indexOf(lane)])
+}
+
 function attack(state: MatchState, out: MatchEvent[], s: Side, edge: number, gkAbility: number) {
   const rng = state.rng
   const side = sideOf(state, s)
@@ -660,20 +698,30 @@ function attack(state: MatchState, out: MatchEvent[], s: Side, edge: number, gkA
     return
   }
 
+  const lane = pickLane(state, side, opp)
+
   if (rng() < BREAKDOWN * (1 - 0.3 * edge)) {
-    const carrier = choose(rng, outfield, (p) => ROLE_WEIGHTS[p.slot][1] + ROLE_WEIGHTS[p.slot][2])
-    const tackler = choose(rng, opp.pitch, (p) => DEFENDER_WEIGHT[p.slot] * style(p).tackle)
+    const carrier = choose(
+      rng,
+      outfield,
+      (p) => (ROLE_WEIGHTS[p.slot][1] + ROLE_WEIGHTS[p.slot][2]) * involvement(p, lane)
+    )
+    const tackler = choose(
+      rng,
+      opp.pitch,
+      (p) => DEFENDER_WEIGHT[p.slot] * style(p).tackle * involvement(p, mirror(lane))
+    )
     if (tackler) tackler.tackles++
-    emit(state, out, "attack", s, { playerId: carrier?.id, otherId: tackler?.id })
+    emit(state, out, "attack", s, { playerId: carrier?.id, otherId: tackler?.id, lane })
     // Some moves end with the ball put out for a corner.
     if (rng() < 0.22) corner(state, out, s, gkAbility)
     return
   }
 
   if (rng() < OFFSIDE) {
-    const runner = choose(rng, outfield, (p) => SCORER_WEIGHT[p.slot])
+    const runner = choose(rng, outfield, (p) => SCORER_WEIGHT[p.slot] * involvement(p, lane))
     side.stats.offsides++
-    emit(state, out, "offside", s, { playerId: runner?.id })
+    emit(state, out, "offside", s, { playerId: runner?.id, lane })
     return
   }
 
@@ -707,13 +755,23 @@ function attack(state: MatchState, out: MatchEvent[], s: Side, edge: number, gkA
   const shooter = choose(
     rng,
     outfield,
-    (p) => SCORER_WEIGHT[p.slot] * style(p).score * (effective(p, false) / 70)
+    (p) =>
+      SCORER_WEIGHT[p.slot] *
+      style(p).score *
+      (effective(p, false) / 70) *
+      // Shots are taken from the middle more than from the flank, so the lane counts half.
+      (0.5 + 0.5 * involvement(p, lane))
   )!
   const assister =
     rng() < (xg > 0.08 ? 0.8 : 0.45)
-      ? choose(rng, outfield, (p) => ASSIST_WEIGHT[p.slot] * style(p).assist, shooter)
+      ? choose(
+          rng,
+          outfield,
+          (p) => ASSIST_WEIGHT[p.slot] * style(p).assist * involvement(p, lane),
+          shooter
+        )
       : null
-  shot(state, out, s, shooter, assister, xg, gkAbility, blockChance)
+  shot(state, out, s, shooter, assister, xg, gkAbility, blockChance, lane)
 }
 
 function shot(
@@ -724,7 +782,8 @@ function shot(
   assister: LivePlayer | null,
   xg: number,
   gkAbility: number,
-  blockChance: number
+  blockChance: number,
+  lane?: Lane
 ) {
   const rng = state.rng
   const side = sideOf(state, s)
@@ -735,9 +794,13 @@ function shot(
   shooter.shots++
 
   if (rng() < blockChance) {
-    const blocker = choose(rng, opp.pitch, (p) => DEFENDER_WEIGHT[p.slot] * style(p).tackle)
+    const blocker = choose(
+      rng,
+      opp.pitch,
+      (p) => DEFENDER_WEIGHT[p.slot] * style(p).tackle * (lane ? involvement(p, mirror(lane)) : 1)
+    )
     if (blocker) blocker.tackles++
-    emit(state, out, "shot-blocked", s, { playerId: shooter.id, otherId: blocker?.id, xg })
+    emit(state, out, "shot-blocked", s, { playerId: shooter.id, otherId: blocker?.id, xg, lane })
     if (rng() < 0.45) corner(state, out, s, gkAbility)
     return
   }
@@ -754,6 +817,7 @@ function shot(
       playerId: shooter.id,
       otherId: assister?.id,
       xg,
+      lane,
       score: score(state),
     })
     concede(opp)
@@ -766,15 +830,15 @@ function shot(
     opp.stats.saves++
     shooter.onTarget++
     if (gk) gk.saves++
-    emit(state, out, "shot-saved", s, { playerId: shooter.id, otherId: gk?.id, xg })
+    emit(state, out, "shot-saved", s, { playerId: shooter.id, otherId: gk?.id, xg, lane })
     if (rng() < 0.3) corner(state, out, s, gkAbility)
   } else if (r < 0.5 && xg > 0.05) {
-    emit(state, out, "woodwork", s, { playerId: shooter.id, xg })
+    emit(state, out, "woodwork", s, { playerId: shooter.id, xg, lane })
   } else if (xg >= 0.28) {
     shooter.ratingAdj -= 0.25
-    emit(state, out, "big-chance-missed", s, { playerId: shooter.id, xg })
+    emit(state, out, "big-chance-missed", s, { playerId: shooter.id, xg, lane })
   } else {
-    emit(state, out, "shot-wide", s, { playerId: shooter.id, xg })
+    emit(state, out, "shot-wide", s, { playerId: shooter.id, xg, lane })
   }
 }
 

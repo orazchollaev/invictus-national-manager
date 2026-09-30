@@ -5,6 +5,7 @@ import { AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/compon
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { CommentaryFeed, StatsPanel } from "@/modules/match/components/live"
+import { laneCounts } from "@/engine/match/lanes"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/engine/calendar/dates"
 import { matchRatingTone } from "@/modules/core/utils/format"
@@ -123,7 +124,12 @@ const motm = computed(() => [...(report.value?.lines ?? [])].sort((a, b) => b.ra
         @update:model-value="(v) => (tab = v)"
       />
       <div class="panel">
-        <StatsPanel v-if="tab === 'summary'" :home="report.stats[0]" :away="report.stats[1]" />
+        <StatsPanel
+          v-if="tab === 'summary'"
+          :home="report.stats[0]"
+          :away="report.stats[1]"
+          :lanes="laneCounts(report.events)"
+        />
         <CommentaryFeed
           v-else-if="tab === 'feed'"
           :events="report.events"

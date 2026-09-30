@@ -64,6 +64,12 @@ below and only lopsided ones feel different. Badges (Big-game player, Reliable, 
 Injury-prone, Tires early) are read from character and age and describe effects the engine
 already has.
 
+Every attack comes down a **lane** (`engine/match/lanes.ts`): left, centre or right of the
+attacking team. The lane follows where the side's attacking players are, how wide it is asked
+to play, and the flank where the opponent is weakest; the players involved, and the defenders
+who meet them, are those in or near that lane. Attacks, shots, goals and offsides carry it, so
+the feed draws an arrow for each and the stats show where each side attacked from.
+
 Each slot can ask for a **role** (`engine/match/roles.ts`: Stopper, Wing-back, Poacher,
 Pressing forward…). A role reshapes the slot like an archetype does, always as a trade-off,
 and a player whose archetype suits it plays two ability points above himself. A sheet

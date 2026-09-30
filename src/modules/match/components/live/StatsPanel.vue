@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { AppStatBar } from "@/components/ui"
 import type { TeamStats } from "@/engine/match/types"
+import type { LaneShares } from "@/engine/match/lanes"
 
-defineProps<{ home: TeamStats; away: TeamStats }>()
+defineProps<{
+  home: TeamStats
+  away: TeamStats
+  /** Attacks by lane for each side, when the events are at hand. */
+  lanes?: LaneShares
+}>()
 </script>
 
 <template>
@@ -21,10 +27,25 @@ defineProps<{ home: TeamStats; away: TeamStats }>()
     <AppStatBar label="Saves" :home="home.saves" :away="away.saves" />
     <AppStatBar label="Yellow cards" :home="home.yellows" :away="away.yellows" />
     <AppStatBar label="Red cards" :home="home.reds" :away="away.reds" />
+    <template v-if="lanes">
+      <h3 class="zones">Attacks by side · each team's own left and right</h3>
+      <AppStatBar label="Down the left" :home="lanes.home.left" :away="lanes.away.left" />
+      <AppStatBar label="Through the middle" :home="lanes.home.centre" :away="lanes.away.centre" />
+      <AppStatBar label="Down the right" :home="lanes.home.right" :away="lanes.away.right" />
+    </template>
   </div>
 </template>
 
 <style scoped>
+.zones {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 .stats {
   display: flex;
   flex-direction: column;

@@ -3,6 +3,9 @@ import type { Role } from "./roles"
 
 export type Side = "home" | "away"
 
+/** The side of the pitch an attack came down, from the attacking team's point of view. */
+export type Lane = "left" | "centre" | "right"
+
 export type Formation =
   | "4-4-2"
   | "4-3-3"
@@ -109,6 +112,8 @@ export interface MatchEvent {
   /** Assist provider, fouled player, player coming on, or the keeper who saved. */
   otherId?: string
   xg?: number
+  /** Where the attack came from, on attacks, shots and offsides. */
+  lane?: Lane
   /** Score after the event, for goals. */
   score?: [number, number]
 }

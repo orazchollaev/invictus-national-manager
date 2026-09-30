@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import type { MatchEvent } from "@/engine/match/types"
+import { ArrowUp, ArrowUpLeft, ArrowUpRight } from "@lucide/vue"
+import type { Lane, MatchEvent } from "@/engine/match/types"
 import { KEY_EVENTS } from "@/engine/match/types"
 import { clock, commentaryLine, isMinor, type CommentaryNames } from "@/engine/match/commentary"
 
@@ -22,6 +23,14 @@ const lines = computed(() => {
   return out.reverse()
 })
 
+/** The arrow for a lane: up the pitch, leaning left or right of the attacking team. */
+const ARROWS = { left: ArrowUpLeft, centre: ArrowUp, right: ArrowUpRight }
+const LANE_LABEL: Record<Lane, string> = {
+  left: "Attack down the left",
+  centre: "Attack through the middle",
+  right: "Attack down the right",
+}
+
 function tone(ev: MatchEvent) {
   if (ev.kind === "goal" || ev.kind === "pen-goal" || ev.kind === "own-goal") return "goal"
   if (ev.kind === "red" || ev.kind === "second-yellow") return "red"
@@ -40,6 +49,14 @@ function tone(ev: MatchEvent) {
       :class="[tone(l.ev), { mine: l.ev.side && l.ev.side === mine }]"
     >
       <span class="line-clock">{{ l.clock }}</span>
+      <component
+        :is="ARROWS[l.ev.lane]"
+        v-if="l.ev.lane"
+        class="line-lane"
+        :size="18"
+        role="img"
+        :aria-label="LANE_LABEL[l.ev.lane]"
+      />
       <span class="line-text">{{ l.text }}</span>
     </li>
   </ol>
@@ -70,6 +87,16 @@ function tone(ev: MatchEvent) {
   font-weight: 700;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+.line-lane {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--text-muted);
+}
+
+.line.mine .line-lane {
+  color: var(--accent);
 }
 
 .line.goal {
