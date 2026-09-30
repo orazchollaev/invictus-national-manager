@@ -64,6 +64,14 @@ below and only lopsided ones feel different. Badges (Big-game player, Reliable, 
 Injury-prone, Tires early) are read from character and age and describe effects the engine
 already has.
 
+**Bonds** (`engine/players/bonds.ts`) say who gets on with whom: club mates, friends by chance,
+feuds rarer and likelier between two hot-headed players. They come from the players' ids and
+clubs, so they need no saved state and never change. On the pitch each bond moves both players
+by a point or so (capped at +2 and −2.5), recalculated whenever the eleven changes through a
+substitution, red card or injury. The tactics page shows the eleven's spirit and every tie in
+it, and what each candidate would add; the call-up page and the player card show who a player
+is friends or at odds with.
+
 Every attack comes down a **lane** (`engine/match/lanes.ts`): left, centre or right of the
 attacking team. The lane follows where the side's attacking players are, how wide it is asked
 to play, and the flank where the opponent is weakest; the players involved, and the defenders

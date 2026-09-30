@@ -66,7 +66,7 @@ export function makeTeam(prefix: string, ca: number, formation: Formation = "4-2
 export function playerWith(prefix: string, pos: Position, want: Archetype, ca = 70): Player {
   for (let n = 0; n < 5000; n++) {
     const id = `${prefix}${n}`
-    if (archetypeOf({ id, pos }) === want) return makePlayer(id, pos, ca)
+    if (archetypeOf({ id, pos }) === want) return makePlayer(id, pos, ca, { clubId: id })
   }
   throw new Error(`no id draws ${want}`)
 }

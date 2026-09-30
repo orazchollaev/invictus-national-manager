@@ -39,6 +39,9 @@ for Android; it also runs in the browser.
   matchups favour whom, and what your assistant would change (apply it in one tap).
 - **Attack arrows** — the live feed and the report show which side each attack came down,
   who led it, and where each team attacked from.
+- **Chemistry** — club mates and friends play better together, feuds drag both down. See the
+  ties in your eleven, what a player would add before you pick him, and who not to name
+  together.
 - **Minute-by-minute matches** — a match engine that plays possession, attacks, shots
   (xG), fouls, cards, injuries and fatigue, with live text commentary, extra time and
   kick-by-kick shootouts, followed by a match report.

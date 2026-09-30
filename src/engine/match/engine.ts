@@ -24,6 +24,7 @@ import {
 } from "../players/archetypes"
 import { ROLE_SUIT_BONUS, combineStyle, suitsRole, validRole, type Role } from "./roles"
 import { instructionsOf, meet, styleOf } from "./matchup"
+import { BOND_LIMITS, BOND_POINTS, bondBetween } from "../players/bonds"
 import { LANES, laneAffinity, laneOfSlot, mirror, widthBias } from "./lanes"
 import { FORMATIONS } from "./formations"
 import type {
@@ -160,6 +161,8 @@ export interface LivePlayer {
   mod: Modifiers
   /** His role suits his archetype, so he plays above himself. */
   suited: boolean
+  /** What his team mates on the pitch give him, from his bonds with them. */
+  bond: number
   slot: Position
   base: number
   age: number
@@ -197,6 +200,8 @@ export interface LiveSide {
   goals: number
   stats: TeamStats
   possessionMinutes: number
+  /** Ability points two team mates give each other: friends, club mates and feuds. */
+  bondPoints: (a: string, b: string) => number
 }
 
 export type Phase =
@@ -286,6 +291,7 @@ function livePlayer(
     role: null,
     mod: ARCHETYPES[arch],
     suited: false,
+    bond: 0,
     slot,
     base: matchAbility(p),
     age: ageOn(p.born, date),
@@ -313,6 +319,29 @@ function livePlayer(
   return live
 }
 
+function bondPointsFor(setup: MatchSetup): LiveSide["bondPoints"] {
+  const cache = new Map<string, number>()
+  return (a, b) => {
+    const key = a < b ? `${a}|${b}` : `${b}|${a}`
+    let v = cache.get(key)
+    if (v === undefined) {
+      const kind = bondBetween(setup.player(a), setup.player(b))
+      v = kind ? BOND_POINTS[kind] : 0
+      cache.set(key, v)
+    }
+    return v
+  }
+}
+
+/** Work out again what each player on the pitch gets from the ones beside him. */
+function rebond(side: LiveSide) {
+  for (const p of side.pitch) {
+    let total = 0
+    for (const q of side.pitch) if (q !== p) total += side.bondPoints(p.id, q.id)
+    p.bond = clamp(total, BOND_LIMITS.min, BOND_LIMITS.max)
+  }
+}
+
 function buildSide(sheet: TeamSheet, setup: MatchSetup, rng: Rng): LiveSide {
   const pitch = sheet.xi.map((s) =>
     livePlayer(setup.player(s.playerId), s.pos, setup.date, true, 0, s.role)
@@ -326,8 +355,9 @@ function buildSide(sheet: TeamSheet, setup: MatchSetup, rng: Rng): LiveSide {
   const plannedSubs = Array.from({ length: count }, () => randInt(rng, 55, 84)).sort(
     (a, b) => a - b
   )
-  return {
+  const side: LiveSide = {
     sheet,
+    bondPoints: bondPointsFor(setup),
     tactics: { ...sheet.tactics },
     baseMentality: sheet.tactics.mentality,
     pitch,
@@ -339,6 +369,8 @@ function buildSide(sheet: TeamSheet, setup: MatchSetup, rng: Rng): LiveSide {
     stats: emptyStats(),
     possessionMinutes: 0,
   }
+  rebond(side)
+  return side
 }
 
 export function createMatch(setup: MatchSetup): MatchState {
@@ -375,7 +407,7 @@ function effective(p: LivePlayer, bigMatch: boolean): number {
   const fit = positionFit({ pos: p.natural, alt: p.alt }, p.slot)
   const fatigue = 0.88 + 0.12 * (p.stamina / 100)
   const nerve = bigMatch ? (p.bigMatch - 10) * 0.3 : 0
-  const suit = p.suited ? ROLE_SUIT_BONUS : 0
+  const suit = (p.suited ? ROLE_SUIT_BONUS : 0) + p.bond // role and team mates
   const hurt = p.injured ? 0.5 : 1
   return Math.max(1, (p.base + nerve + suit) * fit * fatigue * hurt)
 }
@@ -1006,6 +1038,7 @@ function sendOff(
   p.ratingAdj -= 1.5
   side.stats.reds++
   side.pitch = side.pitch.filter((x) => x !== p)
+  rebond(side)
   emit(state, out, kind, s, { playerId: p.id })
   // A side that loses its keeper puts an outfielder in goal.
   if (p.slot === "GK" && side.pitch.length) {
@@ -1030,6 +1063,7 @@ function injure(state: MatchState, out: MatchEvent[], s: Side, p: LivePlayer) {
     // No change left: he limps off and the side plays on a man short.
     p.off = state.minute
     side.pitch = side.pitch.filter((x) => x !== p)
+    rebond(side)
   }
 }
 
@@ -1070,6 +1104,7 @@ export function substitute(
   joining.on = state.minute
   joining.started = false
   side.pitch = side.pitch.map((p) => (p === leaving ? joining : p))
+  rebond(side)
   side.bench = side.bench.filter((p) => p !== joining)
   side.appeared.push(joining)
   state.pendingInjuries = state.pendingInjuries.filter((id) => id !== outId)

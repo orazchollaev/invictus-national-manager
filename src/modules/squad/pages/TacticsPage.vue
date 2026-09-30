@@ -7,6 +7,7 @@ import {
   AppButtonGroup,
   AppCard,
   AppField,
+  AppSectionHeader,
   AppSelect,
   AppSheet,
   AppSubTabBar,
@@ -25,6 +26,8 @@ import type { Formation, Level, Mentality, Tactics } from "@/engine/match/types"
 import type { Player, PositionGroup } from "@/engine/types"
 import { showAlert } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
+import { spiritLabel, spiritOf } from "@/engine/players/bonds"
+import { bondLines, chemistryWith, signed } from "@/modules/squad/utils/chemistry"
 import { carryFormation, placePlayer, roleChoices, setSlotRole } from "@/modules/squad/utils/lineup"
 import { useSettingsStore } from "@/modules/settings/store"
 
@@ -103,6 +106,23 @@ function choose(p: Player) {
   if (i === null) return
   team.value.xi = placePlayer(team.value.xi, positions.value, i, p.id, player)
   selectedSlot.value = null
+}
+
+/** Who is in the eleven now, and what they give each other. */
+const eleven = computed(() =>
+  slots.value
+    .filter(Boolean)
+    .map((id) => player(id!)!)
+    .filter(Boolean)
+)
+const spirit = computed(() => spiritOf(eleven.value))
+const ties = computed(() => bondLines(eleven.value, (id) => world.world?.clubs.get(id)?.name))
+
+/** What a player would add to the eleven through his bonds, in place of whoever holds the slot. */
+function chem(p: Player): number {
+  const i = selectedSlot.value
+  const holder = i === null || !slots.value[i] ? undefined : player(slots.value[i]!)
+  return chemistryWith(p, eleven.value, holder)
 }
 
 const roleLabels = computed(() =>
@@ -216,6 +236,21 @@ async function save() {
       @select="(i) => (selectedSlot = i)"
     />
 
+    <AppCard padding="md" class="chemistry">
+      <AppSectionHeader title="Chemistry" />
+      <div class="spirit">
+        <strong>{{ spiritLabel(spirit) }}</strong>
+        <span class="tie-note">Players gain or lose a little from those they play beside</span>
+      </div>
+      <ul v-if="ties.length" class="ties">
+        <li v-for="t in ties" :key="t.key" class="tie" :class="`tie--${t.kind}`">
+          <span class="tie-points">{{ signed(t.points) }}</span>
+          {{ t.text }}
+        </li>
+      </ul>
+      <p v-else class="tie-note">No close ties or feuds in this eleven.</p>
+    </AppCard>
+
     <AppCard padding="md" class="instructions">
       <AppField label="Mentality" layout="stack">
         <AppSelect v-model="mentality" :options="MENTALITY_OPTIONS" />
@@ -327,6 +362,14 @@ async function save() {
         <button v-for="p in candidates" :key="p.id" class="pick" @click="choose(p)">
           <PlayerRow :player="p" static compact>
             <template #trailing>
+              <span
+                v-if="signed(chem(p))"
+                class="chem"
+                :class="chem(p) > 0 ? 'chem--up' : 'chem--down'"
+                title="Chemistry with the rest of the eleven"
+              >
+                {{ signed(chem(p)) }}
+              </span>
               <span v-if="inXI.has(p.id)" class="in-xi">XI</span>
               <StatPill
                 :value="
@@ -350,6 +393,58 @@ async function save() {
 </template>
 
 <style scoped>
+.chemistry :deep(.card-body) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.spirit {
+  display: flex;
+  flex-direction: column;
+}
+
+.tie-note {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.ties {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+}
+
+.tie {
+  padding: 2px 0;
+}
+
+.tie-points {
+  display: inline-block;
+  min-width: 34px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.tie--feud .tie-points {
+  color: var(--danger);
+}
+
+.chem {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.chem--up {
+  color: var(--success);
+}
+
+.chem--down {
+  color: var(--danger);
+}
+
 .instructions :deep(.card-body) {
   display: flex;
   flex-direction: column;

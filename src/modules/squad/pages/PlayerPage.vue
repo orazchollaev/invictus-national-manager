@@ -12,6 +12,8 @@ import {
 } from "chart.js"
 import { AppCard, AppChip, AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { ARCHETYPES, archetypeOf, badgesOf } from "@/engine/players/archetypes"
+import { BOND_LABELS } from "@/engine/players/bonds"
+import { relationsOf, signed } from "@/modules/squad/utils/chemistry"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
@@ -36,6 +38,11 @@ const injured = computed(() => !!p.value?.injury && p.value.injury.until > world
 
 const style = computed(() => ARCHETYPES[archetypeOf(p.value ?? { id: "", pos: "CM" })])
 const badges = computed(() => (p.value ? badgesOf(p.value, world.date) : []))
+
+/** His bonds with the rest of his nation's players. */
+const relations = computed(() =>
+  p.value && world.world ? relationsOf(p.value, world.world.pool(p.value.nationId)) : []
+)
 
 const traits = computed(() => {
   if (!p.value) return []
@@ -132,6 +139,20 @@ onBeforeUnmount(() => chart?.destroy())
     </AppCard>
 
     <AppCard padding="md">
+      <AppSectionHeader title="Relationships" />
+      <ul v-if="relations.length" class="rels">
+        <li v-for="r in relations" :key="r.player.id" class="rel" :class="`rel--${r.kind}`">
+          <span class="rel-points">{{ signed(r.points) }}</span>
+          <RouterLink :to="`/player/${r.player.id}`" class="rel-name">
+            {{ r.player.first }} {{ r.player.last }}
+          </RouterLink>
+          <span class="rel-kind">{{ BOND_LABELS[r.kind] }}</span>
+        </li>
+      </ul>
+      <p v-else class="style-blurb">Gets on with everyone in the squad.</p>
+    </AppCard>
+
+    <AppCard padding="md">
       <AppSectionHeader title="Club and condition" />
       <dl class="facts">
         <dt>Club</dt>
@@ -219,6 +240,42 @@ onBeforeUnmount(() => chart?.destroy())
 .style-blurb {
   margin: var(--sp-1) 0 0;
   font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.rels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rel {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+
+.rel-points {
+  min-width: 34px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.rel--feud .rel-points {
+  color: var(--danger);
+}
+
+.rel-name {
+  flex: 1;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.rel-kind {
+  font-size: var(--fs-xs);
   color: var(--text-muted);
 }
 

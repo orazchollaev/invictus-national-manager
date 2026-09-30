@@ -136,6 +136,10 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
   expect(pageHtml["/preview/:id"]).toContain("Scouting:")
   expect(pageHtml["/preview/:id"]).toContain("Players to watch")
   expect(pageHtml["/preview/:id"]).toMatch(/Your assistant suggests|No changes needed/)
+  // The eleven's chemistry, and a player's relationships with the rest of his nation.
+  expect(pageHtml["/squad/tactics"]).toContain("Chemistry")
+  expect(pageHtml["/squad/tactics"]).toMatch(/Tight-knit|Good|Neutral|Uneasy|Divided/)
+  expect(pageHtml["/player/:id"]).toContain("Relationships")
   expect(pageHtml["/player/:id"]).toContain("Playing style")
   expect(pageHtml["/player/:id"]).toContain(style.label)
   expect(pageHtml["/squad"]).toMatch(

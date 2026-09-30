@@ -12,6 +12,8 @@ import { formatDate } from "@/engine/calendar/dates"
 import { abilityTone } from "@/modules/core/utils/format"
 import { showAlert } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
+import { relationsOf } from "@/modules/squad/utils/chemistry"
+import { BOND_LABELS } from "@/engine/players/bonds"
 import type { Player } from "@/engine/types"
 
 const router = useRouter()
@@ -69,6 +71,14 @@ const counts = computed(() => {
 const list = computed(() =>
   pool.value.filter((p) => positionGroup(p.pos) === group.value).sort((a, b) => b.ca - a.ca)
 )
+
+/** His feuds and friendships with the players already named, to weigh before naming him. */
+function ties(p: Player) {
+  const named = [...selected.value]
+    .map((id) => world.world?.state.players[id])
+    .filter((x): x is Player => !!x)
+  return relationsOf(p, named).filter((r) => r.kind !== "clubmates")
+}
 
 function toggle(p: Player) {
   if (!canPick(p)) return
@@ -146,6 +156,15 @@ async function confirm() {
           </template>
         </PlayerRow>
         <div v-if="unavailableReason(p)" class="reason">{{ unavailableReason(p) }}</div>
+        <div v-else-if="ties(p).length" class="ties">
+          <span
+            v-for="r in ties(p).slice(0, 3)"
+            :key="r.player.id"
+            :class="r.kind === 'feud' ? 'tie tie--feud' : 'tie'"
+          >
+            {{ BOND_LABELS[r.kind] }}: {{ r.player.last }}
+          </span>
+        </div>
         <div v-else-if="p.banned" class="reason">Suspended for the next match</div>
       </button>
     </div>
@@ -195,6 +214,23 @@ async function confirm() {
   margin-top: -6px;
   padding: 0 var(--sp-3) var(--sp-2) 48px;
   font-size: var(--fs-xs);
+  color: var(--danger);
+}
+
+.ties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: -6px;
+  padding: 0 var(--sp-3) var(--sp-2) 48px;
+  font-size: var(--fs-xs);
+}
+
+.tie {
+  color: var(--success);
+}
+
+.tie--feud {
   color: var(--danger);
 }
 
