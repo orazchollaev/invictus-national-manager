@@ -39,7 +39,7 @@ const who = { you: "You", them: "Them" }
           </span>
           <span class="player-note">
             {{ k.note }} · {{ k.archetype }}
-            <template v-if="k.role">({{ k.role }})</template>
+            <template v-if="k.role && k.role !== k.archetype">({{ k.role }})</template>
           </span>
         </RouterLink>
       </li>

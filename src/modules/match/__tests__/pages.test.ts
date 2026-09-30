@@ -128,6 +128,11 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
     )
   )
   // A match still to play shows the staff's report and their advice.
+  // The buttons stay at the bottom of the screen, whatever the report's length.
+  // This page has no bottom menu, so the bar sits on the screen's edge, not above a gap.
+  expect(pageHtml["/preview/:id"]).toContain("cta-bar")
+  expect(pageHtml["/preview/:id"]).not.toContain("cta-bar--nav")
+  expect(pageHtml["/preview/:id"]).toContain("Tactics")
   expect(pageHtml["/preview/:id"]).toContain("Scouting:")
   expect(pageHtml["/preview/:id"]).toContain("Players to watch")
   expect(pageHtml["/preview/:id"]).toMatch(/Your assistant suggests|No changes needed/)

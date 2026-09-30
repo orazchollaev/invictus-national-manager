@@ -12,7 +12,7 @@ import {
   TriangleAlert,
 } from "@lucide/vue"
 import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
-import { PageShell, StatPill } from "@/modules/core/components"
+import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PitchView } from "@/modules/squad/components/pitch"
 import { ScoutReportCard } from "@/modules/match/components/scout"
@@ -391,20 +391,22 @@ const pitchSlots = computed(() => {
       </div>
     </div>
 
-    <AppButton variant="tonal" block @click="router.push('/squad/tactics')">
-      <ClipboardList :size="16" />
-      Team and tactics
-    </AppButton>
-    <div v-if="due" class="actions">
-      <AppButton variant="outlined" :disabled="problems.length > 0" @click="quickResult">
-        <SkipForward :size="16" />
-        Instant result
+    <StickyCta>
+      <AppButton variant="tonal" @click="router.push('/squad/tactics')">
+        <ClipboardList :size="16" />
+        Tactics
       </AppButton>
-      <AppButton variant="filled" :disabled="problems.length > 0" @click="kickOff">
-        <Play :size="16" />
-        Kick off
-      </AppButton>
-    </div>
+      <template v-if="due">
+        <AppButton variant="outlined" :disabled="problems.length > 0" @click="quickResult">
+          <SkipForward :size="16" />
+          Instant
+        </AppButton>
+        <AppButton variant="filled" :disabled="problems.length > 0" @click="kickOff">
+          <Play :size="16" />
+          Kick off
+        </AppButton>
+      </template>
+    </StickyCta>
   </PageShell>
 
   <div v-else class="live">
@@ -563,12 +565,6 @@ const pitchSlots = computed(() => {
   display: flex;
   gap: var(--sp-1);
   margin-bottom: var(--sp-2);
-}
-
-.actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--sp-2);
 }
 
 .notice {

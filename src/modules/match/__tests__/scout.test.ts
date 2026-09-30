@@ -122,6 +122,17 @@ describe("ScoutReportCard", () => {
     expect(html).not.toContain("Apply to my tactics")
   })
 
+  it("names a role only when it adds something to the player's style", async () => {
+    const { report, byId } = reportAgainst(false)
+    const same = { ...report, key: [{ ...report.key[0], archetype: "Poacher", role: "Poacher" }] }
+    expect(await render(same, false, byId)).not.toContain("(Poacher)")
+    const other = {
+      ...report,
+      key: [{ ...report.key[0], archetype: "Poacher", role: "Target man" }],
+    }
+    expect(await render(other, false, byId)).toContain("(Target man)")
+  })
+
   it("copes with a player who is gone", async () => {
     const { report } = reportAgainst(true)
     const html = await render(report, false, new Map([["x", makePlayer("x", "ST", 70)]]))
