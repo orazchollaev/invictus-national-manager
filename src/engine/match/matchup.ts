@@ -70,35 +70,141 @@ export function ownEffect(s: PlayStyle): Multipliers {
   }
 }
 
-/** How the attacking side's way of playing works against the defending side's. */
-export function attackEdge(a: PlayStyle, d: PlayStyle): number {
-  let f = 1
+export type RuleId =
+  | "behind-high-line"
+  | "counter-into-deep-block"
+  | "width-into-back-five"
+  | "width-into-open-flanks"
+  | "patience-into-press"
+  | "direct-past-press"
+  | "lone-striker-into-back-three"
+  | "two-strikers-into-flat-four"
+  | "midfield-numbers"
+  | "midfield-outnumbered"
+  | "press-patient-side"
+  | "narrow-into-wide"
+
+export interface Rule {
+  id: RuleId
+  /** `att`: chances for the side on the ball; `mid`: who wins the ball in midfield. */
+  layer: "att" | "mid"
+  factor: number
+  /** The event in words, from the point of view of the side it helps or hurts. */
+  label: string
+  /** `a` is the side the factor is applied to, `o` the other. */
+  applies(a: PlayStyle, o: PlayStyle): boolean
+}
+
+/** Every matchup, in the order they multiply. */
+export const RULES: Rule[] = [
   // Balls in behind a high line; nothing to counter into against a deep block.
-  if ((a.counter || a.tempo === 2) && d.line === 2) f *= 1.05
-  if (a.counter && d.line === 0) f *= 0.96
+  {
+    id: "behind-high-line",
+    layer: "att",
+    factor: 1.05,
+    label: "Balls in behind a high line",
+    applies: (a, o) => (a.counter || a.tempo === 2) && o.line === 2,
+  },
+  {
+    id: "counter-into-deep-block",
+    layer: "att",
+    factor: 0.96,
+    label: "Nothing to counter into against a deep block",
+    applies: (a, o) => a.counter && o.line === 0,
+  },
   // Width against a back five is wasted; against a flat four with nobody on its
   // flanks (narrow by choice or by shape, as in a diamond) it is not.
-  if (a.width === 2 && d.cbs === 3) f *= 0.96
-  if (a.width === 2 && d.cbs === 2 && (d.width === 0 || d.wingers === 0)) f *= 1.04
+  {
+    id: "width-into-back-five",
+    layer: "att",
+    factor: 0.96,
+    label: "Width is wasted against a back five",
+    applies: (a, o) => a.width === 2 && o.cbs === 3,
+  },
+  {
+    id: "width-into-open-flanks",
+    layer: "att",
+    factor: 1.04,
+    label: "Width against a flat four with open flanks",
+    applies: (a, o) => a.width === 2 && o.cbs === 2 && (o.width === 0 || o.wingers === 0),
+  },
   // A patient side gets pressed into mistakes; a direct one bypasses the press.
-  if (a.tempo === 0 && d.press === 2) f *= 0.96
-  if (a.tempo === 2 && d.press === 2) f *= 1.04
+  {
+    id: "patience-into-press",
+    layer: "att",
+    factor: 0.96,
+    label: "Patient build-up against a high press",
+    applies: (a, o) => a.tempo === 0 && o.press === 2,
+  },
+  {
+    id: "direct-past-press",
+    layer: "att",
+    factor: 1.04,
+    label: "Direct play past a high press",
+    applies: (a, o) => a.tempo === 2 && o.press === 2,
+  },
   // Three centre-backs smother a lone striker; two forwards stretch a flat four.
-  if (a.strikers === 1 && d.cbs === 3) f *= 0.96
-  if (a.strikers >= 2 && d.cbs === 2) f *= 1.03
-  return f
+  {
+    id: "lone-striker-into-back-three",
+    layer: "att",
+    factor: 0.96,
+    label: "A lone striker against three centre-backs",
+    applies: (a, o) => a.strikers === 1 && o.cbs === 3,
+  },
+  {
+    id: "two-strikers-into-flat-four",
+    layer: "att",
+    factor: 1.03,
+    label: "Two strikers against a flat four",
+    applies: (a, o) => a.strikers >= 2 && o.cbs === 2,
+  },
+  {
+    id: "midfield-numbers",
+    layer: "mid",
+    factor: 1.03,
+    label: "More players through the middle",
+    applies: (a, o) => a.centre > o.centre,
+  },
+  {
+    id: "midfield-outnumbered",
+    layer: "mid",
+    factor: 0.97,
+    label: "Outnumbered through the middle",
+    applies: (a, o) => a.centre < o.centre,
+  },
+  // A high press wins the ball off a patient side.
+  {
+    id: "press-patient-side",
+    layer: "mid",
+    factor: 1.03,
+    label: "A high press against a patient side",
+    applies: (a, o) => a.press === 2 && o.tempo === 0,
+  },
+  // A narrow side packs the middle against a wide one.
+  {
+    id: "narrow-into-wide",
+    layer: "mid",
+    factor: 1.02,
+    label: "A narrow side packs the middle against a wide one",
+    applies: (a, o) => a.width === 0 && o.width === 2,
+  },
+]
+
+/** The matchups that act on `a` when it meets `o`. */
+export function firing(a: PlayStyle, o: PlayStyle, layer?: Rule["layer"]): Rule[] {
+  return RULES.filter((r) => (!layer || r.layer === layer) && r.applies(a, o))
+}
+
+const product = (rules: Rule[]) => rules.reduce((f, r) => f * r.factor, 1)
+
+/** How the attacking side's way of playing works against the defending side's. */
+export function attackEdge(a: PlayStyle, d: PlayStyle): number {
+  return product(firing(a, d, "att"))
 }
 
 /** How a side's way of playing works in the fight for the ball. */
 export function midEdge(a: PlayStyle, o: PlayStyle): number {
-  let f = 1
-  if (a.centre > o.centre) f *= 1.03
-  if (a.centre < o.centre) f *= 0.97
-  // A high press wins the ball off a patient side.
-  if (a.press === 2 && o.tempo === 0) f *= 1.03
-  // A narrow side packs the middle against a wide one.
-  if (a.width === 0 && o.width === 2) f *= 1.02
-  return f
+  return product(firing(a, o, "mid"))
 }
 
 /** The whole effect on `own` of meeting `opp`: its own instructions and the matchup. */

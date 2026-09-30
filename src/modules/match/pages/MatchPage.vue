@@ -15,6 +15,7 @@ import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } fro
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PitchView } from "@/modules/squad/components/pitch"
+import { ScoutReportCard } from "@/modules/match/components/scout"
 import {
   CommentaryFeed,
   LiveTacticsSheet,
@@ -80,6 +81,14 @@ const oppForm = world.derive(
 )
 const rankOf = (id: string) => world.world?.fifaRank(id) ?? 0
 
+/** The staff's report on the opponent, against the tactics the user would play. */
+const scout = world.derive((w) => {
+  const f = fixture.value
+  if (!f || !w.userNation) return null
+  // An assistant who picks the team plays the AI coach's tactics, not the saved ones.
+  return w.scout(f, settings.assistantPicks ? w.expectedSheet(w.userNation, f).tactics : undefined)
+}, null)
+
 /** Only today's match can be played; any other is a preview. */
 const due = world.derive((w) => w.userMatchDue()?.id === String(route.params.id), false)
 /** What stops the saved eleven taking the field (the assistant needs none). */
@@ -126,7 +135,7 @@ async function kickOff(): Promise<boolean> {
     return false
   }
   // With the assistant in charge of selection, he names the eleven too.
-  const own = settings.assistantPicks ? w.aiSheet(f[mine.value], f) : w.userSheet(f)
+  const own = settings.assistantPicks ? w.assistantSheet(f) : w.userSheet(f)
   const home = mine.value === "home" ? own : w.aiSheet(f.home, f)
   const away = mine.value === "away" ? own : w.aiSheet(f.away, f)
   match.value = createMatch({ ...w.matchSetup(f, home, away), managed: mine.value })
@@ -355,6 +364,15 @@ const pitchSlots = computed(() => {
       </div>
       <div class="muted">Coach: {{ world.world?.nation(opp).coach }}</div>
     </AppCard>
+
+    <ScoutReportCard
+      v-if="scout && opp"
+      :report="scout"
+      :name="world.world?.def(opp).name ?? ''"
+      :player="(id) => world.world?.state.players[id]"
+      :assisted="settings.assistantPicks"
+      @apply="world.applyAdvice(fixture)"
+    />
 
     <div v-if="!due" class="notice">
       <CalendarClock :size="20" class="notice-icon" />

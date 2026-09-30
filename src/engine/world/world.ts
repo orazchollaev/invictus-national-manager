@@ -20,7 +20,8 @@ import { addDays, daysBetween, yearOf } from "../calendar/dates"
 import { windowNear, windowsForYear, type MatchWindow } from "../calendar/windows"
 import { deriveSeed, makeRng, pick, shuffle, streamFor } from "../rng"
 import { playMatch } from "../match/engine"
-import type { MatchReport, SheetSlot, Side, TeamSheet } from "../match/types"
+import type { MatchReport, SheetSlot, Side, Tactics, TeamSheet } from "../match/types"
+import { advise, scoutReport, type ScoutReport } from "../match/scouting"
 import { suggestedRole, validRole } from "../match/roles"
 import { archetypeOf } from "../players/archetypes"
 import { rankingUpdate } from "../ranking"
@@ -81,6 +82,7 @@ import type {
   NationState,
   NewsItem,
   NewsKind,
+  UserTeam,
   WorldState,
 } from "./types"
 import {
@@ -701,16 +703,81 @@ export class World {
 
   /** Team sheet an AI coach sends out for this fixture. */
   aiSheet(nationId: string, f: Fixture): TeamSheet {
-    const squad = this.squadFor(nationId, f).filter((p) => !p.banned)
+    return this.sheetFrom(nationId, f, this.squadFor(nationId, f))
+  }
+
+  private sheetFrom(nationId: string, f: Fixture, squad: Player[]): TeamSheet {
     const opp = nationId === f.home ? f.away : f.home
     const mentality = aiMentality(this.strengthOf(nationId), this.strengthOf(opp))
     return aiTeamSheet(
       nationId,
-      squad,
+      squad.filter((p) => !p.banned),
       f.date,
       { mentality },
       this.state.nations[nationId].formation
     )
+  }
+
+  /**
+   * The sheet an opponent is expected to send out. Squads are named ten days before a
+   * match, so earlier than that the staff can only say who would be picked today; nothing
+   * is named or changed by looking.
+   */
+  expectedSheet(nationId: string, f: Fixture): TeamSheet {
+    const n = this.state.nations[nationId]
+    if (n.squadFor === this.squadKey(f, nationId)) return this.aiSheet(nationId, f)
+    const ids = pickSquad(this.pool(nationId), f.date, 26, n.squad, (p) =>
+      this.released(p, f.compId)
+    )
+    return this.sheetFrom(
+      nationId,
+      f,
+      ids.map((id) => this.state.players[id])
+    )
+  }
+
+  /** The staff's report on the user's opponent, against the tactics he would play. */
+  scout(f: Fixture, mine?: Tactics): ScoutReport | null {
+    const me = this.userNation
+    if (!me || (f.home !== me && f.away !== me)) return null
+    const opp = f.home === me ? f.away : f.home
+    const sheet = this.expectedSheet(opp, f)
+    const tactics = mine ?? this.state.userTeam?.tactics ?? this.expectedSheet(me, f).tactics
+    return scoutReport(sheet, tactics, (id) => this.state.players[id])
+  }
+
+  /**
+   * The user's team with the staff's recommended instructions against this opponent, to
+   * save as his own; null when his set-up already suits them.
+   */
+  adviceFor(f: Fixture): UserTeam | null {
+    const me = this.userNation
+    if (!me) return null
+    const sheet = this.userSheet(f)
+    const opp = f.home === me ? f.away : f.home
+    const advice = advise(sheet.tactics, this.expectedSheet(opp, f).tactics)
+    if (!advice.changes.length) return null
+    return {
+      tactics: { ...sheet.tactics, ...advice.patch },
+      xi: sheet.xi,
+      bench: sheet.bench,
+      captainId: sheet.captainId,
+      penaltyTakerId: sheet.penaltyTakerId,
+      setPieceTakerId: sheet.setPieceTakerId,
+    }
+  }
+
+  /**
+   * The sheet the user's assistant sends out when he picks the team: the eleven and
+   * tactics of an AI coach, with the instructions the staff recommend against this
+   * opponent.
+   */
+  assistantSheet(f: Fixture): TeamSheet {
+    const me = this.userNation!
+    const sheet = this.aiSheet(me, f)
+    const opp = f.home === me ? f.away : f.home
+    const advice = advise(sheet.tactics, this.expectedSheet(opp, f).tactics)
+    return { ...sheet, tactics: { ...sheet.tactics, ...advice.patch } }
   }
 
   /**

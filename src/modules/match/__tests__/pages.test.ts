@@ -18,6 +18,8 @@ import type { PlayerRow } from "@/engine/world/create"
 const pages: Record<string, () => Promise<unknown>> = {
   "/report/:id": () => import("../pages/ReportPage.vue"),
   "/match/:id": () => import("../pages/MatchPage.vue"),
+  // The same page before kick-off, for a match not yet played.
+  "/preview/:id": () => import("../pages/MatchPage.vue"),
   "/home": () => import("@/modules/core/pages/HomePage.vue"),
   "/menu": () => import("@/modules/career/pages/MainMenuPage.vue"),
   "/load": () => import("@/modules/career/pages/LoadGamePage.vue"),
@@ -76,7 +78,11 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
           ? "unl-2026"
           : path.startsWith("/player")
             ? w.pool("TUR")[0].id
-            : fixtureId
+            : path.startsWith("/preview")
+              ? Object.values(w.state.fixtures).find(
+                  (f) => (f.home === "TUR" || f.away === "TUR") && !f.result
+                )!.id
+              : fixtureId
     )
     const router = createRouter({
       history: createMemoryHistory(),
@@ -121,6 +127,10 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
         .join("|")
     )
   )
+  // A match still to play shows the staff's report and their advice.
+  expect(pageHtml["/preview/:id"]).toContain("Scouting:")
+  expect(pageHtml["/preview/:id"]).toContain("Players to watch")
+  expect(pageHtml["/preview/:id"]).toMatch(/Your assistant suggests|No changes needed/)
   expect(pageHtml["/player/:id"]).toContain("Playing style")
   expect(pageHtml["/player/:id"]).toContain(style.label)
   expect(pageHtml["/squad"]).toMatch(

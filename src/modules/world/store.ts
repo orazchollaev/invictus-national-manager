@@ -217,6 +217,12 @@ export const useWorldStore = defineStore(
       void autoSave()
     }
 
+    /** Take the staff's recommended instructions for a match as the user's own. */
+    function applyAdvice(f: Fixture) {
+      const team = world.value?.adviceFor(f)
+      if (team) setUserTeam(team)
+    }
+
     /** Record the user's finished match and move on. */
     function finishUserMatch(f: Fixture, report: MatchReport) {
       const w = world.value
@@ -344,6 +350,7 @@ export const useWorldStore = defineStore(
       proceed,
       confirmCallup,
       setUserTeam,
+      applyAdvice,
       finishUserMatch,
       takeJob,
       turnDown,

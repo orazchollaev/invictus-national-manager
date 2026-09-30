@@ -77,6 +77,16 @@ a patient side pressed, a lone striker against three centre-backs, width against
 five). Tests pin that no style is unbeatable and none is a free gain. AI coaches pick a
 habit from their strength and their nation, so opponents differ.
 
+Before a match the staff write a **scouting report** (`engine/match/scouting.ts`) on the
+opponent's expected sheet: how they play, four players to watch (best, goal threat, creator,
+weak link), and which matchups favour whom. The matchups are the same `RULES` table the
+engine multiplies by, so the report cannot promise what the match will not deliver. The
+assistant's advice tries every defensive line, width and counter-attack setting against the
+opponent and suggests the best one if it is worth at least one per cent; tempo and pressing are
+left alone because their costs are paid elsewhere. Looking changes nothing: squads are named ten
+days before a match, and earlier the report uses who would be picked today. With "Assistant
+picks the team" on, the assistant plays the advice himself.
+
 The score is only what those events add up to. Knockout matches go to extra time and a
 kick-by-kick shootout. The AI touchline chases games late, sits on leads and makes
 planned changes; the user's side is left alone (injuries wait for him). Calibration is
