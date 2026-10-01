@@ -44,38 +44,78 @@ function pick(inId: string) {
   <AppSheet
     :title="outId ? 'Who comes on?' : 'Who comes off?'"
     :subtitle="`${left} substitution${left === 1 ? '' : 's'} left`"
+    max-height="85dvh"
+    max-height-mobile="85dvh"
     @close="emit('close')"
   >
-    <div v-if="!outId" class="list">
-      <button v-for="p in side.pitch" :key="p.id" class="row" @click="outId = p.id">
-        <span class="role">{{ p.slot }}</span>
-        <span class="name">
-          {{ name(p.id) }}
-          <span v-if="p.injured" class="hurt">· injured</span>
-          <span v-if="p.yellow" class="booked">· booked</span>
-        </span>
-        <StatPill :value="`${Math.round(p.stamina)}%`" :tone="staminaTone(p.stamina)" wide />
-      </button>
-    </div>
-    <div v-else class="list">
-      <button v-for="p in bench" :key="p.id" class="row" :disabled="left <= 0" @click="pick(p.id)">
-        <span class="role">{{ p.natural }}</span>
-        <span class="name">{{ name(p.id) }}</span>
-        <StatPill
-          :value="Math.round(value(p, leaving!.slot))"
-          :tone="
-            positionFit({ pos: p.natural, alt: p.alt }, leaving!.slot) >= 1
-              ? 'var(--success)'
-              : 'var(--warning)'
-          "
-        />
-      </button>
-      <AppButton variant="text" @click="outId = null">Back</AppButton>
+    <div class="body">
+      <p v-if="!outId" class="hint">Pick the player to take off</p>
+      <p v-else class="hint hint--off">
+        <span class="off">▼ {{ name(outId) }}</span>
+        <span>Who comes on in his place?</span>
+      </p>
+      <div v-if="!outId" class="list">
+        <button v-for="p in side.pitch" :key="p.id" class="row" @click="outId = p.id">
+          <span class="role">{{ p.slot }}</span>
+          <span class="name">
+            {{ name(p.id) }}
+            <span v-if="p.injured" class="hurt">· injured</span>
+            <span v-if="p.yellow" class="booked">· booked</span>
+          </span>
+          <StatPill :value="`${Math.round(p.stamina)}%`" :tone="staminaTone(p.stamina)" wide />
+        </button>
+      </div>
+      <div v-else class="list">
+        <button
+          v-for="p in bench"
+          :key="p.id"
+          class="row"
+          :disabled="left <= 0"
+          @click="pick(p.id)"
+        >
+          <span class="role">{{ p.natural }}</span>
+          <span class="name">{{ name(p.id) }}</span>
+          <StatPill
+            :value="Math.round(value(p, leaving!.slot))"
+            :tone="
+              positionFit({ pos: p.natural, alt: p.alt }, leaving!.slot) >= 1
+                ? 'var(--success)'
+                : 'var(--warning)'
+            "
+          />
+        </button>
+        <AppButton variant="text" @click="outId = null">Back</AppButton>
+      </div>
     </div>
   </AppSheet>
 </template>
 
 <style scoped>
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-2) var(--sp-3) calc(var(--sp-3) + var(--safe-bottom));
+}
+
+.hint {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.hint--off {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hint--off .off {
+  color: var(--danger);
+  font-size: var(--fs-md);
+  font-weight: 700;
+}
+
 .list {
   display: flex;
   flex-direction: column;
