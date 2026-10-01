@@ -628,7 +628,8 @@ export class World {
 
   /**
    * How much two nations have seen of each other lately, as a score penalty: each
-   * meeting in the last two years, and more for a friendly in the last eight months.
+   * meeting in the last two years, and much more for a friendly in the last
+   * fourteen months.
    */
   private recentPenalty(a: string, b: string): number {
     const date = this.state.date
@@ -636,8 +637,8 @@ export class World {
     for (const r of this.state.nations[a]?.results ?? []) {
       if (r.opp !== b) continue
       const days = daysBetween(r.date, date)
-      if (days <= 730) penalty += 220
-      if (r.comp === "Friendly" && days <= 240) penalty += 400
+      if (days <= 730) penalty += 260
+      if (r.comp === "Friendly" && days <= 420) penalty += 900
     }
     return penalty
   }
@@ -648,6 +649,9 @@ export class World {
     const nations = ctx.ranked()
     const live = Object.values(this.state.competitions).filter((c) => c.status !== "done")
     const me = this.userNation
+    // Pairs already booked in this window: none of them plays the other twice.
+    const booked = new Set<string>()
+    const pairKey = (a: string, b: string) => (a < b ? `${a}|${b}` : `${b}|${a}`)
     for (const slot of w.slots) {
       const reserved = new Set(
         live.flatMap((c) => competitionDef(c.defId).reserved?.(c, ctx, slot) ?? [])
@@ -667,20 +671,21 @@ export class World {
         const confed = this.def(a).confed
         const pa = this.state.nations[a].points
         const options = free
-          .filter((b) => b !== a && !taken.has(b))
+          .filter((b) => b !== a && !taken.has(b) && !booked.has(pairKey(a, b)))
           .map((b) => ({
             b,
             score:
               Math.abs(this.state.nations[b].points - pa) +
               (this.def(b).confed === confed ? 0 : 110) +
               this.recentPenalty(a, b) +
-              rng() * 120,
+              rng() * 220,
           }))
           .sort((x, y) => x.score - y.score)
         if (!options.length) continue
         const b = pick(rng, options.slice(0, 5)).b
         taken.add(a)
         taken.add(b)
+        booked.add(pairKey(a, b))
         const home =
           rng() < 0.5 + (this.state.nations[a].points - this.state.nations[b].points) / 2000
         this.addFriendly(slot, home ? a : b, home ? b : a)
