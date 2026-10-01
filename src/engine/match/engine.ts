@@ -57,6 +57,8 @@ const RED_PER_FOUL = 0.003
 const INJURY_PER_MINUTE = 0.00011
 const STAMINA_DRAIN = 0.42
 const HOME_BOOST = 2.5
+/** Ability points a tournament host gains in its own tournament, on top of home advantage. */
+const HOST_BOOST = 0.75
 
 /** Share of each role's work that goes to defence, midfield and attack. */
 const ROLE_WEIGHTS: Record<Position, [number, number, number]> = {
@@ -227,6 +229,8 @@ export interface MatchSetup {
   homeBoost?: number
   /** A small lift in ability points for one side: the user's, for the manager's touch. */
   edge?: { side: Side; value: number }
+  /** Sides that host the tournament this match belongs to: each gets a small lift. */
+  hosts?: Side[]
   /** Ties that need a winner. `aggregate` is earlier legs, from this match's home side. */
   knockout?: { aggregate?: [number, number]; extraTime: boolean }
   /** Finals, deciders: players' big-match temperament comes into play. */
@@ -451,7 +455,8 @@ function units(state: MatchState, side: LiveSide, opp: LiveSide, isHome: boolean
   const edge = state.setup.edge
   const home =
     (isHome && state.setup.homeAdvantage ? (state.setup.homeBoost ?? HOME_BOOST) : 0) +
-    (edge && edge.side === (isHome ? "home" : "away") ? edge.value : 0)
+    (edge && edge.side === (isHome ? "home" : "away") ? edge.value : 0) +
+    (state.setup.hosts?.includes(isHome ? "home" : "away") ? HOST_BOOST : 0)
   return {
     def: (unit(0) * keeperUnit[0] * (1 - 0.03 * m) * play.def + home) * short,
     mid: (unit(1) * keeperUnit[1] * (1 + 0.02 * press) * play.mid + home) * short,

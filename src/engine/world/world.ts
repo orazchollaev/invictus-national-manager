@@ -1017,7 +1017,12 @@ export class World {
   matchSetup(f: Fixture, home: TeamSheet, away: TeamSheet) {
     const me = this.userNation
     const side: Side | null = !me ? null : f.home === me ? "home" : f.away === me ? "away" : null
+    const hostIds = this.state.competitions[f.compId]?.hosts ?? []
+    const hosts: Side[] = []
+    if (hostIds.includes(f.home)) hosts.push("home")
+    if (hostIds.includes(f.away)) hosts.push("away")
     return {
+      hosts,
       edge: side ? { side, value: USER_EDGE.match } : undefined,
       id: f.id,
       date: f.date,
