@@ -88,7 +88,7 @@ const settings = useSettingsStore()
         <AppButtonGroup
           :model-value="String(settings.liveMatchSpeed)"
           block
-          :options="['1', '2', '4', '10'].map((v) => ({ value: v, label: `${v}×` }))"
+          :options="['1', '2', '4'].map((v) => ({ value: v, label: `${v}×` }))"
           @update:model-value="(v) => (settings.liveMatchSpeed = Number(v) as LiveMatchSpeed)"
         />
       </AppField>
