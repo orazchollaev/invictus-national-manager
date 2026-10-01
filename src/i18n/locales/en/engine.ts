@@ -84,6 +84,10 @@ const engine = {
       title: "Sacked",
       body: "The {nation} federation has relieved you of your duties.",
     },
+    resigned: {
+      title: "You have resigned",
+      body: "You have stepped down as head coach of {nation}.",
+    },
     notRenewed: {
       title: "Contract not renewed",
       body: "The {nation} federation has decided not to renew your contract.",

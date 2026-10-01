@@ -6,7 +6,7 @@ import type { Interrupt, UserTeam, WorldState } from "@/engine/world/types"
 import type { HostLevel } from "@/engine/world/stadiums"
 import type { Fixture } from "@/engine/competition/types"
 import type { MatchReport } from "@/engine/match/types"
-import { acceptOffer, declineOffer, setAmbition } from "@/engine/career/career"
+import { acceptOffer, declineOffer, resign, setAmbition } from "@/engine/career/career"
 import { pickSquad } from "@/engine/ai/squad"
 import { randomSeed } from "@/engine/rng"
 import { START_DATE } from "@/data/start"
@@ -242,6 +242,15 @@ export const useWorldStore = defineStore(
       void autoSave()
     }
 
+    /** The manager walks away from his job; offers follow as after a sacking. */
+    function resignJob() {
+      if (!world.value?.state.career.nationId) return
+      resign(world.value)
+      interrupt.value = { kind: "none" }
+      touch()
+      void autoSave()
+    }
+
     function turnDown(nationId: string) {
       if (!world.value) return
       declineOffer(world.value, nationId)
@@ -341,6 +350,7 @@ export const useWorldStore = defineStore(
       derive,
       touch,
       newGame,
+      resignJob,
       load,
       resume,
       save,

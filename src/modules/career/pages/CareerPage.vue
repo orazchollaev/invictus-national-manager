@@ -41,6 +41,18 @@ async function accept(nationId: string) {
   router.push("/home")
 }
 
+async function resign() {
+  const id = career.value?.nationId
+  if (!id) return
+  const ok = await showConfirm(t("career.resignConfirm", { name: nationName(id) }), {
+    confirmLabel: t("career.resign"),
+    dangerous: true,
+  })
+  if (!ok) return
+  world.resignJob()
+  router.push("/career/farewell")
+}
+
 const statusTone = (s: string) =>
   s === "met" ? "var(--success)" : s === "failed" ? "var(--danger)" : "var(--text-muted)"
 
@@ -168,6 +180,10 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
         <span class="muted">{{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}</span>
       </div>
     </div>
+
+    <AppButton v-if="career?.nationId" variant="danger" block class="resign" @click="resign">
+      {{ t("career.resign") }}
+    </AppButton>
   </PageShell>
 </template>
 
@@ -266,6 +282,10 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 .milestone-icon {
   flex-shrink: 0;
   color: var(--accent);
+}
+
+.resign {
+  margin-top: var(--sp-4);
 }
 
 .cabinet {

@@ -85,6 +85,10 @@ const engine: typeof en = {
       title: "Demitido",
       body: "A federação de {nation} dispensou você do cargo.",
     },
+    resigned: {
+      title: "Você pediu demissão",
+      body: "Você deixou o cargo de técnico de {nation}.",
+    },
     notRenewed: {
       title: "Contrato não renovado",
       body: "A federação de {nation} decidiu não renovar o seu contrato.",

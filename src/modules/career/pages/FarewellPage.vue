@@ -38,7 +38,13 @@ function next() {
         <NationFlag :id="stint.nationId" :size="64" />
         <h2 class="title">
           {{
-            stint.left === "sacked" ? t("career.farewell.sacked") : t("career.farewell.notRenewed")
+            t(
+              stint.left === "sacked"
+                ? "career.farewell.sacked"
+                : stint.left === "resigned"
+                  ? "career.farewell.resigned"
+                  : "career.farewell.notRenewed"
+            )
           }}
         </h2>
         <p class="lead">

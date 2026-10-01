@@ -52,6 +52,9 @@ export default {
     accept: "Accept",
     acceptConfirm: "Become head coach of {name}?{leaving}",
     acceptLeaving: " You will leave {name}.",
+    resign: "Resign",
+    resignConfirm:
+      "Resign as head coach of {name}? Your reputation will take a small hit and the job goes to someone else.",
     objectives: "Objectives",
     noObjectives: "No objectives right now",
     ambition: {
@@ -88,6 +91,7 @@ export default {
       nothing: "Nothing to see here",
       sacked: "Sacked",
       notRenewed: "Contract not renewed",
+      resigned: "You resigned",
       lead: "Your time in charge of {name} is over: {from} – {to}.",
       matches: "Matches",
       wdl: "W–D–L",

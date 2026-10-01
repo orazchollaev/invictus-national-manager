@@ -825,8 +825,11 @@ function pressure(world: World) {
   }
 }
 
-/** Out of the job: sacked, or the contract was not renewed. */
-export function leaveJob(world: World, reason: "sacked" | "expired") {
+const LEAVE_NEWS = { sacked: "sacked", expired: "notRenewed", resigned: "resigned" } as const
+const LEAVE_REPUTATION = { sacked: -8, expired: -2, resigned: -4 } as const
+
+/** Out of the job: sacked, the contract was not renewed, or the manager walked away. */
+export function leaveJob(world: World, reason: "sacked" | "expired" | "resigned") {
   const c = world.state.career
   if (!c.nationId) return
   const nation = nationText(c.nationId)
@@ -835,7 +838,7 @@ export function leaveJob(world: World, reason: "sacked" | "expired") {
     h.to = world.state.date
     h.left = reason
   }
-  const kind = reason === "sacked" ? "sacked" : "notRenewed"
+  const kind = LEAVE_NEWS[reason]
   world.news(
     "job",
     msg(`news.${kind}.title`),
@@ -851,11 +854,16 @@ export function leaveJob(world: World, reason: "sacked" | "expired") {
   c.ultimatum = null
   c.contractUntil = undefined
   c.contractFor = undefined
-  nudgeReputation(world, reason === "sacked" ? -8 : -2)
+  nudgeReputation(world, LEAVE_REPUTATION[reason])
   world.state.pendingCallup = null
   world.state.pendingUltimatum = false
   world.state.pendingSacked = true
   makeOffers(world, true)
+}
+
+/** The manager hands in his notice: the job ends today. */
+export function resign(world: World) {
+  leaveJob(world, "resigned")
 }
 
 /**

@@ -54,6 +54,9 @@ const pt: typeof en = {
     accept: "Aceitar",
     acceptConfirm: "Tornar-se técnico de {name}?{leaving}",
     acceptLeaving: " Você deixará {name}.",
+    resign: "Pedir demissão",
+    resignConfirm:
+      "Deixar o cargo de técnico de {name}? Sua reputação sofrerá um pequeno abalo e o cargo irá para outra pessoa.",
     objectives: "Objetivos",
     noObjectives: "Nenhum objetivo no momento",
     ambition: {
@@ -90,6 +93,7 @@ const pt: typeof en = {
       nothing: "Nada para ver aqui",
       sacked: "Demitido",
       notRenewed: "Contrato não renovado",
+      resigned: "Você pediu demissão",
       lead: "Seu período no comando de {name} acabou: {from} – {to}.",
       matches: "Partidas",
       wdl: "V–E–D",
