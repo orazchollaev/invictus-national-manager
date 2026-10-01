@@ -1,6 +1,7 @@
 import type { ISODate, Player } from "../types"
 import type { CompetitionInstance, Fixture } from "../competition/types"
 import type { Formation, MatchReport, SheetSlot, Tactics } from "../match/types"
+import type { Text } from "../text"
 
 export interface RecentResult {
   fixture: string
@@ -80,8 +81,8 @@ export interface NewsItem {
   id: number
   date: ISODate
   kind: NewsKind
-  title: string
-  body: string
+  title: Text
+  body: Text
   /** Relevant to the user's nation (shown in the inbox, not just the world feed). */
   mine: boolean
   read?: boolean
@@ -123,7 +124,9 @@ export interface BoardObjective {
   count?: number
   progress?: number
   until?: ISODate
-  text: string
+  /** For a Nations League objective: the league ("A", "B"…). */
+  league?: string
+  text: Text
   status: "open" | "met" | "failed"
   critical: boolean
   /** false while the board still waits for the manager's word on it. */
@@ -151,11 +154,11 @@ export type ReviewVerdict = "delighted" | "satisfied" | "disappointed" | "ultima
 export interface CareerReview {
   /** The competition instance. */
   id: string
-  name: string
+  name: Text
   nationId: string
   date: ISODate
   /** How far the team went: "Champions", "Semi-finals", "Qualified"… */
-  reached: string
+  reached: Text
   winner?: string
   played: number
   won: number
@@ -163,7 +166,7 @@ export interface CareerReview {
   lost: number
   gf: number
   ga: number
-  objectives: { text: string; status: BoardObjective["status"]; critical: boolean }[]
+  objectives: { text: Text; status: BoardObjective["status"]; critical: boolean }[]
   before: CareerSnapshot
   after: CareerSnapshot
   /** Best performers: appearances, goals, average rating. */
@@ -171,7 +174,7 @@ export interface CareerReview {
   /** Players aged 21 or under who played. */
   youngsters: { id: string; name: string; age: number; apps: number }[]
   verdict: ReviewVerdict
-  message: string
+  message: Text
   contract?: "renewed" | "extended" | "expired"
   contractUntil?: ISODate
 }
@@ -180,7 +183,7 @@ export interface CareerMilestone {
   id: string
   date: ISODate
   nationId: string | null
-  text: string
+  text: Text
 }
 
 export interface CareerState {
@@ -202,7 +205,7 @@ export interface CareerState {
     won: number
     drawn: number
     lost: number
-    trophies: string[]
+    trophies: Text[]
     left?: "sacked" | "resigned" | "moved" | "expired"
   }[]
   sacked?: ISODate
@@ -232,7 +235,7 @@ export type Interrupt =
       kind: "callup"
       nationId: string
       squadFor: string
-      label: string
+      label: Text
       deadline: ISODate
       size: number
     }

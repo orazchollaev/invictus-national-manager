@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { AppSheet, AppSubTabBar } from "@/components/ui"
 import { PitchView } from "@/modules/squad/components/pitch"
 import type { Player } from "@/engine/types"
@@ -21,12 +22,14 @@ defineProps<{
 
 const emit = defineEmits<{ close: [] }>()
 
+const { t } = useI18n()
+
 const tab = ref("stats")
 </script>
 
 <template>
   <AppSheet
-    title="Match centre"
+    :title="t('match.centre.title')"
     max-height-mobile="85dvh"
     max-height="85dvh"
     @close="emit('close')"
@@ -35,8 +38,8 @@ const tab = ref("stats")
       <AppSubTabBar
         :model-value="tab"
         :options="[
-          { value: 'stats', label: 'Stats' },
-          { value: 'team', label: 'My team' },
+          { value: 'stats', label: t('match.centre.stats') },
+          { value: 'team', label: t('match.centre.myTeam') },
         ]"
         size="sm"
         @update:model-value="(v) => (tab = v)"

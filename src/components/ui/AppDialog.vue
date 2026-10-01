@@ -8,9 +8,11 @@ import {
   DialogTitle,
   VisuallyHidden,
 } from "reka-ui"
+import { useI18n } from "vue-i18n"
 import { dialogState, resolveDialog } from "@/composables/useDialog"
 import { useHaptic } from "@/composables/useHaptic"
 
+const { t } = useI18n()
 const { tap: hapticTap, warning: hapticWarning } = useHaptic()
 
 function confirm() {
@@ -47,12 +49,14 @@ watch(
       <DialogOverlay class="dialog-backdrop" />
       <DialogContent class="dialog-card" :aria-describedby="undefined">
         <VisuallyHidden as-child>
-          <DialogTitle>{{ dialogState.type === "alert" ? "Alert" : "Confirm" }}</DialogTitle>
+          <DialogTitle>
+            {{ dialogState.type === "alert" ? t("common.alert") : t("common.confirm") }}
+          </DialogTitle>
         </VisuallyHidden>
         <p class="dialog-msg">{{ dialogState.message }}</p>
         <div class="dialog-actions">
           <button v-if="dialogState.type === 'confirm'" class="dialog-cancel" @click="cancel">
-            Cancel
+            {{ t("common.cancel") }}
           </button>
           <button
             :class="[

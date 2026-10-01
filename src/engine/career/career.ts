@@ -16,7 +16,7 @@ import { addDays } from "../calendar/dates"
 import { expectedResult, IMPORTANCE_WEIGHT } from "../ranking"
 import { clamp, deriveSeed, makeRng, pick } from "../rng"
 import type { BoardObjective, CareerSnapshot } from "../world/types"
-import { competitionDef } from "../competition/defs"
+import { COMPETITION_DEFS, competitionDef } from "../competition/defs"
 import { standingsOf } from "../competition/runtime"
 import { goldCupRoutes } from "../competition/defs/concacaf"
 import { ageOn, fullName } from "../players/ability"
@@ -25,6 +25,7 @@ import type { World } from "../world/world"
 import { leagueGroup, ORDER, outcomeFor, playedIn, reached } from "./progress"
 import { buildReview, REVIEWED, snapshotOf } from "./review"
 import { award, checkMilestones } from "./milestones"
+import { compText, lower, msg, nationText, type Msg, type Text } from "../text"
 
 /** Every number that decides how hard the job is, in one place. */
 export const CAREER_TUNING = {
@@ -75,11 +76,52 @@ function nudgeReputation(world: World, delta: number) {
   c.reputation = Math.round(clamp(c.reputation + d, 1, 100) * 100) / 100
 }
 
-/** "FIFA World Cup 2030" from "wc-2030". */
-function finalsName(instanceId: string): string {
-  const year = Number(instanceId.slice(instanceId.lastIndexOf("-") + 1))
-  const defId = instanceId.slice(0, instanceId.lastIndexOf("-"))
-  return competitionDef(defId).name(year)
+/** A competition instance id ("wc-2030") as its definition and year. */
+function splitId(instanceId: string): { defId: string; year: number } {
+  const dash = instanceId.lastIndexOf("-")
+  return { defId: instanceId.slice(0, dash), year: Number(instanceId.slice(dash + 1)) }
+}
+
+/** "FIFA World Cup 2030" from "wc-2030", in the language being played. */
+function compOf(instanceId: string): Msg {
+  const { defId, year } = splitId(instanceId)
+  return compText(defId, year)
+}
+
+/** What an objective asks, worked out from what it is about, so it can be reworded. */
+export function objectiveText(o: BoardObjective): Msg {
+  const { defId, year } = splitId(o.compInstance)
+  const comp = compOf(o.compInstance)
+  switch (o.kind) {
+    case "qualify": {
+      const finals =
+        o.target === "asian-cup" || o.target === "gold-cup"
+          ? compText(o.target, year + 1)
+          : (() => {
+              const id = COMPETITION_DEFS.find((d) => d.id === defId)?.finals?.(year)
+              return id ? compOf(id) : comp
+            })()
+      const base = msg("obj.qualify", { comp: finals })
+      return o.unbeaten ? msg("obj.unbeaten", { text: base }) : base
+    }
+    case "promotion":
+      return msg("obj.promotion", { letter: o.league ?? "" })
+    case "avoid-relegation":
+      return msg("obj.relegation", { letter: o.league ?? "" })
+    case "win":
+      return msg("obj.win", { comp })
+    case "reach":
+      return msg(`obj.reach.${(o.stage ?? "knockout").toLowerCase()}`, { comp })
+    case "debuts":
+      return msg("obj.debuts", { count: o.count ?? 0, year: (o.until ?? "").slice(0, 4) })
+  }
+}
+
+const withText = (o: BoardObjective): BoardObjective => ({ ...o, text: objectiveText(o) })
+
+/** Text run into a sentence: its first letter in lower case. */
+function lc(t: Text): Text {
+  return typeof t === "string" ? t.charAt(0).toLowerCase() + t.slice(1) : lower(t)
 }
 
 const FINALS_PLACES: Record<string, number> = {
@@ -159,7 +201,7 @@ export function refreshObjectives(world: World) {
           comp: inst.defId,
           compInstance: inst.id,
           kind: "qualify",
-          text: `Qualify for the ${finalsName(target)}`,
+          text: "",
           status: "open",
           critical: rank <= places * 0.7,
           agreed: false,
@@ -181,10 +223,8 @@ export function refreshObjectives(world: World) {
           comp: inst.defId,
           compInstance: inst.id,
           kind: top && letter !== "A" ? "promotion" : "avoid-relegation",
-          text:
-            top && letter !== "A"
-              ? `Win promotion from League ${letter}`
-              : `Avoid relegation from League ${letter}`,
+          league: letter,
+          text: "",
           status: "open",
           critical: false,
         }
@@ -210,7 +250,7 @@ export function refreshObjectives(world: World) {
           comp: inst.defId,
           compInstance: inst.id,
           kind: "win",
-          text: `Win the ${inst.name}`,
+          text: "",
           status: "open",
           critical: false,
           agreed: false,
@@ -222,7 +262,7 @@ export function refreshObjectives(world: World) {
           compInstance: inst.id,
           kind: "reach",
           stage,
-          text: reachText(stage, inst.name),
+          text: "",
           status: "open",
           critical: pos <= n * 0.25,
           agreed: false,
@@ -230,34 +270,39 @@ export function refreshObjectives(world: World) {
       }
     }
     if (obj) {
+      obj.text = objectiveText(obj)
       career.objectives.push(obj)
       ;(career.snapshots ??= {})[inst.id] ??= snapshotOf(world, me)
     }
     // Asia's World Cup qualifying second round also decides the next Asian Cup.
     if (inst.defId === "wcq-afc" && rank <= 26) {
-      career.objectives.push({
-        id: `${inst.id}:asian-cup`,
-        comp: inst.defId,
-        compInstance: inst.id,
-        kind: "qualify",
-        target: "asian-cup",
-        text: `Qualify for the AFC Asian Cup ${inst.year + 1}`,
-        status: "open",
-        critical: rank <= 16,
-      })
+      career.objectives.push(
+        withText({
+          id: `${inst.id}:asian-cup`,
+          comp: inst.defId,
+          compInstance: inst.id,
+          kind: "qualify",
+          target: "asian-cup",
+          text: "",
+          status: "open",
+          critical: rank <= 16,
+        })
+      )
     }
     // CONCACAF's Nations League is also the way into the next Gold Cup.
     if (inst.defId === "cnl" && rank <= 20) {
-      career.objectives.push({
-        id: `${inst.id}:gold-cup`,
-        comp: inst.defId,
-        compInstance: inst.id,
-        kind: "qualify",
-        target: "gold-cup",
-        text: `Qualify for the CONCACAF Gold Cup ${inst.year + 1}`,
-        status: "open",
-        critical: rank <= 8,
-      })
+      career.objectives.push(
+        withText({
+          id: `${inst.id}:gold-cup`,
+          comp: inst.defId,
+          compInstance: inst.id,
+          kind: "qualify",
+          target: "gold-cup",
+          text: "",
+          status: "open",
+          critical: rank <= 8,
+        })
+      )
     }
   }
 }
@@ -279,23 +324,20 @@ export function youthObjective(world: World) {
     .filter((p) => p.caps === 0 && ageOn(p.born, world.state.date) <= 21 && p.pa >= top - 18)
   if (prospects.length < 3) return
   const count = prospects.length >= 6 ? 3 : 2
-  c.objectives.push({
-    id,
-    comp: "youth",
-    compInstance: `youth-${year}`,
-    kind: "debuts",
-    count,
-    progress: 0,
-    until: `${year}-12-31`,
-    text: `Hand international debuts to ${count} players aged 21 or under in ${year}`,
-    status: "open",
-    critical: false,
-  })
-}
-
-function reachText(stage: string, name: string) {
-  if (stage === "knockout") return `Reach the knockout stage of the ${name}`
-  return `Reach the ${stage.toLowerCase()} of the ${name}`
+  c.objectives.push(
+    withText({
+      id,
+      comp: "youth",
+      compInstance: `youth-${year}`,
+      kind: "debuts",
+      count,
+      progress: 0,
+      until: `${year}-12-31`,
+      text: "",
+      status: "open",
+      critical: false,
+    })
+  )
 }
 
 // ── Agreeing objectives with the board ──────────────────────────────────────
@@ -310,18 +352,14 @@ const LADDER = ["knockout", "Quarter-finals", "Semi-finals", "Final", "win"]
  * stops being key.
  */
 export function shiftObjective(
-  world: World,
+  _world: World,
   obj: BoardObjective,
   dir: -1 | 1
 ): BoardObjective | null {
-  const name = world.state.competitions[obj.compInstance]?.name ?? obj.text
   if (obj.kind === "qualify") {
     if (obj.target) return null
-    if (dir === 1)
-      return obj.unbeaten
-        ? null
-        : { ...obj, unbeaten: true, critical: true, text: `${obj.text} unbeaten` }
-    if (obj.unbeaten) return { ...obj, unbeaten: false, text: obj.text.replace(/ unbeaten$/, "") }
+    if (dir === 1) return obj.unbeaten ? null : withText({ ...obj, unbeaten: true, critical: true })
+    if (obj.unbeaten) return withText({ ...obj, unbeaten: false })
     return obj.critical ? { ...obj, critical: false } : null
   }
   if (obj.kind !== "reach" && obj.kind !== "win") return null
@@ -331,18 +369,17 @@ export function shiftObjective(
   if (next < 0) return obj.critical ? { ...obj, critical: false } : null
   const stage = LADDER[next]
   const critical = dir === 1 ? true : obj.critical && next >= 1
-  if (stage === "win")
-    return { ...obj, kind: "win", stage: undefined, critical, text: `Win the ${name}` }
-  return { ...obj, kind: "reach", stage, critical, text: reachText(stage, name) }
+  if (stage === "win") return withText({ ...obj, kind: "win", stage: undefined, critical })
+  return withText({ ...obj, kind: "reach", stage, critical })
 }
 
 export interface AmbitionChoice {
   level: -1 | 0 | 1
-  text: string
+  text: Text
   critical: boolean
   allowed: boolean
   /** Why it is not allowed, or what it costs. */
-  note?: string
+  note?: Text
 }
 
 /** What the manager can tell the board about an objective. */
@@ -359,7 +396,7 @@ export function ambitionChoices(world: World, objectiveId: string): AmbitionChoi
       text: up.text,
       critical: up.critical,
       allowed: true,
-      note: `Rewards ×${T.raisedReward}; falling short costs ${T.brokenPromise} confidence, then the original target stands`,
+      note: msg("obj.raiseNote", { reward: T.raisedReward, cost: T.brokenPromise }),
     })
   out.push({ level: 0, text: obj.text, critical: obj.critical, allowed: true })
   if (down)
@@ -370,8 +407,8 @@ export function ambitionChoices(world: World, objectiveId: string): AmbitionChoi
       allowed: c.confidence >= T.lowerNeeds,
       note:
         c.confidence >= T.lowerNeeds
-          ? `Costs ${T.lowerCost} confidence now; rewards halved`
-          : `The board will only listen with confidence of ${T.lowerNeeds}% or more`,
+          ? msg("obj.lowerNote", { cost: T.lowerCost })
+          : msg("obj.lowerNeeds", { n: T.lowerNeeds }),
     })
   return out
 }
@@ -397,10 +434,8 @@ export function setAmbition(world: World, objectiveId: string, level: -1 | 0 | 1
     if (level === -1) nudgeConfidence(world, -T.lowerCost)
     world.news(
       "board",
-      level === 1 ? "You raise the bar" : "Expectations lowered",
-      level === 1
-        ? `You have promised the federation more: "${obj.text}". Deliver, and they will not forget it.`
-        : `The federation has reluctantly agreed to a lesser target: "${obj.text}".`,
+      msg(level === 1 ? "news.raise.title" : "news.lower.title"),
+      msg(level === 1 ? "news.raise.body" : "news.lower.body", { text: obj.text }),
       true,
       "/career"
     )
@@ -515,8 +550,8 @@ export function checkObjectives(world: World) {
       nudgeReputation(world, -2)
       world.news(
         "board",
-        "Promise broken",
-        `You promised to "${promised.charAt(0).toLowerCase() + promised.slice(1)}" and fell short. The federation still expects you to "${obj.text.charAt(0).toLowerCase() + obj.text.slice(1)}".`,
+        msg("news.broken.title"),
+        msg("news.broken.body", { promised: lc(promised), target: lc(obj.text) }),
         true,
         "/career"
       )
@@ -539,16 +574,16 @@ export function checkObjectives(world: World) {
       )
       world.news(
         "board",
-        "Objective achieved",
-        `The federation is delighted: "${obj.text}" — done. The extra backing will reach the academies too.`,
+        msg("news.met.title"),
+        msg("news.met.body", { text: obj.text }),
         true,
         "/career"
       )
       if (obj.kind === "qualify" && !obj.target) {
         const wc = obj.comp.startsWith("wcq")
-        const name = world.def(me).name
-        award(world, "first-qualification", `You have taken ${name} to a major tournament.`)
-        if (wc) award(world, "first-world-cup", `You have taken ${name} to a World Cup.`)
+        const name = nationText(me)
+        award(world, "first-qualification", msg("ms.qualification", { nation: name }))
+        if (wc) award(world, "first-world-cup", msg("ms.worldCup", { nation: name }))
       }
     } else {
       nudgeConfidence(world, obj.critical ? T.failedCritical : T.failed)
@@ -556,8 +591,8 @@ export function checkObjectives(world: World) {
       federationBoost(world, me, -0.2, 0)
       world.news(
         "board",
-        "Objective missed",
-        `The federation is unhappy: we failed to "${obj.text.charAt(0).toLowerCase() + obj.text.slice(1)}".`,
+        msg("news.missed.title"),
+        msg("news.missed.body", { text: lc(obj.text) }),
         true,
         "/career"
       )
@@ -623,27 +658,25 @@ function resultNews(
   ga: number,
   surprise: number
 ) {
-  const us = world.def(me).name
-  const them = world.def(opp).name
+  const us = nationText(me)
+  const them = nationText(opp)
   const score = `${gf}–${ga}`
-  const comp =
-    f.compId === "friendly" ? "a friendly" : (world.state.competitions[f.compId]?.name ?? "")
-  let title = ""
-  let body = ""
-  if (gf - ga >= 4) {
-    title = `${us} run riot against ${them}`
-    body = `A ${score} win over ${them} in ${comp}. The fans will remember this one.`
-  } else if (surprise > 0.35 && gf > ga) {
-    title = `Shock win over ${them}`
-    body = `Few gave us a chance, but we beat ${them} ${score} in ${comp}.`
-  } else if (ga - gf >= 4) {
-    title = `Humiliation against ${them}`
-    body = `A ${score} defeat to ${them} in ${comp}. Questions are being asked of the manager.`
-  } else if (surprise < -0.35 && gf < ga) {
-    title = `Embarrassing defeat to ${them}`
-    body = `We were expected to win, but lost ${score} to ${them} in ${comp}.`
-  }
-  if (title) world.news("result", title, body, true, `/report/${f.id}`)
+  const inst = world.state.competitions[f.compId]
+  const comp: Msg = inst ? compText(inst.defId, inst.year) : msg("news.friendly")
+  const params = { us, them, score, comp }
+  let kind = ""
+  if (gf - ga >= 4) kind = "riot"
+  else if (surprise > 0.35 && gf > ga) kind = "shock"
+  else if (ga - gf >= 4) kind = "humiliation"
+  else if (surprise < -0.35 && gf < ga) kind = "embarrassing"
+  if (kind)
+    world.news(
+      "result",
+      msg(`news.${kind}.title`, params),
+      msg(`news.${kind}.body`, params),
+      true,
+      `/report/${f.id}`
+    )
 }
 
 /**
@@ -674,16 +707,16 @@ export function playerMoments(world: World, f: Fixture, report: MatchReport) {
     if (caps === 50 || caps === 100 || caps === 150)
       world.news(
         "callup",
-        `${fullName(p)} wins cap number ${caps}`,
-        `${fullName(p)} has now played ${caps} times for ${world.def(me).name}.`,
+        msg("news.cap.title", { name: fullName(p), caps }),
+        msg("news.cap.body", { name: fullName(p), caps, nation: nationText(me) }),
         true
       )
     for (const g of [10, 25, 50, 75, 100])
       if (p.goals < g && p.goals + line.goals >= g)
         world.news(
           "callup",
-          `${fullName(p)} reaches ${g} international goals`,
-          `${fullName(p)} has now scored ${g} goals for ${world.def(me).name}.`,
+          msg("news.goals.title", { name: fullName(p), goals: g }),
+          msg("news.goals.body", { name: fullName(p), goals: g, nation: nationText(me) }),
           true
         )
   }
@@ -696,8 +729,13 @@ export function playerMoments(world: World, f: Fixture, report: MatchReport) {
   const names = debuts.map((p) => `${fullName(p)} (${ageOn(p.born, f.date)})`)
   world.news(
     "callup",
-    debuts.length === 1 ? `First cap for ${fullName(debuts[0])}` : `${debuts.length} debuts`,
-    `Making their international debut against ${world.def(f.home === me ? f.away : f.home).name}: ${names.join(", ")}.`,
+    debuts.length === 1
+      ? msg("news.debut.title", { name: fullName(debuts[0]) })
+      : msg("news.debuts.title", { n: debuts.length }),
+    msg("news.debut.body", {
+      opp: nationText(f.home === me ? f.away : f.home),
+      names: names.join(", "),
+    }),
     true
   )
 }
@@ -711,14 +749,15 @@ export function afterCompetition(world: World, compId: string) {
   if (c.snapshots) delete c.snapshots[compId]
   if (inst && me && inst.outcome.winner === me) {
     const h = c.history[c.history.length - 1]
-    h?.trophies.push(inst.name)
+    h?.trophies.push(compText(inst.defId, inst.year))
     nudgeReputation(world, inst.kind === "world-cup" ? 25 : inst.kind === "continental" ? 12 : 4)
     nudgeConfidence(world, 25)
-    award(world, "first-trophy", `Your first trophy: the ${inst.name}.`)
+    const comp = compText(inst.defId, inst.year)
+    award(world, "first-trophy", msg("ms.trophy", { comp }))
     if (inst.kind === "world-cup")
-      award(world, "world-champion", `World champions! ${world.def(me).name} win the ${inst.name}.`)
+      award(world, "world-champion", msg("ms.world", { nation: world.def(me).name, comp }))
     if (inst.kind === "continental")
-      award(world, "continental-champion", `Champions of your continent: the ${inst.name}.`)
+      award(world, "continental-champion", msg("ms.continental", { comp }))
   }
   checkObjectives(world)
   if (inst && me) reviewCompetition(world, inst, me, before)
@@ -747,7 +786,7 @@ function reviewCompetition(
     review.contractUntil = c.contractUntil
     if (review.contract === "expired") {
       review.verdict = "sacked"
-      review.message = `The ${inst.name} marks the end of your contract, and the federation has decided not to renew it.`
+      review.message = msg("review.msg.contractEnd", { comp: compText(inst.defId, inst.year) })
     }
   }
   const list = (c.reviews ??= [])
@@ -775,19 +814,14 @@ function pressure(world: World) {
     world.state.pendingUltimatum = true
     world.news(
       "board",
-      "Final warning",
-      `The federation has lost patience. Lift their confidence to ${T.ultimatumLifted}% within ${T.ultimatumMatches} competitive matches, or you will be replaced.`,
+      msg("news.ultimatum.title"),
+      msg("news.ultimatum.body", { lifted: T.ultimatumLifted, matches: T.ultimatumMatches }),
       true,
       "/career"
     )
   } else if (c.ultimatum && c.confidence >= T.ultimatumLifted) {
     c.ultimatum = null
-    world.news(
-      "board",
-      "The pressure eases",
-      "Results have turned. The federation has withdrawn its final warning.",
-      true
-    )
+    world.news("board", msg("news.eases.title"), msg("news.eases.body"), true)
   }
 }
 
@@ -795,18 +829,17 @@ function pressure(world: World) {
 export function leaveJob(world: World, reason: "sacked" | "expired") {
   const c = world.state.career
   if (!c.nationId) return
-  const nation = world.def(c.nationId).name
+  const nation = nationText(c.nationId)
   const h = c.history[c.history.length - 1]
   if (h) {
     h.to = world.state.date
     h.left = reason
   }
+  const kind = reason === "sacked" ? "sacked" : "notRenewed"
   world.news(
     "job",
-    reason === "sacked" ? "Sacked" : "Contract not renewed",
-    reason === "sacked"
-      ? `The ${nation} federation has relieved you of your duties.`
-      : `The ${nation} federation has decided not to renew your contract.`,
+    msg(`news.${kind}.title`),
+    msg(`news.${kind}.body`, { nation }),
     true,
     "/career"
   )
@@ -851,13 +884,13 @@ export function setContract(world: World) {
 /** The contract has run its course: renewed, extended for a year, or ended. */
 export function decideContract(world: World): "renewed" | "extended" | "expired" {
   const c = world.state.career
-  const nation = c.nationId ? world.def(c.nationId).name : ""
+  const nation = c.nationId ? nationText(c.nationId) : ""
   if (c.confidence >= T.renewAt) {
     setContract(world)
     world.news(
       "job",
-      "Contract renewed",
-      `The ${nation} federation has renewed your contract until ${c.contractUntil}.`,
+      msg("news.renewed.title"),
+      msg("news.renewed.body", { nation, date: c.contractUntil ?? "" }),
       true,
       "/career"
     )
@@ -868,8 +901,8 @@ export function decideContract(world: World): "renewed" | "extended" | "expired"
     c.contractUntil = addDays(world.state.date, 365)
     world.news(
       "job",
-      "One more year",
-      `The ${nation} federation has extended your contract by a single year. They want to see progress.`,
+      msg("news.extended.title"),
+      msg("news.extended.body", { nation }),
       true,
       "/career"
     )
@@ -929,8 +962,8 @@ function aiCoachChanges(world: World, compId: string) {
       world.nation(t).coach = aiCoachName(world, t)
       world.news(
         "job",
-        `${world.def(t).name} change coach`,
-        `${world.def(t).name} have appointed ${world.nation(t).coach} as their new head coach.`,
+        msg("news.coachChange.title", { nation: nationText(t) }),
+        msg("news.coachChange.body", { nation: nationText(t), coach: world.nation(t).coach }),
         false
       )
     }
@@ -960,8 +993,8 @@ export function makeOffers(world: World, unemployed = false) {
     world.state.pendingOffer = n
     world.news(
       "job",
-      `Job offer: ${world.def(n).name}`,
-      `The ${world.def(n).name} federation would like you as their new head coach. The offer stands until ${expires}.`,
+      msg("news.offer.title", { nation: nationText(n) }),
+      msg("news.offer.body", { nation: nationText(n), date: expires }),
       true,
       "/career"
     )
@@ -1003,8 +1036,8 @@ export function acceptOffer(world: World, nationId: string) {
   world.nation(nationId).coach = c.managerName
   world.news(
     "job",
-    `New job: ${world.def(nationId).name}`,
-    `You are the new head coach of ${world.def(nationId).name}.`,
+    msg("news.newJob.title", { nation: nationText(nationId) }),
+    msg("news.newJob.body", { nation: nationText(nationId) }),
     true
   )
   refreshObjectives(world)

@@ -1,3 +1,5 @@
+import { i18n } from "@/i18n"
+import { resolveText } from "@/i18n/text"
 import type { ISODate, Player } from "@/engine/types"
 
 /**
@@ -6,8 +8,12 @@ import type { ISODate, Player } from "@/engine/types"
  */
 export function unavailability(p: Player, date: ISODate, forMatch = true): string | null {
   if (p.injury && p.injury.until > date)
-    return `${p.first} ${p.last} is injured (${p.injury.label})`
-  if (forMatch && p.banned) return `${p.first} ${p.last} is suspended`
+    return i18n.global.t("squad.unavailable.injured", {
+      name: `${p.first} ${p.last}`,
+      label: resolveText(p.injury.label),
+    })
+  if (forMatch && p.banned)
+    return i18n.global.t("squad.unavailable.suspended", { name: `${p.first} ${p.last}` })
   return null
 }
 

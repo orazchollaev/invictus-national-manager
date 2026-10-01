@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { Hospital } from "@lucide/vue"
 import type { Player } from "@/engine/types"
 import { useWorldStore } from "@/modules/world/store"
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ select: [index: number] }>()
 
+const { t } = useI18n()
 const world = useWorldStore()
 const coords = computed(() => slotPositions(props.formation))
 const roles = computed(() => FORMATIONS[props.formation])
@@ -68,10 +70,20 @@ function fitClass(i: number) {
         <template v-else-if="slots[i]">{{ Math.round(player(slots[i]!)?.ca ?? 0) }}</template>
         <template v-else>+</template>
         <span v-if="status(i).injured || status(i).banned" class="slot-badges">
-          <span v-if="status(i).injured" class="badge-injury" role="img" aria-label="Injured">
+          <span
+            v-if="status(i).injured"
+            class="badge-injury"
+            role="img"
+            :aria-label="t('squad.status.injured')"
+          >
             <Hospital :size="10" />
           </span>
-          <span v-if="status(i).banned" class="badge-card" role="img" aria-label="Suspended"></span>
+          <span
+            v-if="status(i).banned"
+            class="badge-card"
+            role="img"
+            :aria-label="t('squad.status.suspended')"
+          ></span>
         </span>
       </span>
       <span class="slot-name">{{ slots[i] ? player(slots[i]!)?.last : roles[i] }}</span>

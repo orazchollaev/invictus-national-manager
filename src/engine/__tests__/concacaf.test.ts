@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { resolveText as say } from "@/i18n/text"
 import nations from "@/data/nations.json"
 import clubRows from "@/data/clubs.json"
 import playerRows from "@/data/players.json"
@@ -62,7 +63,7 @@ describe("CONCACAF Nations League and Gold Cup", { timeout: 600000 }, () => {
       expect(fixtures.filter((f) => f.away === t)).toHaveLength(2)
     }
     // Real opening fixtures (23–26 September 2026).
-    const first = fixtures.filter((f) => f.label.endsWith("Matchday 1")).map((f) => f.home)
+    const first = fixtures.filter((f) => say(f.label).endsWith("Matchday 1")).map((f) => f.home)
     expect(first.sort()).toEqual(["CRC", "DOM", "HAI"])
     // Every league match is inside the September–October window.
     const league = ["league-a", "league-c"].flatMap((k) =>

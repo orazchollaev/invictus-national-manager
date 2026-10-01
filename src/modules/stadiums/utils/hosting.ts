@@ -1,21 +1,14 @@
+import { i18n } from "@/i18n"
 import type { Confed } from "@/engine/types"
 import type { CompetitionInstance } from "@/engine/competition/types"
 import { hostLevelOf, type HostLevel } from "@/engine/world/stadiums"
 
-const CONTINENTAL: Record<Confed, string> = {
-  UEFA: "UEFA Euro",
-  CONMEBOL: "Copa América",
-  CONCACAF: "Gold Cup",
-  CAF: "Africa Cup of Nations",
-  AFC: "AFC Asian Cup",
-  OFC: "OFC Nations Cup",
-}
-
 /** What a hosting level means for a nation of this confederation. */
 export function levelName(level: HostLevel, confed: Confed): string {
-  if (level === "world-cup") return "FIFA World Cup"
-  if (level === "continental") return CONTINENTAL[confed]
-  return "Regional cups"
+  const t = i18n.global.t
+  if (level === "world-cup") return t("stadiums.levelName.world-cup")
+  if (level === "continental") return t(`stadiums.levelName.${confed}`)
+  return t("stadiums.levelName.regional")
 }
 
 export const seats = (n: number) => n.toLocaleString("en")

@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n"
+import { compName } from "@/i18n/text"
 import { StandingsTable } from "@/modules/competitions/components/tables"
 import { useWorldStore } from "@/modules/world/store"
 import { groupView } from "@/modules/competitions/utils/groupView"
 
+const { t } = useI18n()
 const world = useWorldStore()
 
 /** The user's group in the competition he is currently playing a group stage of. */
@@ -22,7 +25,7 @@ const snapshot = world.derive((w) => {
     const view = groupView(inst, stage, group, ctx)
     return {
       id: inst.id,
-      title: `${inst.short} · ${group.name.length <= 2 ? `Group ${group.name}` : group.name}`,
+      title: `${compName(inst, "short")} · ${group.name.length <= 2 ? t("common.group", { name: group.name }) : group.name}`,
       ...view,
     }
   }

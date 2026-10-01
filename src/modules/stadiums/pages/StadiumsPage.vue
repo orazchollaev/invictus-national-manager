@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
 import { Hammer, MapPin, Star } from "@lucide/vue"
 import { AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { HostingCard } from "@/modules/stadiums/components/hosting"
+import { compName, nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
-import { daysBetween, formatDate } from "@/engine/calendar/dates"
+import { daysBetween } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import { homeBoost } from "@/engine/world/federation"
 import {
   HOST_LEVELS,
@@ -20,6 +23,7 @@ import {
 } from "@/engine/world/stadiums"
 import { hostedAt, levelName, seats, seatsShort } from "@/modules/stadiums/utils/hosting"
 
+const { t } = useI18n()
 const route = useRoute()
 const world = useWorldStore()
 
@@ -44,7 +48,7 @@ const view = world.derive((w) => {
       planned: hostCheck(planned, req),
       hosting: hostedAt(competitions, id, level, w.state.date).map((c) => ({
         id: c.id,
-        name: c.name,
+        name: compName(c),
       })),
       bid: !!w.state.career.bids?.includes(level),
     }
@@ -65,12 +69,14 @@ const view = world.derive((w) => {
         ...p,
         left,
         progress: Math.min(100, Math.max(4, Math.round(((total - left) / total) * 100))),
-        comp: p.forComp ? w.state.competitions[p.forComp]?.name : undefined,
+        comp: ((i) => (i ? compName(i) : undefined))(
+          p.forComp ? w.state.competitions[p.forComp] : undefined
+        ),
       }
     })
   return {
     id,
-    name: def.name,
+    name: nationName(id),
     own,
     level: n.stadium,
     count: grounds.length,
@@ -90,33 +96,33 @@ function setBid(level: HostLevel, on: boolean) {
 </script>
 
 <template>
-  <PageShell v-if="view" :back="!view.own" title="Stadiums" :subtitle="view.name">
+  <PageShell v-if="view" :back="!view.own" :title="t('stadiums.title')" :subtitle="view.name">
     <template #actions>
       <NationFlag :id="view.id" :size="32" />
     </template>
 
     <section class="tiles">
       <div class="tile">
-        <span class="tile-value stars" :aria-label="`Level ${view.level} of 5`">
+        <span class="tile-value stars" :aria-label="t('stadiums.level', { n: view.level })">
           <Star v-for="i in 5" :key="i" :size="14" :class="{ on: i <= view.level }" />
         </span>
-        <span class="tile-label">Stadium level</span>
+        <span class="tile-label">{{ t("stadiums.stadiumLevel") }}</span>
       </div>
       <div class="tile">
         <span class="tile-value">{{ view.count }}</span>
-        <span class="tile-label">Grounds</span>
+        <span class="tile-label">{{ t("stadiums.grounds") }}</span>
       </div>
       <div class="tile">
         <span class="tile-value">{{ seatsShort(view.capacity) }}</span>
-        <span class="tile-label">Seats</span>
+        <span class="tile-label">{{ t("stadiums.seats") }}</span>
       </div>
       <div class="tile">
         <span class="tile-value">+{{ view.boost.toFixed(1) }}</span>
-        <span class="tile-label">Home edge</span>
+        <span class="tile-label">{{ t("stadiums.homeEdge") }}</span>
       </div>
     </section>
 
-    <AppSectionHeader title="Hosting" />
+    <AppSectionHeader :title="t('stadiums.hosting')" />
     <div class="hosting">
       <HostingCard
         v-for="l in view.levels"
@@ -133,7 +139,7 @@ function setBid(level: HostLevel, on: boolean) {
     </div>
 
     <template v-if="view.projects.length">
-      <AppSectionHeader title="Under construction" />
+      <AppSectionHeader :title="t('stadiums.underConstruction')" />
       <ul class="works">
         <li v-for="p in view.projects" :key="p.id" class="work">
           <Hammer :size="18" class="work-icon" />
@@ -143,17 +149,20 @@ function setBid(level: HostLevel, on: boolean) {
               <span class="work-cap">{{ seats(p.capacity) }}</span>
             </div>
             <div class="work-meta">
-              {{ p.kind === "build" ? "New ground" : "Expansion" }} · {{ p.city }}
-              <template v-if="p.comp">· for the {{ p.comp }}</template>
+              {{ p.kind === "build" ? t("stadiums.newGround") : t("stadiums.expansion") }} ·
+              {{ p.city }}
+              <template v-if="p.comp">· {{ t("stadiums.forComp", { name: p.comp }) }}</template>
             </div>
             <div class="work-bar"><span :style="{ width: `${p.progress}%` }"></span></div>
-            <div class="work-meta">Opens {{ formatDate(p.done) }} · {{ p.left }} days to go</div>
+            <div class="work-meta">
+              {{ t("stadiums.opens", { date: formatDate(p.done), n: p.left }) }}
+            </div>
           </div>
         </li>
       </ul>
     </template>
 
-    <AppSectionHeader title="Grounds by city" />
+    <AppSectionHeader :title="t('stadiums.groundsByCity')" />
     <div class="cities">
       <section v-for="c in view.cities" :key="c.city" class="city">
         <div class="city-name">
@@ -165,7 +174,9 @@ function setBid(level: HostLevel, on: boolean) {
             <span class="ground-name">
               <Star v-if="s.id === view.showpieceId" :size="13" class="showpiece" />
               {{ s.name }}
-              <small v-if="s.opened" class="new">opened {{ s.opened }}</small>
+              <small v-if="s.opened" class="new">
+                {{ t("stadiums.opened", { year: s.opened }) }}
+              </small>
             </span>
             <span class="ground-cap">{{ seats(s.capacity) }}</span>
           </div>
@@ -176,8 +187,8 @@ function setBid(level: HostLevel, on: boolean) {
       </section>
     </div>
   </PageShell>
-  <PageShell v-else back title="Stadiums">
-    <AppEmptyState title="No nation to show" />
+  <PageShell v-else back :title="t('stadiums.title')">
+    <AppEmptyState :title="t('stadiums.noNation')" />
   </PageShell>
 </template>
 

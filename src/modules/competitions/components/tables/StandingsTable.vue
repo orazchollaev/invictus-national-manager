@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import type { Standing } from "@/engine/competition/types"
 import { AppChip } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -20,6 +21,7 @@ const props = defineProps<{
   hosts?: string[]
 }>()
 
+const { t } = useI18n()
 const world = useWorldStore()
 
 const legend = computed(() => {
@@ -39,13 +41,13 @@ const tone = (i: number) => {
     <div class="table-title">{{ title }}</div>
     <div class="row head">
       <span class="pos">#</span>
-      <span class="team">Team</span>
-      <span>P</span>
-      <span>W</span>
-      <span>D</span>
-      <span>L</span>
-      <span class="gd">GD</span>
-      <span class="pts">Pts</span>
+      <span class="team">{{ t("competitions.table.team") }}</span>
+      <span>{{ t("competitions.table.p") }}</span>
+      <span>{{ t("competitions.table.w") }}</span>
+      <span>{{ t("competitions.table.d") }}</span>
+      <span>{{ t("competitions.table.l") }}</span>
+      <span class="gd">{{ t("competitions.table.gd") }}</span>
+      <span class="pts">{{ t("competitions.table.pts") }}</span>
     </div>
     <RouterLink
       v-for="(r, i) in rows"
@@ -59,13 +61,13 @@ const tone = (i: number) => {
       <span class="team">
         <NationFlag :id="r.team" :size="18" name />
         <AppChip v-if="hosts?.includes(r.team)" size="xs" variant="accent" class="host">
-          Host
+          {{ t("competitions.table.host") }}
         </AppChip>
         <AppChip v-if="outlook?.[i] === 'qualified'" size="xs" variant="success" class="host">
-          Q
+          {{ t("competitions.table.q") }}
         </AppChip>
         <AppChip v-else-if="outlook?.[i] === 'eliminated'" size="xs" variant="danger" class="host">
-          E
+          {{ t("competitions.table.e") }}
         </AppChip>
       </span>
       <span>{{ r.p }}</span>
@@ -76,11 +78,15 @@ const tone = (i: number) => {
       <span class="pts">{{ r.pts }}</span>
     </RouterLink>
     <div v-if="legend.length || outlook?.some(Boolean)" class="legend">
-      <span v-if="outlook?.includes('qualified')" class="legend-item">Q Through</span>
-      <span v-if="outlook?.includes('eliminated')" class="legend-item">E Out</span>
+      <span v-if="outlook?.includes('qualified')" class="legend-item">
+        {{ t("competitions.table.through") }}
+      </span>
+      <span v-if="outlook?.includes('eliminated')" class="legend-item">
+        {{ t("competitions.table.out") }}
+      </span>
       <span v-for="l in legend" :key="l.zone" class="legend-item">
         <span class="legend-dot" :style="{ background: l.tone }"></span>
-        {{ l.label }}
+        {{ t(l.label) }}
       </span>
     </div>
   </div>

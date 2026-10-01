@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 
+const { t } = useI18n()
 const world = useWorldStore()
 const confed = ref("all")
 
@@ -32,13 +34,17 @@ const shown = computed(() =>
 </script>
 
 <template>
-  <PageShell back title="FIFA World Ranking" subtitle="Updated after every match">
+  <PageShell
+    back
+    :title="t('competitions.ranking.title')"
+    :subtitle="t('competitions.ranking.subtitle')"
+  >
     <AppSubTabBar
       :model-value="confed"
       :options="
         ['all', 'UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'].map((v) => ({
           value: v,
-          label: v === 'all' ? 'World' : v,
+          label: v === 'all' ? t('competitions.ranking.world') : v,
         }))
       "
       @update:model-value="(v) => (confed = v)"

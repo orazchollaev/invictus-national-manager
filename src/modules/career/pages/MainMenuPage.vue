@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import { FolderOpen, Play, Plus, Settings } from "@lucide/vue"
 import { AppLogo } from "@/components/layout"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { activeSlot, listSlots, type SlotMeta } from "@/modules/world/services/saves"
 import { useWorldStore } from "@/modules/world/store"
 import { NATION_DEFS } from "@/modules/world/services/statics"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 const last = ref<SlotMeta | null>(null)
@@ -34,18 +36,19 @@ async function resume() {
   <div class="menu">
     <div class="brand">
       <AppLogo class="brand-logo" />
-      <h1 class="brand-title">Invictus</h1>
-      <p class="brand-sub">National Manager</p>
+      <h1 class="brand-title">{{ t("app.name") }}</h1>
+      <p class="brand-sub">{{ t("app.subtitle") }}</p>
     </div>
 
     <div class="actions">
       <button v-if="last" class="item item--primary" @click="resume">
         <Play :size="22" />
         <span class="item-text">
-          <span class="item-label">Continue</span>
+          <span class="item-label">{{ t("career.menu.continue") }}</span>
           <span class="item-hint">
             <NationFlag v-if="lastNation" :id="lastNation.id" :size="16" />
-            {{ last.managerName }} · {{ lastNation?.name ?? "Unemployed" }} ·
+            {{ last.managerName }} ·
+            {{ lastNation ? $nation(lastNation.id) : t("career.menu.unemployed") }} ·
             {{ formatDate(last.date) }}
           </span>
         </span>
@@ -53,22 +56,22 @@ async function resume() {
       <button class="item" @click="router.push('/new')">
         <Plus :size="22" />
         <span class="item-text">
-          <span class="item-label">New game</span>
-          <span class="item-hint">Take charge of any of 222 national teams</span>
+          <span class="item-label">{{ t("career.menu.newGame") }}</span>
+          <span class="item-hint">{{ t("career.menu.newGameHint") }}</span>
         </span>
       </button>
       <button class="item" :disabled="!hasSaves" @click="router.push('/load')">
         <FolderOpen :size="22" />
         <span class="item-text">
-          <span class="item-label">Load game</span>
-          <span class="item-hint">Three save slots</span>
+          <span class="item-label">{{ t("career.menu.loadGame") }}</span>
+          <span class="item-hint">{{ t("career.menu.loadGameHint") }}</span>
         </span>
       </button>
       <button class="item" @click="router.push('/settings')">
         <Settings :size="22" />
         <span class="item-text">
-          <span class="item-label">Settings</span>
-          <span class="item-hint">Theme, match speed, autosave</span>
+          <span class="item-label">{{ t("career.menu.settings") }}</span>
+          <span class="item-hint">{{ t("career.menu.settingsHint") }}</span>
         </span>
       </button>
     </div>

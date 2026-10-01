@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import { Flag, Trophy } from "@lucide/vue"
 import { AppButton, AppCard, AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
+import { nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import { showConfirm } from "@/composables/useDialog"
-import { verdictLabel, verdictTone } from "@/modules/career/utils/verdict"
+import { verdictKey, verdictTone } from "@/modules/career/utils/verdict"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 const career = world.derive((w) => w.state.career, null)
@@ -17,18 +20,22 @@ const objectives = computed(() => [...(career.value?.objectives ?? [])].reverse(
 const history = computed(() => [...(career.value?.history ?? [])].reverse())
 const trophies = computed(() =>
   (career.value?.history ?? []).flatMap((h) =>
-    h.trophies.map((t) => ({ name: t, nationId: h.nationId }))
+    h.trophies.map((name) => ({ name, nationId: h.nationId }))
   )
 )
 const milestones = computed(() => [...(career.value?.milestones ?? [])].reverse())
 const reviews = computed(() => [...(career.value?.reviews ?? [])].reverse())
 
 async function accept(nationId: string) {
-  const name = world.world?.def(nationId).name
+  const name = nationName(nationId)
   const leaving = career.value?.nationId
-    ? ` You will leave ${world.world?.def(career.value.nationId).name}.`
+    ? t("career.acceptLeaving", { name: nationName(career.value.nationId) })
     : ""
-  if (!(await showConfirm(`Become head coach of ${name}?${leaving}`, { confirmLabel: "Accept" })))
+  if (
+    !(await showConfirm(t("career.acceptConfirm", { name, leaving }), {
+      confirmLabel: t("career.accept"),
+    }))
+  )
     return
   world.takeJob(nationId)
   router.push("/home")
@@ -37,23 +44,28 @@ async function accept(nationId: string) {
 const statusTone = (s: string) =>
   s === "met" ? "var(--success)" : s === "failed" ? "var(--danger)" : "var(--text-muted)"
 
-const LEFT = { sacked: "Sacked", moved: "Moved on", expired: "Not renewed", resigned: "Resigned" }
+const LEFT = {
+  sacked: "career.left.sacked",
+  moved: "career.left.moved",
+  expired: "career.left.expired",
+  resigned: "career.left.resigned",
+} as const
 const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--danger)")
 </script>
 
 <template>
-  <PageShell back title="Career" :subtitle="career?.managerName">
+  <PageShell back :title="t('career.title')" :subtitle="career?.managerName">
     <AppCard v-if="career" padding="md" class="stats">
       <div class="stat">
-        <span class="muted">Confidence</span>
+        <span class="muted">{{ t("career.confidence") }}</span>
         <strong>{{ career.nationId ? `${career.confidence}%` : "—" }}</strong>
       </div>
       <div class="stat">
-        <span class="muted">Reputation</span>
+        <span class="muted">{{ t("career.reputation") }}</span>
         <strong>{{ Math.round(career.reputation) }}</strong>
       </div>
       <div class="stat">
-        <span class="muted">Contract until</span>
+        <span class="muted">{{ t("career.contractUntil") }}</span>
         <strong>
           {{ career.nationId && career.contractUntil ? formatDate(career.contractUntil) : "—" }}
         </strong>
@@ -61,55 +73,62 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
     </AppCard>
 
     <div v-if="career?.ultimatum" class="warning">
-      <strong>Final warning.</strong>
-      Lift confidence to 40% within {{ career.ultimatum.matches }} competitive
-      {{ career.ultimatum.matches === 1 ? "match" : "matches" }}, or you will be replaced.
+      <strong>{{ t("career.finalWarning") }}</strong>
+      {{ t("career.ultimatum", { n: career.ultimatum.matches }, career.ultimatum.matches) }}
     </div>
 
     <template v-if="career?.offers.length">
-      <AppSectionHeader title="Job offers" />
+      <AppSectionHeader :title="t('career.jobOffers')" />
       <AppCard v-for="o in career.offers" :key="o.nationId" padding="md" class="offer">
         <NationFlag :id="o.nationId" :size="32" name link />
-        <span class="muted">until {{ formatDate(o.expires) }}</span>
+        <span class="muted">{{ t("career.until", { date: formatDate(o.expires) }) }}</span>
         <div class="offer-actions">
-          <AppButton variant="text" @click="world.turnDown(o.nationId)">Decline</AppButton>
-          <AppButton variant="filled" @click="accept(o.nationId)">Accept</AppButton>
+          <AppButton variant="text" @click="world.turnDown(o.nationId)">
+            {{ t("career.decline") }}
+          </AppButton>
+          <AppButton variant="filled" @click="accept(o.nationId)">
+            {{ t("career.accept") }}
+          </AppButton>
         </div>
       </AppCard>
     </template>
 
-    <AppSectionHeader title="Objectives" />
-    <AppEmptyState v-if="!objectives.length" title="No objectives right now" />
+    <AppSectionHeader :title="t('career.objectives')" />
+    <AppEmptyState v-if="!objectives.length" :title="t('career.noObjectives')" />
     <div v-else class="list">
       <div v-for="o in objectives" :key="o.id" class="row">
         <span class="row-text">
-          {{ o.text }}
-          <small v-if="o.ambition === 1" class="ambition up">You promised more</small>
-          <small v-else-if="o.ambition === -1" class="ambition down">Target lowered</small>
-          <small v-else-if="o.broken" class="ambition down">Promise broken</small>
+          {{ $tx(o.text) }}
+          <small v-if="o.ambition === 1" class="ambition up">{{ t("career.ambition.up") }}</small>
+          <small v-else-if="o.ambition === -1" class="ambition down">
+            {{ t("career.ambition.down") }}
+          </small>
+          <small v-else-if="o.broken" class="ambition down">
+            {{ t("career.ambition.broken") }}
+          </small>
         </span>
         <StatPill
           v-if="o.kind === 'debuts' && o.status === 'open'"
           :value="`${o.progress ?? 0}/${o.count}`"
         />
-        <StatPill v-if="o.critical" value="Key" tone="var(--danger)" />
-        <StatPill :value="o.status" :tone="statusTone(o.status)" wide />
+        <StatPill v-if="o.critical" :value="t('career.key')" tone="var(--danger)" />
+        <StatPill :value="t(`career.status.${o.status}`)" :tone="statusTone(o.status)" wide />
       </div>
     </div>
 
     <template v-if="trophies.length">
-      <AppSectionHeader title="Trophy cabinet" />
+      <AppSectionHeader :title="t('career.trophyCabinet')" />
       <div class="cabinet">
-        <div v-for="(t, i) in trophies" :key="i" class="trophy">
+        <div v-for="(tr, i) in trophies" :key="i" class="trophy">
           <Trophy :size="28" class="trophy-icon" />
-          <span class="trophy-name">{{ t.name }}</span>
-          <NationFlag :id="t.nationId" :size="16" />
+          <span class="trophy-name">{{ $tx(tr.name) }}</span>
+          <NationFlag :id="tr.nationId" :size="16" />
         </div>
       </div>
     </template>
 
     <template v-if="reviews.length">
-      <AppSectionHeader title="Competition reviews" />
+      <AppSectionHeader :title="t('career.competitionReviews')" />
       <div class="list">
         <RouterLink
           v-for="r in reviews"
@@ -119,31 +138,33 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
         >
           <NationFlag :id="r.nationId" :size="20" />
           <span class="row-text">
-            {{ r.name }}
-            <small class="muted">{{ r.reached }}</small>
+            {{ $tx(r.name) }}
+            <small class="muted">{{ $tx(r.reached) }}</small>
           </span>
-          <StatPill :value="verdictLabel(r.verdict)" :tone="verdictTone(r.verdict)" />
+          <StatPill :value="t(verdictKey(r.verdict))" :tone="verdictTone(r.verdict)" />
         </RouterLink>
       </div>
     </template>
 
     <template v-if="milestones.length">
-      <AppSectionHeader title="Milestones" />
+      <AppSectionHeader :title="t('career.milestones')" />
       <div class="list">
         <div v-for="m in milestones" :key="m.id" class="row">
           <Flag :size="16" class="milestone-icon" />
-          <span class="row-text">{{ m.text }}</span>
+          <span class="row-text">{{ $tx(m.text) }}</span>
           <span class="muted">{{ m.date.slice(0, 4) }}</span>
         </div>
       </div>
     </template>
 
-    <AppSectionHeader title="Record" />
+    <AppSectionHeader :title="t('career.record')" />
     <div class="list">
       <div v-for="(h, i) in history" :key="i" class="row">
         <NationFlag :id="h.nationId" :size="22" name />
-        <StatPill v-if="h.left" :value="LEFT[h.left]" :tone="leftTone(h.left)" />
-        <span class="muted">{{ h.played }}P {{ h.won }}W {{ h.drawn }}D {{ h.lost }}L</span>
+        <StatPill v-if="h.left" :value="t(LEFT[h.left])" :tone="leftTone(h.left)" />
+        <span class="muted">
+          {{ t("career.record_line", { p: h.played, w: h.won, d: h.drawn, l: h.lost }) }}
+        </span>
         <span class="muted">{{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}</span>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import type { Confed, ISODate } from "../types"
 import type { Side } from "../match/types"
+import type { Text } from "../text"
 
 /** Match weight in the FIFA ranking, and how much the public cares. */
 export type Importance =
@@ -45,7 +46,7 @@ export interface Fixture {
   /** Competition instance id, or "friendly". */
   compId: string
   stage: string
-  label: string
+  label: Text
   date: ISODate
   home: string
   away: string

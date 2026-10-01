@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n"
+
 defineProps<{
   home: string
   away: string
@@ -7,13 +9,15 @@ defineProps<{
   homeColor: string
   awayColor: string
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
   <div
     class="pressure"
     role="img"
-    :aria-label="`Possession ${home} ${share[0]}%, ${away} ${share[1]}%`"
+    :aria-label="t('match.possession', { home, homePct: share[0], away, awayPct: share[1] })"
   >
     <span class="label">{{ home }} {{ share[0] }}%</span>
     <div class="bar">

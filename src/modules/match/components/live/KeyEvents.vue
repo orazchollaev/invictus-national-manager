@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { ArrowLeftRight, Goal, X } from "@lucide/vue"
 import type { MatchEvent, MatchEventKind } from "@/engine/match/types"
 import { clock, type CommentaryNames } from "@/engine/match/commentary"
@@ -8,6 +9,8 @@ const props = defineProps<{
   events: readonly MatchEvent[]
   names: CommentaryNames
 }>()
+
+const { t } = useI18n()
 
 type Icon = "goal" | "miss" | "yellow" | "red" | "sub"
 
@@ -30,12 +33,12 @@ function label(ev: MatchEvent): string {
     case "pen-goal":
       return ev.otherId ? `${who} (${props.names.player(ev.otherId)})` : who
     case "own-goal":
-      return `${who} (og)`
+      return t("match.events.og", { who })
     case "pen-miss":
     case "pen-saved":
-      return `${who} (pen missed)`
+      return t("match.events.penMissed", { who })
     case "second-yellow":
-      return `${who} (2nd yellow)`
+      return t("match.events.secondYellow", { who })
     default:
       return who
   }
@@ -98,7 +101,7 @@ const rows = computed(() => {
       </span>
     </li>
   </ol>
-  <p v-else class="none">No goals or cards yet.</p>
+  <p v-else class="none">{{ t("match.events.none") }}</p>
 </template>
 
 <style scoped>

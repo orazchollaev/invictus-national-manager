@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import type { MatchEvent } from "@/engine/match/types"
+import { commentaryText } from "@/i18n"
 import { clock, commentaryLine, isMinor, type CommentaryNames } from "@/engine/match/commentary"
 
 const props = defineProps<{
@@ -9,12 +11,14 @@ const props = defineProps<{
   verbose: boolean
 }>()
 
+const { t } = useI18n()
+
 /** The latest line worth saying, keyed by its place in the event list so a new one fades in. */
 const current = computed(() => {
   for (let i = props.events.length - 1; i >= 0; i--) {
     const ev = props.events[i]
     if (!props.verbose && isMinor(ev.kind)) continue
-    const text = commentaryLine(ev, i, props.names)
+    const text = commentaryLine(ev, i, props.names, commentaryText())
     if (text) return { key: i, clock: clock(ev), text }
   }
   return null
@@ -27,7 +31,7 @@ const current = computed(() => {
       <span class="clock">{{ current.clock }}</span>
       {{ current.text }}
     </p>
-    <p v-else class="text text--idle">Waiting for kick-off…</p>
+    <p v-else class="text text--idle">{{ t("match.waiting") }}</p>
   </div>
 </template>
 

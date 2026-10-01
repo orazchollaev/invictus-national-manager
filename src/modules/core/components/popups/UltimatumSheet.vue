@@ -1,11 +1,14 @@
 <script setup lang="ts">
 /** The board's final warning: turn results round in a few matches, or go. */
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { TriangleAlert } from "@lucide/vue"
 import { AppButton, AppSheet } from "@/components/ui"
+import { nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { CAREER_TUNING } from "@/engine/career/career"
 
+const { t } = useI18n()
 const world = useWorldStore()
 const sheet = ref<InstanceType<typeof AppSheet> | null>(null)
 
@@ -13,7 +16,7 @@ const info = world.derive((w) => {
   const c = w.state.career
   if (!c.nationId) return null
   return {
-    name: w.def(c.nationId).name,
+    name: nationName(c.nationId),
     confidence: c.confidence,
     matches: c.ultimatum?.matches ?? CAREER_TUNING.ultimatumMatches,
   }
@@ -23,24 +26,27 @@ const info = world.derive((w) => {
 <template>
   <AppSheet
     ref="sheet"
-    title="Final warning"
+    :title="t('core.ultimatum.title')"
     :dismiss-on-outside-click="false"
     @close="world.seenUltimatum()"
   >
     <div v-if="info" class="warn">
       <TriangleAlert :size="40" class="icon" />
-      <h2 class="title">The {{ info.name }} federation is losing patience</h2>
-      <p class="body">
-        Confidence has fallen to
-        <strong>{{ info.confidence }}%.</strong>
-        Lift it to {{ CAREER_TUNING.ultimatumLifted }}% within your next
-        {{ info.matches }} competitive matches, or you will be replaced. Drop below
-        {{ CAREER_TUNING.ultimatumSackBelow }}% before then and they will not wait that long.
-      </p>
+      <h2 class="title">{{ t("core.ultimatum.heading", { name: info.name }) }}</h2>
+      <i18n-t keypath="core.ultimatum.body" tag="p" class="body">
+        <template #confidence>
+          <strong>{{ info.confidence }}%</strong>
+        </template>
+        <template #lifted>{{ CAREER_TUNING.ultimatumLifted }}</template>
+        <template #matches>{{ info.matches }}</template>
+        <template #sack>{{ CAREER_TUNING.ultimatumSackBelow }}</template>
+      </i18n-t>
     </div>
     <template #footer>
       <div class="actions">
-        <AppButton variant="filled" block @click="sheet?.close()">Understood</AppButton>
+        <AppButton variant="filled" block @click="sheet?.close()">
+          {{ t("core.ultimatum.understood") }}
+        </AppButton>
       </div>
     </template>
   </AppSheet>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChevronLeft } from "@lucide/vue"
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 
 defineProps<{
   title?: string
@@ -11,6 +12,7 @@ defineProps<{
   onBack?: () => void
 }>()
 
+const { t } = useI18n()
 const router = useRouter()
 </script>
 
@@ -20,7 +22,7 @@ const router = useRouter()
       <button
         v-if="back"
         class="page-back"
-        aria-label="Back"
+        :aria-label="t('common.back')"
         @click="onBack ? onBack() : router.back()"
       >
         <ChevronLeft :size="30" />

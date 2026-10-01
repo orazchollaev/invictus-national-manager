@@ -1,3 +1,4 @@
+import { i18n } from "@/i18n"
 import type { ISODate, Player, Position } from "@/engine/types"
 import { ageOn, positionGroup } from "@/engine/players/ability"
 
@@ -48,20 +49,22 @@ export function potentialRange(p: Player, on: ISODate): [number, number] {
   return [lo, Math.min(99, lo + spread)]
 }
 
+const t = (key: string) => i18n.global.t(key)
+
 export function formLabel(form: number): string {
-  if (form >= 3) return "Excellent"
-  if (form >= 1) return "Good"
-  if (form > -1) return "Average"
-  if (form > -3) return "Poor"
-  return "Awful"
+  if (form >= 3) return t("form.excellent")
+  if (form >= 1) return t("form.good")
+  if (form > -1) return t("form.average")
+  if (form > -3) return t("form.poor")
+  return t("form.awful")
 }
 
 export function describeTrait(v: number): string {
-  if (v >= 17) return "Outstanding"
-  if (v >= 14) return "Strong"
-  if (v >= 8) return "Average"
-  if (v >= 5) return "Weak"
-  return "Very weak"
+  if (v >= 17) return t("trait.outstanding")
+  if (v >= 14) return t("trait.strong")
+  if (v >= 8) return t("trait.average")
+  if (v >= 5) return t("trait.weak")
+  return t("trait.veryWeak")
 }
 
 export function scoreline(h: number, a: number, pens?: [number, number]): string {

@@ -2,6 +2,7 @@
  * Domain types shared by the engine and the app. The engine owns them because it is
  * the only layer every other one depends on; modules re-export what they need.
  */
+import type { Text } from "./text"
 
 /** Calendar date as `YYYY-MM-DD`. Lexical order is chronological order. */
 export type ISODate = string
@@ -42,7 +43,7 @@ export interface Club {
 export interface Injury {
   /** First day the player is fit again. */
   until: ISODate
-  label: string
+  label: Text
 }
 
 export interface PlayerSeason {

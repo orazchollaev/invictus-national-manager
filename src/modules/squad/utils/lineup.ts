@@ -1,14 +1,8 @@
+import { i18n } from "@/i18n"
 import type { Player, Position } from "@/engine/types"
 import type { SheetSlot } from "@/engine/match/types"
-import { ARCHETYPES, archetypeOf } from "@/engine/players/archetypes"
-import {
-  ROLES,
-  rolesFor,
-  suggestedRole,
-  suitsRole,
-  validRole,
-  type Role,
-} from "@/engine/match/roles"
+import { archetypeOf } from "@/engine/players/archetypes"
+import { rolesFor, suggestedRole, suitsRole, validRole, type Role } from "@/engine/match/roles"
 
 /** The role that suits a player in a slot, if one does. */
 export function roleFor(player: Player | undefined, pos: Position): Role | undefined {
@@ -84,12 +78,12 @@ export function roleChoices(
   return {
     options: rolesFor(pos).map((id) => ({
       id,
-      label: ROLES[id].label,
+      label: i18n.global.t(`role.${id}.label`),
       suits: !!arch && suitsRole(arch, id),
     })),
     current,
-    blurb: current ? ROLES[current].blurb : "The plain version of the position.",
-    style: arch ? ARCHETYPES[arch].label : null,
+    blurb: current ? i18n.global.t(`role.${current}.blurb`) : i18n.global.t("squad.plainRole"),
+    style: arch ? i18n.global.t(`arch.${arch}.label`) : null,
     suited: !!arch && suitsRole(arch, current),
   }
 }

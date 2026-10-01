@@ -91,7 +91,7 @@ export function bestPlaced(
   if (places < 1 || places >= groups.length) return null
   const tables = standingsOf(inst, stage.key, ctx, plan?.groups?.tiebreak ?? "gd")
   return {
-    title: pos === 1 ? "Best runners-up" : "Best third-placed teams",
+    title: pos === 1 ? "competitions.best.runnersUp" : "competitions.best.thirds",
     rows: finishers(tables, pos),
     places,
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import {
   Briefcase,
   CalendarDays,
@@ -16,6 +17,7 @@ import { showConfirm } from "@/composables/useDialog"
 import { PageShell } from "@/modules/core/components"
 import { useWorldStore } from "@/modules/world/store"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 
@@ -23,29 +25,39 @@ const items = [
   {
     to: "/career",
     icon: Briefcase,
-    label: "Career",
-    hint: "Objectives, confidence and job offers",
+    label: t("core.more.career"),
+    hint: t("core.more.careerHint"),
   },
   {
     to: "/stadiums",
     icon: Landmark,
-    label: "Stadiums",
-    hint: "Grounds, works and bids to host tournaments",
+    label: t("core.more.stadiums"),
+    hint: t("core.more.stadiumsHint"),
   },
-  { to: "/rankings", icon: ListOrdered, label: "FIFA ranking", hint: "All 211 FIFA members" },
+  {
+    to: "/rankings",
+    icon: ListOrdered,
+    label: t("core.more.ranking"),
+    hint: t("core.more.rankingHint"),
+  },
   {
     to: "/calendar",
     icon: CalendarDays,
-    label: "Calendar",
-    hint: "Your fixtures and the FIFA windows",
+    label: t("core.more.calendar"),
+    hint: t("core.more.calendarHint"),
   },
-  { to: "/honours", icon: Medal, label: "Honours", hint: "Every trophy since 2026" },
-  { to: "/settings", icon: Settings, label: "Settings", hint: "Theme, match speed" },
+  { to: "/honours", icon: Medal, label: t("core.more.honours"), hint: t("core.more.honoursHint") },
+  {
+    to: "/settings",
+    icon: Settings,
+    label: t("core.more.settings"),
+    hint: t("core.more.settingsHint"),
+  },
 ]
 
 async function exitWithoutSaving() {
-  const ok = await showConfirm("Leave without saving? Progress since the last save is lost.", {
-    confirmLabel: "Exit",
+  const ok = await showConfirm(t("core.more.leaveConfirm"), {
+    confirmLabel: t("core.more.exit"),
     dangerous: true,
   })
   if (!ok) return
@@ -61,7 +73,7 @@ async function saveAndExit() {
 </script>
 
 <template>
-  <PageShell title="More">
+  <PageShell :title="t('core.more.title')">
     <AppCard padding="none" class="menu">
       <RouterLink v-for="i in items" :key="i.to" :to="i.to" class="item">
         <component :is="i.icon" :size="20" class="icon" />
@@ -73,22 +85,22 @@ async function saveAndExit() {
       <button class="item" @click="world.save()">
         <Save :size="20" class="icon" />
         <span class="text">
-          <span class="label">Save game</span>
-          <span class="hint">Also saved automatically</span>
+          <span class="label">{{ t("core.more.saveGame") }}</span>
+          <span class="hint">{{ t("core.more.saveGameHint") }}</span>
         </span>
       </button>
       <button class="item" @click="exitWithoutSaving">
         <LogOut :size="20" class="icon" />
         <span class="text">
-          <span class="label">Exit without saving</span>
-          <span class="hint">Lose everything since the last save</span>
+          <span class="label">{{ t("core.more.exitNoSave") }}</span>
+          <span class="hint">{{ t("core.more.exitNoSaveHint") }}</span>
         </span>
       </button>
       <button class="item" @click="saveAndExit">
         <FolderOpen :size="20" class="icon" />
         <span class="text">
-          <span class="label">Save and exit</span>
-          <span class="hint">Back to the main menu</span>
+          <span class="label">{{ t("core.more.saveExit") }}</span>
+          <span class="hint">{{ t("core.more.saveExitHint") }}</span>
         </span>
       </button>
     </AppCard>

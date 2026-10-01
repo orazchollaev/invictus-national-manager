@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 
 const world = useWorldStore()
 const label = computed(() =>

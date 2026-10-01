@@ -5,31 +5,29 @@
  * never promises anything the match will not deliver.
  */
 import type { Player } from "../types"
+import { msg, type Msg } from "../text"
 import { matchAbility, positionGroup } from "../players/ability"
-import { ARCHETYPES, archetypeOf } from "../players/archetypes"
-import { combineStyle, ROLES } from "./roles"
+import { archetypeOf } from "../players/archetypes"
+import { combineStyle } from "./roles"
 import { firing, instructionsOf, meet, styleOf, type PlayStyle, type Rule } from "./matchup"
 import type { Formation, Level, Tactics, TeamSheet } from "./types"
 
-export const LINE_NAMES = ["Deep", "Standard", "High"] as const
-export const WIDTH_NAMES = ["Narrow", "Standard", "Wide"] as const
-
 /** How a side plays, in a few words. */
-export function traitsOf(t: Tactics): string[] {
+export function traitsOf(t: Tactics): Msg[] {
   const i = instructionsOf(t)
   const out: string[] = []
-  if (t.mentality >= 1) out.push("Attack-minded")
-  if (t.mentality <= -1) out.push("Cautious")
-  if (i.line === 2) out.push("High line")
-  if (i.line === 0) out.push("Deep line")
-  if (i.width === 2) out.push("Plays wide")
-  if (i.width === 0) out.push("Plays narrow")
-  if (i.counter) out.push("Counter-attacking")
-  if (t.pressing === 2) out.push("High press")
-  if (t.pressing === 0) out.push("Drops off")
-  if (t.tempo === 2) out.push("Direct")
-  if (t.tempo === 0) out.push("Patient")
-  return out.length ? out : ["Balanced"]
+  if (t.mentality >= 1) out.push("attack")
+  if (t.mentality <= -1) out.push("cautious")
+  if (i.line === 2) out.push("highLine")
+  if (i.line === 0) out.push("deepLine")
+  if (i.width === 2) out.push("wide")
+  if (i.width === 0) out.push("narrow")
+  if (i.counter) out.push("counter")
+  if (t.pressing === 2) out.push("highPress")
+  if (t.pressing === 0) out.push("dropsOff")
+  if (t.tempo === 2) out.push("direct")
+  if (t.tempo === 0) out.push("patient")
+  return (out.length ? out : ["balanced"]).map((k) => msg(`scout.trait.${k}`))
 }
 
 export type KeyReason = "star" | "threat" | "creator" | "weak"
@@ -38,16 +36,9 @@ export interface KeyPlayer {
   playerId: string
   reason: KeyReason
   /** What to say about him. */
-  note: string
-  archetype: string
-  role: string | null
-}
-
-const REASON_NOTE: Record<KeyReason, string> = {
-  star: "Their best player",
-  threat: "Their main goal threat",
-  creator: "Creates most of their chances",
-  weak: "The weak link",
+  note: Msg
+  archetype: Msg
+  role: Msg | null
 }
 
 /** The players to watch in a sheet, and the one place to hit. */
@@ -68,9 +59,9 @@ export function keyPlayers(
     out.push({
       playerId: x.p.id,
       reason,
-      note: REASON_NOTE[reason],
-      archetype: ARCHETYPES[archetypeOf(x.p)].label,
-      role: x.slot.role ? ROLES[x.slot.role].label : null,
+      note: msg(`scout.reason.${reason}`),
+      archetype: msg(`arch.${archetypeOf(x.p)}.label`),
+      role: x.slot.role ? msg(`role.${x.slot.role}.label`) : null,
     })
   }
   const style = (x: (typeof picks)[number]) => combineStyle(archetypeOf(x.p), x.slot.role)
@@ -107,13 +98,13 @@ export function keyPlayers(
 
 export interface MatchupLine {
   id: Rule["id"]
-  label: string
+  label: Msg
   /** Above 1 the matchup helps the side it is listed for. */
   factor: number
 }
 
 function lines(rules: Rule[]): MatchupLine[] {
-  return rules.map((r) => ({ id: r.id, label: r.label, factor: r.factor }))
+  return rules.map((r) => ({ id: r.id, label: msg(`rule.${r.id}`), factor: r.factor }))
 }
 
 /** Net advantage of `a`'s way of playing over `b`'s, as a log ratio. */
@@ -127,9 +118,9 @@ export interface Advice {
   /** What to change in the tactics, to apply as they are. */
   patch: Partial<Pick<Tactics, "line" | "width" | "counter">>
   /** The same in words, one line per change. */
-  changes: string[]
+  changes: Msg[]
   /** The matchups this wins or avoids. */
-  reasons: string[]
+  reasons: Msg[]
   /** How much better the matchup gets, as a log ratio (0.01 is about one per cent). */
   gain: number
 }
@@ -170,18 +161,33 @@ export function advise(mine: Tactics, theirs: Tactics): Advice {
   const bestGain = best.gain
 
   const patch: Advice["patch"] = {}
-  const changes: string[] = []
+  const changes: Msg[] = []
   if (best.line !== own.line) {
     patch.line = best.line
-    changes.push(`Defensive line: ${LINE_NAMES[own.line]} → ${LINE_NAMES[best.line]}`)
+    changes.push(
+      msg("scout.change.line", {
+        from: msg(`scout.level.${own.line}`),
+        to: msg(`scout.level.${best.line}`),
+      })
+    )
   }
   if (best.width !== own.width) {
     patch.width = best.width
-    changes.push(`Width: ${WIDTH_NAMES[own.width]} → ${WIDTH_NAMES[best.width]}`)
+    changes.push(
+      msg("scout.change.width", {
+        from: msg(`scout.width.${own.width}`),
+        to: msg(`scout.width.${best.width}`),
+      })
+    )
   }
   if (best.counter !== own.counter) {
     patch.counter = best.counter
-    changes.push(`Counter-attack: ${own.counter ? "on" : "off"} → ${best.counter ? "on" : "off"}`)
+    changes.push(
+      msg("scout.change.counter", {
+        from: msg(own.counter ? "scout.on" : "scout.off"),
+        to: msg(best.counter ? "scout.on" : "scout.off"),
+      })
+    )
   }
 
   if (!changes.length || bestGain < ADVICE_THRESHOLD)
@@ -196,14 +202,19 @@ export function advise(mine: Tactics, theirs: Tactics): Advice {
     ...firing(base, opp).filter((r) => r.factor < 1 && !ids(firing(after, opp)).has(r.id)),
     ...firing(opp, base).filter((r) => r.factor > 1 && !ids(firing(opp, after)).has(r.id)),
     ...firing(opp, after).filter((r) => r.factor < 1 && !hadTheirs.has(r.id)),
-  ].map((r) => r.label)
-  return { patch, changes, reasons: [...new Set(reasons)], gain: bestGain }
+  ].map((r) => r.id)
+  return {
+    patch,
+    changes,
+    reasons: [...new Set(reasons)].map((id) => msg(`rule.${id}`)),
+    gain: bestGain,
+  }
 }
 
 export interface ScoutReport {
   nationId: string
   formation: Formation
-  traits: string[]
+  traits: Msg[]
   key: KeyPlayer[]
   /** How your way of playing meets theirs, for and against you. */
   yours: MatchupLine[]

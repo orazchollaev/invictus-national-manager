@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { resolveText as say } from "@/i18n/text"
 import nations from "@/data/nations.json"
 import clubRows from "@/data/clubs.json"
 import playerRows from "@/data/players.json"
@@ -22,7 +23,7 @@ describe("progress news", { timeout: 300000 }, () => {
   }
   const inst = w.state.competitions["asian-cup-2027"]
   const mine = w.state.news.filter((n) => n.mine && n.link === `/competitions/${inst.id}`)
-  const titles = mine.map((n) => n.title)
+  const titles = mine.map((n) => say(n.title))
 
   it("reports the group stage once, through or out", () => {
     const groupNews = titles.filter((t) => /: (through|out)$/.test(t))
@@ -35,7 +36,9 @@ describe("progress news", { timeout: 300000 }, () => {
     // Said once, not on every later result.
     const first = mine.filter(
       (n) =>
-        n.body.startsWith("We finished") || n.body.startsWith("We are through to the Round of 16")
+        say(n.body).startsWith("We finished") ||
+        say(n.body).startsWith("We are through to: Round of 16") ||
+        say(n.body).startsWith("We are through to the Round of 16")
     )
     expect(first.length).toBeLessThanOrEqual(1)
   })
@@ -45,13 +48,15 @@ describe("progress news", { timeout: 300000 }, () => {
       .find((s) => s.key === "knockout")!
       .rounds!.flatMap((r) => r.ties)
       .filter((t) => (t.home === "KSA" || t.away === "KSA") && t.winner)
-    const bodies = mine.map((n) => n.body)
+    const bodies = mine.map((n) => say(n.body))
     expect(new Set(bodies).size).toBe(bodies.length)
     const rounds = inst.stages.find((s) => s.key === "knockout")!.rounds!
     const last = rounds[rounds.length - 1].ties
     // Winning the final is told as the title, not as progress.
     const told = ties.filter((t) => !(last.includes(t) && t.winner === "KSA")).length
-    const tieNews = mine.filter((n) => /through to the|knocked out|lost the final/.test(n.body))
+    const tieNews = mine.filter((n) =>
+      /through to the|knocked out|lost the final/.test(say(n.body))
+    )
     // The group stage's own "through" is told as well, when the team went on.
     const wentOn = rounds[0].ties.some((t) => t.home === "KSA" || t.away === "KSA")
     expect(tieNews).toHaveLength(told + (wentOn ? 1 : 0))

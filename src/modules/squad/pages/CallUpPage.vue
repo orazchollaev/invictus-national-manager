@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { Check, Sparkles } from "@lucide/vue"
 import { AppButton, AppChip, AppSubTabBar } from "@/components/ui"
@@ -8,14 +9,14 @@ import { PlayerRow } from "@/modules/squad/components/list"
 import { useWorldStore } from "@/modules/world/store"
 import { pickSquad, available } from "@/engine/ai/squad"
 import { positionGroup } from "@/engine/players/ability"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import { abilityTone } from "@/modules/core/utils/format"
 import { showAlert } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
 import { relationsOf } from "@/modules/squad/utils/chemistry"
-import { BOND_LABELS } from "@/engine/players/bonds"
 import type { Player } from "@/engine/types"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 
@@ -53,9 +54,10 @@ function canPick(p: Player) {
 }
 
 function unavailableReason(p: Player): string | null {
-  if (p.intlRetired) return "Retired from internationals"
-  if (!released(p)) return "Club won't release"
-  if (!available(p, world.date)) return `Injured until ${formatDate(p.injury!.until)}`
+  if (p.intlRetired) return t("squad.callup.retired")
+  if (!released(p)) return t("squad.callup.noRelease")
+  if (!available(p, world.date))
+    return t("squad.callup.injuredUntil", { date: formatDate(p.injury!.until) })
   return null
 }
 
@@ -94,15 +96,15 @@ function suggest() {
 }
 
 async function confirm() {
-  if (selected.value.size < 23) return showAlert("Name at least 23 players.")
-  if (counts.value.GK < 3) return showAlert("You need three goalkeepers.")
+  if (selected.value.size < 23) return showAlert(t("squad.callup.atLeast"))
+  if (counts.value.GK < 3) return showAlert(t("squad.callup.threeGk"))
   // Suspended players may be named: they sit out the match, not the squad.
   const blocked = unavailableIn(
     [...selected.value].map((id) => world.world?.state.players[id]),
     world.date,
     false
   )
-  if (blocked.length) return showAlert(`Remove unavailable players first: ${blocked.join("; ")}.`)
+  if (blocked.length) return showAlert(t("squad.callup.removeFirst", { list: blocked.join("; ") }))
   world.confirmCallup([...selected.value])
   router.replace("/home")
 }
@@ -110,18 +112,21 @@ async function confirm() {
 
 <template>
   <PageShell
-    title="Squad announcement"
+    :title="t('squad.callup.title')"
     :subtitle="
       pending?.kind === 'callup'
-        ? `${pending.label} · ${formatDate(pending.deadline)}`
-        : 'No call-up due'
+        ? t('squad.callup.subtitle', {
+            label: $tx(pending.label),
+            date: formatDate(pending.deadline),
+          })
+        : t('squad.callup.noneDue')
     "
     back
   >
     <template #actions>
       <AppButton variant="tonal" @click="suggest">
         <Sparkles :size="16" />
-        Suggest
+        {{ t("squad.callup.suggest") }}
       </AppButton>
     </template>
 
@@ -135,7 +140,10 @@ async function confirm() {
     <AppSubTabBar
       :model-value="group"
       :options="
-        ['GK', 'DEF', 'MID', 'FWD'].map((g) => ({ value: g, label: `${g} (${counts[g]})` }))
+        ['GK', 'DEF', 'MID', 'FWD'].map((g) => ({
+          value: g,
+          label: `${t('squad.pos.' + g)} (${counts[g]})`,
+        }))
       "
       size="sm"
       @update:model-value="(v) => (group = v)"
@@ -162,16 +170,16 @@ async function confirm() {
             :key="r.player.id"
             :class="r.kind === 'feud' ? 'tie tie--feud' : 'tie'"
           >
-            {{ BOND_LABELS[r.kind] }}: {{ r.player.last }}
+            {{ t(`bond.${r.kind}`) }}: {{ r.player.last }}
           </span>
         </div>
-        <div v-else-if="p.banned" class="reason">Suspended for the next match</div>
+        <div v-else-if="p.banned" class="reason">{{ t("squad.callup.suspendedNext") }}</div>
       </button>
     </div>
 
     <StickyCta>
       <AppButton variant="filled" block :disabled="selected.size < 23" @click="confirm">
-        Announce squad
+        {{ t("squad.callup.announce") }}
       </AppButton>
     </StickyCta>
   </PageShell>

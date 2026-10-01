@@ -1,6 +1,6 @@
+import { i18n } from "@/i18n"
 import type { Player } from "@/engine/types"
 import {
-  BOND_LABELS,
   BOND_POINTS,
   bondBetween,
   bondsAmong,
@@ -52,7 +52,12 @@ export function bondLines(
       return {
         key: `${b.a}|${b.b}`,
         kind: b.kind,
-        text: `${name(a)} & ${name(c)} · ${BOND_LABELS[b.kind]}${club ? ` at ${club}` : ""}`,
+        text: i18n.global.t("squad.chemistry.line", {
+          a: name(a),
+          b: name(c),
+          label: i18n.global.t(`bond.${b.kind}`),
+          club: club ? i18n.global.t("squad.chemistry.atClub", { club }) : "",
+        }),
         points: BOND_POINTS[b.kind],
       }
     })

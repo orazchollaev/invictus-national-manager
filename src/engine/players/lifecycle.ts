@@ -10,6 +10,7 @@
 import type { Club, ClubRole, ISODate, NationDef, Player, Position } from "../types"
 import { clamp, gauss, pick, pickWeighted, randInt, type Rng } from "../rng"
 import { addDays } from "../calendar/dates"
+import { msg, type Msg } from "../text"
 import { NAME_ALIASES, NAME_POOLS } from "@/data/names"
 import { ageOn } from "./ability"
 import { findClub, roleAt, type ClubIndex } from "./clubs"
@@ -40,7 +41,11 @@ const INJURIES: [string, number, number, number][] = [
   ["Cruciate ligament rupture", 180, 280, 1],
 ]
 
-export function clubWeek(p: Player, date: ISODate, age: number, rng: Rng): string | null {
+/** The message of an injury, from its English name. */
+const injuryText = (name: string): Msg =>
+  msg(`injury.${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`)
+
+export function clubWeek(p: Player, date: ISODate, age: number, rng: Rng): Msg | null {
   // Form wanders and settles; a player's role pulls it a little.
   const roleBias = p.role === "star" ? 0.3 : p.role === "reserve" ? -0.3 : 0
   p.form = Math.round(clamp(p.form * 0.8 + gauss(rng, roleBias, 1), -5, 5) * 10) / 10
@@ -57,7 +62,8 @@ export function clubWeek(p: Player, date: ISODate, age: number, rng: Rng): strin
     (age >= 31 ? 1.3 : 1) *
     (p.role === "star" || p.role === "starter" ? 1.1 : 0.8)
   if (rng() < risk) {
-    const [label, min, max] = pickWeighted(rng, INJURIES, ([, , , w]) => w)
+    const [name, min, max] = pickWeighted(rng, INJURIES, ([, , , w]) => w)
+    const label = injuryText(name)
     p.injury = { until: addDays(date, randInt(rng, min, max)), label }
     return label
   }
@@ -66,9 +72,9 @@ export function clubWeek(p: Player, date: ISODate, age: number, rng: Rng): strin
 
 /** An injury picked up on international duty, from the match engine's event. */
 export function matchInjury(p: Player, date: ISODate, rng: Rng) {
-  const [label, min, max] = pickWeighted(rng, INJURIES, ([, , , w]) => w)
+  const [name, min, max] = pickWeighted(rng, INJURIES, ([, , , w]) => w)
   const until = addDays(date, randInt(rng, min, max))
-  if (!p.injury || p.injury.until < until) p.injury = { until, label }
+  if (!p.injury || p.injury.until < until) p.injury = { until, label: injuryText(name) }
 }
 
 // ── Yearly development ──────────────────────────────────────────────────────

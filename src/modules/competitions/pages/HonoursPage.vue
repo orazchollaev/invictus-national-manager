@@ -1,30 +1,33 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
+import { compName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { COMPETITION_DEFS } from "@/engine/competition/defs"
 
+const { t } = useI18n()
 const world = useWorldStore()
 const honours = world.derive((w) => w.state.honours, {})
 
 const sections = computed(() =>
   COMPETITION_DEFS.filter((d) => honours.value[d.id]?.length).map((d) => ({
     id: d.id,
-    name: d
-      .name(0)
-      .replace(/ 0$/, "")
-      .replace(/ 0–00$/, "")
-      .replace(/ 0 /, " "),
+    name: compName({ defId: d.id, year: 0 }, "plain"),
     rows: [...honours.value[d.id]].reverse(),
   }))
 )
 </script>
 
 <template>
-  <PageShell back title="Honours" subtitle="Every trophy won since September 2026">
-    <AppEmptyState v-if="!sections.length" title="No trophies handed out yet" />
+  <PageShell
+    back
+    :title="t('competitions.honours.title')"
+    :subtitle="t('competitions.honours.subtitle')"
+  >
+    <AppEmptyState v-if="!sections.length" :title="t('competitions.honours.empty')" />
     <template v-for="s in sections" :key="s.id">
       <AppSectionHeader :title="s.name" />
       <div class="list">

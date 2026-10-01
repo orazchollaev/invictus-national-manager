@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { CalendarDays, ListOrdered, Medal } from "@lucide/vue"
 import { AppButton, AppCard, AppChip, AppSectionHeader, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
-import { formatShort } from "@/engine/calendar/dates"
+import { formatShort } from "@/i18n/dates"
 import type { CompetitionInstance } from "@/engine/competition/types"
 import { competitionDef } from "@/engine/competition/defs"
 import { AWARDED_HOSTS } from "@/data/start"
 
+const { t } = useI18n()
 const world = useWorldStore()
 const filter = ref("all")
 
@@ -54,47 +56,38 @@ function hostOf(c: CompetitionInstance): string | undefined {
   if (!id) return undefined
   return world.world?.state.competitions[id]?.hosts[0] ?? AWARDED_HOSTS[id]?.[0]
 }
-
-const kindLabel: Record<string, string> = {
-  "world-cup": "World Cup",
-  continental: "Championship",
-  qualifier: "Qualifying",
-  "nations-league": "Nations League",
-  regional: "Regional",
-  "super-cup": "Super cup",
-}
 </script>
 
 <template>
-  <PageShell title="Competitions">
+  <PageShell :title="t('competitions.title')">
     <div class="links">
       <AppButton variant="tonal" @click="$router.push('/rankings')">
         <ListOrdered :size="16" />
-        Ranking
+        {{ t("competitions.list.ranking") }}
       </AppButton>
       <AppButton variant="tonal" @click="$router.push('/calendar')">
         <CalendarDays :size="16" />
-        Calendar
+        {{ t("competitions.list.calendar") }}
       </AppButton>
       <AppButton variant="tonal" @click="$router.push('/honours')">
         <Medal :size="16" />
-        Honours
+        {{ t("competitions.list.honours") }}
       </AppButton>
     </div>
 
     <template v-if="mine.length">
-      <AppSectionHeader title="Your competitions" />
+      <AppSectionHeader :title="t('competitions.list.yours')" />
       <RouterLink v-for="c in mine" :key="c.id" :to="`/competitions/${c.id}`" class="comp">
         <AppCard padding="md" interactive>
           <div class="comp-row">
             <div class="comp-text">
-              <div class="comp-name">{{ c.name }}</div>
+              <div class="comp-name">{{ $comp(c) }}</div>
               <div class="muted">
                 {{ formatShort(c.start) }} – {{ formatShort(c.end) }} {{ c.end.slice(0, 4) }}
               </div>
             </div>
             <AppChip :variant="c.status === 'active' ? 'live' : 'neutral'">
-              {{ c.status === "active" ? "Live" : "Soon" }}
+              {{ c.status === "active" ? t("common.live") : t("competitions.list.soon") }}
             </AppChip>
           </div>
         </AppCard>
@@ -106,7 +99,7 @@ const kindLabel: Record<string, string> = {
       :options="
         ['all', 'FIFA', 'UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'].map((v) => ({
           value: v,
-          label: v === 'all' ? 'All' : v,
+          label: v === 'all' ? t('common.all') : v,
         }))
       "
       @update:model-value="(v) => (filter = v)"
@@ -114,9 +107,9 @@ const kindLabel: Record<string, string> = {
 
     <template
       v-for="[title, list] in [
-        ['In progress', active],
-        ['Coming up', upcoming],
-        ['Finished', finished],
+        [t('competitions.list.inProgress'), active],
+        [t('competitions.list.comingUp'), upcoming],
+        [t('competitions.list.finished'), finished],
       ] as const"
       :key="title"
     >
@@ -125,9 +118,10 @@ const kindLabel: Record<string, string> = {
         <div class="list">
           <RouterLink v-for="c in list" :key="c.id" :to="`/competitions/${c.id}`" class="row">
             <div class="row-text">
-              <div class="row-name">{{ c.name }}</div>
+              <div class="row-name">{{ $comp(c) }}</div>
               <div class="muted">
-                {{ kindLabel[c.kind] }} · {{ formatShort(c.start) }} {{ c.start.slice(0, 4) }}
+                {{ t(`competitions.list.kind.${c.kind}`) }} · {{ formatShort(c.start) }}
+                {{ c.start.slice(0, 4) }}
               </div>
             </div>
             <NationFlag v-if="c.outcome.winner" :id="c.outcome.winner" :size="22" />

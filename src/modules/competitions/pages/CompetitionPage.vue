@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { FixtureRow, StandingsTable } from "@/modules/competitions/components/tables"
+import { compName, stageLabel } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { competitionDef } from "@/engine/competition/defs"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import type { Fixture, StageState, Tie } from "@/engine/competition/types"
 import { bestPlaced, groupView } from "@/modules/competitions/utils/groupView"
 import { AWARDED_HOSTS } from "@/data/start"
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const world = useWorldStore()
@@ -20,7 +23,7 @@ const inst = world.derive((w) => w.state.competitions[String(route.params.id)] ?
 /** "FIFA World Cup 2030" for "wc-2030", whether or not the edition exists yet. */
 function editionName(id: string) {
   const dash = id.lastIndexOf("-")
-  return competitionDef(id.slice(0, dash)).name(Number(id.slice(dash + 1)))
+  return compName({ defId: id.slice(0, dash), year: Number(id.slice(dash + 1)) })
 }
 
 /** The finals a qualifying competition leads to, with its hosts. */
@@ -37,7 +40,7 @@ const qualifying = world.derive(
   (w) =>
     Object.values(w.state.competitions)
       .filter((c) => competitionDef(c.defId).finals?.(c.year) === String(route.params.id))
-      .map((c) => ({ id: c.id, short: c.short })),
+      .map((c) => ({ id: c.id, short: compName(c, "short") })),
   [] as { id: string; short: string }[]
 )
 
@@ -105,26 +108,26 @@ const groupFixtures = (ids: string[]) =>
 const openGroup = ref<string | null>(null)
 
 /** Who goes through a decided tie, and on what: "BRA advance · 3–2 on aggregate". */
-function advance(t: Tie) {
-  if (!t.winner || !t.home || !t.away) return null
-  const played = t.fixtures.map(fx).filter((f): f is Fixture => !!f?.result)
+function advance(tie: Tie) {
+  if (!tie.winner || !tie.home || !tie.away) return null
+  const played = tie.fixtures.map(fx).filter((f): f is Fixture => !!f?.result)
   if (!played.length) return null
   const goals = (team: string) =>
     played.reduce((n, f) => n + (f.home === team ? f.result!.h : f.result!.a), 0)
-  const loser = t.winner === t.home ? t.away : t.home
+  const loser = tie.winner === tie.home ? tie.away : tie.home
   const last = played[played.length - 1]
-  const level = goals(t.winner) === goals(loser)
+  const level = goals(tie.winner) === goals(loser)
   const how = level
     ? last.result!.pens
-      ? "on penalties"
+      ? t("competitions.detail.onPenalties")
       : ""
-    : t.fixtures.length > 1
-      ? "on aggregate"
+    : tie.fixtures.length > 1
+      ? t("competitions.detail.onAggregate")
       : last.result!.ft
-        ? "after extra time"
+        ? t("competitions.detail.afterExtraTime")
         : ""
-  const score = t.fixtures.length > 1 ? `${goals(t.winner)}–${goals(loser)} ` : ""
-  return { team: t.winner, text: `${score}${how}`.trim() }
+  const score = tie.fixtures.length > 1 ? `${goals(tie.winner)}–${goals(loser)} ` : ""
+  return { team: tie.winner, text: `${score}${how}`.trim() }
 }
 </script>
 
@@ -132,7 +135,7 @@ function advance(t: Tie) {
   <PageShell
     v-if="inst"
     back
-    :title="inst.name"
+    :title="$comp(inst)"
     :subtitle="`${formatDate(inst.start)} – ${formatDate(inst.end)}`"
   >
     <AppCard
@@ -141,20 +144,26 @@ function advance(t: Tie) {
       class="meta"
     >
       <div v-if="hosts.length" class="meta-row wrap">
-        <span class="muted">{{ inst.hosts.length ? "Hosts" : "Finals hosts" }}</span>
+        <span class="muted">
+          {{
+            inst.hosts.length
+              ? t("competitions.detail.hosts")
+              : t("competitions.detail.finalsHosts")
+          }}
+        </span>
         <span class="hosts">
           <NationFlag v-for="h in hosts" :id="h" :key="h" :size="20" name="short" link />
         </span>
       </div>
       <div v-if="finals" class="meta-row">
-        <span class="muted">Qualifying for</span>
+        <span class="muted">{{ t("competitions.detail.qualifyingFor") }}</span>
         <RouterLink v-if="finals.exists" :to="`/competitions/${finals.id}`" class="link">
           {{ finals.name }}
         </RouterLink>
         <span v-else>{{ finals.name }}</span>
       </div>
       <div v-if="qualifying.length" class="meta-row wrap">
-        <span class="muted">Qualifying</span>
+        <span class="muted">{{ t("competitions.detail.qualifying") }}</span>
         <span class="hosts">
           <RouterLink
             v-for="q in qualifying"
@@ -167,11 +176,11 @@ function advance(t: Tie) {
         </span>
       </div>
       <div v-if="inst.outcome.winner" class="meta-row">
-        <span class="muted">Champions</span>
+        <span class="muted">{{ t("competitions.detail.champions") }}</span>
         <NationFlag :id="inst.outcome.winner" :size="22" name link />
       </div>
       <div v-if="inst.outcome.qualified?.length" class="meta-row wrap">
-        <span class="muted">Qualified</span>
+        <span class="muted">{{ t("competitions.detail.qualified") }}</span>
         <span class="hosts">
           <NationFlag
             v-for="q in inst.outcome.qualified"
@@ -188,7 +197,7 @@ function advance(t: Tie) {
     <AppSubTabBar
       v-if="inst.stages.length > 1"
       :model-value="stageKey"
-      :options="inst.stages.map((s) => ({ value: s.key, label: s.name }))"
+      :options="inst.stages.map((s) => ({ value: s.key, label: stageLabel(s.name) }))"
       size="sm"
       @update:model-value="(v) => (stageKey = v)"
     />
@@ -202,41 +211,49 @@ function advance(t: Tie) {
       variant="tonal"
       @click="router.push(`/draw/${inst.id}/${stage.key}`)"
     >
-      Watch the draw
+      {{ t("competitions.detail.watchDraw") }}
     </AppButton>
 
     <AppEmptyState
       v-if="!stage || stage.status === 'waiting'"
-      title="Not drawn yet"
-      :description="plan ? `The draw is on ${formatDate(plan.drawDate)}.` : ''"
+      :title="t('competitions.detail.notDrawn')"
+      :description="
+        plan ? t('competitions.detail.drawOn', { date: formatDate(plan.drawDate) }) : ''
+      "
     />
 
     <template v-else-if="stage.groups">
       <StandingsTable
         v-if="best"
         :rows="best.rows"
-        :title="best.title"
+        :title="t(best.title)"
         :cut="best.places"
         :hosts="hosts"
         class="best"
       />
-      <div v-for="t in tables" :key="t.group.name" class="group">
+      <div v-for="tb in tables" :key="tb.group.name" class="group">
         <StandingsTable
-          :rows="t.rows"
-          :title="t.group.name.length <= 2 ? `Group ${t.group.name}` : t.group.name"
-          :zones="t.zones"
-          :outlook="t.outlook"
+          :rows="tb.rows"
+          :title="
+            tb.group.name.length <= 2 ? t('common.group', { name: tb.group.name }) : tb.group.name
+          "
+          :zones="tb.zones"
+          :outlook="tb.outlook"
           :hosts="hosts"
         />
         <button
           class="toggle"
-          @click="openGroup = openGroup === t.group.name ? null : t.group.name"
+          @click="openGroup = openGroup === tb.group.name ? null : tb.group.name"
         >
-          {{ openGroup === t.group.name ? "Hide matches" : "Show matches" }}
+          {{
+            openGroup === tb.group.name
+              ? t("competitions.detail.hide")
+              : t("competitions.detail.show")
+          }}
         </button>
-        <div v-if="openGroup === t.group.name" class="fixtures">
+        <div v-if="openGroup === tb.group.name" class="fixtures">
           <FixtureRow
-            v-for="f in groupFixtures(t.group.fixtures)"
+            v-for="f in groupFixtures(tb.group.fixtures)"
             :key="f.id"
             :fixture="f"
             show-date
@@ -247,24 +264,24 @@ function advance(t: Tie) {
 
     <template v-else-if="stage.rounds">
       <template v-for="r in stage.rounds" :key="r.name">
-        <AppSectionHeader v-if="r.ties.length" :title="r.name" />
+        <AppSectionHeader v-if="r.ties.length" :title="$stage(r.name)" />
         <div v-if="r.ties.length" class="fixtures">
-          <template v-for="t in r.ties" :key="t.id">
-            <FixtureRow v-for="id in t.fixtures" :key="id" :fixture="fx(id)!" show-date />
-            <div v-if="advance(t)" class="advance">
-              <NationFlag :id="advance(t)!.team" :size="16" name="short" />
-              advance
-              <span v-if="advance(t)!.text">· {{ advance(t)!.text }}</span>
+          <template v-for="tie in r.ties" :key="tie.id">
+            <FixtureRow v-for="id in tie.fixtures" :key="id" :fixture="fx(id)!" show-date />
+            <div v-if="advance(tie)" class="advance">
+              <NationFlag :id="advance(tie)!.team" :size="16" name="short" />
+              {{ t("competitions.detail.advance") }}
+              <span v-if="advance(tie)!.text">· {{ advance(tie)!.text }}</span>
             </div>
-            <div v-if="!t.fixtures.length && t.winner" class="bye">
-              <NationFlag :id="t.winner" :size="16" name />
-              · bye
+            <div v-if="!tie.fixtures.length && tie.winner" class="bye">
+              <NationFlag :id="tie.winner" :size="16" name />
+              · {{ t("competitions.detail.bye") }}
             </div>
           </template>
         </div>
       </template>
       <template v-if="stage.thirdPlace">
-        <AppSectionHeader title="Third place" />
+        <AppSectionHeader :title="t('competitions.detail.thirdPlace')" />
         <div class="fixtures">
           <FixtureRow
             v-for="id in stage.thirdPlace.fixtures"
@@ -276,8 +293,8 @@ function advance(t: Tie) {
       </template>
     </template>
   </PageShell>
-  <PageShell v-else back title="Competition">
-    <AppEmptyState title="Not found" />
+  <PageShell v-else back :title="t('competitions.detail.title')">
+    <AppEmptyState :title="t('competitions.detail.notFound')" />
   </PageShell>
 </template>
 

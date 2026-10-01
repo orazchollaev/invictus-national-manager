@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { AppButton, AppSheet } from "@/components/ui"
 import { StatPill } from "@/modules/core/components"
 import type { LivePlayer, LiveSide } from "@/engine/match/engine"
@@ -14,6 +15,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ close: []; sub: [outId: string, inId: string] }>()
+
+const { t } = useI18n()
 
 const outId = ref<string | null>(props.forceOut ?? null)
 const left = computed(() => props.maxSubs - props.side.subsUsed)
@@ -42,25 +45,25 @@ function pick(inId: string) {
 
 <template>
   <AppSheet
-    :title="outId ? 'Who comes on?' : 'Who comes off?'"
-    :subtitle="`${left} substitution${left === 1 ? '' : 's'} left`"
+    :title="outId ? t('match.sub.whoOn') : t('match.sub.whoOff')"
+    :subtitle="t('match.sub.left', { n: left }, left)"
     max-height="85dvh"
     max-height-mobile="85dvh"
     @close="emit('close')"
   >
     <div class="body">
-      <p v-if="!outId" class="hint">Pick the player to take off</p>
+      <p v-if="!outId" class="hint">{{ t("match.sub.pickOff") }}</p>
       <p v-else class="hint hint--off">
         <span class="off">▼ {{ name(outId) }}</span>
-        <span>Who comes on in his place?</span>
+        <span>{{ t("match.sub.onInPlace") }}</span>
       </p>
       <div v-if="!outId" class="list">
         <button v-for="p in side.pitch" :key="p.id" class="row" @click="outId = p.id">
           <span class="role">{{ p.slot }}</span>
           <span class="name">
             {{ name(p.id) }}
-            <span v-if="p.injured" class="hurt">· injured</span>
-            <span v-if="p.yellow" class="booked">· booked</span>
+            <span v-if="p.injured" class="hurt">{{ t("match.sub.injured") }}</span>
+            <span v-if="p.yellow" class="booked">{{ t("match.sub.booked") }}</span>
           </span>
           <StatPill :value="`${Math.round(p.stamina)}%`" :tone="staminaTone(p.stamina)" wide />
         </button>
@@ -84,7 +87,7 @@ function pick(inId: string) {
             "
           />
         </button>
-        <AppButton variant="text" @click="outId = null">Back</AppButton>
+        <AppButton variant="text" @click="outId = null">{{ t("common.back") }}</AppButton>
       </div>
     </div>
   </AppSheet>

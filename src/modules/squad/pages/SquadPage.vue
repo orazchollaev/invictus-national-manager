@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { ClipboardList, Sprout, Users } from "@lucide/vue"
 import { AppButton, AppEmptyState, AppSearchInput, AppSubTabBar } from "@/components/ui"
@@ -9,6 +10,7 @@ import { useWorldStore } from "@/modules/world/store"
 import { positionGroup, ageOn } from "@/engine/players/ability"
 import type { Player } from "@/engine/types"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 
@@ -57,40 +59,40 @@ const list = computed(() => {
 
 <template>
   <PageShell
-    title="Squad"
-    :subtitle="me ? `${squad.length} called up · ${pool.length} eligible players` : ''"
+    :title="t('squad.title')"
+    :subtitle="me ? t('squad.subtitle', { squad: squad.length, pool: pool.length }) : ''"
   >
     <template #actions>
       <AppButton
         v-if="me"
         variant="tonal"
-        aria-label="Prospects"
+        :aria-label="t('squad.prospects')"
         @click="router.push('/squad/prospects')"
       >
         <Sprout :size="16" />
       </AppButton>
       <AppButton variant="tonal" @click="router.push('/squad/tactics')">
         <ClipboardList :size="16" />
-        Tactics
+        {{ t("squad.tacticsBtn") }}
       </AppButton>
     </template>
 
     <AppEmptyState
       v-if="!me"
       :icon="Users"
-      title="No team"
-      description="You are not managing a nation right now."
+      :title="t('squad.noTeam')"
+      :description="t('squad.noTeamHint')"
     />
 
     <template v-else>
       <AppButton v-if="pending" variant="filled" block @click="router.push('/squad/callup')">
-        Name your squad
+        {{ t("squad.nameSquad") }}
       </AppButton>
       <AppSubTabBar
         :model-value="tab"
         :options="[
-          { value: 'squad', label: 'Current squad' },
-          { value: 'pool', label: 'All players' },
+          { value: 'squad', label: t('squad.currentSquad') },
+          { value: 'pool', label: t('squad.allPlayers') },
         ]"
         size="sm"
         @update:model-value="(v) => (tab = v as 'squad' | 'pool')"
@@ -98,35 +100,35 @@ const list = computed(() => {
       <AppSearchInput
         v-if="tab === 'pool'"
         v-model="query"
-        placeholder="Search players"
+        :placeholder="t('squad.searchPlayers')"
         size="sm"
       />
       <div class="filters">
         <AppSubTabBar
           :model-value="group"
           :options="[
-            { value: 'all', label: 'All' },
-            { value: 'GK', label: 'GK' },
-            { value: 'DEF', label: 'DEF' },
-            { value: 'MID', label: 'MID' },
-            { value: 'FWD', label: 'FWD' },
+            { value: 'all', label: t('common.all') },
+            { value: 'GK', label: t('squad.pos.GK') },
+            { value: 'DEF', label: t('squad.pos.DEF') },
+            { value: 'MID', label: t('squad.pos.MID') },
+            { value: 'FWD', label: t('squad.pos.FWD') },
           ]"
           @update:model-value="(v) => (group = v)"
         />
         <select v-model="sort" class="sort">
-          <option value="position">Position</option>
-          <option value="ability">Ability</option>
-          <option value="form">Form</option>
-          <option value="age">Age</option>
-          <option value="caps">Caps</option>
+          <option value="position">{{ t("squad.sort.position") }}</option>
+          <option value="ability">{{ t("squad.sort.ability") }}</option>
+          <option value="form">{{ t("squad.sort.form") }}</option>
+          <option value="age">{{ t("squad.sort.age") }}</option>
+          <option value="caps">{{ t("squad.sort.caps") }}</option>
         </select>
       </div>
 
       <AppEmptyState
         v-if="!list.length"
         :icon="Users"
-        :title="tab === 'squad' ? 'No squad named yet' : 'No players'"
-        :description="tab === 'squad' ? 'You name a squad before each international window.' : ''"
+        :title="tab === 'squad' ? t('squad.noSquad') : t('squad.noPlayers')"
+        :description="tab === 'squad' ? t('squad.noSquadHint') : ''"
       />
       <div v-else class="list">
         <PlayerRow v-for="p in list" :key="p.id" :player="p" />

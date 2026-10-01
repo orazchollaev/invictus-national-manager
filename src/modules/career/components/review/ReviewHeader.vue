@@ -1,49 +1,50 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import type { CareerReview } from "@/engine/world/types"
 import { NationFlag } from "@/modules/nations/components/badge"
-import { useWorldStore } from "@/modules/world/store"
-import { verdictLabel, verdictTone } from "@/modules/career/utils/verdict"
+import { nationName } from "@/i18n/text"
+import { verdictKey, verdictTone } from "@/modules/career/utils/verdict"
 
 const props = defineProps<{ review: CareerReview }>()
 
-const world = useWorldStore()
+const { t } = useI18n()
 const champion = computed(() =>
   props.review.winner && props.review.winner !== props.review.nationId
-    ? world.world?.def(props.review.winner).name
+    ? nationName(props.review.winner)
     : null
 )
 </script>
 
 <template>
   <section class="head" :style="{ '--verdict': verdictTone(review.verdict) }">
-    <span class="verdict">{{ verdictLabel(review.verdict) }}</span>
+    <span class="verdict">{{ t(verdictKey(review.verdict)) }}</span>
     <NationFlag :id="review.nationId" :size="56" />
-    <div class="comp">{{ review.name }}</div>
-    <div class="reached">{{ review.reached }}</div>
+    <div class="comp">{{ $tx(review.name) }}</div>
+    <div class="reached">{{ $tx(review.reached) }}</div>
     <div class="record">
       <span>
         <strong>{{ review.played }}</strong>
-        P
+        {{ t("career.review.p") }}
       </span>
       <span>
         <strong>{{ review.won }}</strong>
-        W
+        {{ t("career.review.w") }}
       </span>
       <span>
         <strong>{{ review.drawn }}</strong>
-        D
+        {{ t("career.review.d") }}
       </span>
       <span>
         <strong>{{ review.lost }}</strong>
-        L
+        {{ t("career.review.l") }}
       </span>
       <span>
         <strong>{{ review.gf }}–{{ review.ga }}</strong>
-        goals
+        {{ t("career.review.goals") }}
       </span>
     </div>
-    <div v-if="champion" class="champion">Won by {{ champion }}</div>
+    <div v-if="champion" class="champion">{{ t("career.review.wonBy", { name: champion }) }}</div>
   </section>
 </template>
 

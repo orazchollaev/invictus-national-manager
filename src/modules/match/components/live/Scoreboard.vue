@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n"
 import { NationFlag } from "@/modules/nations/components/badge"
 
 defineProps<{
@@ -10,6 +11,8 @@ defineProps<{
   pens?: [number, number]
   aggregate?: [number, number]
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -32,8 +35,10 @@ defineProps<{
     </div>
     <div class="board-clock">
       {{ clock }}
-      <template v-if="pens">· Pens {{ pens[0] }}–{{ pens[1] }}</template>
-      <template v-if="aggregate">· Agg {{ aggregate[0] }}–{{ aggregate[1] }}</template>
+      <template v-if="pens">· {{ t("match.pens", { a: pens[0], b: pens[1] }) }}</template>
+      <template v-if="aggregate">
+        · {{ t("match.agg", { a: aggregate[0], b: aggregate[1] }) }}
+      </template>
     </div>
   </div>
 </template>

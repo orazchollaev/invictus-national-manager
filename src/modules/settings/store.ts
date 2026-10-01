@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { ref, watch } from "vue"
+import { setLocale, type Locale } from "@/i18n"
 
 export type Theme = "light" | "dark"
 /** Platform look: shape, elevation, type scale and neutrals — never the accent. */
@@ -13,6 +14,7 @@ export type AutoSave = "always" | "weekly" | "monthly" | "off"
 
 export const useSettingsStore = defineStore("settings", () => {
   const theme = ref<Theme>("dark")
+  const locale = ref<Locale>("en")
   const designLanguage = ref<DesignLanguage>("ios")
   const liveMatchSpeed = ref<LiveMatchSpeed>(2)
   const advanceStep = ref<AdvanceStep>(1)
@@ -39,6 +41,8 @@ export const useSettingsStore = defineStore("settings", () => {
     { immediate: true }
   )
 
+  watch(locale, (val) => setLocale(val), { immediate: true })
+
   watch(
     theme,
     (val) => {
@@ -57,6 +61,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
   function resetAll() {
     theme.value = "dark"
+    locale.value = "en"
     designLanguage.value = "ios"
     liveMatchSpeed.value = 2
     advanceStep.value = 1
@@ -71,6 +76,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
   return {
     theme,
+    locale,
     designLanguage,
     liveMatchSpeed,
     advanceStep,

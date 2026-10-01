@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { Settings } from "@lucide/vue"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import { flagUrl } from "@/lib/flags"
 
+const { t } = useI18n()
 const world = useWorldStore()
 const nation = world.derive(
   (w) => (w.state.career.nationId ? w.def(w.state.career.nationId) : null),
@@ -18,11 +20,11 @@ const date = computed(() => (world.date ? formatDate(world.date) : ""))
     <div class="header-inner">
       <RouterLink to="/home" class="brand">
         <img v-if="nation" :src="flagUrl(nation.flag)" alt="" class="brand-flag" />
-        <span class="brand-name">{{ nation?.name ?? "Invictus" }}</span>
+        <span class="brand-name">{{ nation ? $nation(nation.id) : t("app.name") }}</span>
       </RouterLink>
       <div class="header-end">
         <span v-if="date" class="header-date">{{ date }}</span>
-        <RouterLink to="/settings" class="settings-btn" aria-label="Settings">
+        <RouterLink to="/settings" class="settings-btn" :aria-label="t('nav.settings')">
           <Settings :size="18" />
         </RouterLink>
       </div>
