@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.0.3](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.2...v0.0.3) (2026-09-30)
+
+### 🚀 New Features
+
+- **career:** board meetings, competition reviews, final warnings, contracts and milestones ([478359f](https://github.com/orazchollaev/invictus-national-manager/commit/478359f526b56b41ed504a2816c702f0789ccfe3))
+- **career:** reputation grows steadily and losses are softened ([05c7309](https://github.com/orazchollaev/invictus-national-manager/commit/05c73091e45c2609568958f0520d6f112c17c487))
+- **career:** review, farewell and career pages ([1d5da91](https://github.com/orazchollaev/invictus-national-manager/commit/1d5da919b83b10ae53587536438343ae73880351))
+- **career:** start out of work with a chosen reputation and flags in the nationality picker ([ba2c82b](https://github.com/orazchollaev/invictus-national-manager/commit/ba2c82b026490f94241218d65980902f9c00023e))
+- **core:** board meeting, youth intake and final warning popups ([fe67149](https://github.com/orazchollaev/invictus-national-manager/commit/fe6714935dded943d9d477f85c914b42a3387914))
+- **match:** give the user's nation a small edge in matches ([3d15135](https://github.com/orazchollaev/invictus-national-manager/commit/3d15135c1b9298f2b2fecdfe16593c33052a5e87))
+- **players:** international minutes speed up development and attract bigger clubs ([e550d45](https://github.com/orazchollaev/invictus-national-manager/commit/e550d4505fcef50d2d57c0175e7f106b8b2f3345))
+- **squad:** prospects page with watchlist ([1513216](https://github.com/orazchollaev/invictus-national-manager/commit/1513216496d08e490fc3a6cdf43c100f690fae1c))
+- **squad:** show injury and suspension badges on the pitch ([90dc252](https://github.com/orazchollaev/invictus-national-manager/commit/90dc25296c0229bfb109b11b8de7a265c3048634))
+
+### 🐛 Bug Fixes
+
+- **android:** mirror real window insets onto CSS safe-area vars ([d6a0c3d](https://github.com/orazchollaev/invictus-national-manager/commit/d6a0c3dde1b56a0e3418d15e6db0b62a77d609c9))
+- **engine:** stop repeat call-up prompts and unresolved play-off slots ([6439ba8](https://github.com/orazchollaev/invictus-national-manager/commit/6439ba8b2a37c5290c9b278b4e577419932ace3c))
+- **match:** block early kick-offs and incomplete starting elevens ([d53c983](https://github.com/orazchollaev/invictus-national-manager/commit/d53c983e843871c06da3d851805cb5c04909cc49))
+- **squad:** allow suspended players in call-ups ([5bedc8c](https://github.com/orazchollaev/invictus-national-manager/commit/5bedc8cc550af9e3f04a4f02f09374e009a3ac4e))
+- **ui:** remove page and navigation transitions ([b1cb23e](https://github.com/orazchollaev/invictus-national-manager/commit/b1cb23e0e7b1938d67a78ae0cf7995aa07711e82))
+
+### 🔧 Maintenance
+
+- build bugs fixed ([680207d](https://github.com/orazchollaev/invictus-national-manager/commit/680207dd607f437c2207290682e42346719beb1d))
+- **gradle:** bump gradle version ([5e7f30c](https://github.com/orazchollaev/invictus-national-manager/commit/5e7f30caecd1bf12d25bfad8bc0a92d01a6e825c))
+- **release:** bump versionCode/versionName to 2 / 0.0.2 ([fca8c98](https://github.com/orazchollaev/invictus-national-manager/commit/fca8c98a72ccb43a5c29b1b20ea263f38e7dcdfe))
+
 ## [0.0.2](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.1...v0.0.2) (2026-09-28)
 
 ### 🚀 New Features

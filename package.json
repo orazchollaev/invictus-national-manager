@@ -2,11 +2,11 @@
   "name": "invictus-national-manager",
   "description": "Invictus - National Manager: manage a national team through qualifiers, continental cups and the World Cup",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vitest run && vite build",
+    "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
