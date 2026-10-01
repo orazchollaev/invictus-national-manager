@@ -8,6 +8,7 @@
 import type { Club, Confed, ISODate, NationDef, Player } from "../types"
 import type { CompContext } from "../competition/runtime"
 import { advanceCompetition, createInstance } from "../competition/runtime"
+import { advancedFrom, stagesAfter } from "../competition/advance"
 import { COMPETITION_DEFS, competitionDef } from "../competition/defs"
 import type {
   CompactResult,
@@ -217,6 +218,22 @@ export class World {
 
   // ── Competition context ───────────────────────────────────────────────────
 
+  /**
+   * The confederations a place still to be decided can turn out to be. An
+   * inter-confederation play-off winner is one of the three teams on its side of
+   * the bracket, so a draw keeps only those confederations out of its group.
+   */
+  private placeholderConfeds(id: string): Confed[] {
+    const { compId, defId, slot } = parsePlaceholder(id)
+    if (defId !== "wcq-ic") return [placeholderConfed(id) as Confed]
+    const ties =
+      this.state.competitions[compId]?.stages[0]?.rounds?.[0]?.ties.slice(slot * 2, slot * 2 + 2) ??
+      []
+    const teams = ties.flatMap((t) => [t.home, t.away]).filter((t): t is string => !!t)
+    const confeds = [...new Set(teams.map((t) => this.def(t)?.confed).filter(Boolean))] as Confed[]
+    return confeds.length ? confeds : ["PLAYOFF" as Confed]
+  }
+
   ctx(): CompContext {
     const s = this.state
     return {
@@ -224,6 +241,8 @@ export class World {
       seed: s.seed,
       confedOf: (t) =>
         isPlaceholder(t) ? (placeholderConfed(t) as Confed) : (this.def(t)?.confed ?? "UEFA"),
+      confedsOf: (t) =>
+        isPlaceholder(t) ? this.placeholderConfeds(t) : [this.def(t)?.confed ?? "UEFA"],
       subFeds: (t) => this.def(t)?.subFeds ?? [],
       points: (t) => s.nations[t]?.points ?? 0,
       ranked: (filter) =>
@@ -304,11 +323,133 @@ export class World {
       if (onlyId && inst.id !== onlyId) continue
       const def = competitionDef(inst.defId)
       const wasDrawn = inst.stages.map((s) => s.status)
+      const progress = this.progressMark(inst)
       advanceCompetition(inst, def, ctx)
+      this.announceProgress(inst, progress, ctx)
       inst.stages.forEach((s, i) => {
         if (wasDrawn[i] === "waiting" && s.status !== "waiting") this.onDraw(inst.id, s.key)
       })
       if ((inst.status as string) === "done") this.onCompetitionDone(inst.id)
+    }
+  }
+
+  /** Which stages are over and which ties decided, to tell what changed afterwards. */
+  private progressMark(inst: CompetitionInstance) {
+    const stages = new Set(inst.stages.filter((s) => s.status === "done").map((s) => s.key))
+    const ties = new Set<string>()
+    for (const s of inst.stages)
+      for (const t of [
+        ...(s.rounds ?? []).flatMap((r) => r.ties),
+        ...(s.thirdPlace ? [s.thirdPlace] : []),
+      ])
+        if (t.winner) ties.add(t.id)
+    return { stages, ties }
+  }
+
+  /**
+   * Tells the manager how his team's competition just went: through a group stage or
+   * a tie, out of it, or — when qualifying ends — in or out of the finals.
+   */
+  private announceProgress(
+    inst: CompetitionInstance,
+    before: { stages: Set<string>; ties: Set<string> },
+    ctx: CompContext
+  ) {
+    const me = this.userNation
+    if (!me) return
+    const link = `/competitions/${inst.id}`
+    const comp = inst.name
+    for (const stage of inst.stages) {
+      // A group stage that has just ended.
+      if (stage.kind === "groups" && stage.status === "done" && !before.stages.has(stage.key)) {
+        const group = stage.groups?.find((g) => g.teams.includes(me))
+        if (!group || inst.status === "done") continue
+        const went = advancedFrom(inst, stage, ctx)
+        if (!went) continue
+        const next = stagesAfter(inst, stage, ctx).find((s) => s.status !== "waiting")
+        const name = next?.rounds?.[0]?.name ?? next?.name
+        if (went.has(me))
+          this.news(
+            "tournament",
+            `${comp}: through`,
+            `We are through${name ? ` to the ${name}` : ""}.`,
+            true,
+            link
+          )
+        else
+          this.news(
+            "tournament",
+            `${comp}: out`,
+            `We finished ${group.name.length <= 2 ? `Group ${group.name}` : group.name} without going through.`,
+            true,
+            link
+          )
+      }
+      // Ties that have just been decided.
+      for (const [r, round] of (stage.rounds ?? []).entries()) {
+        for (const tie of round.ties) {
+          if (!tie.winner || before.ties.has(tie.id) || !tie.home || !tie.away) continue
+          if (tie.home !== me && tie.away !== me) continue
+          if (tie.winner === me) {
+            const nextRound = stage.rounds?.[r + 1]?.name
+            if (nextRound)
+              this.news(
+                "tournament",
+                `${comp}: through`,
+                `We are through to the ${nextRound}.`,
+                true,
+                link
+              )
+          } else if (round.name === "Final") {
+            this.news("tournament", `${comp}: runners-up`, "We lost the final.", true, link)
+          } else {
+            this.news(
+              "tournament",
+              `${comp}: out`,
+              `We have been knocked out in the ${round.name.toLowerCase()}.`,
+              true,
+              link
+            )
+          }
+        }
+      }
+    }
+    // Qualifying over: the finals, the play-off, or not this time.
+    if (inst.status === "done" && inst.kind === "qualifier") {
+      const took = inst.stages.some(
+        (s) =>
+          s.groups?.some((g) => g.teams.includes(me)) ||
+          s.rounds?.[0]?.ties.some((t) => t.home === me || t.away === me)
+      )
+      if (!took) return
+      const finals = competitionDef(inst.defId).finals?.(inst.year)
+      const finalsName = finals
+        ? competitionDef(finals.slice(0, finals.lastIndexOf("-"))).name(inst.year)
+        : "the finals"
+      if (inst.outcome.qualified?.includes(me))
+        this.news(
+          "tournament",
+          `Qualified for ${finalsName}`,
+          `We have earned a place at ${finalsName}.`,
+          true,
+          link
+        )
+      else if (inst.outcome.interconf?.includes(me))
+        this.news(
+          "tournament",
+          "Into the play-off",
+          `We have reached the inter-confederation play-off for ${finalsName}.`,
+          true,
+          link
+        )
+      else
+        this.news(
+          "tournament",
+          "Did not qualify",
+          `We have missed out on ${finalsName}.`,
+          true,
+          link
+        )
     }
   }
 

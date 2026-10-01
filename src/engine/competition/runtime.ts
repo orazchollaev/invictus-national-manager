@@ -8,6 +8,7 @@ import type { HostLevel } from "../world/stadiums"
 import { addDays } from "../calendar/dates"
 import { makeRng, deriveSeed, shuffle } from "../rng"
 import { drawGroups, roundRobin, seedBracket, bracketOrder } from "./draw"
+import { isPlaceholder } from "./placeholders"
 import { groupStandings, type Tiebreak } from "./tables"
 import type {
   CompetitionInstance,
@@ -24,6 +25,8 @@ export interface CompContext {
   date: ISODate
   seed: number
   confedOf(team: string): Confed
+  /** Every confederation a team is or — for a place still to be decided — may turn out to be. */
+  confedsOf(team: string): Confed[]
   subFeds(team: string): string[]
   points(team: string): number
   /** Nations allowed to enter competitions (not suspended), best ranked first. */
@@ -221,10 +224,11 @@ function drawGroupStage(
     gp.fixed ??
     drawGroups(entrants, gp.count, rng, {
       fixed: gp.seeded?.filter((t) => entrants.includes(t)),
-      family: gp.spreadConfeds
-        ? ctx.confedOf
+      open: isPlaceholder,
+      families: gp.spreadConfeds
+        ? ctx.confedsOf
         : gp.separate?.length
-          ? (t) => (gp.separate!.includes(t) ? "separate" : t)
+          ? (t) => [gp.separate!.includes(t) ? "separate" : t]
           : undefined,
       maxPerFamily: (c) => (c === "UEFA" ? 2 : 1),
     })
