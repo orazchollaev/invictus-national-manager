@@ -259,6 +259,8 @@ export interface MatchState {
   pens?: [number, number]
   /** Injured players on the managed side waiting for the manager to act. */
   pendingInjuries: string[]
+  /** Who has the ball, the lane they work and how far up the pitch (3 is in the box), for the live view. */
+  ball: { side: Side; lane: Lane; depth: 1 | 2 | 3 }
 }
 
 // ── Setup ───────────────────────────────────────────────────────────────────
@@ -390,6 +392,7 @@ export function createMatch(setup: MatchSetup): MatchState {
     away: buildSide(setup.away, setup, rng),
     events: [],
     pendingInjuries: [],
+    ball: { side: "home", lane: "centre", depth: 1 },
   }
   state.events.push({ minute: 0, kind: "kickoff", side: null })
   return state
@@ -653,6 +656,11 @@ function playMinute(state: MatchState, out: MatchEvent[]) {
   const defSide = sideOf(state, other(attacking))
 
   const edge = Math.tanh((att.att - def.def) / 22)
+  state.ball = {
+    side: attacking,
+    lane: state.ball.side === attacking ? state.ball.lane : "centre",
+    depth: edge > 0.3 ? 3 : edge > -0.15 ? 2 : 1,
+  }
   const pAttack =
     ATTACK_BASE *
     (1 + 0.5 * edge) *
@@ -736,6 +744,8 @@ function attack(state: MatchState, out: MatchEvent[], s: Side, edge: number, gkA
   }
 
   const lane = pickLane(state, side, opp)
+  state.ball.lane = lane
+  state.ball.depth = 3
 
   if (rng() < BREAKDOWN * (1 - 0.3 * edge)) {
     const carrier = choose(

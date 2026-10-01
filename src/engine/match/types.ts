@@ -109,7 +109,7 @@ export interface MatchEvent {
   kind: MatchEventKind
   side: Side | null
   playerId?: string
-  /** Assist provider, fouled player, player coming on, or the keeper who saved. */
+  /** Assist provider, fouled player, player going off (on a sub), or the keeper who saved. */
   otherId?: string
   xg?: number
   /** Where the attack came from, on attacks, shots and offsides. */
