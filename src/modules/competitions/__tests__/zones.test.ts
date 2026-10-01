@@ -5,9 +5,8 @@ import playerRows from "@/data/players.json"
 import type { NationDef } from "@/engine/types"
 import { clubsFromRows, createWorld, type ClubRow, type PlayerRow } from "@/engine/world/create"
 import { competitionDef } from "@/engine/competition/defs"
-import { groupStandings } from "@/engine/competition/tables"
 import { AWARDED_HOSTS } from "@/data/start"
-import { zonesFor } from "../utils/zones"
+import { groupView } from "../utils/groupView"
 
 /**
  * The coloured markers on a table promise where a position leads. This plays four
@@ -29,7 +28,6 @@ describe("table zones match what actually happens", () => {
 
     for (const inst of Object.values(w.state.competitions)) {
       if (inst.status !== "done") continue
-      const plans = competitionDef(inst.defId).plan(inst, ctx)
       const groupStages = inst.stages.filter((s) => s.kind === "groups" && s.groups?.length)
 
       const knockout = new Set(
@@ -52,10 +50,10 @@ describe("table zones match what actually happens", () => {
       ])
       // Teams can also reach play-offs through the Nations League (UEFA), from any position.
       const playoffRoute = new Set(
-        (inst.stages.find((st) => st.key === "playoff")?.rounds?.[0]?.ties ?? []).flatMap((t) => [
-          t.home,
-          t.away,
-        ])
+        inst.stages
+          .filter((st) => st.key === "playoff" || st.key === "playin")
+          .flatMap((st) => st.rounds?.[0]?.ties ?? [])
+          .flatMap((t) => [t.home, t.away])
       )
       const tierOf = (t: string) =>
         Object.entries(inst.outcome.tiers ?? {}).find(([, list]) => list.includes(t))?.[0]
@@ -78,13 +76,12 @@ describe("table zones match what actually happens", () => {
       )
 
       for (const groupStage of groupStages) {
-        const rule = plans.find((p) => p.key === groupStage.key)?.groups?.tiebreak ?? "gd"
         const next = after(groupStage.key)
-        // Only the last group stage decides places; earlier ones lead on.
-        const final = groupStage === groupStages.at(-1)
+        // Only the last group stage decides places; earlier ones lead on. Europe's two
+        // leagues are played side by side and both decide places.
+        const final = groupStage === groupStages.at(-1) || ["l1", "l2"].includes(groupStage.key)
         for (const g of groupStage.groups!) {
-          const rows = groupStandings(g, ctx.fixture, rule, ctx.points)
-          const zones = zonesFor(inst, g.name, rows.length, ctx, groupStage.key)
+          const { rows, zones, outlook } = groupView(inst, groupStage, g, ctx)
           rows.forEach((r, pos) => {
             const zone = zones[pos]
             const where = `${inst.id} ${groupStage.key} ${g.name} #${pos + 1} ${r.team} (${zone ?? "none"})`
@@ -100,7 +97,16 @@ describe("table zones match what actually happens", () => {
                 problems.push(`${where}: not in the quarter-finals`)
               if (zone === null && now !== letter) problems.push(`${where}: moved to ${now}`)
             } else if (inst.kind === "qualifier") {
+              if (outlook[pos] === "eliminated" && (next.has(r.team) || qualified.has(r.team)))
+                problems.push(`${where}: marked out but went on`)
               if (hosts.has(r.team)) return
+              if (
+                outlook[pos] === "qualified" &&
+                !next.has(r.team) &&
+                !qualified.has(r.team) &&
+                final
+              )
+                problems.push(`${where}: marked through but did not`)
               if ((zone === "wc-ac" || zone === "next") && !next.has(r.team))
                 problems.push(`${where}: did not go on`)
               if (zone === "acq" && asianCupQ && !inAsianCupQ.has(r.team))
@@ -110,6 +116,9 @@ describe("table zones match what actually happens", () => {
                 problems.push(`${where}: did not qualify`)
               if (zone === null && qualified.has(r.team) && !playoffRoute.has(r.team))
                 problems.push(`${where}: qualified without a marker`)
+              // A direct place read as a play-off one (a host above shifts the places down).
+              if (zone === "playoff" && qualified.has(r.team) && !playoffRoute.has(r.team))
+                problems.push(`${where}: qualified directly but marked for the play-offs`)
             } else if (knockout.size) {
               if (zone === "advance" && !knockout.has(r.team))
                 problems.push(`${where}: did not reach the knockout stage`)

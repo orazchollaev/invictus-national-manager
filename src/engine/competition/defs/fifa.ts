@@ -396,7 +396,8 @@ export const wcqConcacaf: CompetitionDef = {
         drawDate: iso(y - 3, 7, 1),
         importance: "qualifier",
         entrants: (c, i) => {
-          const first = firstRound(c)
+          // The first round as drawn, not as the ranking would split it now.
+          const first = teamsIn(i, "r1")
           const list = [
             ...entrants(i, c).filter((t) => !first.includes(t)),
             ...knockoutResult(i, "r1").finalWinners,

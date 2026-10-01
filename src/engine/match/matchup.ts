@@ -89,8 +89,6 @@ export interface Rule {
   /** `att`: chances for the side on the ball; `mid`: who wins the ball in midfield. */
   layer: "att" | "mid"
   factor: number
-  /** The event in words, from the point of view of the side it helps or hurts. */
-  label: string
   /** `a` is the side the factor is applied to, `o` the other. */
   applies(a: PlayStyle, o: PlayStyle): boolean
 }
@@ -102,14 +100,12 @@ export const RULES: Rule[] = [
     id: "behind-high-line",
     layer: "att",
     factor: 1.05,
-    label: "Balls in behind a high line",
     applies: (a, o) => (a.counter || a.tempo === 2) && o.line === 2,
   },
   {
     id: "counter-into-deep-block",
     layer: "att",
     factor: 0.96,
-    label: "Nothing to counter into against a deep block",
     applies: (a, o) => a.counter && o.line === 0,
   },
   // Width against a back five is wasted; against a flat four with nobody on its
@@ -118,14 +114,12 @@ export const RULES: Rule[] = [
     id: "width-into-back-five",
     layer: "att",
     factor: 0.96,
-    label: "Width is wasted against a back five",
     applies: (a, o) => a.width === 2 && o.cbs === 3,
   },
   {
     id: "width-into-open-flanks",
     layer: "att",
     factor: 1.04,
-    label: "Width against a flat four with open flanks",
     applies: (a, o) => a.width === 2 && o.cbs === 2 && (o.width === 0 || o.wingers === 0),
   },
   // A patient side gets pressed into mistakes; a direct one bypasses the press.
@@ -133,14 +127,12 @@ export const RULES: Rule[] = [
     id: "patience-into-press",
     layer: "att",
     factor: 0.96,
-    label: "Patient build-up against a high press",
     applies: (a, o) => a.tempo === 0 && o.press === 2,
   },
   {
     id: "direct-past-press",
     layer: "att",
     factor: 1.04,
-    label: "Direct play past a high press",
     applies: (a, o) => a.tempo === 2 && o.press === 2,
   },
   // Three centre-backs smother a lone striker; two forwards stretch a flat four.
@@ -148,28 +140,24 @@ export const RULES: Rule[] = [
     id: "lone-striker-into-back-three",
     layer: "att",
     factor: 0.96,
-    label: "A lone striker against three centre-backs",
     applies: (a, o) => a.strikers === 1 && o.cbs === 3,
   },
   {
     id: "two-strikers-into-flat-four",
     layer: "att",
     factor: 1.03,
-    label: "Two strikers against a flat four",
     applies: (a, o) => a.strikers >= 2 && o.cbs === 2,
   },
   {
     id: "midfield-numbers",
     layer: "mid",
     factor: 1.03,
-    label: "More players through the middle",
     applies: (a, o) => a.centre > o.centre,
   },
   {
     id: "midfield-outnumbered",
     layer: "mid",
     factor: 0.97,
-    label: "Outnumbered through the middle",
     applies: (a, o) => a.centre < o.centre,
   },
   // A high press wins the ball off a patient side.
@@ -177,7 +165,6 @@ export const RULES: Rule[] = [
     id: "press-patient-side",
     layer: "mid",
     factor: 1.03,
-    label: "A high press against a patient side",
     applies: (a, o) => a.press === 2 && o.tempo === 0,
   },
   // A narrow side packs the middle against a wide one.
@@ -185,7 +172,6 @@ export const RULES: Rule[] = [
     id: "narrow-into-wide",
     layer: "mid",
     factor: 1.02,
-    label: "A narrow side packs the middle against a wide one",
     applies: (a, o) => a.width === 0 && o.width === 2,
   },
 ]

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { CircleCheck, CircleX, Trophy } from "@lucide/vue"
 import { AppToggle } from "@/components/ui"
 import type { HostCheck, HostRequirement } from "@/engine/world/stadiums"
@@ -20,13 +21,15 @@ const props = defineProps<{
 
 const emit = defineEmits<{ bid: [value: boolean] }>()
 
+const { t } = useI18n()
+
 const percent = computed(() => Math.round(props.now.score * 100))
 const status = computed(() =>
   props.now.ready
-    ? { label: "Ready to host", tone: "var(--success)" }
+    ? { label: t("stadiums.card.ready"), tone: "var(--success)" }
     : props.planned.ready
-      ? { label: "Ready once works finish", tone: "var(--pos-2)" }
-      : { label: `${percent.value}% ready`, tone: "var(--warning)" }
+      ? { label: t("stadiums.card.readyAfter"), tone: "var(--pos-2)" }
+      : { label: t("stadiums.card.percentReady", { n: percent.value }), tone: "var(--warning)" }
 )
 </script>
 
@@ -56,7 +59,9 @@ const status = computed(() =>
       <li>
         <CircleCheck v-if="now.venues >= req.venues" :size="16" class="ok" />
         <CircleX v-else :size="16" class="no" />
-        <span class="check-text">Grounds of {{ seats(req.minCapacity) }}+</span>
+        <span class="check-text">
+          {{ t("stadiums.card.grounds", { seats: seats(req.minCapacity) }) }}
+        </span>
         <strong>
           {{ now.venues }}/{{ req.venues }}
           <small v-if="planned.venues > now.venues" class="soon">→ {{ planned.venues }}</small>
@@ -65,7 +70,9 @@ const status = computed(() =>
       <li>
         <CircleCheck v-if="now.showpiece" :size="16" class="ok" />
         <CircleX v-else :size="16" class="no" />
-        <span class="check-text">A showpiece of {{ seats(req.showpiece) }}+</span>
+        <span class="check-text">
+          {{ t("stadiums.card.showpiece", { seats: seats(req.showpiece) }) }}
+        </span>
         <strong>{{ seats(now.biggest) }}</strong>
       </li>
     </ul>
@@ -77,20 +84,18 @@ const status = computed(() =>
         :to="`/competitions/${h.id}`"
         class="hosting-chip"
       >
-        Hosting the {{ h.name }}
+        {{ t("stadiums.card.hosting", { name: h.name }) }}
       </RouterLink>
     </div>
 
     <label v-if="canBid" class="bid">
       <span>
-        <span class="bid-title">Bid to host</span>
-        <span class="bid-hint">
-          Counts four times over when hosts are chosen, about six years ahead
-        </span>
+        <span class="bid-title">{{ t("stadiums.card.bid") }}</span>
+        <span class="bid-hint">{{ t("stadiums.card.bidHint") }}</span>
       </span>
       <AppToggle
         :model-value="bid"
-        aria-label="Bid to host"
+        :aria-label="t('stadiums.card.bid')"
         @update:model-value="emit('bid', $event)"
       />
     </label>

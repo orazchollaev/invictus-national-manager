@@ -2,30 +2,70 @@ import { shuffle, type Rng } from "../rng"
 
 /**
  * Round-robin rounds by the circle method. With an odd count one team rests each
- * round — never the first team in the first round, so a host always opens. `legs` 2
- * repeats the rounds with home and away swapped. Home and away alternate for each
- * team as evenly as the method allows.
+ * round — never the first team in the first round, so a host always opens. Venues
+ * follow the position a team holds in the circle, so each team alternates home and
+ * away as the circle turns (a run of three in a row happens at most once, at the
+ * turn). `legs` 2 repeats the rounds with home and away swapped, the second leg
+ * starting at whichever round keeps runs shortest across the join.
  */
 export function roundRobin(teams: string[], legs: 1 | 2): [string, string][][] {
   const list = teams.slice()
   if (list.length % 2) list.splice(1, 0, "")
   const n = list.length
-  const rounds: [string, string][][] = []
-  const arr = list.slice()
-  for (let r = 0; r < n - 1; r++) {
-    const pairs: [string, string][] = []
-    for (let i = 0; i < n / 2; i++) {
-      const a = arr[i]
-      const b = arr[n - 1 - i]
-      if (!a || !b) continue
-      // Alternate the fixed team's venue and flip by round for the rest.
-      pairs.push(i === 0 ? (r % 2 ? [b, a] : [a, b]) : (r + i) % 2 ? [b, a] : [a, b])
+  const build = (flip: boolean) => {
+    const out: [string, string][][] = []
+    const arr = list.slice()
+    for (let r = 0; r < n - 1; r++) {
+      const pairs: [string, string][] = []
+      for (let i = 0; i < n / 2; i++) {
+        const a = arr[i]
+        const b = arr[n - 1 - i]
+        if (!a || !b) continue
+        // The fixed team alternates by round; the rest by their place in the circle.
+        const aHome = i === 0 ? r % 2 === 0 : (i % 2 === 0) !== flip
+        pairs.push(aHome ? [a, b] : [b, a])
+      }
+      out.push(pairs)
+      arr.splice(1, 0, arr.pop()!)
     }
-    rounds.push(pairs)
-    arr.splice(1, 0, arr.pop()!)
+    return out
   }
+  const [plain, flipped] = [build(false), build(true)]
+  const rounds = runScore(flipped, list) < runScore(plain, list) ? flipped : plain
   if (legs === 1) return rounds
-  return [...rounds, ...rounds.map((pairs) => pairs.map(([h, a]) => [a, h] as [string, string]))]
+  const mirror = rounds.map((pairs) => pairs.map(([h, a]) => [a, h] as [string, string]))
+  // Any order of the second leg is a valid schedule: take the one with the fewest
+  // long runs of home or away matches where the legs meet.
+  let best = mirror
+  let bestScore = Infinity
+  for (let shift = 0; shift < mirror.length; shift++) {
+    const second = [...mirror.slice(shift), ...mirror.slice(0, shift)]
+    const score = runScore([...rounds, ...second], list)
+    if (score < bestScore) {
+      bestScore = score
+      best = second
+    }
+  }
+  return [...rounds, ...best]
+}
+
+/** How badly a schedule strings home or away matches together: runs of 3+ cost most. */
+export function runScore(rounds: [string, string][][], teams: string[]): number {
+  let score = 0
+  for (const t of teams) {
+    if (!t) continue
+    let prev = ""
+    let run = 0
+    for (const round of rounds)
+      for (const [h, a] of round) {
+        if (h !== t && a !== t) continue
+        const venue = h === t ? "H" : "A"
+        run = venue === prev ? run + 1 : 1
+        prev = venue
+        if (run >= 3) score += 10 ** (run - 2)
+      }
+  }
+  return score
 }
 
 /**
@@ -74,6 +114,11 @@ export function sixMatchRounds(teams: string[]): [string, string][][] | null {
  * Split ranked teams into pots and draw them into `count` groups: one team from each
  * pot per group, keeping teams from the same `family` (confederation) apart where the
  * `maxPerFamily` rule allows. `fixed` places teams (hosts) as the first of a group.
+ *
+ * A few places still to be decided (`open`: play-off winners) are given their groups
+ * first and held there, so the teams drawn after them keep clear of every
+ * confederation they could turn out to be. A draw that leaves a team nowhere legal is thrown away and made
+ * again; only when none of many draws works is the rule bent.
  */
 export function drawGroups(
   ranked: string[],
@@ -81,55 +126,88 @@ export function drawGroups(
   rng: Rng,
   opts: {
     family?: (team: string) => string
+    /**
+     * Every family a team may belong to: a place still to be decided (a play-off
+     * winner) counts against each confederation it could turn out to be.
+     */
+    families?: (team: string) => string[]
+    /** Places not yet known, drawn into the last pot whatever their ranking. */
+    open?: (team: string) => boolean
     maxPerFamily?: (family: string) => number
     fixed?: string[]
   } = {}
 ): string[][] {
-  const groups: string[][] = Array.from({ length: count }, () => [])
   const fixed = (opts.fixed ?? []).slice(0, count)
-  fixed.forEach((t, i) => groups[i].push(t))
-  const rest = ranked.filter((t) => !fixed.includes(t))
-  const family = opts.family
+  const isOpen = opts.open ?? (() => false)
+  const unplaced = ranked.filter((t) => !fixed.includes(t))
+  // Few enough open places to have a group each: set them aside. Many (a finals drawn
+  // before most play-offs) simply fill the last pots, as the ranking puts them.
+  const setAside = unplaced.filter(isOpen).length <= count
+  const open = setAside ? unplaced.filter(isOpen) : []
+  const rest = setAside ? unplaced.filter((t) => !isOpen(t)) : unplaced
+  const family = opts.families ?? (opts.family ? (t: string) => [opts.family!(t)] : undefined)
   const max = opts.maxPerFamily ?? (() => 1)
-  const fits = (g: string[], t: string) =>
-    !family || g.filter((x) => family(x) === family(t)).length < max(family(t))
 
-  /**
-   * One pot into its open groups. The most constrained teams go first, and a pot
-   * that cannot be placed legally is re-drawn: placing teams one by one in draw
-   * order can leave the last team only groups it is not allowed in.
-   */
-  const placePot = (pot: string[], open: number[], strict: boolean): Map<string, number> | null => {
-    const out = new Map<string, number>()
-    let free = open.slice()
-    const options = (t: string) => free.filter((i) => fits(groups[i], t))
-    const order = strict ? [...pot].sort((a, b) => options(a).length - options(b).length) : pot
-    for (const team of order) {
-      if (!free.length) free = groups.map((_, i) => i)
-      const ok = options(team)
+  const attempt = (strict: boolean): string[][] | null => {
+    const groups: string[][] = Array.from({ length: count }, () => [])
+    // What each group holds or has set aside, for the family rule.
+    const held: string[][] = groups.map(() => [])
+    const fits = (g: number, t: string) =>
+      !family ||
+      family(t).every((f) => held[g].filter((x) => family(x).includes(f)).length < max(f))
+    fixed.forEach((t, i) => {
+      groups[i].push(t)
+      held[i].push(t)
+    })
+
+    // Open places first, each in a group of its own, away from what it could clash with.
+    const reserved = new Set<number>()
+    const reservedBy = new Map<string, number>()
+    for (const t of open) {
+      const free = groups.map((_, i) => i).filter((i) => !reserved.has(i))
+      const ok = free.filter((i) => fits(i, t))
       if (!ok.length && strict) return null
-      const pool = ok.length ? ok : free
-      const choice = pool[Math.floor(rng() * pool.length)]
-      out.set(team, choice)
-      free = free.filter((i) => i !== choice)
+      const pool = ok.length ? ok : free.length ? free : groups.map((_, i) => i)
+      const g = pool[Math.floor(rng() * pool.length)]
+      reserved.add(g)
+      reservedBy.set(t, g)
+      held[g].push(t)
     }
-    return out
+
+    let cursor = 0
+    for (let level = 0; cursor < rest.length; level++) {
+      const size = level === 0 ? count - fixed.length : count
+      const lastLevel = cursor + size >= rest.length
+      const pot = shuffle(rng, rest.slice(cursor, cursor + size))
+      cursor += size
+      let free = groups
+        .map((_, i) => i)
+        .filter((i) => groups[i].length === level && !(lastLevel && reserved.has(i)))
+      const order = strict
+        ? [...pot].sort(
+            (x, y) => free.filter((i) => fits(i, x)).length - free.filter((i) => fits(i, y)).length
+          )
+        : pot
+      for (const team of order) {
+        if (!free.length) free = groups.map((_, i) => i)
+        const ok = free.filter((i) => fits(i, team))
+        if (!ok.length && strict) return null
+        const pool = ok.length ? ok : free
+        const choice = pool[Math.floor(rng() * pool.length)]
+        groups[choice].push(team)
+        held[choice].push(team)
+        free = free.filter((i) => i !== choice)
+      }
+    }
+    for (const [t, g] of reservedBy) groups[g].push(t)
+    return groups
   }
 
-  let cursor = 0
-  for (let level = 0; cursor < rest.length; level++) {
-    const size = level === 0 ? count - fixed.length : count
-    const potTeams = rest.slice(cursor, cursor + size)
-    cursor += size
-    const open = groups.map((_, i) => i).filter((i) => groups[i].length === level)
-    let placed: Map<string, number> | null = null
-    for (let attempt = 0; attempt < 100 && !placed; attempt++) {
-      placed = placePot(shuffle(rng, potTeams), open, true)
-    }
-    placed ??= placePot(shuffle(rng, potTeams), open, false)!
-    for (const [team, g] of placed) groups[g].push(team)
+  for (let tries = 0; tries < 300; tries++) {
+    const groups = attempt(true)
+    if (groups) return groups
   }
-  return groups
+  return attempt(false)!
 }
 
 /** Standard bracket order for `n` seeds (power of two): 1 v n, and 1 and 2 kept apart. */

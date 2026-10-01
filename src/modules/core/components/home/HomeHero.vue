@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 
+const { t } = useI18n()
 const world = useWorldStore()
 
 const info = world.derive((w) => {
@@ -46,20 +48,30 @@ const tone = computed(() => {
       <NationFlag :id="info.id" :size="56" />
       <div class="hero-id">
         <div class="hero-eyebrow">
-          {{ info.confed }} #{{ info.confedRank }} · Head coach {{ info.manager }}
+          {{
+            t("core.hero.eyebrow", {
+              confed: info.confed,
+              rank: info.confedRank,
+              manager: info.manager,
+            })
+          }}
         </div>
-        <h1 class="hero-name">{{ info.name }}</h1>
+        <h1 class="hero-name">{{ $nation(info.id) }}</h1>
       </div>
     </div>
 
     <div class="hero-stats">
       <RouterLink to="/rankings" class="stat">
         <span class="stat-value">{{ info.rank ? `#${info.rank}` : "—" }}</span>
-        <span class="stat-label">{{ info.rank ? "FIFA ranking" : "Not a FIFA member" }}</span>
+        <span class="stat-label">
+          {{ info.rank ? t("core.hero.fifaRanking") : t("core.hero.notFifa") }}
+        </span>
       </RouterLink>
       <RouterLink to="/stadiums" class="stat">
         <span class="stat-value">{{ info.federation.toFixed(1) }}</span>
-        <span class="stat-label">Federation /10 · {{ "★".repeat(info.stadium) }}</span>
+        <span class="stat-label">
+          {{ t("core.hero.federationLine", { stars: "★".repeat(info.stadium) }) }}
+        </span>
       </RouterLink>
       <div class="stat">
         <span class="stat-value">
@@ -68,22 +80,21 @@ const tone = computed(() => {
             {{ info.trend > 0 ? "▲" : "▼" }}{{ Math.abs(info.trend) }}
           </small>
         </span>
-        <span class="stat-label">Points</span>
+        <span class="stat-label">{{ t("core.hero.points") }}</span>
       </div>
     </div>
 
     <RouterLink v-if="info.warning" to="/career" class="warning">
-      <strong>Final warning</strong>
+      <strong>{{ t("core.hero.finalWarning") }}</strong>
       <span>
-        {{ info.warning }} competitive {{ info.warning === 1 ? "match" : "matches" }} to lift
-        confidence to 40%
+        {{ t("core.hero.warningLine", { n: info.warning }, info.warning) }}
       </span>
     </RouterLink>
 
     <RouterLink to="/career" class="meters">
       <div class="meter">
         <div class="meter-head">
-          <span>Federation confidence</span>
+          <span>{{ t("core.hero.federationConfidence") }}</span>
           <strong :style="{ color: tone }">{{ info.confidence }}%</strong>
         </div>
         <div class="meter-bar">
@@ -92,13 +103,15 @@ const tone = computed(() => {
       </div>
       <div class="meter">
         <div class="meter-head">
-          <span>Reputation</span>
+          <span>{{ t("core.hero.reputation") }}</span>
           <strong>{{ info.reputation }}</strong>
         </div>
         <div class="meter-bar"><span :style="{ width: `${info.reputation}%` }"></span></div>
       </div>
     </RouterLink>
-    <div v-if="info.contract" class="contract">Contract until {{ formatDate(info.contract) }}</div>
+    <div v-if="info.contract" class="contract">
+      {{ t("core.hero.contractUntil", { date: formatDate(info.contract) }) }}
+    </div>
   </section>
 </template>
 

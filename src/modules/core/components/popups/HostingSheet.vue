@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import confetti from "canvas-confetti"
 import { Landmark } from "@lucide/vue"
 import { AppButton, AppSheet } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import { hostCheck, hostLevelOf, hostRequirement, withProjects } from "@/engine/world/stadiums"
+import { compName, nationName } from "@/i18n/text"
 import { seats } from "@/modules/stadiums/utils/hosting"
 
 const props = defineProps<{ compId: string }>()
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 const sheet = ref<InstanceType<typeof AppSheet> | null>(null)
@@ -20,7 +23,7 @@ const info = world.derive((w) => {
   const inst = w.state.competitions[props.compId]
   const me = w.state.career.nationId
   if (!inst || !me) return null
-  const partners = inst.hosts.filter((h) => h !== me).map((h) => w.def(h).name)
+  const partners = inst.hosts.filter((h) => h !== me).map((h) => nationName(h))
   const level = hostLevelOf(inst.kind)
   const req = level ? hostRequirement(level, w.def(inst.hosts[0]).confed) : null
   const nations = inst.hosts.map((h) => w.state.nations[h]).filter(Boolean)
@@ -38,7 +41,7 @@ const info = world.derive((w) => {
       )
     : null
   return {
-    name: inst.name,
+    inst: { defId: inst.defId, year: inst.year },
     start: inst.start,
     hosts: inst.hosts,
     partners,
@@ -49,6 +52,8 @@ const info = world.derive((w) => {
     building,
   }
 }, null)
+
+const compLabel = computed(() => (info.value ? compName(info.value.inst) : ""))
 
 onMounted(() => {
   // A small celebration: the reduced-motion setting is honoured by the library.
@@ -67,7 +72,7 @@ function stadiums() {
 </script>
 
 <template>
-  <AppSheet ref="sheet" title="Tournament awarded" @close="world.seenHosting()">
+  <AppSheet ref="sheet" :title="t('core.hosting.title')" @close="world.seenHosting()">
     <div v-if="info" class="hosting">
       <div class="flags">
         <NationFlag
@@ -79,39 +84,51 @@ function stadiums() {
       </div>
       <div class="eyebrow">
         <Landmark :size="14" />
-        We are hosts
+        {{ t("core.hosting.eyebrow") }}
       </div>
-      <h2 class="title">{{ info.name }}</h2>
+      <h2 class="title">{{ compLabel }}</h2>
       <p class="lead">
-        <template v-if="info.partners.length">
-          Together with {{ info.partners.join(", ") }}, we will stage the {{ info.name }}.
-        </template>
-        <template v-else>The {{ info.name }} is coming to us.</template>
-        Kick-off on {{ formatDate(info.start)
-        }}{{ info.world ? " — the whole world will be watching" : "" }}.
+        {{
+          info.partners.length
+            ? t("core.hosting.together", { partners: info.partners.join(", "), name: compLabel })
+            : t("core.hosting.coming", { name: compLabel })
+        }}
+        {{
+          t("core.hosting.kickoff", {
+            date: formatDate(info.start),
+            extra: info.world ? t("core.hosting.worldWatching") : "",
+          })
+        }}
       </p>
       <ul v-if="info.req && info.now && info.planned" class="checks">
         <li>
-          <span>Grounds of {{ seats(info.req.minCapacity) }}+</span>
+          <span>{{ t("core.hosting.grounds", { seats: seats(info.req.minCapacity) }) }}</span>
           <strong>{{ info.now.venues }}/{{ info.req.venues }}</strong>
         </li>
         <li>
-          <span>Showpiece for the final</span>
+          <span>{{ t("core.hosting.showpiece") }}</span>
           <strong>
-            {{ info.now.showpiece ? "Ready" : `${seats(info.req.showpiece)}+ needed` }}
+            {{
+              info.now.showpiece
+                ? t("core.hosting.ready")
+                : t("core.hosting.needed", { seats: seats(info.req.showpiece) })
+            }}
           </strong>
         </li>
       </ul>
       <p v-if="info.building.length" class="note">
-        The federation starts {{ info.building.length }}
-        {{ info.building.length === 1 ? "project" : "projects" }} to be ready in time.
+        {{ t("core.hosting.projects", { n: info.building.length }, info.building.length) }}
       </p>
-      <p v-else-if="info.now?.ready" class="note">Our grounds are ready for it.</p>
+      <p v-else-if="info.now?.ready" class="note">{{ t("core.hosting.groundsReady") }}</p>
     </div>
     <template #footer>
       <div class="actions">
-        <AppButton variant="tonal" block @click="stadiums">See stadiums</AppButton>
-        <AppButton variant="filled" block @click="sheet?.close()">Brilliant!</AppButton>
+        <AppButton variant="tonal" block @click="stadiums">
+          {{ t("core.hosting.seeStadiums") }}
+        </AppButton>
+        <AppButton variant="filled" block @click="sheet?.close()">
+          {{ t("core.hosting.brilliant") }}
+        </AppButton>
       </div>
     </template>
   </AppSheet>

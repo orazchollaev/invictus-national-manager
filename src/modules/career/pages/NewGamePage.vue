@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import {
   AppButton,
   AppButtonGroup,
@@ -14,9 +15,11 @@ import { PageShell, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { SlotList } from "@/modules/career/components/slots"
 import { NATION_DEFS } from "@/modules/world/services/statics"
+import { nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { CONFEDS, type Confed } from "@/engine/types"
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const world = useWorldStore()
@@ -33,27 +36,51 @@ const chosen = ref<string | null>(null)
 const mode = ref<"job" | "free">("job")
 
 /** Starting reputations out of work: it decides which federations call first. */
-const REPUTATIONS = [
-  { value: "25", label: "Unknown", hint: "Small nations, far down the ranking, will call." },
-  { value: "50", label: "Promising", hint: "Mid-ranked nations will be interested." },
-  { value: "75", label: "Respected", hint: "Established nations will want to talk." },
-  { value: "95", label: "Elite", hint: "Some of the world's strongest teams will call." },
-]
+const REPUTATIONS = computed(() => [
+  {
+    value: "25",
+    label: t("career.newGame.reputation.unknown"),
+    hint: t("career.newGame.reputation.unknownHint"),
+  },
+  {
+    value: "50",
+    label: t("career.newGame.reputation.promising"),
+    hint: t("career.newGame.reputation.promisingHint"),
+  },
+  {
+    value: "75",
+    label: t("career.newGame.reputation.respected"),
+    hint: t("career.newGame.reputation.respectedHint"),
+  },
+  {
+    value: "95",
+    label: t("career.newGame.reputation.elite"),
+    hint: t("career.newGame.reputation.eliteHint"),
+  },
+])
 const reputation = ref("50")
-const reputationHint = computed(() => REPUTATIONS.find((r) => r.value === reputation.value)?.hint)
+const reputationHint = computed(
+  () => REPUTATIONS.value.find((r) => r.value === reputation.value)?.hint
+)
 
 const byPoints = [...NATION_DEFS].filter((n) => !n.banned).sort((a, b) => b.points - a.points)
 const strengthOf = new Map(byPoints.map((n, i) => [n.id, i + 1]))
 /** FIFA ranking position; teams outside FIFA have none. */
 const rankOf = new Map(byPoints.filter((n) => !n.nonFifa).map((n, i) => [n.id, i + 1]))
 
-const nationalityOptions = [...NATION_DEFS]
-  .sort((a, b) => a.name.localeCompare(b.name))
-  .map((n) => ({ value: n.id, label: n.name }))
+const nationalityOptions = computed(() =>
+  [...NATION_DEFS]
+    .map((n) => ({ value: n.id, label: nationName(n.id) }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+)
 
 const list = computed(() => {
   const q = query.value.trim().toLowerCase()
-  return byPoints.filter((n) => (q ? n.name.toLowerCase().includes(q) : n.confed === confed.value))
+  return byPoints.filter((n) =>
+    q
+      ? n.name.toLowerCase().includes(q) || nationName(n.id).toLowerCase().includes(q)
+      : n.confed === confed.value
+  )
 })
 
 /** Stars for how big a job it is, from the team's strength. */
@@ -63,9 +90,9 @@ function stars(id: string) {
 }
 
 const TITLES = [
-  ["New game", "Choose a save slot"],
-  ["New career", "Tell us about yourself"],
-  ["Choose your nation", "Every national team is open to you"],
+  ["career.newGame.slotTitle", "career.newGame.slotSubtitle"],
+  ["career.newGame.managerTitle", "career.newGame.managerSubtitle"],
+  ["career.newGame.nationTitle", "career.newGame.nationSubtitle"],
 ]
 
 function pickSlot(n: number) {
@@ -84,10 +111,10 @@ const canStart = computed(
 )
 
 const startLabel = computed(() => {
-  if (mode.value === "free") return "Start out of work"
+  if (mode.value === "free") return t("career.newGame.startFree")
   return chosen.value
-    ? `Take charge of ${NATION_DEFS.find((n) => n.id === chosen.value)?.name}`
-    : "Pick a nation"
+    ? t("career.newGame.takeCharge", { name: nationName(chosen.value) })
+    : t("career.newGame.pickNation")
 })
 
 async function start() {
@@ -104,26 +131,26 @@ async function start() {
 </script>
 
 <template>
-  <PageShell :title="TITLES[step][0]" :subtitle="TITLES[step][1]" :on-back="back" back>
+  <PageShell :title="t(TITLES[step][0])" :subtitle="t(TITLES[step][1])" :on-back="back" back>
     <SlotList v-if="step === 0" mode="new" @pick="pickSlot" />
 
     <template v-else-if="step === 1">
       <AppCard padding="md" class="form">
-        <AppField label="Your name" layout="stack">
+        <AppField :label="t('career.newGame.yourName')" layout="stack">
           <input
             v-model="name"
             class="input"
             maxlength="32"
-            placeholder="Manager name"
+            :placeholder="t('career.newGame.managerName')"
             autocomplete="off"
           />
         </AppField>
-        <AppField label="Nationality" layout="stack">
+        <AppField :label="t('career.newGame.nationality')" layout="stack">
           <AppSelect
             v-model="nationality"
             :options="nationalityOptions"
             searchable
-            search-placeholder="Search nations"
+            :search-placeholder="t('career.newGame.searchNations')"
           >
             <template #value="{ option }">
               <NationFlag v-if="option" :id="option.value" :size="20" name class="select-nation" />
@@ -135,7 +162,7 @@ async function start() {
         </AppField>
       </AppCard>
       <AppButton variant="filled" block :disabled="name.trim().length < 2" @click="step = 2">
-        Next
+        {{ t("common.next") }}
       </AppButton>
     </template>
 
@@ -144,14 +171,14 @@ async function start() {
         :model-value="mode"
         block
         :options="[
-          { value: 'job', label: 'Take a job' },
-          { value: 'free', label: 'Start out of work' },
+          { value: 'job', label: t('career.newGame.takeJob') },
+          { value: 'free', label: t('career.newGame.startFree') },
         ]"
         @update:model-value="(v) => (mode = v as 'job' | 'free')"
       />
 
       <AppCard v-if="mode === 'free'" padding="md" class="form">
-        <AppField label="Your reputation" layout="stack">
+        <AppField :label="t('career.newGame.yourReputation')" layout="stack">
           <AppButtonGroup
             :model-value="reputation"
             block
@@ -160,12 +187,12 @@ async function start() {
           />
         </AppField>
         <p class="hint">
-          {{ reputationHint }} Offers arrive on day one; decline them all and more will come.
+          {{ t("career.newGame.offersHint", { hint: reputationHint }) }}
         </p>
       </AppCard>
 
       <template v-else>
-        <AppSearchInput v-model="query" placeholder="Search all nations" />
+        <AppSearchInput v-model="query" :placeholder="t('career.newGame.searchAll')" />
         <AppSubTabBar
           v-if="!query"
           :model-value="confed"

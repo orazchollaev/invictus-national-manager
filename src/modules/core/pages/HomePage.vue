@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import {
   Briefcase,
   ChevronRight,
@@ -23,10 +24,12 @@ import {
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 import { useSettingsStore } from "@/modules/settings/store"
-import { formatDate, formatShort } from "@/engine/calendar/dates"
+import { formatDate, formatShort } from "@/i18n/dates"
+import { compName, stageLabel } from "@/i18n/text"
 import { resultLetter } from "@/modules/core/utils/format"
 import type { Interrupt } from "@/engine/world/types"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 const settings = useSettingsStore()
@@ -41,7 +44,11 @@ const drawReady = world.derive((w) => {
   if (!d) return null
   const inst = w.state.competitions[d.compId]
   const stage = inst?.stages.find((s) => s.key === d.stageKey)
-  return { ...d, label: inst ? `${inst.name} · ${stage?.name ?? "Draw"}` : "Draw" }
+  return {
+    ...d,
+    inst: inst ? { defId: inst.defId, year: inst.year } : null,
+    stage: stage?.name ?? null,
+  }
 }, null)
 /** A popup on screen (see GamePopups): answering it is the next step. */
 const popup = world.derive(
@@ -65,6 +72,12 @@ const careerPage = world.derive(
         : null,
   null
 )
+
+const drawLabel = computed(() => {
+  const d = drawReady.value
+  if (!d?.inst) return t("core.home.draw")
+  return `${compName(d.inst)} · ${d.stage ? stageLabel(d.stage) : t("core.home.draw")}`
+})
 
 const results = world.derive((w) => {
   const id = w.state.career.nationId
@@ -101,14 +114,20 @@ async function proceed() {
 
 const cta = computed(() => {
   if (careerPage.value?.startsWith("/career/review"))
-    return { label: "The federation's verdict", icon: Landmark }
-  if (careerPage.value) return { label: "Clear your desk", icon: Briefcase }
-  if (pending.value && !settings.assistantPicks) return { label: "Name your squad", icon: Users }
-  if (drawReady.value) return { label: "Watch the draw", icon: Shuffle }
-  if (today.value) return { label: "Match day — go to the match", icon: Play }
+    return { label: t("core.home.verdict"), icon: Landmark }
+  if (careerPage.value) return { label: t("core.home.clearDesk"), icon: Briefcase }
+  if (pending.value && !settings.assistantPicks)
+    return { label: t("core.home.nameSquad"), icon: Users }
+  if (drawReady.value) return { label: t("core.home.watchDraw"), icon: Shuffle }
+  if (today.value) return { label: t("core.home.matchDay"), icon: Play }
   const step = settings.advanceStep
-  const how = step === "match" ? "to next match" : step === 1 ? "1 day" : `${step} days`
-  return { label: `Continue · ${how}`, icon: ChevronRight }
+  const how =
+    step === "match"
+      ? t("core.home.toNextMatch")
+      : step === 1
+        ? t("core.home.oneDay")
+        : t("core.home.nDays", { n: step })
+  return { label: t("core.home.continueHow", { how }), icon: ChevronRight }
 })
 </script>
 
@@ -119,11 +138,11 @@ const cta = computed(() => {
     <section v-else class="panel jobless">
       <Briefcase :size="28" class="jobless-icon" />
       <div>
-        <div class="panel-title">Out of work</div>
-        <p class="muted">Federations get in touch when a job opens up. Keep the calendar moving.</p>
+        <div class="panel-title">{{ t("core.home.outOfWork") }}</div>
+        <p class="muted">{{ t("core.home.outOfWorkHint") }}</p>
       </div>
       <AppButton variant="tonal" @click="router.push('/career')">
-        Offers ({{ career?.offers.length ?? 0 }})
+        {{ t("core.home.offers", { n: career?.offers.length ?? 0 }) }}
       </AppButton>
     </section>
 
@@ -134,9 +153,14 @@ const cta = computed(() => {
     >
       <Users :size="20" class="alert-icon" />
       <div class="alert-text">
-        <div class="panel-title">Squad announcement due</div>
+        <div class="panel-title">{{ t("core.home.squadDue") }}</div>
         <div class="muted">
-          {{ pending.label }} · first match {{ formatDate(pending.deadline) }}
+          {{
+            t("core.home.squadDueHint", {
+              label: $tx(pending.label),
+              date: formatDate(pending.deadline),
+            })
+          }}
         </div>
       </div>
       <ChevronRight :size="18" class="muted" />
@@ -149,8 +173,8 @@ const cta = computed(() => {
     >
       <Shuffle :size="20" class="alert-icon" />
       <div class="alert-text">
-        <div class="panel-title">The draw is ready</div>
-        <div class="muted">{{ drawReady.label }} · watch it to see who we face</div>
+        <div class="panel-title">{{ t("core.home.drawReady") }}</div>
+        <div class="muted">{{ t("core.home.drawReadyHint", { label: drawLabel }) }}</div>
       </div>
       <ChevronRight :size="18" class="muted" />
     </section>
@@ -163,7 +187,7 @@ const cta = computed(() => {
       <AppSectionHeader>
         <span class="section-title">
           <Target :size="16" />
-          Federation objectives
+          {{ t("core.home.objectives") }}
         </span>
       </AppSectionHeader>
       <ul class="objectives">
@@ -171,18 +195,18 @@ const cta = computed(() => {
           <CircleCheck v-if="o.status === 'met'" :size="18" class="obj-icon" />
           <CircleX v-else-if="o.status === 'failed'" :size="18" class="obj-icon" />
           <span v-else class="obj-dot"></span>
-          <span class="obj-text">{{ o.text }}</span>
+          <span class="obj-text">{{ $tx(o.text) }}</span>
           <StatPill
             v-if="o.kind === 'debuts' && o.status === 'open'"
             :value="`${o.progress ?? 0}/${o.count}`"
           />
-          <StatPill v-if="o.critical" value="Key" tone="var(--danger)" />
+          <StatPill v-if="o.critical" :value="t('common.key')" tone="var(--danger)" />
         </li>
       </ul>
     </section>
 
     <section v-if="results.length" class="panel">
-      <AppSectionHeader title="Form" />
+      <AppSectionHeader :title="t('core.home.form')" />
       <div class="form-strip">
         <StatPill
           v-for="r in [...results].reverse()"
@@ -203,10 +227,10 @@ const cta = computed(() => {
 
     <section v-if="news.length" class="panel">
       <AppSectionHeader>
-        Inbox
+        {{ t("core.home.inbox") }}
         <template #actions>
           <RouterLink to="/inbox" class="link">
-            {{ unread ? `${unread} unread` : "All" }}
+            {{ unread ? t("core.home.unread", { n: unread }) : t("core.home.all") }}
           </RouterLink>
         </template>
       </AppSectionHeader>
@@ -218,10 +242,10 @@ const cta = computed(() => {
         :class="{ unread: !n.read }"
       >
         <div class="news-head">
-          <span class="news-title">{{ n.title }}</span>
+          <span class="news-title">{{ $tx(n.title) }}</span>
           <span class="news-date">{{ formatShort(n.date) }}</span>
         </div>
-        <div class="news-body">{{ n.body }}</div>
+        <div class="news-body">{{ $tx(n.body) }}</div>
       </RouterLink>
     </section>
 

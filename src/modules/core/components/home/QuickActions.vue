@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n"
 import { CalendarDays, ClipboardList, ListOrdered, Users } from "@lucide/vue"
 
+const { t } = useI18n()
+
 const items = [
-  { to: "/squad", icon: Users, label: "Squad" },
-  { to: "/squad/tactics", icon: ClipboardList, label: "Tactics" },
-  { to: "/calendar", icon: CalendarDays, label: "Calendar" },
-  { to: "/rankings", icon: ListOrdered, label: "Ranking" },
+  { to: "/squad", icon: Users, label: "core.quick.squad" },
+  { to: "/squad/tactics", icon: ClipboardList, label: "core.quick.tactics" },
+  { to: "/calendar", icon: CalendarDays, label: "core.quick.calendar" },
+  { to: "/rankings", icon: ListOrdered, label: "core.quick.ranking" },
 ]
 </script>
 
@@ -13,7 +16,7 @@ const items = [
   <nav class="quick">
     <RouterLink v-for="i in items" :key="i.to" :to="i.to" class="tile">
       <span class="tile-icon"><component :is="i.icon" :size="20" /></span>
-      <span class="tile-label">{{ i.label }}</span>
+      <span class="tile-label">{{ t(i.label) }}</span>
     </RouterLink>
   </nav>
 </template>

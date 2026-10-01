@@ -8,6 +8,8 @@ import type { HostLevel } from "../world/stadiums"
 import { addDays } from "../calendar/dates"
 import { makeRng, deriveSeed, shuffle } from "../rng"
 import { drawGroups, roundRobin, seedBracket, bracketOrder } from "./draw"
+import { isPlaceholder } from "./placeholders"
+import { groupText, msg, stageText, type Msg } from "../text"
 import { groupStandings, type Tiebreak } from "./tables"
 import type {
   CompetitionInstance,
@@ -24,6 +26,8 @@ export interface CompContext {
   date: ISODate
   seed: number
   confedOf(team: string): Confed
+  /** Every confederation a team is or — for a place still to be decided — may turn out to be. */
+  confedsOf(team: string): Confed[]
   subFeds(team: string): string[]
   points(team: string): number
   /** Nations allowed to enter competitions (not suspended), best ranked first. */
@@ -180,6 +184,17 @@ function fixtureId(inst: CompetitionInstance, stage: string, n: number) {
   return `${inst.id}:${stage}:${n}`
 }
 
+/** A fixture's label in a knockout: the stage (unless it is the round), the round, the leg. */
+function roundLabel(stage: string, round: string, leg: number): Msg {
+  const r = stageText(round)
+  if (stage === round)
+    return leg ? msg("fx.roundLeg", { round: r, leg }) : msg("fx.round", { round: r })
+  const s = stageText(stage)
+  return leg
+    ? msg("fx.stageRoundLeg", { stage: s, round: r, leg })
+    : msg("fx.stageRound", { stage: s, round: r })
+}
+
 function roundDate(dates: ISODate[], r: number): ISODate {
   if (r < dates.length) return dates[r]
   const gap = dates.length > 1 ? 3 : 3
@@ -221,10 +236,11 @@ function drawGroupStage(
     gp.fixed ??
     drawGroups(entrants, gp.count, rng, {
       fixed: gp.seeded?.filter((t) => entrants.includes(t)),
-      family: gp.spreadConfeds
-        ? ctx.confedOf
+      open: isPlaceholder,
+      families: gp.spreadConfeds
+        ? ctx.confedsOf
         : gp.separate?.length
-          ? (t) => (gp.separate!.includes(t) ? "separate" : t)
+          ? (t) => [gp.separate!.includes(t) ? "separate" : t]
           : undefined,
       maxPerFamily: (c) => (c === "UEFA" ? 2 : 1),
     })
@@ -245,7 +261,14 @@ function drawGroupStage(
           id: fixtureId(inst, stage.key, n++),
           compId: inst.id,
           stage: stage.key,
-          label: `${stage.name} · ${teams.length > 1 ? `Group ${name} · ` : ""}Matchday ${r + 1}`,
+          label:
+            teams.length > 1
+              ? msg("fx.groupMatchday", {
+                  stage: stageText(stage.name),
+                  group: groupText(name),
+                  n: r + 1,
+                })
+              : msg("fx.matchday", { stage: stageText(stage.name), n: r + 1 }),
           date,
           ...v,
           importance: plan.importance,
@@ -344,7 +367,7 @@ function makeTie(
       id: `${tie.id}:${leg + 1}`,
       compId: inst.id,
       stage: stage.key,
-      label: `${stage.name === roundPlan.name ? "" : `${stage.name} · `}${roundPlan.name}${legs > 1 ? ` · Leg ${leg + 1}` : ""}`,
+      label: roundLabel(stage.name, roundPlan.name, legs > 1 ? leg + 1 : 0),
       date: freeDate(ctx, v.home, v.away, date),
       ...v,
       importance: plan.importance,

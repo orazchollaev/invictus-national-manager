@@ -32,39 +32,35 @@ export type Zone =
   | "down-pi"
   | "qf-third"
   | "playoff-risk"
+  | "host"
 
 export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
-  qf: { label: "Quarter-finals", tone: "var(--pos-2)" },
-  up: { label: "Promoted", tone: "var(--success)" },
-  "playoff-up": { label: "Promotion play-off", tone: "var(--pos-3)" },
-  "playoff-down": { label: "Relegation play-off", tone: "var(--warning)" },
-  risk: { label: "Relegation or relegation play-off", tone: "var(--warning)" },
-  down: { label: "Relegated", tone: "var(--danger)" },
-  through: { label: "Qualifies", tone: "var(--success)" },
-  playoff: { label: "Play-offs (best placed)", tone: "var(--warning)" },
-  ic: { label: "Inter-confederation play-off (best placed)", tone: "var(--pos-3)" },
-  maybe: { label: "Qualifies if among the best runners-up", tone: "var(--warning)" },
-  advance: { label: "Knockout stage", tone: "var(--success)" },
-  third: { label: "Knockout stage if among the best thirds", tone: "var(--warning)" },
-  champion: { label: "Champions", tone: "var(--gold)" },
-  "wc-ac": { label: "Third round and Asian Cup", tone: "var(--success)" },
-  acq: { label: "Asian Cup qualifying", tone: "var(--pos-3)" },
-  next: { label: "Next round", tone: "var(--warning)" },
-  "host-group": { label: "Qualifies if the host finishes above", tone: "var(--warning)" },
-  "up-gc": { label: "Promoted and qualifies for the Gold Cup", tone: "var(--success)" },
-  "up-pi": { label: "Promoted and Play-In", tone: "var(--success)" },
-  "best-up": { label: "Promoted and Play-In if the best runner-up", tone: "var(--warning)" },
-  gcp: { label: "Gold Cup Prelims", tone: "var(--pos-3)" },
-  "best-gcp": {
-    label: "Gold Cup Prelims if among the two best runners-up",
-    tone: "var(--warning)",
-  },
-  "down-pi": { label: "Relegated, Play-In for the Gold Cup Prelims", tone: "var(--danger)" },
-  "qf-third": { label: "Quarter-finals if among the two best thirds", tone: "var(--warning)" },
-  "playoff-risk": {
-    label: "Relegation play-off if among the two worst thirds",
-    tone: "var(--warning)",
-  },
+  qf: { label: "zones.qf", tone: "var(--pos-2)" },
+  up: { label: "zones.up", tone: "var(--success)" },
+  "playoff-up": { label: "zones.playoff-up", tone: "var(--pos-3)" },
+  "playoff-down": { label: "zones.playoff-down", tone: "var(--warning)" },
+  risk: { label: "zones.risk", tone: "var(--warning)" },
+  down: { label: "zones.down", tone: "var(--danger)" },
+  through: { label: "zones.through", tone: "var(--success)" },
+  playoff: { label: "zones.playoff", tone: "var(--warning)" },
+  ic: { label: "zones.ic", tone: "var(--pos-3)" },
+  maybe: { label: "zones.maybe", tone: "var(--warning)" },
+  advance: { label: "zones.advance", tone: "var(--success)" },
+  third: { label: "zones.third", tone: "var(--warning)" },
+  champion: { label: "zones.champion", tone: "var(--gold)" },
+  "wc-ac": { label: "zones.wc-ac", tone: "var(--success)" },
+  acq: { label: "zones.acq", tone: "var(--pos-3)" },
+  next: { label: "zones.next", tone: "var(--warning)" },
+  "host-group": { label: "zones.host-group", tone: "var(--warning)" },
+  "up-gc": { label: "zones.up-gc", tone: "var(--success)" },
+  "up-pi": { label: "zones.up-pi", tone: "var(--success)" },
+  "best-up": { label: "zones.best-up", tone: "var(--warning)" },
+  gcp: { label: "zones.gcp", tone: "var(--pos-3)" },
+  "best-gcp": { label: "zones.best-gcp", tone: "var(--warning)" },
+  "down-pi": { label: "zones.down-pi", tone: "var(--danger)" },
+  "qf-third": { label: "zones.qf-third", tone: "var(--warning)" },
+  "playoff-risk": { label: "zones.playoff-risk", tone: "var(--warning)" },
+  host: { label: "zones.host", tone: "var(--success)" },
 }
 
 /**
@@ -74,12 +70,24 @@ export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
 function europeanQualifierZones(
   places: number,
   stageKey: string,
-  z: (...list: (Zone | null)[]) => (Zone | null)[]
+  z: (...list: (Zone | null)[]) => (Zone | null)[],
+  hosts: string[] = [],
+  rows: string[] = []
 ) {
   if (stageKey === "l2") return z("playoff")
   const { perGroup, ties } = qualifierSplit(places)
   const playoffRows = Math.ceil(Math.max(0, ties * 2 - 3) / 3)
-  return z(...Array<Zone>(perGroup).fill("through"), ...Array<Zone>(playoffRows).fill("playoff"))
+  if (!rows.some((t) => hosts.includes(t)))
+    return z(...Array<Zone>(perGroup).fill("through"), ...Array<Zone>(playoffRows).fill("playoff"))
+  // A host has its place already and takes none of the group's: the places pass down.
+  let others = 0
+  return z(
+    ...rows.map((t): Zone | null => {
+      if (hosts.includes(t)) return "host"
+      others++
+      return others <= perGroup ? "through" : others <= perGroup + playoffRows ? "playoff" : null
+    })
+  )
 }
 
 const letterOf = (name: string) => name.replace(/\d+$/, "")
@@ -108,7 +116,9 @@ export function zonesFor(
   groupName: string,
   size: number,
   ctx: CompContext,
-  stageKey = "groups"
+  stageKey = "groups",
+  /** The group's teams in table order, for competitions whose places depend on who they are. */
+  rows: string[] = []
 ): (Zone | null)[] {
   const z = (...list: (Zone | null)[]) => Array.from({ length: size }, (_, i) => list[i] ?? null)
   /** `top` from first place down, and `zone` for last place. */
@@ -152,7 +162,7 @@ export function zonesFor(
     // World Cup qualifying (see defs/fifa.ts).
     case "wcq-uefa": {
       const hosts = worldCupHosts(inst.year, ctx).filter((h) => ctx.confedOf(h) === "UEFA")
-      return europeanQualifierZones(WC_PLACES.UEFA - hosts.length, stageKey, z)
+      return europeanQualifierZones(WC_PLACES.UEFA - hosts.length, stageKey, z, hosts, rows)
     }
     case "wcq-caf":
       return z("through", "playoff")
@@ -190,8 +200,11 @@ export function zonesFor(
     case "euroq": {
       // Euro 2028: winners, the eight best runners-up, then play-offs.
       if (inst.year <= 2028) return z("through", "maybe")
-      const hosts = ctx.instance(`euro-${inst.year}`)?.hosts ?? []
-      return europeanQualifierZones(24 - Math.min(2, hosts.length), stageKey, z)
+      const all =
+        ctx.instance(`euro-${inst.year}`)?.hosts ?? AWARDED_HOSTS[`euro-${inst.year}`] ?? []
+      // The two best ranked hosts qualify without playing for it.
+      const hosts = [...all].sort((a, b) => ctx.points(b) - ctx.points(a)).slice(0, 2)
+      return europeanQualifierZones(24 - hosts.length, stageKey, z, hosts, rows)
     }
     case "afconq":
       return hostGroup(inst, stageKey, groupName, ctx)

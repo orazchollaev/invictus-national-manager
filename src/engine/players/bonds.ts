@@ -9,6 +9,7 @@
  * On the pitch each bond with a team mate moves a player by a point or so, up to a cap,
  * so a side of friends plays above a side at war without either deciding a match alone.
  */
+import { msg, type Msg } from "../text"
 import type { Player } from "../types"
 import { deriveSeed, makeRng } from "../rng"
 
@@ -31,12 +32,6 @@ const FEUD_CHANCE = 0.012
 /** Two players this hot-headed fall out far more easily. */
 const HOT = 14
 const HOT_FEUD_CHANCE = 0.05
-
-export const BOND_LABELS: Record<BondKind, string> = {
-  clubmates: "Club mates",
-  friends: "Friends",
-  feud: "Feud",
-}
 
 /** The bond between two players, if they have one. Symmetric. */
 export function bondBetween(a: Player, b: Player): BondKind | null {
@@ -86,10 +81,10 @@ export function spiritOf(players: Player[]): number {
 }
 
 /** The spirit in a word. */
-export function spiritLabel(spirit: number): string {
-  if (spirit >= 1) return "Tight-knit"
-  if (spirit >= 0.3) return "Good"
-  if (spirit > -0.3) return "Neutral"
-  if (spirit > -1) return "Uneasy"
-  return "Divided"
+export function spiritLabel(spirit: number): Msg {
+  if (spirit >= 1) return msg("spirit.tight")
+  if (spirit >= 0.3) return msg("spirit.good")
+  if (spirit > -0.3) return msg("spirit.neutral")
+  if (spirit > -1) return msg("spirit.uneasy")
+  return msg("spirit.divided")
 }

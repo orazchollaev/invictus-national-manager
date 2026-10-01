@@ -12,7 +12,8 @@ import { FORMATIONS } from "../match/formations"
 import type { Lane, MatchEvent } from "../match/types"
 import { archetypesFor } from "../players/archetypes"
 import { POSITIONS, type Position } from "../types"
-import { playMany, sideOf } from "./helpers"
+import { playMany, sideOf, stateOf } from "./helpers"
+import { step } from "../match/engine"
 
 const first = (pos: Position) => archetypesFor(pos)[0]
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
@@ -167,5 +168,37 @@ describe("lanes in the match engine", () => {
       return sum(c.map((x) => x.left)) / sum(c.map((x) => x.left + x.centre + x.right))
     }
     expect(share(weak)).toBeGreaterThan(share(strong))
+  })
+})
+
+describe("ball", () => {
+  it("follows who has the ball each minute and the lane they work", async () => {
+    const { stateOf } = await import("./helpers")
+    const { step } = await import("../match/engine")
+    const state = stateOf(sideOf("h", first), sideOf("a", first))
+    const seen = new Set<string>()
+    while (state.phase !== "done" && state.minute < 90) {
+      step(state)
+      expect(["home", "away"]).toContain(state.ball.side)
+      expect(LANES).toContain(state.ball.lane)
+      expect([1, 2, 3]).toContain(state.ball.depth)
+      seen.add(state.ball.side)
+    }
+    expect(seen.size).toBe(2)
+  })
+})
+
+describe("ball", () => {
+  it("follows who has the ball each minute and the lane they work", () => {
+    const state = stateOf(sideOf("h", first), sideOf("a", first))
+    const seen = new Set<string>()
+    while (state.phase !== "done" && state.minute < 90) {
+      step(state)
+      expect(["home", "away"]).toContain(state.ball.side)
+      expect(LANES).toContain(state.ball.lane)
+      expect([1, 2, 3]).toContain(state.ball.depth)
+      seen.add(state.ball.side)
+    }
+    expect(seen.size).toBe(2)
   })
 })

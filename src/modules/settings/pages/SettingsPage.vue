@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n"
 import { AppButtonGroup, AppCard, AppField, AppToggle } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
+import { LOCALES, type Locale } from "@/i18n"
 import {
   useSettingsStore,
   type AdvanceStep,
@@ -10,30 +12,39 @@ import {
   type Theme,
 } from "@/modules/settings/store"
 
+const { t } = useI18n()
 const settings = useSettingsStore()
 </script>
 
 <template>
-  <PageShell back title="Settings">
+  <PageShell back :title="t('nav.settings')">
     <AppCard padding="md" class="group">
-      <AppField label="Theme" layout="stack">
+      <AppField :label="t('settings.language')" layout="stack">
+        <AppButtonGroup
+          :model-value="settings.locale"
+          block
+          :options="LOCALES"
+          @update:model-value="(v) => (settings.locale = v as Locale)"
+        />
+      </AppField>
+      <AppField :label="t('settings.theme')" layout="stack">
         <AppButtonGroup
           :model-value="settings.theme"
           block
           :options="[
-            { value: 'dark', label: 'Dark' },
-            { value: 'light', label: 'Light' },
+            { value: 'dark', label: t('settings.dark') },
+            { value: 'light', label: t('settings.light') },
           ]"
           @update:model-value="(v) => (settings.theme = v as Theme)"
         />
       </AppField>
-      <AppField label="Look" layout="stack">
+      <AppField :label="t('settings.look')" layout="stack">
         <AppButtonGroup
           :model-value="settings.designLanguage"
           block
           :options="[
-            { value: 'ios', label: 'Rounded' },
-            { value: 'android', label: 'Material' },
+            { value: 'ios', label: t('settings.rounded') },
+            { value: 'android', label: t('settings.material') },
           ]"
           @update:model-value="(v) => (settings.designLanguage = v as DesignLanguage)"
         />
@@ -41,62 +52,64 @@ const settings = useSettingsStore()
     </AppCard>
 
     <AppCard padding="md" class="group">
-      <AppField label="Continue moves on" layout="stack">
+      <AppField :label="t('settings.advance')" layout="stack">
         <AppButtonGroup
           :model-value="String(settings.advanceStep)"
           block
           :options="[
-            { value: '1', label: '1 day' },
-            { value: '7', label: '7 days' },
-            { value: '30', label: '30 days' },
-            { value: 'match', label: 'Next match' },
+            { value: '1', label: t('settings.oneDay') },
+            { value: '7', label: t('settings.sevenDays') },
+            { value: '30', label: t('settings.thirtyDays') },
+            { value: 'match', label: t('settings.nextMatch') },
           ]"
           @update:model-value="
             (v) => (settings.advanceStep = v === 'match' ? 'match' : (Number(v) as AdvanceStep))
           "
         />
       </AppField>
-      <AppField
-        label="Assistant picks the team"
-        hint="Squads and starting elevens are chosen for you"
-      >
-        <AppToggle v-model="settings.assistantPicks" aria-label="Assistant picks the team" />
+      <AppField :label="t('settings.assistantPicks')" :hint="t('settings.assistantPicksHint')">
+        <AppToggle v-model="settings.assistantPicks" :aria-label="t('settings.assistantPicks')" />
       </AppField>
-      <AppField label="Watch my draws" hint="Stop for draws involving your team">
-        <AppToggle v-model="settings.watchDraws" aria-label="Watch my draws" />
+      <AppField :label="t('settings.watchDraws')" :hint="t('settings.watchDrawsHint')">
+        <AppToggle v-model="settings.watchDraws" :aria-label="t('settings.watchDraws')" />
       </AppField>
-      <AppField label="Accept the board's targets" hint="Skip the meeting on each new objective">
-        <AppToggle v-model="settings.assistantBoard" aria-label="Accept the board's targets" />
+      <AppField :label="t('settings.assistantBoard')" :hint="t('settings.assistantBoardHint')">
+        <AppToggle v-model="settings.assistantBoard" :aria-label="t('settings.assistantBoard')" />
       </AppField>
-      <AppField label="Show the youth intake" hint="Stop on 1 January for the new generation">
-        <AppToggle v-model="settings.showIntake" aria-label="Show the youth intake" />
+      <AppField :label="t('settings.showIntake')" :hint="t('settings.showIntakeHint')">
+        <AppToggle v-model="settings.showIntake" :aria-label="t('settings.showIntake')" />
       </AppField>
-      <AppField label="Autosave" layout="stack">
+      <AppField :label="t('settings.autosave')" layout="stack">
         <AppButtonGroup
           :model-value="settings.autoSave"
           block
           :options="[
-            { value: 'always', label: 'Always' },
-            { value: 'weekly', label: 'Weekly' },
-            { value: 'monthly', label: 'Monthly' },
-            { value: 'off', label: 'Off' },
+            { value: 'always', label: t('settings.always') },
+            { value: 'weekly', label: t('settings.weekly') },
+            { value: 'monthly', label: t('settings.monthly') },
+            { value: 'off', label: t('settings.off') },
           ]"
           @update:model-value="(v) => (settings.autoSave = v as AutoSave)"
         />
       </AppField>
-      <AppField label="Match speed" layout="stack">
+      <AppField :label="t('settings.matchSpeed')" layout="stack">
         <AppButtonGroup
           :model-value="String(settings.liveMatchSpeed)"
           block
-          :options="['1', '2', '4', '10'].map((v) => ({ value: v, label: `${v}×` }))"
+          :options="
+            ['1', '2', '4'].map((v) => ({ value: v, label: t('settings.speed', { n: v }) }))
+          "
           @update:model-value="(v) => (settings.liveMatchSpeed = Number(v) as LiveMatchSpeed)"
         />
       </AppField>
-      <AppField label="Pause on goals and red cards">
-        <AppToggle v-model="settings.pauseOnKeyEvents" aria-label="Pause on goals and red cards" />
+      <AppField :label="t('settings.pauseOnKey')">
+        <AppToggle v-model="settings.pauseOnKeyEvents" :aria-label="t('settings.pauseOnKey')" />
       </AppField>
-      <AppField label="Full commentary" hint="Fouls, corners and offsides as well">
-        <AppToggle v-model="settings.verboseCommentary" aria-label="Full commentary" />
+      <AppField :label="t('settings.fullCommentary')" :hint="t('settings.fullCommentaryHint')">
+        <AppToggle
+          v-model="settings.verboseCommentary"
+          :aria-label="t('settings.fullCommentary')"
+        />
       </AppField>
     </AppCard>
   </PageShell>

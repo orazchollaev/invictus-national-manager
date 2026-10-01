@@ -2,13 +2,15 @@
 /** The job is gone: a look back over the spell, then on to the offers. */
 import { computed } from "vue"
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import { Briefcase, Trophy } from "@lucide/vue"
 import { AppButton, AppEmptyState } from "@/components/ui"
 import { PageShell, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 
@@ -29,44 +31,53 @@ function next() {
 </script>
 
 <template>
-  <PageShell title="Clear your desk">
-    <AppEmptyState v-if="!stint" :icon="Briefcase" title="Nothing to see here" />
+  <PageShell :title="t('career.farewell.title')">
+    <AppEmptyState v-if="!stint" :icon="Briefcase" :title="t('career.farewell.nothing')" />
     <template v-else>
       <section class="card">
         <NationFlag :id="stint.nationId" :size="64" />
         <h2 class="title">
-          {{ stint.left === "sacked" ? "Sacked" : "Contract not renewed" }}
+          {{
+            stint.left === "sacked" ? t("career.farewell.sacked") : t("career.farewell.notRenewed")
+          }}
         </h2>
         <p class="lead">
-          Your time in charge of {{ stint.name }} is over: {{ formatDate(stint.from) }} –
-          {{ stint.to ? formatDate(stint.to) : "" }}.
+          {{
+            t("career.farewell.lead", {
+              name: $nation(stint.nationId),
+              from: formatDate(stint.from),
+              to: stint.to ? formatDate(stint.to) : "",
+            })
+          }}
         </p>
         <div class="stats">
           <div>
             <strong>{{ stint.played }}</strong>
-            <span>Matches</span>
+            <span>{{ t("career.farewell.matches") }}</span>
           </div>
           <div>
             <strong>{{ stint.won }}–{{ stint.drawn }}–{{ stint.lost }}</strong>
-            <span>W–D–L</span>
+            <span>{{ t("career.farewell.wdl") }}</span>
           </div>
           <div>
             <strong>{{ winRate }}%</strong>
-            <span>Won</span>
+            <span>{{ t("career.farewell.won") }}</span>
           </div>
         </div>
         <ul v-if="stint.trophies.length" class="trophies">
-          <li v-for="t in stint.trophies" :key="t">
+          <li v-for="(trophy, i) in stint.trophies" :key="i">
             <Trophy :size="16" />
-            {{ t }}
+            {{ $tx(trophy) }}
           </li>
         </ul>
         <p class="lead">
-          Other federations have heard. Your reputation will decide who calls, and how soon.
+          {{ t("career.farewell.heard") }}
         </p>
       </section>
       <StickyCta above-nav>
-        <AppButton variant="filled" block @click="next">See job offers</AppButton>
+        <AppButton variant="filled" block @click="next">
+          {{ t("career.farewell.seeOffers") }}
+        </AppButton>
       </StickyCta>
     </template>
   </PageShell>

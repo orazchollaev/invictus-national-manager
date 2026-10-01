@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { FastForward, Pause, Play, SkipForward } from "@lucide/vue"
 import { AppButton, AppChip, AppEmptyState } from "@/components/ui"
 import { PageShell, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
+import { stageLabel } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { makeRng, deriveSeed, shuffle } from "@/engine/rng"
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const world = useWorldStore()
@@ -97,7 +100,10 @@ const placed = computed(() => {
 })
 
 const groupNames = computed(
-  () => stage.value?.groups?.map((g) => (g.name.length <= 2 ? `Group ${g.name}` : g.name)) ?? []
+  () =>
+    stage.value?.groups?.map((g) =>
+      g.name.length <= 2 ? t("common.group", { name: g.name }) : g.name
+    ) ?? []
 )
 const groupSize = computed(() =>
   Math.max(0, ...(stage.value?.groups?.map((g) => g.teams.length) ?? [0]))
@@ -111,10 +117,14 @@ function finish() {
 </script>
 
 <template>
-  <PageShell v-if="inst && stage" :title="inst.name" :subtitle="`${stage.name} draw`">
+  <PageShell
+    v-if="inst && stage"
+    :title="$comp(inst)"
+    :subtitle="t('competitions.draw.subtitle', { stage: stageLabel(stage.name) })"
+  >
     <template #actions>
       <AppChip :variant="done ? 'neutral' : 'live'" size="sm">
-        {{ done ? "Complete" : "Live" }}
+        {{ done ? t("competitions.draw.complete") : t("common.live") }}
       </AppChip>
     </template>
 
@@ -122,19 +132,21 @@ function finish() {
       <div class="ball" :class="{ empty: !current }">
         <template v-if="current">
           <NationFlag :id="current.team" :size="56" />
-          <div class="ball-name">{{ world.world?.def(current.team).name }}</div>
+          <div class="ball-name">{{ $nation(current.team) }}</div>
           <div class="ball-to">
             {{
               stage.groups
-                ? `→ ${groupNames[current.slot]}`
-                : `→ Tie ${current.slot + 1}, ${current.pos === 0 ? "home" : "away"}`
+                ? t("competitions.draw.toGroup", { name: groupNames[current.slot] })
+                : current.pos === 0
+                  ? t("competitions.draw.toTie", { n: current.slot + 1 })
+                  : t("competitions.draw.toTieAway", { n: current.slot + 1 })
             }}
           </div>
         </template>
-        <div v-else class="ball-wait">The draw is about to begin…</div>
+        <div v-else class="ball-wait">{{ t("competitions.draw.about") }}</div>
       </div>
       <div v-if="stage.groups && !done" class="pot">
-        <div class="pot-title">Pot {{ currentPot + 1 }}</div>
+        <div class="pot-title">{{ t("competitions.draw.pot", { n: currentPot + 1 }) }}</div>
         <div class="pot-teams">
           <NationFlag v-for="s in potLeft" :id="s.team" :key="s.team" :size="22" />
         </div>
@@ -176,7 +188,7 @@ function finish() {
           />
           <span v-else class="slot-empty">—</span>
         </span>
-        <span class="vs">v</span>
+        <span class="vs">{{ t("competitions.draw.vs") }}</span>
         <span class="tie-team" :class="{ me: placed.get(`${i - 1}|1`) === world.me }">
           <NationFlag
             v-if="placed.get(`${i - 1}|1`)"
@@ -194,22 +206,24 @@ function finish() {
         <AppButton variant="tonal" @click="toggle">
           <Pause v-if="running" :size="16" />
           <Play v-else :size="16" />
-          {{ running ? "Pause" : "Resume" }}
+          {{ running ? t("competitions.draw.pause") : t("competitions.draw.resume") }}
         </AppButton>
         <AppButton variant="tonal" @click="fast = !fast">
           <FastForward :size="16" />
-          {{ fast ? "Normal" : "Faster" }}
+          {{ fast ? t("competitions.draw.normal") : t("competitions.draw.faster") }}
         </AppButton>
         <AppButton variant="tonal" @click="skip">
           <SkipForward :size="16" />
-          Result
+          {{ t("competitions.draw.result") }}
         </AppButton>
       </template>
-      <AppButton v-else variant="filled" block @click="finish">Continue</AppButton>
+      <AppButton v-else variant="filled" block @click="finish">
+        {{ t("common.continue") }}
+      </AppButton>
     </StickyCta>
   </PageShell>
-  <PageShell v-else back title="Draw">
-    <AppEmptyState title="This draw has not been made" />
+  <PageShell v-else back :title="t('competitions.draw.title')">
+    <AppEmptyState :title="t('competitions.draw.notMade')" />
   </PageShell>
 </template>
 

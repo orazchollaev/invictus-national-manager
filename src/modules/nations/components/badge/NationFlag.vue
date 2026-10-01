@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { flagUrl } from "@/lib/flags"
 import { NATION_DEFS } from "@/modules/world/services/statics"
-import {
-  isPlaceholder,
-  placeholderLabel,
-  placeholderShort,
-} from "@/engine/competition/placeholders"
+import { isPlaceholder, placeholderText } from "@/engine/competition/placeholders"
+import { nationName, resolveText } from "@/i18n/text"
 
 const props = withDefaults(
   defineProps<{
@@ -20,13 +18,18 @@ const props = withDefaults(
   { size: 20, name: false, link: false }
 )
 
+const { t } = useI18n()
+
 const def = computed(() => NATION_DEFS.find((n) => n.id === props.id))
 /** A place still to be decided in a draw ("UEFA play-off Path A winner"). */
 const pending = computed(() => isPlaceholder(props.id))
 const label = computed(() => {
-  if (pending.value)
-    return props.name === "short" ? placeholderShort(props.id!) : placeholderLabel(props.id!)
-  return (props.name === "short" ? def.value?.id : def.value?.name) ?? props.id ?? "TBD"
+  if (pending.value) return resolveText(placeholderText(props.id!, props.name === "short"))
+  return (
+    (props.name === "short" ? def.value?.id : def.value && nationName(def.value.id)) ??
+    props.id ??
+    t("common.tbd")
+  )
 })
 </script>
 

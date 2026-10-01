@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { AppSectionHeader } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { FixtureRow } from "@/modules/competitions/components/tables"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate, monthName } from "@/engine/calendar/dates"
+import { formatDate, monthName } from "@/i18n/dates"
 import { windowsForYear } from "@/engine/calendar/windows"
 import type { Fixture } from "@/engine/competition/types"
 
+const { t } = useI18n()
 const world = useWorldStore()
 
 /** The user's fixtures, past and future, month by month. */
@@ -39,12 +41,18 @@ const windows = computed(() => {
 </script>
 
 <template>
-  <PageShell back title="Calendar" subtitle="Your fixtures and the FIFA windows">
-    <AppSectionHeader title="International windows" />
+  <PageShell
+    back
+    :title="t('competitions.calendar.title')"
+    :subtitle="t('competitions.calendar.subtitle')"
+  >
+    <AppSectionHeader :title="t('competitions.calendar.windows')" />
     <div class="windows">
       <div v-for="w in windows" :key="w.id" class="window">
         <strong>{{ formatDate(w.start) }} – {{ formatDate(w.end) }}</strong>
-        <span class="muted">{{ w.slots.length }} matches</span>
+        <span class="muted">
+          {{ t("competitions.calendar.matches", { n: w.slots.length }, w.slots.length) }}
+        </span>
       </div>
     </div>
     <template v-for="m in months" :key="m.key">

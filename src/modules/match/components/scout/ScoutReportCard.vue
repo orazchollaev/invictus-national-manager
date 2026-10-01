@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { RouterLink } from "vue-router"
 import { ArrowDown, ArrowUp, Lightbulb } from "@lucide/vue"
 import { AppButton, AppCard, AppChip, AppSectionHeader } from "@/components/ui"
@@ -17,19 +18,23 @@ const props = defineProps<{
 
 const emit = defineEmits<{ apply: [] }>()
 
+const { t } = useI18n()
+
 const notes = computed(() => matchupNotes(props.report))
-const who = { you: "You", them: "Them" }
+const who = { you: "match.scout.you", them: "match.scout.them" }
 </script>
 
 <template>
   <AppCard padding="md" class="scout">
-    <AppSectionHeader :title="`Scouting: ${name}`" />
+    <AppSectionHeader :title="t('match.scout.title', { name })" />
     <p class="shape">{{ report.formation }}</p>
     <div class="traits">
-      <AppChip v-for="t in report.traits" :key="t" variant="accent" size="sm">{{ t }}</AppChip>
+      <AppChip v-for="(trait, i) in report.traits" :key="i" variant="accent" size="sm">
+        {{ $tx(trait) }}
+      </AppChip>
     </div>
 
-    <h3 class="sub">Players to watch</h3>
+    <h3 class="sub">{{ t("match.scout.watch") }}</h3>
     <ul class="players">
       <li v-for="k in report.key" :key="k.playerId">
         <RouterLink :to="`/player/${k.playerId}`" class="player">
@@ -38,30 +43,32 @@ const who = { you: "You", them: "Them" }
             <span class="player-pos">{{ player(k.playerId)?.pos }}</span>
           </span>
           <span class="player-note">
-            {{ k.note }} · {{ k.archetype }}
-            <template v-if="k.role && k.role !== k.archetype">({{ k.role }})</template>
+            {{ $tx(k.note) }} · {{ $tx(k.archetype) }}
+            <template v-if="k.role && $tx(k.role) !== $tx(k.archetype)">
+              ({{ $tx(k.role) }})
+            </template>
           </span>
         </RouterLink>
       </li>
     </ul>
 
-    <h3 class="sub">How your styles meet</h3>
+    <h3 class="sub">{{ t("match.scout.meet") }}</h3>
     <p v-if="!notes.good.length && !notes.bad.length" class="quiet">
-      Neither way of playing has an edge over the other.
+      {{ t("match.scout.noEdge") }}
     </p>
     <ul v-else class="notes">
-      <li v-for="n in notes.good" :key="`g-${n.who}-${n.label}`" class="note note--good">
+      <li v-for="n in notes.good" :key="`g-${n.who}-${$tx(n.label)}`" class="note note--good">
         <ArrowUp :size="14" />
         <span>
-          <strong>{{ who[n.who] }}</strong>
-          · {{ n.label }}
+          <strong>{{ t(who[n.who]) }}</strong>
+          · {{ $tx(n.label) }}
         </span>
       </li>
-      <li v-for="n in notes.bad" :key="`b-${n.who}-${n.label}`" class="note note--bad">
+      <li v-for="n in notes.bad" :key="`b-${n.who}-${$tx(n.label)}`" class="note note--bad">
         <ArrowDown :size="14" />
         <span>
-          <strong>{{ who[n.who] }}</strong>
-          · {{ n.label }}
+          <strong>{{ t(who[n.who]) }}</strong>
+          · {{ $tx(n.label) }}
         </span>
       </li>
     </ul>
@@ -70,21 +77,21 @@ const who = { you: "You", them: "Them" }
       <Lightbulb :size="18" class="advice-icon" />
       <div class="advice-body">
         <template v-if="report.advice.changes.length">
-          <strong>Your assistant suggests</strong>
+          <strong>{{ t("match.scout.suggests") }}</strong>
           <ul class="changes">
-            <li v-for="c in report.advice.changes" :key="c">{{ c }}</li>
+            <li v-for="(c, i) in report.advice.changes" :key="i">{{ $tx(c) }}</li>
           </ul>
           <p v-if="report.advice.reasons.length" class="quiet">
-            {{ report.advice.reasons.join(" · ") }}
+            {{ report.advice.reasons.map((r) => $tx(r)).join(" · ") }}
           </p>
-          <p v-if="assisted" class="quiet">Your assistant sets this up for you.</p>
+          <p v-if="assisted" class="quiet">{{ t("match.scout.assisted") }}</p>
           <AppButton v-else variant="tonal" block @click="emit('apply')">
-            Apply to my tactics
+            {{ t("match.scout.apply") }}
           </AppButton>
         </template>
         <template v-else>
-          <strong>No changes needed</strong>
-          <p class="quiet">Your set-up already suits the way they play.</p>
+          <strong>{{ t("match.scout.noChanges") }}</strong>
+          <p class="quiet">{{ t("match.scout.suits") }}</p>
         </template>
       </div>
     </div>

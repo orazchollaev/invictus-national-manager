@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
 import { AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PlayerRow } from "@/modules/squad/components/list"
 import { FixtureRow } from "@/modules/competitions/components/tables"
+import { compName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { COMPETITION_DEFS } from "@/engine/competition/defs"
 import type { Fixture } from "@/engine/competition/types"
 import type { Player } from "@/engine/types"
 
+const { t } = useI18n()
 const route = useRoute()
 const world = useWorldStore()
 const id = computed(() => String(route.params.id))
@@ -41,7 +44,7 @@ const trophies = world.derive((w) => {
     const years = (w.state.honours[d.id] ?? [])
       .filter((h) => h.winner === id.value)
       .map((h) => h.year)
-    if (years.length) out.push({ name: d.short, years })
+    if (years.length) out.push({ name: compName({ defId: d.id, year: 0 }, "short"), years })
   }
   return out
 }, [])
@@ -60,32 +63,43 @@ const record = computed(() => {
   <PageShell
     v-if="def && nation"
     back
-    :title="def.name"
-    :subtitle="`${def.confed} · ${rank ? `FIFA #${rank} · ${nation.points.toFixed(0)} pts` : 'Not a FIFA member'}`"
+    :title="$nation(def.id)"
+    :subtitle="
+      t('nation.subtitle', {
+        confed: def.confed,
+        detail: rank
+          ? t('nation.ranked', { rank, points: nation.points.toFixed(0) })
+          : t('nation.notFifa'),
+      })
+    "
   >
     <AppCard padding="md" class="head">
       <NationFlag :id="def.id" :size="56" />
       <div class="facts">
         <div>
-          <span class="muted">Federation</span>
-          {{ nation.reputation.toFixed(1) }}/10 ·
+          <span class="muted">{{ t("nation.federation") }}</span>
+          {{ t("nation.federationLine", { rep: nation.reputation.toFixed(1) }) }}
           <RouterLink :to="`/stadiums/${def.id}`" class="stadiums-link">
-            stadiums {{ "★".repeat(nation.stadium) }}{{ "☆".repeat(5 - nation.stadium) }}
+            {{
+              t("nation.stadiums", {
+                stars: "★".repeat(nation.stadium) + "☆".repeat(5 - nation.stadium),
+              })
+            }}
           </RouterLink>
         </div>
         <div>
-          <span class="muted">Coach</span>
+          <span class="muted">{{ t("nation.coach") }}</span>
           {{ nation.coach }}
         </div>
         <div>
-          <span class="muted">Last {{ nation.results.length }}</span>
-          {{ record.w }}W {{ record.d }}D {{ record.l }}L
+          <span class="muted">{{ t("nation.last", { n: nation.results.length }) }}</span>
+          {{ t("nation.record", record) }}
         </div>
         <div v-if="trophies.length" class="trophies">
           <StatPill
-            v-for="t in trophies"
-            :key="t.name"
-            :value="`${t.name} ×${t.years.length}`"
+            v-for="tr in trophies"
+            :key="tr.name"
+            :value="`${tr.name} ×${tr.years.length}`"
             tone="var(--gold)"
             wide
           />
@@ -96,9 +110,9 @@ const record = computed(() => {
     <AppSubTabBar
       :model-value="tab"
       :options="[
-        { value: 'overview', label: 'Fixtures' },
-        { value: 'squad', label: 'Squad' },
-        { value: 'pool', label: 'Players' },
+        { value: 'overview', label: t('nation.fixtures') },
+        { value: 'squad', label: t('nation.squad') },
+        { value: 'pool', label: t('nation.players') },
       ]"
       size="sm"
       @update:model-value="(v) => (tab = v)"
@@ -106,27 +120,27 @@ const record = computed(() => {
 
     <template v-if="tab === 'overview'">
       <template v-if="upcoming.length">
-        <AppSectionHeader title="Upcoming" />
+        <AppSectionHeader :title="t('nation.upcoming')" />
         <div class="list">
           <FixtureRow v-for="f in upcoming" :key="f.id" :fixture="f" show-date show-comp />
         </div>
       </template>
       <template v-if="played.length">
-        <AppSectionHeader title="Results" />
+        <AppSectionHeader :title="t('nation.results')" />
         <div class="list">
           <FixtureRow v-for="f in played" :key="f.id" :fixture="f" show-date show-comp />
         </div>
       </template>
-      <AppEmptyState v-if="!upcoming.length && !played.length" title="No fixtures yet" />
+      <AppEmptyState v-if="!upcoming.length && !played.length" :title="t('nation.noFixtures')" />
     </template>
 
     <div v-else class="list">
       <PlayerRow v-for="p in tab === 'squad' ? squad : pool" :key="p.id" :player="p" />
-      <AppEmptyState v-if="tab === 'squad' && !squad.length" title="No squad named yet" />
+      <AppEmptyState v-if="tab === 'squad' && !squad.length" :title="t('nation.noSquad')" />
     </div>
   </PageShell>
-  <PageShell v-else back title="Nation">
-    <AppEmptyState title="Not found" />
+  <PageShell v-else back :title="t('nation.title')">
+    <AppEmptyState :title="t('nation.notFound')" />
   </PageShell>
 </template>
 

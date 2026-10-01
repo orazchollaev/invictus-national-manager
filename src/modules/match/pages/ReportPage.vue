@@ -1,25 +1,31 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { useRoute } from "vue-router"
-import { AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
-import { PageShell, StatPill } from "@/modules/core/components"
+import { useI18n } from "vue-i18n"
+import { useRoute, useRouter } from "vue-router"
+import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
+import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { CommentaryFeed, StatsPanel } from "@/modules/match/components/live"
 import { laneCounts } from "@/engine/match/lanes"
+import { compName as compNameOf, nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import { matchRatingTone } from "@/modules/core/utils/format"
 import type { Side } from "@/engine/match/types"
 
+const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 const world = useWorldStore()
 const id = computed(() => String(route.params.id))
 const fixture = world.derive((w) => w.state.fixtures[id.value] ?? null, null)
 const report = world.derive((w) => w.state.reports[id.value] ?? null, null)
 const compName = computed(() =>
   fixture.value?.compId === "friendly"
-    ? "Friendly"
-    : (world.world?.state.competitions[fixture.value?.compId ?? ""]?.name ?? "")
+    ? t("match.friendly")
+    : ((i) => (i ? compNameOf(i) : ""))(
+        world.world?.state.competitions[fixture.value?.compId ?? ""]
+      )
 )
 const tab = ref("summary")
 
@@ -31,9 +37,7 @@ const playerName = (pid?: string) => {
 const names = {
   player: (pid: string | undefined) => playerName(pid),
   team: (s: Side) =>
-    fixture.value
-      ? (world.world?.def(s === "home" ? fixture.value.home : fixture.value.away).name ?? "")
-      : "",
+    fixture.value ? nationName(s === "home" ? fixture.value.home : fixture.value.away) : "",
 }
 
 /** Goals and cards per side, from the compact record every match keeps. */
@@ -76,22 +80,22 @@ const motm = computed(() => [...(report.value?.lines ?? [])].sort((a, b) => b.ra
     v-if="fixture"
     back
     :title="compName"
-    :subtitle="`${fixture.label} · ${formatDate(fixture.date)}`"
+    :subtitle="t('match.subtitle', { label: $tx(fixture.label), date: formatDate(fixture.date) })"
   >
     <AppCard padding="md">
       <div class="score">
         <NationFlag :id="fixture.home" :size="44" name link />
         <div class="score-num">
           <template v-if="fixture.result">{{ fixture.result.h }}–{{ fixture.result.a }}</template>
-          <template v-else>v</template>
+          <template v-else>{{ t("competitions.fixture.vs") }}</template>
         </div>
         <NationFlag :id="fixture.away" :size="44" name link />
       </div>
       <div v-if="fixture.result" class="muted center">
-        HT {{ fixture.result.ht?.[0] }}–{{ fixture.result.ht?.[1] }}
-        <template v-if="fixture.result.ft">· after extra time</template>
+        {{ t("match.report.ht", { a: fixture.result.ht?.[0], b: fixture.result.ht?.[1] }) }}
+        <template v-if="fixture.result.ft">{{ t("match.report.afterET") }}</template>
         <template v-if="fixture.result.pens">
-          · {{ fixture.result.pens[0] }}–{{ fixture.result.pens[1] }} on penalties
+          {{ t("match.report.onPens", { a: fixture.result.pens[0], b: fixture.result.pens[1] }) }}
         </template>
       </div>
       <div class="moments">
@@ -104,21 +108,21 @@ const motm = computed(() => [...(report.value?.lines ?? [])].sort((a, b) => b.ra
       </div>
     </AppCard>
 
-    <AppEmptyState v-if="!fixture.result" title="Not played yet" />
+    <AppEmptyState v-if="!fixture.result" :title="t('match.report.notPlayed')" />
 
     <template v-else-if="report">
       <AppCard v-if="motm" padding="md" class="motm">
-        <span class="muted">Player of the match</span>
+        <span class="muted">{{ t("match.report.motm") }}</span>
         <strong>{{ playerName(motm.playerId) }}</strong>
         <StatPill :value="motm.rating.toFixed(1)" :tone="matchRatingTone(motm.rating)" />
       </AppCard>
       <AppSubTabBar
         :model-value="tab"
         :options="[
-          { value: 'summary', label: 'Stats' },
+          { value: 'summary', label: t('match.report.stats') },
           { value: 'home', label: fixture.home },
           { value: 'away', label: fixture.away },
-          { value: 'feed', label: 'Commentary' },
+          { value: 'feed', label: t('match.report.commentary') },
         ]"
         size="sm"
         @update:model-value="(v) => (tab = v)"
@@ -147,10 +151,10 @@ const motm = computed(() => [...(report.value?.lines ?? [])].sort((a, b) => b.ra
             <span class="name">
               {{ playerName(l.playerId) }}
               <span class="muted">
-                {{ l.started ? "" : "sub · " }}{{ l.minutes }}'{{
-                  l.goals ? ` · ${l.goals} goal${l.goals > 1 ? "s" : ""}` : ""
-                }}{{ l.assists ? ` · ${l.assists} assist` : "" }}{{ l.yellow ? " · 🟨" : ""
-                }}{{ l.red ? " · 🟥" : "" }}
+                {{ l.started ? "" : t("match.report.sub") }}{{ l.minutes }}'{{
+                  l.goals ? " · " + t("match.report.goals", { n: l.goals }, l.goals) : ""
+                }}{{ l.assists ? " · " + t("match.report.assist", { n: l.assists }) : ""
+                }}{{ l.yellow ? " · 🟨" : "" }}{{ l.red ? " · 🟥" : "" }}
               </span>
             </span>
             <StatPill :value="l.rating.toFixed(1)" :tone="matchRatingTone(l.rating)" />
@@ -160,12 +164,17 @@ const motm = computed(() => [...(report.value?.lines ?? [])].sort((a, b) => b.ra
     </template>
 
     <AppCard v-else padding="md">
-      <AppSectionHeader title="Summary" />
-      <p class="muted">Only goals and cards are kept for matches you did not play.</p>
+      <AppSectionHeader :title="t('match.report.summary')" />
+      <p class="muted">{{ t("match.report.onlyGoals") }}</p>
     </AppCard>
+    <StickyCta above-nav>
+      <AppButton variant="filled" block @click="router.push('/home')">
+        {{ t("common.continue") }}
+      </AppButton>
+    </StickyCta>
   </PageShell>
-  <PageShell v-else back title="Match">
-    <AppEmptyState title="Match not found" />
+  <PageShell v-else back :title="t('match.title')">
+    <AppEmptyState :title="t('match.notFound')" />
   </PageShell>
 </template>
 

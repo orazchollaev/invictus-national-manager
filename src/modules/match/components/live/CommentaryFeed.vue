@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { ArrowUp, ArrowUpLeft, ArrowUpRight } from "@lucide/vue"
-import type { Lane, MatchEvent } from "@/engine/match/types"
+import type { MatchEvent } from "@/engine/match/types"
 import { KEY_EVENTS } from "@/engine/match/types"
+import { commentaryText } from "@/i18n"
 import { clock, commentaryLine, isMinor, type CommentaryNames } from "@/engine/match/commentary"
 
 const props = defineProps<{
@@ -13,11 +15,13 @@ const props = defineProps<{
   mine?: "home" | "away" | null
 }>()
 
+const { t } = useI18n()
+
 const lines = computed(() => {
   const out: { key: number; clock: string; text: string; ev: MatchEvent }[] = []
   props.events.forEach((ev, i) => {
     if (!props.verbose && isMinor(ev.kind)) return
-    const text = commentaryLine(ev, i, props.names)
+    const text = commentaryLine(ev, i, props.names, commentaryText())
     if (text) out.push({ key: i, clock: clock(ev), text, ev })
   })
   return out.reverse()
@@ -25,11 +29,6 @@ const lines = computed(() => {
 
 /** The arrow for a lane: up the pitch, leaning left or right of the attacking team. */
 const ARROWS = { left: ArrowUpLeft, centre: ArrowUp, right: ArrowUpRight }
-const LANE_LABEL: Record<Lane, string> = {
-  left: "Attack down the left",
-  centre: "Attack through the middle",
-  right: "Attack down the right",
-}
 
 function tone(ev: MatchEvent) {
   if (ev.kind === "goal" || ev.kind === "pen-goal" || ev.kind === "own-goal") return "goal"
@@ -55,7 +54,7 @@ function tone(ev: MatchEvent) {
         class="line-lane"
         :size="18"
         role="img"
-        :aria-label="LANE_LABEL[l.ev.lane]"
+        :aria-label="t(`match.lane.${l.ev.lane}`)"
       />
       <span class="line-text">{{ l.text }}</span>
     </li>

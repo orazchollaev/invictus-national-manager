@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n"
 import { Circle, CircleCheck, CircleX } from "@lucide/vue"
 import type { CareerReview } from "@/engine/world/types"
 import { StatPill } from "@/modules/core/components"
 
 defineProps<{ objectives: CareerReview["objectives"] }>()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -12,8 +14,8 @@ defineProps<{ objectives: CareerReview["objectives"] }>()
       <CircleCheck v-if="o.status === 'met'" :size="18" class="icon" />
       <CircleX v-else-if="o.status === 'failed'" :size="18" class="icon" />
       <Circle v-else :size="18" class="icon" />
-      <span class="text">{{ o.text }}</span>
-      <StatPill v-if="o.critical" value="Key" tone="var(--danger)" />
+      <span class="text">{{ $tx(o.text) }}</span>
+      <StatPill v-if="o.critical" :value="t('common.key')" tone="var(--danger)" />
     </li>
   </ul>
 </template>

@@ -1,31 +1,35 @@
-export const MENTALITY_OPTIONS = [
-  { value: "-2", label: "Very defensive" },
-  { value: "-1", label: "Defensive" },
-  { value: "0", label: "Balanced" },
-  { value: "1", label: "Attacking" },
-  { value: "2", label: "All-out attack" },
+import { i18n } from "@/i18n"
+
+const t = (key: string) => i18n.global.t(key)
+
+export const mentalityOptions = () => [
+  { value: "-2", label: t("tactics.mentality.-2") },
+  { value: "-1", label: t("tactics.mentality.-1") },
+  { value: "0", label: t("tactics.mentality.0") },
+  { value: "1", label: t("tactics.mentality.1") },
+  { value: "2", label: t("tactics.mentality.2") },
 ]
 
-export const PRESSING_OPTIONS = [
-  { value: "0", label: "Low" },
-  { value: "1", label: "Standard" },
-  { value: "2", label: "High" },
+export const pressingOptions = () => [
+  { value: "0", label: t("tactics.pressing.0") },
+  { value: "1", label: t("tactics.pressing.1") },
+  { value: "2", label: t("tactics.pressing.2") },
 ]
 
-export const LINE_OPTIONS = [
-  { value: "0", label: "Deep" },
-  { value: "1", label: "Standard" },
-  { value: "2", label: "High" },
+export const lineOptions = () => [
+  { value: "0", label: t("tactics.line.0") },
+  { value: "1", label: t("tactics.line.1") },
+  { value: "2", label: t("tactics.line.2") },
 ]
 
-export const WIDTH_OPTIONS = [
-  { value: "0", label: "Narrow" },
-  { value: "1", label: "Standard" },
-  { value: "2", label: "Wide" },
+export const widthOptions = () => [
+  { value: "0", label: t("tactics.width.0") },
+  { value: "1", label: t("tactics.width.1") },
+  { value: "2", label: t("tactics.width.2") },
 ]
 
-export const TEMPO_OPTIONS = [
-  { value: "0", label: "Patient" },
-  { value: "1", label: "Standard" },
-  { value: "2", label: "Direct" },
+export const tempoOptions = () => [
+  { value: "0", label: t("tactics.tempo.0") },
+  { value: "1", label: t("tactics.tempo.1") },
+  { value: "2", label: t("tactics.tempo.2") },
 ]

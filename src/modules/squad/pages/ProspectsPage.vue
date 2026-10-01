@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { Eye, EyeOff, Sprout } from "@lucide/vue"
 import { AppEmptyState, AppStarRating, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
@@ -10,6 +11,7 @@ import { INTL_MINUTES_FULL } from "@/engine/players/lifecycle"
 import { isWonderkid, potentialStars, seasonGain } from "@/modules/squad/utils/stars"
 import type { Player } from "@/engine/types"
 
+const { t } = useI18n()
 const world = useWorldStore()
 const filter = ref<"all" | "watched" | "uncapped">("all")
 
@@ -51,19 +53,16 @@ const boost = (p: Player) => Math.min(1, (p.intlMin ?? 0) / INTL_MINUTES_FULL)
 <template>
   <PageShell
     back
-    title="Prospects"
-    :subtitle="data ? `${data.players.length} players aged 21 or under` : ''"
+    :title="t('squad.prospectsPage.title')"
+    :subtitle="data ? t('squad.prospectsPage.subtitle', { n: data.players.length }) : ''"
   >
-    <p class="intro">
-      International minutes speed a youngster's development — up to a quarter faster with about six
-      full matches a season — and a good season in your shirt draws bigger clubs.
-    </p>
+    <p class="intro">{{ t("squad.prospectsPage.intro") }}</p>
     <AppSubTabBar
       :model-value="filter"
       :options="[
-        { value: 'all', label: 'All' },
-        { value: 'watched', label: 'Watchlist' },
-        { value: 'uncapped', label: 'Uncapped' },
+        { value: 'all', label: t('squad.prospectsPage.all') },
+        { value: 'watched', label: t('squad.prospectsPage.watchlist') },
+        { value: 'uncapped', label: t('squad.prospectsPage.uncapped') },
       ]"
       size="sm"
       @update:model-value="(v) => (filter = v as typeof filter)"
@@ -71,8 +70,12 @@ const boost = (p: Player) => Math.min(1, (p.intlMin ?? 0) / INTL_MINUTES_FULL)
     <AppEmptyState
       v-if="!list.length"
       :icon="Sprout"
-      :title="filter === 'watched' ? 'Nobody on your watchlist' : 'No prospects'"
-      :description="filter === 'watched' ? 'Tap the eye next to a player to follow him.' : ''"
+      :title="
+        filter === 'watched'
+          ? t('squad.prospectsPage.noWatch')
+          : t('squad.prospectsPage.noProspects')
+      "
+      :description="filter === 'watched' ? t('squad.prospectsPage.watchHint') : ''"
     />
     <div v-else class="list">
       <div v-for="r in list" :key="r.player.id" class="item">
@@ -81,7 +84,9 @@ const boost = (p: Player) => Math.min(1, (p.intlMin ?? 0) / INTL_MINUTES_FULL)
             <div class="scout">
               <AppStarRating :value="r.stars" :size="12" />
               <span class="meta">
-                <strong v-if="r.wonder" class="wonder">Wonderkid</strong>
+                <strong v-if="r.wonder" class="wonder">
+                  {{ t("squad.prospectsPage.wonderkid") }}
+                </strong>
                 <span v-if="r.gain" :class="r.gain > 0 ? 'up' : 'down'">
                   {{ r.gain > 0 ? "▲" : "▼" }}{{ Math.abs(r.gain) }}
                 </span>
@@ -90,13 +95,15 @@ const boost = (p: Player) => Math.min(1, (p.intlMin ?? 0) / INTL_MINUTES_FULL)
             </div>
           </template>
         </PlayerRow>
-        <div class="boost" :title="`${r.player.intlMin ?? 0} international minutes this season`">
+        <div class="boost" :title="t('squad.prospectsPage.boost', { n: r.player.intlMin ?? 0 })">
           <span :style="{ width: `${boost(r.player) * 100}%` }"></span>
         </div>
         <button
           class="watch"
           :class="{ on: r.watched }"
-          :aria-label="r.watched ? 'Stop watching' : 'Watch'"
+          :aria-label="
+            r.watched ? t('squad.prospectsPage.stopWatching') : t('squad.prospectsPage.watch')
+          "
           @click="world.toggleWatch(r.player.id)"
         >
           <Eye v-if="r.watched" :size="18" />

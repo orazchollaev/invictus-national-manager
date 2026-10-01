@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { resolveText as say } from "@/i18n/text"
 import {
   ARCHETYPES,
   TIRES_EARLY_AGE,
@@ -99,8 +100,8 @@ describe("badges", () => {
     )
     expect(all.length).toBe(4)
     for (const b of all) {
-      expect(b.label.length).toBeGreaterThan(0)
-      expect(b.text.length).toBeGreaterThan(10)
+      expect(say(b.label).length).toBeGreaterThan(0)
+      expect(say(b.text).length).toBeGreaterThan(10)
     }
   })
 })

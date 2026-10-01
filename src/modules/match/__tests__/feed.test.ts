@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { createSSRApp, h, type Component } from "vue"
 import { renderToString } from "vue/server-renderer"
+import i18n from "@/i18n"
 import { commentaryLine } from "@/engine/match/commentary"
 import { laneCounts } from "@/engine/match/lanes"
 import type { Lane, MatchEvent, TeamStats } from "@/engine/match/types"
@@ -26,7 +27,7 @@ const attack = (
 })
 
 const render = (component: Component, props: Record<string, unknown>) =>
-  renderToString(createSSRApp({ render: () => h(component, props) }))
+  renderToString(createSSRApp({ render: () => h(component, props) }).use(i18n))
 
 describe("commentary with lanes", () => {
   it("says where an attack came from, for every variant of the line", () => {

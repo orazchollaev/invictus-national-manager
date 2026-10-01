@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
 import {
   Chart,
@@ -11,13 +12,12 @@ import {
   Filler,
 } from "chart.js"
 import { AppCard, AppChip, AppEmptyState, AppSectionHeader } from "@/components/ui"
-import { ARCHETYPES, archetypeOf, badgesOf } from "@/engine/players/archetypes"
-import { BOND_LABELS } from "@/engine/players/bonds"
+import { archetypeOf, badgesOf } from "@/engine/players/archetypes"
 import { relationsOf, signed } from "@/modules/squad/utils/chemistry"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import {
   abilityTone,
   age,
@@ -28,6 +28,7 @@ import {
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler)
 
+const { t } = useI18n()
 const route = useRoute()
 const world = useWorldStore()
 const id = computed(() => String(route.params.id))
@@ -36,7 +37,7 @@ const club = computed(() => (p.value ? world.world?.clubs.get(p.value.clubId) : 
 const potential = computed(() => (p.value ? potentialRange(p.value, world.date) : [0, 0]))
 const injured = computed(() => !!p.value?.injury && p.value.injury.until > world.date)
 
-const style = computed(() => ARCHETYPES[archetypeOf(p.value ?? { id: "", pos: "CM" })])
+const archId = computed(() => archetypeOf(p.value ?? { id: "", pos: "CM" }))
 const badges = computed(() => (p.value ? badgesOf(p.value, world.date) : []))
 
 /** His bonds with the rest of his nation's players. */
@@ -46,14 +47,14 @@ const relations = computed(() =>
 
 const traits = computed(() => {
   if (!p.value) return []
-  const t = p.value.pers
+  const pers = p.value.pers
   return [
-    ["Professionalism", t.professionalism],
-    ["Ambition", t.ambition],
-    ["Temperament", t.temperament],
-    ["Consistency", t.consistency],
-    ["Big matches", t.bigMatch],
-    ["Injury resistance", 21 - t.injuryProne],
+    [t("squad.player.traits.professionalism"), pers.professionalism],
+    [t("squad.player.traits.ambition"), pers.ambition],
+    [t("squad.player.traits.temperament"), pers.temperament],
+    [t("squad.player.traits.consistency"), pers.consistency],
+    [t("squad.player.traits.bigMatches"), pers.bigMatch],
+    [t("squad.player.traits.injuryResistance"), 21 - pers.injuryProne],
   ] as [string, number][]
 })
 
@@ -64,7 +65,7 @@ function draw() {
   if (!canvas.value || !p.value) return
   const points = [
     ...p.value.history.map((h) => [String(h.season).slice(2), h.ca] as const),
-    ["Now", p.value.ca] as const,
+    [t("squad.player.now"), p.value.ca] as const,
   ]
   const styles = getComputedStyle(document.documentElement)
   const accent = styles.getPropertyValue("--accent").trim() || "teal"
@@ -105,88 +106,109 @@ onBeforeUnmount(() => chart?.destroy())
   <PageShell
     v-if="p"
     :title="`${p.first} ${p.last}`"
-    :subtitle="`${p.pos}${p.alt.length ? ` (${p.alt.join(', ')})` : ''} · ${age(p, world.date)} years`"
+    :subtitle="
+      t('squad.player.subtitle', {
+        pos: p.pos,
+        alt: p.alt.length ? ` (${p.alt.join(', ')})` : '',
+        age: age(p, world.date),
+      })
+    "
     back
   >
     <AppCard padding="md" class="head">
       <NationFlag :id="p.nationId" :size="40" name link />
       <div class="head-stats">
         <div class="stat">
-          <span class="stat-label">Ability</span>
+          <span class="stat-label">{{ t("squad.player.ability") }}</span>
           <StatPill :value="Math.round(p.ca)" :tone="abilityTone(p.ca)" wide />
         </div>
         <div class="stat">
-          <span class="stat-label">Potential</span>
+          <span class="stat-label">{{ t("squad.player.potential") }}</span>
           <span class="stat-value">{{ potential[0] }}–{{ potential[1] }}</span>
         </div>
         <div class="stat">
-          <span class="stat-label">Caps / goals</span>
+          <span class="stat-label">{{ t("squad.player.capsGoals") }}</span>
           <span class="stat-value">{{ p.caps }} / {{ p.goals }}</span>
         </div>
       </div>
     </AppCard>
 
     <AppCard padding="md">
-      <AppSectionHeader title="Playing style" />
-      <div class="style-name">{{ style.label }}</div>
-      <p class="style-blurb">{{ style.blurb }}</p>
+      <AppSectionHeader :title="t('squad.player.style')" />
+      <div class="style-name">{{ t(`arch.${archId}.label`) }}</div>
+      <p class="style-blurb">{{ t(`arch.${archId}.blurb`) }}</p>
       <ul v-if="badges.length" class="badges">
         <li v-for="b in badges" :key="b.id">
-          <AppChip variant="accent" size="sm">{{ b.label }}</AppChip>
-          <span class="badge-text">{{ b.text }}</span>
+          <AppChip variant="accent" size="sm">{{ $tx(b.label) }}</AppChip>
+          <span class="badge-text">{{ $tx(b.text) }}</span>
         </li>
       </ul>
     </AppCard>
 
     <AppCard padding="md">
-      <AppSectionHeader title="Relationships" />
+      <AppSectionHeader :title="t('squad.player.relationships')" />
       <ul v-if="relations.length" class="rels">
         <li v-for="r in relations" :key="r.player.id" class="rel" :class="`rel--${r.kind}`">
           <span class="rel-points">{{ signed(r.points) }}</span>
           <RouterLink :to="`/player/${r.player.id}`" class="rel-name">
             {{ r.player.first }} {{ r.player.last }}
           </RouterLink>
-          <span class="rel-kind">{{ BOND_LABELS[r.kind] }}</span>
+          <span class="rel-kind">{{ t(`bond.${r.kind}`) }}</span>
         </li>
       </ul>
-      <p v-else class="style-blurb">Gets on with everyone in the squad.</p>
+      <p v-else class="style-blurb">{{ t("squad.player.noRelations") }}</p>
     </AppCard>
 
     <AppCard padding="md">
-      <AppSectionHeader title="Club and condition" />
+      <AppSectionHeader :title="t('squad.player.clubCondition')" />
       <dl class="facts">
-        <dt>Club</dt>
+        <dt>{{ t("squad.player.club") }}</dt>
         <dd>
           {{ club?.name ?? "—" }}
-          <span class="muted">(level {{ club?.tier ?? "?" }})</span>
+          <span class="muted">{{ t("squad.player.level", { n: club?.tier ?? "?" }) }}</span>
         </dd>
-        <dt>Role</dt>
+        <dt>{{ t("squad.player.role") }}</dt>
         <dd class="cap">{{ p.role }}</dd>
-        <dt>Form</dt>
+        <dt>{{ t("squad.player.form") }}</dt>
         <dd>{{ formLabel(p.form) }}</dd>
-        <dt>Sharpness</dt>
+        <dt>{{ t("squad.player.sharpness") }}</dt>
         <dd>{{ p.sharp }}%</dd>
-        <dt>Morale</dt>
+        <dt>{{ t("squad.player.morale") }}</dt>
         <dd>{{ p.morale }}%</dd>
-        <dt>Fitness</dt>
+        <dt>{{ t("squad.player.fitness") }}</dt>
         <dd :class="{ bad: injured }">
-          {{ injured ? `${p.injury!.label} — back ${formatDate(p.injury!.until)}` : "Fit" }}
+          {{
+            injured
+              ? t("squad.player.backOn", {
+                  label: $tx(p.injury!.label),
+                  date: formatDate(p.injury!.until),
+                })
+              : t("squad.player.fit")
+          }}
         </dd>
         <template v-if="p.banned">
-          <dt>Suspended</dt>
-          <dd class="bad">{{ p.banned }} match</dd>
+          <dt>{{ t("squad.player.suspended") }}</dt>
+          <dd class="bad">{{ t("squad.player.suspendedLine", { n: p.banned }) }}</dd>
         </template>
         <template v-if="p.intlRetired">
-          <dt>International</dt>
-          <dd class="bad">Retired</dd>
+          <dt>{{ t("squad.player.international") }}</dt>
+          <dd class="bad">{{ t("squad.player.retired") }}</dd>
         </template>
-        <dt>Foot</dt>
-        <dd>{{ p.foot === "L" ? "Left" : p.foot === "B" ? "Both" : "Right" }}</dd>
+        <dt>{{ t("squad.player.foot") }}</dt>
+        <dd>
+          {{
+            p.foot === "L"
+              ? t("squad.player.left")
+              : p.foot === "B"
+                ? t("squad.player.both")
+                : t("squad.player.right")
+          }}
+        </dd>
       </dl>
     </AppCard>
 
     <AppCard padding="md">
-      <AppSectionHeader title="Character" />
+      <AppSectionHeader :title="t('squad.player.character')" />
       <dl class="facts">
         <template v-for="[label, v] in traits" :key="label">
           <dt>{{ label }}</dt>
@@ -196,11 +218,15 @@ onBeforeUnmount(() => chart?.destroy())
     </AppCard>
 
     <AppCard padding="md">
-      <AppSectionHeader title="Development" />
+      <AppSectionHeader :title="t('squad.player.development')" />
       <div class="chart"><canvas ref="canvas"></canvas></div>
     </AppCard>
   </PageShell>
-  <AppEmptyState v-else title="Player not found" description="He may have retired." />
+  <AppEmptyState
+    v-else
+    :title="t('squad.player.notFound')"
+    :description="t('squad.player.notFoundHint')"
+  />
 </template>
 
 <style scoped>

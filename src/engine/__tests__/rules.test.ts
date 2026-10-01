@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { resolveText as say } from "@/i18n/text"
 import nations from "@/data/nations.json"
 import clubRows from "@/data/clubs.json"
 import playerRows from "@/data/players.json"
@@ -74,7 +75,7 @@ describe("suspensions and injuries", () => {
 describe("world events", () => {
   it("announces tournament hosts in the news", () => {
     const w = newWorld()
-    const titles = w.state.news.map((n) => n.title)
+    const titles = w.state.news.map((n) => say(n.title))
     expect(titles.some((t) => t.includes("to host the FIFA World Cup 2030"))).toBe(true)
     expect(titles.some((t) => t.includes("host the UEFA Euro 2028"))).toBe(true)
   })
@@ -171,7 +172,7 @@ describe("career", () => {
         f.result = { h: 1, a: 1 }
       }
     }
-    const texts = w.state.career.objectives.map((o) => o.text)
+    const texts = w.state.career.objectives.map((o) => say(o.text))
     expect(texts).toContain("Qualify for the FIFA World Cup 2030")
     expect(texts).toContain("Qualify for the AFC Asian Cup 2031")
   })

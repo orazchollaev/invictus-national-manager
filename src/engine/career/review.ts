@@ -8,31 +8,34 @@ import { ageOn, fullName } from "../players/ability"
 import type { World } from "../world/world"
 import type { CareerReview, CareerSnapshot, ReviewVerdict } from "../world/types"
 import { leagueGroup, ORDER, outcomeFor, playedIn, reached } from "./progress"
+import { compText, msg, stageText, type Msg } from "../text"
 
 /** Kinds of competition that get a review. */
 export const REVIEWED = new Set(["qualifier", "continental", "world-cup", "nations-league"])
 
 /** "Champions", "Semi-finals", "Qualified", "Promoted to League B"… */
-export function reachedLabel(inst: CompetitionInstance, nationId: string): string {
+export function reachedLabel(inst: CompetitionInstance, nationId: string): Msg {
   const o = inst.outcome
-  if (o.winner === nationId) return "Champions"
+  if (o.winner === nationId) return msg("review.reached.champions")
   if (inst.kind === "qualifier") {
-    if (!o.qualified) return "Knocked out"
-    return o.qualified.includes(nationId) ? "Qualified" : "Did not qualify"
+    if (!o.qualified) return msg("review.reached.knockedOut")
+    return o.qualified.includes(nationId)
+      ? msg("review.reached.qualified")
+      : msg("review.reached.notQualified")
   }
   if (inst.kind === "nations-league") {
     const found = leagueGroup(inst, nationId)
     const letter = found?.group.name.replace(/\d+$/, "")
     const now = Object.entries(o.tiers ?? {}).find(([, list]) => list.includes(nationId))?.[0]
-    if (!letter || !now) return "League stage"
-    if (now < letter) return `Promoted to League ${now}`
-    if (now > letter) return `Relegated to League ${now}`
-    return `Stayed in League ${letter}`
+    if (!letter || !now) return msg("review.reached.leagueStage")
+    if (now < letter) return msg("review.reached.promoted", { letter: now })
+    if (now > letter) return msg("review.reached.relegated", { letter: now })
+    return msg("review.reached.stayed", { letter })
   }
-  if (o.runnerUp === nationId) return "Runners-up"
+  if (o.runnerUp === nationId) return msg("review.reached.runnersUp")
   const deepest = Math.max(...reached(inst, nationId).map((r) => ORDER.indexOf(r)))
-  if (deepest <= 0) return "Group stage"
-  return ORDER[deepest]
+  if (deepest <= 0) return msg("review.reached.groups")
+  return stageText(ORDER[deepest])
 }
 
 export function snapshotOf(world: World, nationId: string | null): CareerSnapshot {
@@ -44,19 +47,9 @@ export function snapshotOf(world: World, nationId: string | null): CareerSnapsho
   }
 }
 
-const MESSAGES: Record<ReviewVerdict, (name: string, reached: string) => string> = {
-  delighted: (name, r) =>
-    r === "Champions"
-      ? `The federation is delighted. Winning the ${name} is beyond what anyone dared to hope for, and your standing has never been higher.`
-      : `The federation is delighted with the ${name}. You have given them more than they asked for.`,
-  satisfied: (name) =>
-    `The federation is satisfied with the ${name}. The job was done; now they expect you to build on it.`,
-  disappointed: (name) =>
-    `The federation is disappointed with the ${name}. They expected more, and their patience is not endless.`,
-  ultimatum: (name) =>
-    `After the ${name}, the federation has run out of patience. Results must improve at once, or they will find someone who can deliver them.`,
-  sacked: (name) =>
-    `The ${name} was the last straw. The federation has decided to relieve you of your duties.`,
+function reviewMessage(verdict: ReviewVerdict, comp: Msg, champions: boolean): Msg {
+  if (verdict === "delighted" && champions) return msg("review.msg.delightedChampion", { comp })
+  return msg(`review.msg.${verdict}`, { comp })
 }
 
 /**
@@ -123,18 +116,19 @@ export function buildReview(
     .map((o) => ({ text: o.text, status: o.status, critical: o.critical }))
   const after = snapshotOf(world, nationId)
   const label = reachedLabel(inst, nationId)
+  const champions = label.k === "review.reached.champions"
   const delta = after.confidence - before.confidence
   let verdict: ReviewVerdict
   if (sacked) verdict = "sacked"
   else if (c.ultimatum) verdict = "ultimatum"
   else if (objectives.some((o) => o.status === "failed")) verdict = "disappointed"
-  else if (label === "Champions" || delta >= 15) verdict = "delighted"
+  else if (champions || delta >= 15) verdict = "delighted"
   else if (delta <= -10) verdict = "disappointed"
   else verdict = "satisfied"
 
   return {
     id: inst.id,
-    name: inst.name,
+    name: compText(inst.defId, inst.year),
     nationId,
     date: world.state.date,
     reached: label,
@@ -151,6 +145,6 @@ export function buildReview(
     stars,
     youngsters,
     verdict,
-    message: MESSAGES[verdict](inst.name, label),
+    message: reviewMessage(verdict, compText(inst.defId, inst.year), champions),
   }
 }

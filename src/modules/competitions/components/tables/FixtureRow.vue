@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import type { Fixture } from "@/engine/competition/types"
 import { NationFlag } from "@/modules/nations/components/badge"
-import { formatShort } from "@/engine/calendar/dates"
+import { formatShort } from "@/i18n/dates"
+import { compName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 
 const props = defineProps<{ fixture: Fixture; showDate?: boolean; showComp?: boolean }>()
+const { t } = useI18n()
 const world = useWorldStore()
 const mine = computed(
   () => world.me && (props.fixture.home === world.me || props.fixture.away === world.me)
 )
 const comp = computed(() =>
   props.fixture.compId === "friendly"
-    ? "Friendly"
-    : (world.world?.state.competitions[props.fixture.compId]?.short ?? "")
+    ? t("competitions.fixture.friendly")
+    : ((i) => (i ? compName(i, "short") : ""))(
+        world.world?.state.competitions[props.fixture.compId]
+      )
 )
 </script>
 
@@ -30,9 +35,9 @@ const comp = computed(() =>
     <span class="fx-score">
       <template v-if="fixture.result">
         {{ fixture.result.h }}–{{ fixture.result.a }}
-        <small v-if="fixture.result.pens">p</small>
+        <small v-if="fixture.result.pens">{{ t("competitions.fixture.pens") }}</small>
       </template>
-      <template v-else>v</template>
+      <template v-else>{{ t("competitions.fixture.vs") }}</template>
     </span>
     <span class="fx-team"><NationFlag :id="fixture.away" :size="18" name="short" /></span>
     <span v-if="showComp" class="fx-comp">{{ comp }}</span>

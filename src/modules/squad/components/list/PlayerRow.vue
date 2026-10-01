@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { Ban, Cross, TrendingDown, TrendingUp } from "@lucide/vue"
 import type { Player } from "@/engine/types"
-import { ARCHETYPES, archetypeOf } from "@/engine/players/archetypes"
+import { archetypeOf } from "@/engine/players/archetypes"
 import { StatPill } from "@/modules/core/components"
 import { abilityTone, age, positionTone } from "@/modules/core/utils/format"
 import { useWorldStore } from "@/modules/world/store"
@@ -15,11 +16,12 @@ const props = defineProps<{
   static?: boolean
 }>()
 
+const { t } = useI18n()
 const world = useWorldStore()
 const date = computed(() => world.date)
 const club = computed(() => world.world?.clubs.get(props.player.clubId))
 const injured = computed(() => !!props.player.injury && props.player.injury.until > date.value)
-const style = computed(() => ARCHETYPES[archetypeOf(props.player)])
+const archId = computed(() => archetypeOf(props.player))
 </script>
 
 <template>
@@ -36,10 +38,10 @@ const style = computed(() => ARCHETYPES[archetypeOf(props.player)])
         <Cross v-if="injured" :size="14" class="prow-icon prow-icon--injury" />
         <Ban v-if="player.banned" :size="14" class="prow-icon prow-icon--ban" />
       </div>
-      <div class="prow-style">{{ style.label }}</div>
+      <div class="prow-style">{{ t(`arch.${archId}.label`) }}</div>
       <div v-if="!compact" class="prow-sub">
-        {{ age(player, date) }} · {{ club?.name ?? "Free agent" }}
-        <template v-if="player.caps">· {{ player.caps }} caps</template>
+        {{ age(player, date) }} · {{ club?.name ?? t("squad.freeAgent") }}
+        <template v-if="player.caps">· {{ t("squad.capsLine", { n: player.caps }) }}</template>
       </div>
     </div>
     <TrendingUp v-if="player.form >= 2" :size="16" class="prow-form up" />

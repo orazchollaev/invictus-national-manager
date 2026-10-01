@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { resolveText as say } from "@/i18n/text"
 import nations from "@/data/nations.json"
 import clubRows from "@/data/clubs.json"
 import playerRows from "@/data/players.json"
@@ -103,11 +104,11 @@ describe("chemistry", () => {
   })
 
   it("puts the spirit in a word", () => {
-    expect(spiritLabel(2)).toBe("Tight-knit")
-    expect(spiritLabel(0.5)).toBe("Good")
-    expect(spiritLabel(0)).toBe("Neutral")
-    expect(spiritLabel(-0.5)).toBe("Uneasy")
-    expect(spiritLabel(-2)).toBe("Divided")
+    expect(say(spiritLabel(2))).toBe("Tight-knit")
+    expect(say(spiritLabel(0.5))).toBe("Good")
+    expect(say(spiritLabel(0))).toBe("Neutral")
+    expect(say(spiritLabel(-0.5))).toBe("Uneasy")
+    expect(say(spiritLabel(-2))).toBe("Divided")
   })
 
   it("is small across real squads: it shades a side, it does not make one", () => {

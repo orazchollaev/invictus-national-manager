@@ -1,15 +1,8 @@
 import type { ReviewVerdict } from "@/engine/world/types"
 
-const LABELS: Record<ReviewVerdict, string> = {
-  delighted: "Delighted",
-  satisfied: "Satisfied",
-  disappointed: "Disappointed",
-  ultimatum: "Final warning",
-  sacked: "Dismissed",
-}
-
-export function verdictLabel(v: ReviewVerdict): string {
-  return LABELS[v]
+/** The i18n key of the verdict's label. */
+export function verdictKey(v: ReviewVerdict): string {
+  return `career.verdict.${v}`
 }
 
 /** The verdict's colour, as a token. */

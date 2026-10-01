@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { Sparkles } from "@lucide/vue"
 import {
@@ -15,13 +16,19 @@ import {
 } from "@/components/ui"
 import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { PitchView } from "@/modules/squad/components/pitch"
-import { LINE_OPTIONS, MENTALITY_OPTIONS, WIDTH_OPTIONS } from "@/modules/squad/constants"
+import {
+  lineOptions,
+  mentalityOptions,
+  pressingOptions,
+  tempoOptions,
+  widthOptions,
+} from "@/modules/squad/constants"
 import { PlayerRow } from "@/modules/squad/components/list"
 import { useWorldStore } from "@/modules/world/store"
 import { FORMATIONS, FORMATION_LIST } from "@/engine/match/formations"
 import { aiTeamSheet, pickBench } from "@/engine/ai/squad"
 import { matchAbility, positionFit, positionGroup } from "@/engine/players/ability"
-import { ROLES, type Role } from "@/engine/match/roles"
+import type { Role } from "@/engine/match/roles"
 import type { Formation, Level, Mentality, Tactics } from "@/engine/match/types"
 import type { Player, PositionGroup } from "@/engine/types"
 import { showAlert } from "@/composables/useDialog"
@@ -31,6 +38,7 @@ import { bondLines, chemistryWith, signed } from "@/modules/squad/utils/chemistr
 import { carryFormation, placePlayer, roleChoices, setSlotRole } from "@/modules/squad/utils/lineup"
 import { useSettingsStore } from "@/modules/settings/store"
 
+const { t } = useI18n()
 const settings = useSettingsStore()
 
 const router = useRouter()
@@ -75,11 +83,11 @@ function setFormation(f: Formation) {
 }
 
 const GROUP_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "GK", label: "GK" },
-  { value: "DEF", label: "DEF" },
-  { value: "MID", label: "MID" },
-  { value: "FWD", label: "FWD" },
+  { value: "ALL", label: t("common.all") },
+  { value: "GK", label: t("squad.pos.GK") },
+  { value: "DEF", label: t("squad.pos.DEF") },
+  { value: "MID", label: t("squad.pos.MID") },
+  { value: "FWD", label: t("squad.pos.FWD") },
 ]
 
 /** Opens on the tapped slot's line; "ALL" shows the whole squad. */
@@ -128,7 +136,7 @@ function chem(p: Player): number {
 const roleLabels = computed(() =>
   positions.value.map((_, i) => {
     const r = team.value.xi[i]?.role
-    return r ? ROLES[r].label : null
+    return r ? t(`role.${r}.label`) : null
   })
 )
 
@@ -196,12 +204,13 @@ async function save() {
   const xi = FORMATIONS[team.value.tactics.formation]
     .map((pos, i) => ({ playerId: slots.value[i] ?? "", pos, role: team.value.xi[i]?.role }))
     .filter((s) => s.playerId)
-  if (xi.length < 11) return showAlert("Fill all eleven positions.")
+  if (xi.length < 11) return showAlert(t("squad.tactics.fillAll"))
   const blocked = unavailableIn(
     xi.map((s) => player(s.playerId)),
     world.date
   )
-  if (blocked.length) return showAlert(`Replace unavailable players first: ${blocked.join("; ")}.`)
+  if (blocked.length)
+    return showAlert(t("squad.tactics.replaceFirst", { list: blocked.join("; ") }))
   const bench = pickBench(squad.value, xi, world.date)
   world.setUserTeam({ ...team.value, xi, bench, tactics: { ...(team.value.tactics as Tactics) } })
   router.back()
@@ -209,15 +218,14 @@ async function save() {
 </script>
 
 <template>
-  <PageShell title="Tactics" subtitle="Your eleven and how they play" back>
+  <PageShell :title="t('squad.tactics.title')" :subtitle="t('squad.tactics.subtitle')" back>
     <p v-if="settings.assistantPicks" class="assistant-note">
-      Your assistant picks the eleven for each match. Turn this off in Settings to choose it
-      yourself.
+      {{ t("squad.tactics.assistantNote") }}
     </p>
     <template #actions>
       <AppButton variant="tonal" @click="auto">
         <Sparkles :size="16" />
-        Best XI
+        {{ t("squad.tactics.bestXI") }}
       </AppButton>
     </template>
 
@@ -237,97 +245,81 @@ async function save() {
     />
 
     <AppCard padding="md" class="chemistry">
-      <AppSectionHeader title="Chemistry" />
+      <AppSectionHeader :title="t('squad.tactics.chemistry')" />
       <div class="spirit">
-        <strong>{{ spiritLabel(spirit) }}</strong>
-        <span class="tie-note">Players gain or lose a little from those they play beside</span>
+        <strong>{{ $tx(spiritLabel(spirit)) }}</strong>
+        <span class="tie-note">{{ t("squad.tactics.chemistryNote") }}</span>
       </div>
       <ul v-if="ties.length" class="ties">
-        <li v-for="t in ties" :key="t.key" class="tie" :class="`tie--${t.kind}`">
-          <span class="tie-points">{{ signed(t.points) }}</span>
-          {{ t.text }}
+        <li v-for="tie in ties" :key="tie.key" class="tie" :class="`tie--${tie.kind}`">
+          <span class="tie-points">{{ signed(tie.points) }}</span>
+          {{ tie.text }}
         </li>
       </ul>
-      <p v-else class="tie-note">No close ties or feuds in this eleven.</p>
+      <p v-else class="tie-note">{{ t("squad.tactics.noTies") }}</p>
     </AppCard>
 
     <AppCard padding="md" class="instructions">
-      <AppField label="Mentality" layout="stack">
-        <AppSelect v-model="mentality" :options="MENTALITY_OPTIONS" />
+      <AppField :label="t('squad.tactics.mentality')" layout="stack">
+        <AppSelect v-model="mentality" :options="mentalityOptions()" />
       </AppField>
-      <AppField label="Pressing" layout="stack">
-        <AppButtonGroup
-          v-model="pressing"
-          block
-          :options="[
-            { value: '0', label: 'Low' },
-            { value: '1', label: 'Standard' },
-            { value: '2', label: 'High' },
-          ]"
-        />
+      <AppField :label="t('squad.tactics.pressing')" layout="stack">
+        <AppButtonGroup v-model="pressing" block :options="pressingOptions()" />
       </AppField>
-      <AppField label="Tempo" layout="stack">
-        <AppButtonGroup
-          v-model="tempo"
-          block
-          :options="[
-            { value: '0', label: 'Patient' },
-            { value: '1', label: 'Standard' },
-            { value: '2', label: 'Direct' },
-          ]"
-        />
+      <AppField :label="t('squad.tactics.tempo')" layout="stack">
+        <AppButtonGroup v-model="tempo" block :options="tempoOptions()" />
       </AppField>
-      <AppField label="Defensive line" layout="stack">
-        <AppButtonGroup v-model="line" block :options="LINE_OPTIONS" />
+      <AppField :label="t('squad.tactics.line')" layout="stack">
+        <AppButtonGroup v-model="line" block :options="lineOptions()" />
       </AppField>
-      <AppField label="Width" layout="stack">
-        <AppButtonGroup v-model="width" block :options="WIDTH_OPTIONS" />
+      <AppField :label="t('squad.tactics.width')" layout="stack">
+        <AppButtonGroup v-model="width" block :options="widthOptions()" />
       </AppField>
-      <AppField label="Counter-attack" layout="row">
-        <AppToggle v-model="counter" aria-label="Counter-attack" />
+      <AppField :label="t('squad.tactics.counter')" layout="row">
+        <AppToggle v-model="counter" :aria-label="t('squad.tactics.counter')" />
       </AppField>
-      <AppField label="Captain" layout="stack">
+      <AppField :label="t('squad.tactics.captain')" layout="stack">
         <AppSelect
           :model-value="team.captainId ?? ''"
           :options="xiOptions"
-          placeholder="Choose"
+          :placeholder="t('squad.tactics.choose')"
           @update:model-value="(v) => (team.captainId = v)"
         />
       </AppField>
-      <AppField label="Penalties" layout="stack">
+      <AppField :label="t('squad.tactics.penalties')" layout="stack">
         <AppSelect
           :model-value="team.penaltyTakerId ?? ''"
           :options="xiOptions"
-          placeholder="Choose"
+          :placeholder="t('squad.tactics.choose')"
           @update:model-value="(v) => (team.penaltyTakerId = v)"
         />
       </AppField>
-      <AppField label="Set pieces" layout="stack">
+      <AppField :label="t('squad.tactics.setPieces')" layout="stack">
         <AppSelect
           :model-value="team.setPieceTakerId ?? ''"
           :options="xiOptions"
-          placeholder="Choose"
+          :placeholder="t('squad.tactics.choose')"
           @update:model-value="(v) => (team.setPieceTakerId = v)"
         />
       </AppField>
     </AppCard>
 
     <StickyCta above-nav>
-      <AppButton variant="filled" block @click="save">Save tactics</AppButton>
+      <AppButton variant="filled" block @click="save">{{ t("squad.tactics.save") }}</AppButton>
     </StickyCta>
 
     <AppSheet
       v-if="selectedSlot !== null"
-      :title="`Pick a ${FORMATIONS[team.tactics.formation][selectedSlot]}`"
+      :title="t('squad.tactics.pick', { pos: FORMATIONS[team.tactics.formation][selectedSlot] })"
       max-height="min(640px, 85dvh)"
       max-height-mobile="85dvh"
       @close="selectedSlot = null"
     >
       <div v-if="slotRoles" class="role-pick">
-        <div class="role-label">Role</div>
+        <div class="role-label">{{ t("squad.tactics.role") }}</div>
         <div class="role-chips">
           <button class="role-chip" :class="{ on: !slotRoles.current }" @click="setRole(undefined)">
-            Standard
+            {{ t("squad.tactics.standard") }}
           </button>
           <button
             v-for="r in slotRoles.options"
@@ -337,16 +329,16 @@ async function save() {
             @click="setRole(r.id)"
           >
             {{ r.label }}
-            <span v-if="r.suits" class="role-suits" title="Suits his style">★</span>
+            <span v-if="r.suits" class="role-suits" :title="t('squad.tactics.suitsStyle')">★</span>
           </button>
         </div>
         <p class="role-blurb">
           {{ slotRoles.blurb }}
           <strong v-if="slotRoles.suited">
-            Suits {{ slotRoles.style }}: he plays above himself.
+            {{ t("squad.tactics.suits", { style: slotRoles.style }) }}
           </strong>
           <template v-else-if="slotRoles.style && slotRoles.current">
-            Not his style ({{ slotRoles.style }}).
+            {{ t("squad.tactics.notStyle", { style: slotRoles.style }) }}
           </template>
         </p>
       </div>
@@ -366,11 +358,11 @@ async function save() {
                 v-if="signed(chem(p))"
                 class="chem"
                 :class="chem(p) > 0 ? 'chem--up' : 'chem--down'"
-                title="Chemistry with the rest of the eleven"
+                :title="t('squad.tactics.chemWith')"
               >
                 {{ signed(chem(p)) }}
               </span>
-              <span v-if="inXI.has(p.id)" class="in-xi">XI</span>
+              <span v-if="inXI.has(p.id)" class="in-xi">{{ t("squad.tactics.inXI") }}</span>
               <StatPill
                 :value="
                   Math.round(

@@ -3,7 +3,7 @@
 Vue 3 + TypeScript + Pinia + Capacitor (Android only). Manage one of the 211 FIFA
 members' senior national teams — or one of the 11 outside FIFA that play in a
 confederation or regional federation — from 1 September 2026, inspired by True Football National
-Manager. Package manager: **pnpm**. English only.
+Manager. Package manager: **pnpm**. English and Portuguese; every language is a folder.
 
 Full reasoning behind these rules: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
@@ -38,7 +38,8 @@ src/
     ai/           Squad and line-up selection for AI coaches.
     career/       Objectives, confidence, sacking, job offers.
     world/        The world state, the day-by-day loop, federations and stadiums.
-  i18n/           vue-i18n setup (en only).
+  i18n/           vue-i18n setup. One folder per language in locales/<code>/ (index.ts,
+                  ui.ts, engine.ts, commentary.ts): a new folder is picked up by itself.
   lib/            Infrastructure adapters (IndexedDB, flags).
   modules/        Feature modules (career, competitions, core, match, nations, news,
                   settings, squad, stadiums, world).
@@ -75,6 +76,11 @@ place. The Pinia store keeps it `markRaw` and bumps `tick`; read it through
 
 **Styling** — `<style scoped>` for one component; a sibling `.css` for a folder; tokens
 in `src/assets/style/`. Use `var(--token)`, never literal hex (pitch colours are tokens).
+
+**Text** — no literal prose in components or the engine. Screens use `t('key')`. The engine
+stores what the player reads as a `Text` (`engine/text.ts`: a `msg(key, params)`, not a
+string) and the UI turns it into words with `$tx()`; add the key to every language's
+`engine.ts`. Competition names are `compText`, nations `nationText`, stages `stageText`.
 
 **Tests** — `__tests__/` next to the code. Engine tests are plain function tests.
 

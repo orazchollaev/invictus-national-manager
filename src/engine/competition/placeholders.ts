@@ -7,6 +7,7 @@
  *   ?wcq-ic-2030:1     second winner of the inter-confederation play-off tournament
  */
 import type { Confed } from "../types"
+import { msg, type Msg } from "../text"
 
 export const PLACEHOLDER_PREFIX = "?"
 
@@ -52,6 +53,34 @@ export function placeholderLabel(id: string): string {
     default:
       return `Qualifier ${slot + 1}`
   }
+}
+
+/** The competition a placeholder is the winner of, without the word "winner". */
+export function placeholderBase(id: string): Msg {
+  const { defId, slot } = parsePlaceholder(id)
+  switch (defId) {
+    case "wcq-uefa":
+      return msg("placeholder.uefa", { path: pathName(slot) })
+    case "euroq":
+      return msg("placeholder.path", { path: pathName(slot) })
+    case "wcq-ic":
+      return msg("placeholder.tournament")
+    default:
+      return msg("placeholder.qualifier", { n: slot + 1 })
+  }
+}
+
+/** The same label as `placeholderLabel`, in the language being played. */
+export function placeholderText(id: string, short = false): Msg {
+  const { defId, slot } = parsePlaceholder(id)
+  if (short)
+    return defId === "wcq-ic"
+      ? msg("placeholder.shortIc", { n: slot + 1 })
+      : msg("placeholder.shortPo", { path: pathName(slot) })
+  if (defId === "wcq-ic") return msg("placeholder.tournamentWinner", { n: slot + 1 })
+  if (defId === "wcq-uefa" || defId === "euroq")
+    return msg("placeholder.winner", { base: placeholderBase(id) })
+  return placeholderBase(id)
 }
 
 /** Short label for tight rows. */

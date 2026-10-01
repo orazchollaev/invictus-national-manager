@@ -13,6 +13,16 @@ export interface CommentaryNames {
 
 type Template = string
 
+/** Everything the commentary says, so a language can swap the whole set. */
+export interface CommentaryText {
+  lines: Partial<Record<MatchEventKind, Template[]>>
+  /** The assist tail of a goal line; `{a}` is the assisting player. */
+  assist: string
+  lane: Record<Lane, string>
+  /** Used in an attack line that has no lane. */
+  forward: string
+}
+
 const T: Partial<Record<MatchEventKind, Template[]>> = {
   kickoff: [
     "We're under way!",
@@ -131,26 +141,40 @@ const T: Partial<Record<MatchEventKind, Template[]>> = {
   "shootout-end": ["{team} win the shootout!", "It's {team} who hold their nerve!"],
 }
 
+const LANE_PHRASE: Record<Lane, string> = {
+  left: "down the left",
+  centre: "through the middle",
+  right: "down the right",
+}
+
+/** The English commentary. */
+export const DEFAULT_COMMENTARY: CommentaryText = {
+  lines: T,
+  assist: " Assisted by {a}.",
+  lane: LANE_PHRASE,
+  forward: "forward",
+}
+
 /** The text for one event. `index` is the event's place in the match, for variety. */
-export function commentaryLine(ev: MatchEvent, index: number, names: CommentaryNames): string {
-  const options = T[ev.kind]
+export function commentaryLine(
+  ev: MatchEvent,
+  index: number,
+  names: CommentaryNames,
+  text: CommentaryText = DEFAULT_COMMENTARY
+): string {
+  const options = text.lines[ev.kind]
   if (!options) return ""
   const template = options[(index * 7 + ev.minute) % options.length]
   const team = ev.side ? names.team(ev.side) : ""
-  const assist = ev.kind === "goal" && ev.otherId ? ` Assisted by ${names.player(ev.otherId)}.` : ""
+  const assist =
+    ev.kind === "goal" && ev.otherId ? text.assist.replace("{a}", names.player(ev.otherId)) : ""
   return template
     .replace("{team:home}", names.team("home"))
     .replace(/\{team\}/g, team)
     .replace(/\{p\}/g, names.player(ev.playerId))
     .replace(/\{o\}/g, names.player(ev.otherId))
     .replace("{assist}", assist)
-    .replace(/{lane}/g, ev.lane ? LANE_PHRASE[ev.lane] : "forward")
-}
-
-const LANE_PHRASE: Record<Lane, string> = {
-  left: "down the left",
-  centre: "through the middle",
-  right: "down the right",
+    .replace(/{lane}/g, ev.lane ? text.lane[ev.lane] : text.forward)
 }
 
 /** Clock label: 45+2', 90', 105+1'. */

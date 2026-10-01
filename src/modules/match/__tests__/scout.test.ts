@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest"
 import { createSSRApp, h } from "vue"
 import { renderToString } from "vue/server-renderer"
 import { createMemoryHistory, createRouter } from "vue-router"
+import i18n from "@/i18n"
 import { makePlayer, sideOf } from "@/engine/__tests__/helpers"
+import { msg } from "@/engine/text"
+import { resolveText as say } from "@/i18n/text"
 import { archetypesFor } from "@/engine/players/archetypes"
 import { scoutReport, type MatchupLine, type ScoutReport } from "@/engine/match/scouting"
 import type { Tactics } from "@/engine/match/types"
@@ -10,16 +13,16 @@ import type { Position } from "@/engine/types"
 import ScoutReportCard from "../components/scout/ScoutReportCard.vue"
 import { matchupNotes } from "../utils/scout"
 
-const line = (id: MatchupLine["id"], label: string, factor: number): MatchupLine => ({
+const line = (id: MatchupLine["id"], _label: string, factor: number): MatchupLine => ({
   id,
-  label,
+  label: msg(`rule.${id}`),
   factor,
 })
 
 const base: ScoutReport = {
   nationId: "o",
   formation: "4-2-3-1",
-  traits: ["Balanced"],
+  traits: [msg("scout.trait.balanced")],
   key: [],
   yours: [],
   theirs: [],
@@ -39,7 +42,11 @@ describe("matchupNotes", () => {
         line("midfield-numbers", "More players through the middle", 1.03),
       ],
     }
-    const { good, bad } = matchupNotes(r)
+    const say2 = (ns: { who: string; label: Parameters<typeof say>[0] }[]) =>
+      ns.map((n) => ({ who: n.who, label: say(n.label) }))
+    const { good: good0, bad: bad0 } = matchupNotes(r)
+    const good = say2(good0)
+    const bad = say2(bad0)
     expect(good).toEqual([
       { who: "you", label: "Balls in behind a high line" },
       { who: "them", label: "Width is wasted against a back five" },
@@ -69,7 +76,7 @@ async function render(report: ScoutReport, assisted = false, players = new Map()
         assisted,
       }),
   })
-  app.use(router)
+  app.use(router).use(i18n)
   await router.push("/")
   await router.isReady()
   return renderToString(app)
@@ -124,11 +131,22 @@ describe("ScoutReportCard", () => {
 
   it("names a role only when it adds something to the player's style", async () => {
     const { report, byId } = reportAgainst(false)
-    const same = { ...report, key: [{ ...report.key[0], archetype: "Poacher", role: "Poacher" }] }
+    const same = {
+      ...report,
+      key: [
+        { ...report.key[0], archetype: msg("arch.poacher.label"), role: msg("role.poacher.label") },
+      ],
+    }
     expect(await render(same, false, byId)).not.toContain("(Poacher)")
     const other = {
       ...report,
-      key: [{ ...report.key[0], archetype: "Poacher", role: "Target man" }],
+      key: [
+        {
+          ...report.key[0],
+          archetype: msg("arch.poacher.label"),
+          role: msg("role.target-man.label"),
+        },
+      ],
     }
     expect(await render(other, false, byId)).toContain("(Target man)")
   })

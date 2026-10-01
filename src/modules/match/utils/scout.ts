@@ -1,9 +1,10 @@
 import type { MatchupLine, ScoutReport } from "@/engine/match/scouting"
+import type { Msg } from "@/engine/text"
 
 export interface MatchupNote {
   /** Whose way of playing it is. */
   who: "you" | "them"
-  label: string
+  label: Msg
 }
 
 /**

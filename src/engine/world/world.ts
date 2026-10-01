@@ -5,9 +5,21 @@
  * `advance()` runs days until something needs the user (his call-up is due, his team
  * plays, a job event) and returns that interrupt.
  */
+import {
+  compText,
+  groupText,
+  joinText,
+  lower,
+  msg,
+  nationText,
+  stageText,
+  type Msg,
+  type Text,
+} from "../text"
 import type { Club, Confed, ISODate, NationDef, Player } from "../types"
 import type { CompContext } from "../competition/runtime"
 import { advanceCompetition, createInstance } from "../competition/runtime"
+import { advancedFrom, stagesAfter } from "../competition/advance"
 import { COMPETITION_DEFS, competitionDef } from "../competition/defs"
 import type {
   CompactResult,
@@ -44,6 +56,7 @@ import {
   makePlaceholder,
   parsePlaceholder,
   placeholderConfed,
+  placeholderBase,
   placeholderLabel,
 } from "../competition/placeholders"
 import {
@@ -217,6 +230,22 @@ export class World {
 
   // ── Competition context ───────────────────────────────────────────────────
 
+  /**
+   * The confederations a place still to be decided can turn out to be. An
+   * inter-confederation play-off winner is one of the three teams on its side of
+   * the bracket, so a draw keeps only those confederations out of its group.
+   */
+  private placeholderConfeds(id: string): Confed[] {
+    const { compId, defId, slot } = parsePlaceholder(id)
+    if (defId !== "wcq-ic") return [placeholderConfed(id) as Confed]
+    const ties =
+      this.state.competitions[compId]?.stages[0]?.rounds?.[0]?.ties.slice(slot * 2, slot * 2 + 2) ??
+      []
+    const teams = ties.flatMap((t) => [t.home, t.away]).filter((t): t is string => !!t)
+    const confeds = [...new Set(teams.map((t) => this.def(t)?.confed).filter(Boolean))] as Confed[]
+    return confeds.length ? confeds : ["PLAYOFF" as Confed]
+  }
+
   ctx(): CompContext {
     const s = this.state
     return {
@@ -224,6 +253,8 @@ export class World {
       seed: s.seed,
       confedOf: (t) =>
         isPlaceholder(t) ? (placeholderConfed(t) as Confed) : (this.def(t)?.confed ?? "UEFA"),
+      confedsOf: (t) =>
+        isPlaceholder(t) ? this.placeholderConfeds(t) : [this.def(t)?.confed ?? "UEFA"],
       subFeds: (t) => this.def(t)?.subFeds ?? [],
       points: (t) => s.nations[t]?.points ?? 0,
       ranked: (filter) =>
@@ -304,11 +335,141 @@ export class World {
       if (onlyId && inst.id !== onlyId) continue
       const def = competitionDef(inst.defId)
       const wasDrawn = inst.stages.map((s) => s.status)
+      const progress = this.progressMark(inst)
       advanceCompetition(inst, def, ctx)
+      this.announceProgress(inst, progress, ctx)
       inst.stages.forEach((s, i) => {
         if (wasDrawn[i] === "waiting" && s.status !== "waiting") this.onDraw(inst.id, s.key)
       })
       if ((inst.status as string) === "done") this.onCompetitionDone(inst.id)
+    }
+  }
+
+  /** Which stages are over and which ties decided, to tell what changed afterwards. */
+  private progressMark(inst: CompetitionInstance) {
+    const stages = new Set(inst.stages.filter((s) => s.status === "done").map((s) => s.key))
+    const ties = new Set<string>()
+    for (const s of inst.stages)
+      for (const t of [
+        ...(s.rounds ?? []).flatMap((r) => r.ties),
+        ...(s.thirdPlace ? [s.thirdPlace] : []),
+      ])
+        if (t.winner) ties.add(t.id)
+    return { stages, ties }
+  }
+
+  /**
+   * Tells the manager how his team's competition just went: through a group stage or
+   * a tie, out of it, or — when qualifying ends — in or out of the finals.
+   */
+  private announceProgress(
+    inst: CompetitionInstance,
+    before: { stages: Set<string>; ties: Set<string> },
+    ctx: CompContext
+  ) {
+    const me = this.userNation
+    if (!me) return
+    const link = `/competitions/${inst.id}`
+    const comp = compText(inst.defId, inst.year)
+    for (const stage of inst.stages) {
+      // A group stage that has just ended.
+      if (stage.kind === "groups" && stage.status === "done" && !before.stages.has(stage.key)) {
+        const group = stage.groups?.find((g) => g.teams.includes(me))
+        if (!group || inst.status === "done") continue
+        const went = advancedFrom(inst, stage, ctx)
+        if (!went) continue
+        const next = stagesAfter(inst, stage, ctx).find((s) => s.status !== "waiting")
+        const name = next?.rounds?.[0]?.name ?? next?.name
+        if (went.has(me))
+          this.news(
+            "tournament",
+            msg("news.tourney.through", { comp }),
+            name
+              ? msg("news.tourney.throughTo", { round: stageText(name) })
+              : msg("news.tourney.throughBare"),
+            true,
+            link
+          )
+        else
+          this.news(
+            "tournament",
+            msg("news.tourney.out", { comp }),
+            msg("news.tourney.groupOut", { group: groupText(group.name) }),
+            true,
+            link
+          )
+      }
+      // Ties that have just been decided.
+      for (const [r, round] of (stage.rounds ?? []).entries()) {
+        for (const tie of round.ties) {
+          if (!tie.winner || before.ties.has(tie.id) || !tie.home || !tie.away) continue
+          if (tie.home !== me && tie.away !== me) continue
+          if (tie.winner === me) {
+            const nextRound = stage.rounds?.[r + 1]?.name
+            if (nextRound)
+              this.news(
+                "tournament",
+                msg("news.tourney.through", { comp }),
+                msg("news.tourney.throughTo", { round: stageText(nextRound) }),
+                true,
+                link
+              )
+          } else if (round.name === "Final") {
+            this.news(
+              "tournament",
+              msg("news.tourney.runnersUp", { comp }),
+              msg("news.tourney.lostFinal"),
+              true,
+              link
+            )
+          } else {
+            this.news(
+              "tournament",
+              msg("news.tourney.out", { comp }),
+              msg("news.tourney.knockedOut", { round: lower(stageText(round.name)) }),
+              true,
+              link
+            )
+          }
+        }
+      }
+    }
+    // Qualifying over: the finals, the play-off, or not this time.
+    if (inst.status === "done" && inst.kind === "qualifier") {
+      const took = inst.stages.some(
+        (s) =>
+          s.groups?.some((g) => g.teams.includes(me)) ||
+          s.rounds?.[0]?.ties.some((t) => t.home === me || t.away === me)
+      )
+      if (!took) return
+      const finals = competitionDef(inst.defId).finals?.(inst.year)
+      const finalsName: Msg = finals
+        ? compText(finals.slice(0, finals.lastIndexOf("-")), inst.year)
+        : msg("news.finalsGeneric")
+      if (inst.outcome.qualified?.includes(me))
+        this.news(
+          "tournament",
+          msg("news.qualified.title", { finals: finalsName }),
+          msg("news.qualified.body", { finals: finalsName }),
+          true,
+          link
+        )
+      else if (inst.outcome.interconf?.includes(me))
+        this.news(
+          "tournament",
+          msg("news.playoff.title"),
+          msg("news.playoff.body", { finals: finalsName }),
+          true,
+          link
+        )
+      else
+        this.news(
+          "tournament",
+          msg("news.missedOut.title"),
+          msg("news.missedOut.body", { finals: finalsName }),
+          true,
+          link
+        )
     }
   }
 
@@ -532,7 +693,7 @@ export class World {
       id: `friendly:${slot}:${home}`,
       compId: "friendly",
       stage: "friendly",
-      label: "International friendly",
+      label: msg("fx.friendly"),
       date: slot,
       home,
       away,
@@ -609,7 +770,7 @@ export class World {
   private callUps() {
     const date = this.state.date
     const horizon = addDays(date, 10)
-    const due = new Map<string, { key: string; label: string; first: ISODate; comp?: string }>()
+    const due = new Map<string, { key: string; label: Text; first: ISODate; comp?: string }>()
     for (let d = date; d <= horizon; d = addDays(d, 1)) {
       for (const f of this.fixturesOn(d)) {
         if (f.result) continue
@@ -620,7 +781,7 @@ export class World {
           const inst = this.state.competitions[key]
           due.set(n, {
             key,
-            label: inst ? inst.name : "International window",
+            label: inst ? compText(inst.defId, inst.year) : msg("fx.window"),
             first: f.date,
             comp: inst?.id,
           })
@@ -785,21 +946,21 @@ export class World {
    * players who are not in the squad, injured or suspended. Empty when there is no
    * saved eleven (the best available is picked for him).
    */
-  lineupProblems(f: Fixture): string[] {
+  lineupProblems(f: Fixture): Msg[] {
     const me = this.userNation
     const ut = this.state.userTeam
     if (!me || !ut) return []
     const squad = new Set(this.state.nations[me].squad)
-    const out: string[] = []
+    const out: Msg[] = []
     FORMATIONS[ut.tactics.formation].forEach((pos, i) => {
       const id = ut.xi[i]?.playerId
       const p = id ? this.state.players[id] : undefined
-      if (!p) return out.push(`No one is playing ${pos}`)
+      if (!p) return out.push(msg("lineup.nobody", { pos }))
       const name = `${p.first} ${p.last}`
-      if (!squad.has(p.id)) out.push(`${name} (${pos}) is not in the squad`)
+      if (!squad.has(p.id)) out.push(msg("lineup.notInSquad", { name, pos }))
       else if (p.injury && p.injury.until > f.date)
-        out.push(`${name} (${pos}) is injured (${p.injury.label})`)
-      else if (p.banned) out.push(`${name} (${pos}) is suspended`)
+        out.push(msg("lineup.injured", { name, pos, label: p.injury.label }))
+      else if (p.banned) out.push(msg("lineup.suspended", { name, pos }))
     })
     return out
   }
@@ -876,7 +1037,12 @@ export class World {
   matchSetup(f: Fixture, home: TeamSheet, away: TeamSheet) {
     const me = this.userNation
     const side: Side | null = !me ? null : f.home === me ? "home" : f.away === me ? "away" : null
+    const hostIds = this.state.competitions[f.compId]?.hosts ?? []
+    const hosts: Side[] = []
+    if (hostIds.includes(f.home)) hosts.push("home")
+    if (hostIds.includes(f.away)) hosts.push("away")
     return {
+      hosts,
       edge: side ? { side, value: USER_EDGE.match } : undefined,
       id: f.id,
       date: f.date,
@@ -1010,8 +1176,12 @@ export class World {
       ) {
         this.news(
           "injury",
-          `${fullName(p)} injured`,
-          `${fullName(p)} has picked up a ${injury.toLowerCase()} at club level and will be out until ${p.injury!.until}.`,
+          msg("news.injury.title", { name: fullName(p) }),
+          msg("news.injury.body", {
+            name: fullName(p),
+            injury: lower(injury),
+            date: p.injury!.until,
+          }),
           true
         )
       }
@@ -1069,14 +1239,13 @@ export class World {
         const moved = summerMove(p, this.clubs, this.clubIndex, def.confed, age, rng, showcase)
         const newTier = this.clubs.get(p.clubId)?.tier ?? 5
         if (moved && nationId === me && (p.lastCall || watched.has(p.id))) {
-          const club = this.clubs.get(p.clubId)?.name ?? "a new club"
+          const club = this.clubs.get(p.clubId)?.name ?? msg("news.newClub")
           const breakthrough = showcase && newTier < tier
+          const key = breakthrough ? "news.bigMove" : "news.move"
           this.news(
             "transfer",
-            breakthrough ? `${fullName(p)} earns a big move` : `${fullName(p)} on the move`,
-            breakthrough
-              ? `${fullName(p)} joins ${club} on the back of his international breakthrough.`
-              : `${fullName(p)} joins ${club}.`,
+            msg(`${key}.title`, { name: fullName(p) }),
+            msg(`${key}.body`, { name: fullName(p), club }),
             true
           )
         }
@@ -1090,15 +1259,15 @@ export class World {
     if (progress.length)
       this.news(
         "wonderkid",
-        "Your prospects this season",
-        `How the youngsters you are watching developed: ${progress.join("; ")}.`,
+        msg("news.prospects.title"),
+        msg("news.prospects.body", { list: progress.join("; ") }),
         true,
         "/squad/prospects"
       )
     this.news(
       "season",
-      `Season ${season}–${String(season + 1).slice(2)} begins`,
-      "Players have developed over the last season and the summer transfer window has closed.",
+      msg("news.season.title", { from: season, to: String(season + 1).slice(2) }),
+      msg("news.season.body"),
       true
     )
   }
@@ -1112,8 +1281,8 @@ export class World {
     const year = yearOf(s.date)
     const me = this.userNation
     const rng = streamFor(s.seed, "year", year)
-    const retiredNames: string[] = []
-    const newNames: string[] = []
+    const retiredNames: Msg[] = []
+    const newNames: Msg[] = []
     const intake: string[] = []
 
     for (const [nationId, players] of this.playersByNation()) {
@@ -1137,7 +1306,14 @@ export class World {
           }
           if (nationId === me)
             retiredNames.push(
-              `${fullName(p)} (${p.pos}, ${age}${p.caps ? `, ${p.caps} caps` : ""})`
+              p.caps
+                ? msg("news.retired.entryCaps", {
+                    name: fullName(p),
+                    pos: p.pos,
+                    age,
+                    caps: p.caps,
+                  })
+                : msg("news.retired.entry", { name: fullName(p), pos: p.pos, age })
             )
           continue
         }
@@ -1147,8 +1323,8 @@ export class World {
           if (nationId === me)
             this.news(
               "retirement",
-              `${fullName(p)} quits international football`,
-              `${fullName(p)} (${age}, ${p.caps} caps) has announced his retirement from international football.`,
+              msg("news.retire.title", { name: fullName(p) }),
+              msg("news.retire.body", { name: fullName(p), age, caps: p.caps }),
               true
             )
         }
@@ -1171,13 +1347,23 @@ export class World {
         if (nationId === me) {
           intake.push(id)
           newNames.push(
-            `${fullName(p)} (${p.pos}, ${ageOn(p.born, s.date)}, ${this.clubs.get(p.clubId)?.name ?? "—"})`
+            msg("news.newgen.entry", {
+              name: fullName(p),
+              pos: p.pos,
+              age: ageOn(p.born, s.date),
+              club: this.clubs.get(p.clubId)?.name ?? "—",
+            })
           )
           if (p.pa >= nationTop(nation.youthLevel) - 3)
             this.news(
               "wonderkid",
-              `Wonderkid emerges: ${fullName(p)}`,
-              `Scouts are raving about ${fullName(p)}, a ${ageOn(p.born, s.date)}-year-old ${p.pos} at ${this.clubs.get(p.clubId)?.name}.`,
+              msg("news.wonderkid.title", { name: fullName(p) }),
+              msg("news.wonderkid.body", {
+                name: fullName(p),
+                age: ageOn(p.born, s.date),
+                pos: p.pos,
+                club: this.clubs.get(p.clubId)?.name ?? "—",
+              }),
               true
             )
         }
@@ -1193,14 +1379,12 @@ export class World {
       )
       if (started && nationId === me) {
         const seats = started.capacity.toLocaleString("en")
+        const key = started.kind === "build" ? "build" : "expand"
+        const params = { stadium: started.name, city: started.city, seats, date: started.done }
         this.news(
           "stadium",
-          started.kind === "build"
-            ? `Work begins on the ${started.name}`
-            : `${started.name} to be expanded`,
-          started.kind === "build"
-            ? `The federation is building a ${seats}-seat stadium in ${started.city}, due to open on ${started.done}.`
-            : `The ${started.name} in ${started.city} will hold ${seats} once the work is done, on ${started.done}.`,
+          msg(`news.stadium.${key}.title`, params),
+          msg(`news.stadium.${key}.body`, params),
           true,
           "/stadiums"
         )
@@ -1212,15 +1396,15 @@ export class World {
       if (retiredNames.length)
         this.news(
           "retirement",
-          `${retiredNames.length} players retire`,
-          `These players have hung up their boots: ${retiredNames.join("; ")}.`,
+          msg("news.retiredMany.title", { n: retiredNames.length }),
+          msg("news.retiredMany.body", { list: retiredNames }),
           true
         )
       if (newNames.length)
         this.news(
           "wonderkid",
-          `${newNames.length} youngsters come through`,
-          `The new generation eligible for us: ${newNames.join("; ")}.`,
+          msg("news.newgens.title", { n: newNames.length }),
+          msg("news.newgens.body", { list: newNames }),
           true,
           "/squad/prospects"
         )
@@ -1240,11 +1424,20 @@ export class World {
       for (const p of completeProjects(n, this.state.date)) {
         const mine = n.id === me
         if (!mine && p.capacity < 60000) continue
-        const comp = p.forComp ? this.state.competitions[p.forComp]?.name : undefined
+        const forComp = p.forComp ? this.state.competitions[p.forComp] : undefined
         this.news(
           "stadium",
-          p.kind === "build" ? `${this.def(n.id).name} open the ${p.name}` : `${p.name} expanded`,
-          `The ${p.name} in ${p.city} now holds ${p.capacity.toLocaleString("en")}${comp ? `, ready for the ${comp}` : ""}.`,
+          p.kind === "build"
+            ? msg("news.stadium.opened.build", { nation: nationText(n.id), stadium: p.name })
+            : msg("news.stadium.opened.expand", { stadium: p.name }),
+          msg("news.stadium.opened.body", {
+            stadium: p.name,
+            city: p.city,
+            seats: p.capacity.toLocaleString("en"),
+            ready: forComp
+              ? msg("news.stadium.readyFor", { comp: compText(forComp.defId, forComp.year) })
+              : "",
+          }),
           mine,
           mine ? "/stadiums" : `/stadiums/${n.id}`
         )
@@ -1279,10 +1472,17 @@ export class World {
     })
     const me = this.userNation
     const involved = me && inst.outcome.placings?.includes(me)
+    const winner = nationText(inst.outcome.winner)
+    const comp = compText(inst.defId, inst.year)
     this.news(
       "tournament",
-      `${this.def(inst.outcome.winner).name} win the ${inst.name}`,
-      `${this.def(inst.outcome.winner).name} are champions${inst.outcome.runnerUp ? `, beating ${this.def(inst.outcome.runnerUp).name} in the final` : ""}.`,
+      msg("news.champions.title", { winner, comp }),
+      msg("news.champions.body", {
+        winner,
+        beat: inst.outcome.runnerUp
+          ? msg("news.champions.beat", { runnerUp: nationText(inst.outcome.runnerUp) })
+          : "",
+      }),
       !!involved || inst.kind === "world-cup"
     )
   }
@@ -1297,11 +1497,14 @@ export class World {
     if ((group && (stage.groups?.length ?? 0) > 1) || tie)
       this.state.pendingDraw = { compId, stageKey }
     if (group) {
-      const others = group.teams.filter((t) => t !== me).map((t) => this.def(t).name)
+      const others = group.teams.filter((t) => t !== me).map((t) => nationText(t))
       this.news(
         "draw",
-        `${inst.name}: ${group.name.length <= 2 ? `Group ${group.name}` : group.name}`,
-        `The draw is made. We face ${others.join(", ")}.`,
+        msg("news.draw.title", {
+          comp: compText(inst.defId, inst.year),
+          stage: groupText(group.name),
+        }),
+        msg("news.draw.group", { others: joinText(others) }),
         true,
         `/competitions/${inst.id}`
       )
@@ -1310,8 +1513,11 @@ export class World {
       if (opp)
         this.news(
           "draw",
-          `${inst.name}: ${stage.name}`,
-          `We have been drawn against ${this.def(opp).name}.`,
+          msg("news.draw.title", {
+            comp: compText(inst.defId, inst.year),
+            stage: stageText(stage.name),
+          }),
+          msg("news.draw.tie", { opp: nationText(opp) }),
           true,
           `/competitions/${inst.id}`
         )
@@ -1321,9 +1527,11 @@ export class World {
   /** "Kenya, Tanzania and Uganda will host the Africa Cup of Nations 2027." */
   private announceHosts(inst: CompetitionInstance) {
     if (!inst.hosts.length || inst.kind === "qualifier") return
-    const names = inst.hosts.map((h) => this.def(h)?.name ?? h)
-    const list =
-      names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0]
+    const names = inst.hosts.map((h) => nationText(h))
+    const list: Msg =
+      names.length > 1
+        ? msg("news.and", { a: joinText(names.slice(0, -1)), b: names[names.length - 1] })
+        : names[0]
     const me = this.userNation
     // Hosts build what they still lack, finished a few months before kick-off.
     const level = hostLevelOf(inst.kind)
@@ -1343,10 +1551,15 @@ export class World {
     const mine =
       !!me &&
       (inst.hosts.includes(me) || inst.kind === "world-cup" || inst.confed === this.def(me)?.confed)
+    const comp = compText(inst.defId, inst.year)
     this.news(
       "tournament",
-      `${list} to host the ${inst.name}`,
-      `${list} ${names.length > 1 ? "will co-host" : "will host"} the ${inst.name}, starting ${inst.start}.`,
+      msg("news.host.title", { list, comp }),
+      msg(names.length > 1 ? "news.host.many" : "news.host.one", {
+        list,
+        comp,
+        date: inst.start,
+      }),
       mine,
       `/competitions/${inst.id}`
     )
@@ -1413,8 +1626,11 @@ export class World {
     for (const [ph, team] of map) {
       this.news(
         "tournament",
-        `${this.def(team).name} take their place`,
-        `${this.def(team).name} win the ${placeholderLabel(ph).replace(/ winner$/, "")} and fill that place in the draw.`,
+        msg("news.placeholder.title", { team: nationText(team) }),
+        msg("news.placeholder.body", {
+          team: nationText(team),
+          label: placeholderBase(ph),
+        }),
         team === me,
         `/nation/${team}`
       )
@@ -1465,7 +1681,7 @@ export class World {
       : [...list, playerId]
   }
 
-  news(kind: NewsKind, title: string, body: string, mine: boolean, link?: string) {
+  news(kind: NewsKind, title: Text, body: Text, mine: boolean, link?: string) {
     const s = this.state
     const item: NewsItem = { id: s.nextNewsId++, date: s.date, kind, title, body, mine, link }
     s.news.unshift(item)

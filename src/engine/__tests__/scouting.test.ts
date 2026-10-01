@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { resolveText as say } from "@/i18n/text"
 import nations from "@/data/nations.json"
 import clubRows from "@/data/clubs.json"
 import playerRows from "@/data/players.json"
@@ -30,16 +31,24 @@ const first = (pos: Position) => archetypesFor(pos)[0]
 
 describe("traitsOf", () => {
   it("calls a plain side balanced", () => {
-    expect(traitsOf(tactics())).toEqual(["Balanced"])
+    expect(traitsOf(tactics()).map(say)).toEqual(["Balanced"])
   })
 
   it("names the ways a side plays", () => {
     const t = traitsOf(
       tactics("4-4-2", { mentality: -1, line: 0, counter: true, tempo: 2, pressing: 0 })
     )
-    expect(t).toEqual(["Cautious", "Deep line", "Counter-attacking", "Drops off", "Direct"])
+    expect(t.map(say)).toEqual([
+      "Cautious",
+      "Deep line",
+      "Counter-attacking",
+      "Drops off",
+      "Direct",
+    ])
     expect(
-      traitsOf(tactics("4-3-3", { mentality: 2, line: 2, width: 2, pressing: 2, tempo: 0 }))
+      traitsOf(tactics("4-3-3", { mentality: 2, line: 2, width: 2, pressing: 2, tempo: 0 })).map(
+        say
+      )
     ).toEqual(["Attack-minded", "High line", "Plays wide", "High press", "Patient"])
   })
 })
@@ -78,8 +87,8 @@ describe("keyPlayers", () => {
     const { side, lookup } = squad()
     side.sheet.xi[side.sheet.xi.findIndex((s) => s.pos === "ST")].role = "poacher"
     const out = keyPlayers(side.sheet, lookup)
-    for (const k of out) expect(k.archetype.length).toBeGreaterThan(0)
-    expect(out.some((k) => k.role === "Poacher")).toBe(true)
+    for (const k of out) expect(say(k.archetype).length).toBeGreaterThan(0)
+    expect(out.some((k) => k.role && say(k.role) === "Poacher")).toBe(true)
   })
 
   it("has nothing to say about players it cannot find", () => {
@@ -96,15 +105,15 @@ describe("advise", () => {
   it("tells a high-line side to drop off against a counter-attacking one", () => {
     const a = advise(tactics("4-2-3-1", { line: 2 }), tactics("4-4-2", { counter: true, tempo: 2 }))
     expect(a.patch.line).toBeLessThan(2)
-    expect(a.changes[0]).toContain("Defensive line: High →")
-    expect(a.reasons).toContain("Balls in behind a high line")
+    expect(say(a.changes[0])).toContain("Defensive line: High →")
+    expect(a.reasons.map(say)).toContain("Balls in behind a high line")
     expect(a.gain).toBeGreaterThan(ADVICE_THRESHOLD)
   })
 
   it("tells a side to go wide against a back four with open flanks", () => {
     const a = advise(tactics("4-2-3-1"), tactics("4-3-1-2"))
     expect(a.patch.width).toBe(2)
-    expect(a.reasons).toContain("Width against a flat four with open flanks")
+    expect(a.reasons.map(say)).toContain("Width against a flat four with open flanks")
   })
 
   it("only ever touches line, width and counter-attack", () => {
@@ -118,12 +127,12 @@ describe("advise", () => {
   })
 
   it("explains itself with real matchups", () => {
-    const labels = new Set(RULES.map((r) => r.label))
+    const labels = new Set(RULES.map((r) => `rule.${r.id}`))
     for (const f of FORMATION_LIST)
       for (const line of [0, 1, 2] as Level[])
         for (const counter of [false, true]) {
           const a = advise(tactics("4-2-3-1"), tactics(f, { line, counter, width: 2 }))
-          for (const r of a.reasons) expect(labels.has(r)).toBe(true)
+          for (const r of a.reasons) expect(labels.has(r.k)).toBe(true)
           if (a.changes.length) expect(a.reasons.length).toBeGreaterThan(0)
         }
   })
@@ -170,7 +179,7 @@ describe("scoutReport", () => {
     const r = scoutReport(opp.sheet, mine, (id) => byId.get(id))
     expect(r.nationId).toBe("o")
     expect(r.formation).toBe("4-2-3-1")
-    expect(r.traits).toEqual(["Counter-attacking", "Direct"])
+    expect(r.traits.map(say)).toEqual(["Counter-attacking", "Direct"])
     expect(r.theirs.map((l) => l.id)).toContain("behind-high-line")
     expect(r.yours.map((l) => l.id)).not.toContain("behind-high-line")
     expect(r.key.length).toBeGreaterThan(0)

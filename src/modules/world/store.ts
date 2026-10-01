@@ -14,6 +14,7 @@ import { loadSlot, saveSlot, activeSlot } from "./services/saves"
 import { startingPlayers, statics } from "./services/statics"
 import { useSettingsStore } from "@/modules/settings/store"
 import { daysBetween } from "@/engine/calendar/dates"
+import { i18n } from "@/i18n"
 
 /** Pause between simulated days, so a multi-day advance is seen to tick over. */
 const DAY_DELAY_MS = 25
@@ -70,7 +71,7 @@ export const useWorldStore = defineStore(
       }
     ) {
       busy.value = true
-      busyLabel.value = "Building the world…"
+      busyLabel.value = i18n.global.t("world.building")
       await nextFrame()
       try {
         const rows = await startingPlayers()
@@ -84,7 +85,7 @@ export const useWorldStore = defineStore(
 
     async function load(n: number): Promise<boolean> {
       busy.value = true
-      busyLabel.value = "Loading…"
+      busyLabel.value = i18n.global.t("world.loading")
       await nextFrame()
       try {
         const s = await loadSlot(n)

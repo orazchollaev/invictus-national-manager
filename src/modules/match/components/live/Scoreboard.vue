@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n"
 import { NationFlag } from "@/modules/nations/components/badge"
 
 defineProps<{
@@ -10,6 +11,8 @@ defineProps<{
   pens?: [number, number]
   aggregate?: [number, number]
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -21,9 +24,9 @@ defineProps<{
         <span class="team-code">{{ home }}</span>
       </div>
       <div class="score">
-        <span>{{ score[0] }}</span>
+        <span :key="score[0]" class="num">{{ score[0] }}</span>
         <span class="dash">–</span>
-        <span>{{ score[1] }}</span>
+        <span :key="score[1]" class="num">{{ score[1] }}</span>
       </div>
       <div class="team">
         <NationFlag :id="away" :size="36" />
@@ -32,8 +35,10 @@ defineProps<{
     </div>
     <div class="board-clock">
       {{ clock }}
-      <template v-if="pens">· Pens {{ pens[0] }}–{{ pens[1] }}</template>
-      <template v-if="aggregate">· Agg {{ aggregate[0] }}–{{ aggregate[1] }}</template>
+      <template v-if="pens">· {{ t("match.pens", { a: pens[0], b: pens[1] }) }}</template>
+      <template v-if="aggregate">
+        · {{ t("match.agg", { a: aggregate[0], b: aggregate[1] }) }}
+      </template>
     </div>
   </div>
 </template>
@@ -83,6 +88,17 @@ defineProps<{
   font-size: var(--fs-2xl);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
+}
+
+.num {
+  animation: score-bump 0.8s var(--ease);
+}
+
+@keyframes score-bump {
+  30% {
+    transform: scale(1.5);
+    color: var(--live);
+  }
 }
 
 .dash {

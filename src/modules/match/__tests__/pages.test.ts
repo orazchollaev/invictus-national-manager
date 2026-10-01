@@ -4,6 +4,8 @@ import { renderToString } from "vue/server-renderer"
 import { createPinia, setActivePinia } from "pinia"
 import { createRouter, createMemoryHistory, RouterView } from "vue-router"
 import i18n from "@/i18n"
+import { resolveText as say } from "@/i18n/text"
+import { msg } from "@/engine/text"
 import { useWorldStore } from "@/modules/world/store"
 import { World } from "@/engine/world/world"
 import { createWorld } from "@/engine/world/create"
@@ -116,14 +118,14 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
 
   // The playing style shows on the player's card and in every list of players.
   const star = w.pool("TUR")[0]
-  const style = ARCHETYPES[archetypeOf(star)]
+  const styleId = archetypeOf(star)
   // The tactics page offers the team instructions and shows the roles on the pitch.
   expect(pageHtml["/squad/tactics"]).toContain("Defensive line")
   expect(pageHtml["/squad/tactics"]).toContain("Counter-attack")
   expect(pageHtml["/squad/tactics"]).toMatch(
     new RegExp(
-      Object.values(ROLES)
-        .map((r) => r.label)
+      Object.keys(ROLES)
+        .map((r) => say(msg(`role.${r}.label`)))
         .join("|")
     )
   )
@@ -141,11 +143,11 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
   expect(pageHtml["/squad/tactics"]).toMatch(/Tight-knit|Good|Neutral|Uneasy|Divided/)
   expect(pageHtml["/player/:id"]).toContain("Relationships")
   expect(pageHtml["/player/:id"]).toContain("Playing style")
-  expect(pageHtml["/player/:id"]).toContain(style.label)
+  expect(pageHtml["/player/:id"]).toContain(say(msg(`arch.${styleId}.label`)))
   expect(pageHtml["/squad"]).toMatch(
     new RegExp(
-      Object.values(ARCHETYPES)
-        .map((a) => a.label)
+      Object.keys(ARCHETYPES)
+        .map((a) => say(msg(`arch.${a}.label`)))
         .join("|")
     )
   )

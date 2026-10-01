@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { Mail } from "@lucide/vue"
 import { AppEmptyState, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import type { NewsItem } from "@/engine/world/types"
 
+const { t } = useI18n()
 const world = useWorldStore()
 const tab = ref("mine")
 const news = world.derive((w) => w.state.news, [] as NewsItem[])
@@ -19,17 +21,17 @@ onBeforeUnmount(() => world.markRead(shown.value.filter((n) => !n.read).map((n) 
 </script>
 
 <template>
-  <PageShell title="Inbox">
+  <PageShell :title="t('inbox.title')">
     <AppSubTabBar
       :model-value="tab"
       :options="[
-        { value: 'mine', label: 'For you' },
-        { value: 'all', label: 'World' },
+        { value: 'mine', label: t('inbox.forYou') },
+        { value: 'all', label: t('inbox.world') },
       ]"
       size="sm"
       @update:model-value="(v) => (tab = v)"
     />
-    <AppEmptyState v-if="!shown.length" :icon="Mail" title="Nothing here yet" />
+    <AppEmptyState v-if="!shown.length" :icon="Mail" :title="t('inbox.empty')" />
     <div v-else class="list">
       <component
         :is="n.link ? 'RouterLink' : 'div'"
@@ -40,10 +42,10 @@ onBeforeUnmount(() => world.markRead(shown.value.filter((n) => !n.read).map((n) 
         :class="{ unread: !n.read }"
       >
         <div class="item-head">
-          <span class="item-title">{{ n.title }}</span>
+          <span class="item-title">{{ $tx(n.title) }}</span>
           <span class="item-date">{{ formatDate(n.date) }}</span>
         </div>
-        <div class="item-body">{{ n.body }}</div>
+        <div class="item-body">{{ $tx(n.body) }}</div>
       </component>
     </div>
   </PageShell>

@@ -1,18 +1,29 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import type { CareerSnapshot } from "@/engine/world/types"
 
 const props = defineProps<{ before: CareerSnapshot; after: CareerSnapshot }>()
-
+const { t } = useI18n()
 const rows = computed(() => [
   {
-    label: "Federation confidence",
+    label: t("career.review.federationConfidence"),
     from: props.before.confidence,
     to: props.after.confidence,
     unit: "%",
   },
-  { label: "Your reputation", from: props.before.reputation, to: props.after.reputation, unit: "" },
-  { label: "Academy level", from: props.before.youth, to: props.after.youth, unit: "" },
+  {
+    label: t("career.review.yourReputation"),
+    from: props.before.reputation,
+    to: props.after.reputation,
+    unit: "",
+  },
+  {
+    label: t("career.review.academyLevel"),
+    from: props.before.youth,
+    to: props.after.youth,
+    unit: "",
+  },
 ])
 
 const round = (v: number) => Math.round(v * 10) / 10

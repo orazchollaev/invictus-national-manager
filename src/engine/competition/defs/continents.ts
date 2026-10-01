@@ -204,10 +204,15 @@ export const asianCupQualifying: CompetitionDef = {
         entrants: (c, i) => {
           const w = wcq(c)
           const direct = asianCupDirect(y, c)
+          // A third-placed team that took a host's place in the World Cup's third round
+          // is playing for that place, not for the Asian Cup's.
+          const inThird = new Set(
+            w?.stages.find((s) => s.key === "r3")?.groups?.flatMap((g) => g.teams) ?? []
+          )
           const list = [
             ...(w ? afcSecondRound(w, c).rest : []),
             ...knockoutResult(i, "playoff").finalWinners,
-          ].filter((t) => !direct.includes(t))
+          ].filter((t) => !direct.includes(t) && !inThird.has(t))
           return [...new Set(list)].sort((a, b) => c.points(b) - c.points(a))
         },
         groups: {

@@ -1,28 +1,33 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, triggerRef, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import {
   ArrowLeftRight,
   CalendarClock,
   ClipboardList,
+  ChartNoAxesColumn,
   FastForward,
   Pause,
   Play,
   SkipForward,
   TriangleAlert,
 } from "@lucide/vue"
-import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
+import { AppButton, AppCard, AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
-import { PitchView } from "@/modules/squad/components/pitch"
 import { ScoutReportCard } from "@/modules/match/components/scout"
 import {
-  CommentaryFeed,
+  BallPitch,
+  KeyEvents,
+  LiveNarration,
   LiveTacticsSheet,
+  PressureBar,
   Scoreboard,
-  StatsPanel,
+  StatsSheet,
   SubSheet,
 } from "@/modules/match/components/live"
+import { compName as compNameOf, nationName, resolveText } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { useSettingsStore, type LiveMatchSpeed } from "@/modules/settings/store"
 import {
@@ -38,15 +43,17 @@ import {
   type MatchState,
   type TeamTalk,
 } from "@/engine/match/engine"
-import { KEY_EVENTS, type Side, type Tactics } from "@/engine/match/types"
+import { KEY_EVENTS, type MatchEventKind, type Side, type Tactics } from "@/engine/match/types"
 import { clock } from "@/engine/match/commentary"
+import type { Msg } from "@/engine/text"
 import { laneCounts } from "@/engine/match/lanes"
 import { FORMATIONS } from "@/engine/match/formations"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import { resultLetter } from "@/modules/core/utils/format"
 import { useHaptic } from "@/composables/useHaptic"
 import { showConfirm } from "@/composables/useDialog"
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const world = useWorldStore()
@@ -72,8 +79,10 @@ const opp = computed(() =>
 )
 const compName = computed(() =>
   fixture.value?.compId === "friendly"
-    ? "Friendly"
-    : (world.world?.state.competitions[fixture.value?.compId ?? ""]?.name ?? "")
+    ? t("match.friendly")
+    : ((i) => (i ? compNameOf(i) : ""))(
+        world.world?.state.competitions[fixture.value?.compId ?? ""]
+      )
 )
 
 const oppForm = world.derive(
@@ -95,21 +104,21 @@ const due = world.derive((w) => w.userMatchDue()?.id === String(route.params.id)
 /** What stops the saved eleven taking the field (the assistant needs none). */
 const problems = world.derive(
   (w) => (fixture.value && !settings.assistantPicks ? w.lineupProblems(fixture.value) : []),
-  [] as string[]
+  [] as Msg[]
 )
 
 // ── Live state ──────────────────────────────────────────────────────────────
 
 const match = shallowRef<MatchState | null>(null)
 const running = ref(false)
-const tab = ref("feed")
+const showStats = ref(false)
 const showSubs = ref(false)
 const forceOut = ref<string | null>(null)
 const showTactics = ref(false)
 const talkGiven = ref(false)
 let timer: ReturnType<typeof setTimeout> | null = null
 
-const MS_PER_MINUTE: Record<LiveMatchSpeed, number> = { 1: 1100, 2: 550, 4: 260, 10: 90 }
+const MS_PER_MINUTE: Record<LiveMatchSpeed, number> = { 1: 1100, 2: 550, 4: 260 }
 
 const names = {
   player: (id: string | undefined) => {
@@ -117,9 +126,7 @@ const names = {
     return p ? p.last : "—"
   },
   team: (s: Side) =>
-    fixture.value
-      ? (world.world?.def(s === "home" ? fixture.value.home : fixture.value.away).name ?? "")
-      : "",
+    fixture.value ? nationName(s === "home" ? fixture.value.home : fixture.value.away) : "",
 }
 
 /** Start the match, if it is today and the eleven is ready. Returns whether it started. */
@@ -129,8 +136,10 @@ async function kickOff(): Promise<boolean> {
   if (!w || !f || !mine.value || !due.value) return false
   if (problems.value.length) {
     const fix = await showConfirm(
-      `Your starting eleven is not ready: ${problems.value.join("; ")}.`,
-      { confirmLabel: "Fix the eleven" }
+      t("match.page.ready", { problems: problems.value.map((p) => resolveText(p)).join("; ") }),
+      {
+        confirmLabel: t("match.page.fixEleven"),
+      }
     )
     if (fix) router.push("/squad/tactics")
     return false
@@ -196,7 +205,7 @@ function toggle() {
 }
 
 function cycleSpeed() {
-  const order: LiveMatchSpeed[] = [1, 2, 4, 10]
+  const order: LiveMatchSpeed[] = [1, 2, 4]
   settings.liveMatchSpeed = order[(order.indexOf(settings.liveMatchSpeed) + 1) % order.length]
 }
 
@@ -225,25 +234,26 @@ function closeSubs() {
   forceOut.value = null
 }
 
-function applyTactics(t: Tactics) {
+function applyTactics(tac: Tactics) {
   if (!match.value || !mine.value) return
   const side = match.value[mine.value]
-  if (t.formation !== side.tactics.formation) changeFormation(match.value, mine.value, t.formation)
+  if (tac.formation !== side.tactics.formation)
+    changeFormation(match.value, mine.value, tac.formation)
   setTactics(match.value, mine.value, {
-    mentality: t.mentality,
-    pressing: t.pressing,
-    tempo: t.tempo,
-    line: t.line,
-    width: t.width,
-    counter: t.counter,
+    mentality: tac.mentality,
+    pressing: tac.pressing,
+    tempo: tac.tempo,
+    line: tac.line,
+    width: tac.width,
+    counter: tac.counter,
   })
   showTactics.value = false
   refresh()
 }
 
-function talk(t: TeamTalk) {
+function talk(kind: TeamTalk) {
   if (!match.value || !mine.value) return
-  teamTalk(match.value, mine.value, t)
+  teamTalk(match.value, mine.value, kind)
   talkGiven.value = true
 }
 
@@ -283,16 +293,74 @@ const livePossession = computed<[number, number]>(() => {
 const clockLabel = computed(() => {
   const m = match.value
   if (!m) return ""
-  if (m.phase === "done") return m.pens ? "Penalties" : m.ft ? "After extra time" : "Full-time"
-  if (m.phase === "half-time") return "Half-time"
-  if (m.phase === "et-break") return "End of 90 minutes"
-  if (m.phase === "et-half-time") return "Extra time: half-time"
-  if (m.phase === "shootout") return "Penalty shootout"
+  if (m.phase === "done")
+    return m.pens
+      ? t("match.page.penalties")
+      : m.ft
+        ? t("match.page.afterET")
+        : t("match.page.fullTime")
+  if (m.phase === "half-time") return t("match.page.halfTime")
+  if (m.phase === "et-break") return t("match.page.endOf90")
+  if (m.phase === "et-half-time") return t("match.page.etHalf")
+  if (m.phase === "shootout") return t("match.page.shootoutClock")
   return clock({ minute: m.minute, added: m.added || undefined })
 })
 const aggregate = computed<[number, number] | undefined>(() => {
   const agg = match.value?.setup.knockout?.aggregate
   return agg ? [agg[0] + score.value[0], agg[1] + score.value[1]] : undefined
+})
+
+/** Each nation's colour; when the two clash the away side plays in white. */
+const colors = computed<[string, string]>(() => {
+  const f = fixture.value
+  const w = world.world
+  if (!f || !w) return ["var(--accent)", "var(--pitch-token-text)"]
+  const h = w.def(f.home).color
+  const a = w.def(f.away).color
+  return [h, h.toLowerCase() === a.toLowerCase() ? "var(--pitch-token-text)" : a]
+})
+
+const SHOUTS = new Set<MatchEventKind>([
+  "shot-saved",
+  "shot-wide",
+  "shot-blocked",
+  "woodwork",
+  "big-chance-missed",
+  "corner",
+  "penalty-awarded",
+  "pen-miss",
+  "pen-saved",
+])
+const GOAL_KINDS = new Set<MatchEventKind>(["goal", "pen-goal", "own-goal"])
+
+/** A pop on the ball for the latest event, if it was a shot or a goal. */
+const flash = computed<{ key: number; kind: "goal" | "shot"; label?: string } | null>(() => {
+  const evs = match.value?.events
+  const last = evs?.[evs.length - 1]
+  if (!evs || !last) return null
+  if (GOAL_KINDS.has(last.kind)) return { key: evs.length, kind: "goal" }
+  return SHOUTS.has(last.kind)
+    ? { key: evs.length, kind: "shot", label: t(`match.shout.${last.kind}`) }
+    : null
+})
+
+/** The strip across the pitch when the latest event is a goal. */
+const banner = computed(() => {
+  const evs = match.value?.events
+  const last = evs?.[evs.length - 1]
+  if (!evs || !last?.side || !GOAL_KINDS.has(last.kind)) return null
+  const title =
+    last.kind === "own-goal"
+      ? t("match.banner.ownGoal")
+      : last.kind === "pen-goal"
+        ? t("match.banner.penalty")
+        : t("match.banner.goal")
+  return {
+    key: evs.length,
+    title,
+    text: `${clock(last)} ${names.player(last.playerId)}`,
+    color: colors.value[last.side === "home" ? 0 : 1],
+  }
 })
 
 const mySide = computed(() => (match.value && mine.value ? match.value[mine.value] : null))
@@ -312,11 +380,8 @@ const pitchSlots = computed(() => {
 
 <template>
   <div v-if="!fixture || !mine">
-    <PageShell back title="Match">
-      <AppEmptyState
-        title="Match not found"
-        description="This fixture does not involve your team."
-      />
+    <PageShell back :title="t('match.title')">
+      <AppEmptyState :title="t('match.notFound')" :description="t('match.notInvolved')" />
     </PageShell>
   </div>
 
@@ -324,30 +389,34 @@ const pitchSlots = computed(() => {
     v-else-if="!match"
     back
     :title="compName"
-    :subtitle="`${fixture.label} · ${formatDate(fixture.date)}`"
+    :subtitle="t('match.subtitle', { label: $tx(fixture.label), date: formatDate(fixture.date) })"
   >
     <AppCard padding="md">
       <div class="teams">
         <div class="team">
           <NationFlag :id="fixture.home" :size="52" />
-          <strong>{{ world.world?.def(fixture.home).name }}</strong>
+          <strong>{{ $nation(fixture.home) }}</strong>
           <span v-if="rankOf(fixture.home)" class="muted">#{{ rankOf(fixture.home) }}</span>
         </div>
-        <span class="vs">vs</span>
+        <span class="vs">{{ t("match.page.vs") }}</span>
         <div class="team">
           <NationFlag :id="fixture.away" :size="52" />
-          <strong>{{ world.world?.def(fixture.away).name }}</strong>
+          <strong>{{ $nation(fixture.away) }}</strong>
           <span v-if="rankOf(fixture.away)" class="muted">#{{ rankOf(fixture.away) }}</span>
         </div>
       </div>
       <p class="muted venue">
-        {{ fixture.atHome ? `At home: ${world.world?.def(fixture.home).name}` : "Neutral venue" }}
-        <template v-if="fixture.knockout?.decisive">· Extra time and penalties if needed</template>
+        {{
+          fixture.atHome
+            ? t("match.page.atHome", { name: nationName(fixture.home) })
+            : t("match.page.neutral")
+        }}
+        <template v-if="fixture.knockout?.decisive">{{ t("match.page.extraTime") }}</template>
       </p>
     </AppCard>
 
     <AppCard v-if="opp" padding="md">
-      <AppSectionHeader :title="`${world.world?.def(opp).name} — recent form`" />
+      <AppSectionHeader :title="t('match.page.recentForm', { name: nationName(opp) })" />
       <div class="form">
         <StatPill
           v-for="r in oppForm"
@@ -361,15 +430,17 @@ const pitchSlots = computed(() => {
                 : 'var(--text-muted)'
           "
         />
-        <span v-if="!oppForm.length" class="muted">No recent matches</span>
+        <span v-if="!oppForm.length" class="muted">{{ t("match.page.noRecent") }}</span>
       </div>
-      <div class="muted">Coach: {{ world.world?.nation(opp).coach }}</div>
+      <div class="muted">
+        {{ t("match.page.coach", { name: world.world?.nation(opp).coach }) }}
+      </div>
     </AppCard>
 
     <ScoutReportCard
       v-if="scout && opp"
       :report="scout"
-      :name="world.world?.def(opp).name ?? ''"
+      :name="nationName(opp)"
       :player="(id) => world.world?.state.players[id]"
       :assisted="settings.assistantPicks"
       @apply="world.applyAdvice(fixture)"
@@ -378,16 +449,15 @@ const pitchSlots = computed(() => {
     <div v-if="!due" class="notice">
       <CalendarClock :size="20" class="notice-icon" />
       <span>
-        Match day is {{ formatDate(fixture.date) }}. Keep the calendar moving until then — you can
-        set up your team and tactics now.
+        {{ t("match.page.matchDay", { date: formatDate(fixture.date) }) }}
       </span>
     </div>
     <div v-else-if="problems.length" class="notice notice--bad">
       <TriangleAlert :size="20" class="notice-icon" />
       <div>
-        <strong>Your starting eleven is not ready</strong>
+        <strong>{{ t("match.page.notReady") }}</strong>
         <ul class="problems">
-          <li v-for="p in problems" :key="p">{{ p }}</li>
+          <li v-for="(p, i) in problems" :key="i">{{ $tx(p) }}</li>
         </ul>
       </div>
     </div>
@@ -395,16 +465,16 @@ const pitchSlots = computed(() => {
     <StickyCta>
       <AppButton variant="tonal" @click="router.push('/squad/tactics')">
         <ClipboardList :size="16" />
-        Tactics
+        {{ t("match.page.tactics") }}
       </AppButton>
       <template v-if="due">
         <AppButton variant="outlined" :disabled="problems.length > 0" @click="quickResult">
           <SkipForward :size="16" />
-          Instant
+          {{ t("match.page.instant") }}
         </AppButton>
         <AppButton variant="filled" :disabled="problems.length > 0" @click="kickOff">
           <Play :size="16" />
-          Kick off
+          {{ t("match.page.kickOff") }}
         </AppButton>
       </template>
     </StickyCta>
@@ -416,7 +486,7 @@ const pitchSlots = computed(() => {
       :away="fixture.away"
       :score="score"
       :clock="clockLabel"
-      :label="`${compName} · ${fixture.label}`"
+      :label="`${compName} · ${$tx(fixture.label)}`"
       :pens="match.pens"
       :aggregate="aggregate"
     />
@@ -428,73 +498,60 @@ const pitchSlots = computed(() => {
         class="break"
       >
         <AppSectionHeader
-          :title="match.phase === 'half-time' ? 'Half-time team talk' : 'Before extra time'"
+          :title="
+            match.phase === 'half-time' ? t('match.page.halfTimeTalk') : t('match.page.beforeET')
+          "
         />
         <div v-if="!talkGiven" class="talks">
-          <AppButton variant="tonal" @click="talk('calm')">Stay calm</AppButton>
-          <AppButton variant="tonal" @click="talk('praise')">Praise them</AppButton>
-          <AppButton variant="tonal" @click="talk('demand')">Demand more</AppButton>
+          <AppButton variant="tonal" @click="talk('calm')">{{ t("match.page.calm") }}</AppButton>
+          <AppButton variant="tonal" @click="talk('praise')">
+            {{ t("match.page.praise") }}
+          </AppButton>
+          <AppButton variant="tonal" @click="talk('demand')">
+            {{ t("match.page.demand") }}
+          </AppButton>
         </div>
-        <p v-else class="muted">The players head back out.</p>
-        <AppButton variant="filled" block @click="resume">Continue</AppButton>
+        <p v-else class="muted">{{ t("match.page.headBack") }}</p>
+        <AppButton variant="filled" block @click="resume">{{ t("common.continue") }}</AppButton>
       </AppCard>
 
       <AppCard v-if="match.phase === 'shootout'" padding="md" class="break">
-        <AppSectionHeader title="Penalty shootout" />
-        <AppButton variant="filled" block @click="resume">Take the penalties</AppButton>
+        <AppSectionHeader :title="t('match.page.shootout')" />
+        <AppButton variant="filled" block @click="resume">{{ t("match.page.takePens") }}</AppButton>
       </AppCard>
 
-      <AppCard v-if="match.phase === 'done'" padding="md" class="break">
-        <AppSectionHeader title="Full-time" />
-        <AppButton variant="filled" block @click="finish">Match report</AppButton>
-      </AppCard>
-
-      <AppSubTabBar
-        :model-value="tab"
-        :options="[
-          { value: 'feed', label: 'Commentary' },
-          { value: 'stats', label: 'Stats' },
-          { value: 'team', label: 'My team' },
-        ]"
-        size="sm"
-        @update:model-value="(v) => (tab = v)"
+      <LiveNarration
+        :events="match.events.slice()"
+        :names="names"
+        :verbose="settings.verboseCommentary"
       />
-      <div class="panel">
-        <CommentaryFeed
-          v-if="tab === 'feed'"
-          :events="match.events.slice()"
-          :names="names"
-          :verbose="settings.verboseCommentary"
-          :mine="mine"
-        />
-        <StatsPanel
-          v-else-if="tab === 'stats'"
-          :home="{ ...match.home.stats, possession: livePossession[0] }"
-          :away="{ ...match.away.stats, possession: livePossession[1] }"
-          :lanes="laneCounts(match.events)"
-        />
-        <div v-else-if="mySide" class="team-panel">
-          <PitchView
-            :formation="mySide.tactics.formation"
-            :slots="pitchSlots"
-            :player="(id) => world.world?.state.players[id]"
-          />
-          <ul class="stamina">
-            <li v-for="p in mySide.pitch" :key="p.id">
-              <span class="role">{{ p.slot }}</span>
-              <span class="name">{{ names.player(p.id) }}</span>
-              <span class="bar"><span :style="{ width: `${p.stamina}%` }"></span></span>
-            </li>
-          </ul>
-        </div>
-      </div>
+      <BallPitch
+        :ball="match.ball"
+        :home="fixture.home"
+        :away="fixture.away"
+        :home-color="colors[0]"
+        :away-color="colors[1]"
+        :flash="flash"
+        :banner="banner"
+      />
+      <PressureBar
+        :home="fixture.home"
+        :away="fixture.away"
+        :share="livePossession"
+        :home-color="colors[0]"
+        :away-color="colors[1]"
+      />
+      <KeyEvents :events="match.events.slice()" :names="names" />
     </div>
 
-    <div v-if="match.phase !== 'done'" class="controls">
+    <StickyCta v-if="match.phase === 'done'">
+      <AppButton variant="filled" block @click="finish">{{ t("match.page.report") }}</AppButton>
+    </StickyCta>
+    <div v-else class="controls">
       <button class="control" @click="toggle">
         <Pause v-if="running" :size="20" />
         <Play v-else :size="20" />
-        <span>{{ running ? "Pause" : "Play" }}</span>
+        <span>{{ running ? t("match.page.pause") : t("match.page.play") }}</span>
       </button>
       <button class="control" @click="cycleSpeed">
         <FastForward :size="20" />
@@ -502,15 +559,19 @@ const pitchSlots = computed(() => {
       </button>
       <button class="control" @click="((running = false), (showSubs = true))">
         <ArrowLeftRight :size="20" />
-        <span>Subs</span>
+        <span>{{ t("match.page.subs") }}</span>
       </button>
       <button class="control" @click="((running = false), (showTactics = true))">
         <ClipboardList :size="20" />
-        <span>Tactics</span>
+        <span>{{ t("match.page.tactics") }}</span>
+      </button>
+      <button class="control" @click="showStats = true">
+        <ChartNoAxesColumn :size="20" />
+        <span>{{ t("match.page.stats") }}</span>
       </button>
       <button class="control" @click="skipToEnd">
         <SkipForward :size="20" />
-        <span>Skip</span>
+        <span>{{ t("match.page.skip") }}</span>
       </button>
     </div>
 
@@ -522,6 +583,17 @@ const pitchSlots = computed(() => {
       :force-out="forceOut"
       @close="closeSubs"
       @sub="doSub"
+    />
+    <StatsSheet
+      v-if="showStats && mySide"
+      :home="{ ...match.home.stats, possession: livePossession[0] }"
+      :away="{ ...match.away.stats, possession: livePossession[1] }"
+      :lanes="laneCounts(match.events)"
+      :side="mySide"
+      :slots="pitchSlots"
+      :player="(id) => world.world?.state.players[id]"
+      :name="(id) => names.player(id)"
+      @close="showStats = false"
     />
     <LiveTacticsSheet
       v-if="showTactics && mySide"
@@ -633,60 +705,6 @@ const pitchSlots = computed(() => {
   gap: var(--sp-2);
 }
 
-.panel {
-  border-radius: var(--radius);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.team-panel {
-  padding: var(--sp-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-
-.stamina {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1-5);
-}
-
-.stamina li {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-sm);
-}
-
-.role {
-  width: 28px;
-  font-weight: 800;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-}
-
-.name {
-  flex: 1;
-}
-
-.bar {
-  width: 90px;
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--border-light);
-  overflow: hidden;
-}
-
-.bar span {
-  display: block;
-  height: 100%;
-  background: var(--success);
-}
-
 .controls {
   position: fixed;
   left: 0;
@@ -694,10 +712,9 @@ const pitchSlots = computed(() => {
   bottom: 0;
   z-index: var(--z-bottom-bar);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   padding: var(--sp-1) var(--sp-2) calc(var(--safe-bottom) + var(--sp-1));
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(16px);
+  background: var(--surface);
   border-top: 1px solid var(--border-light);
 }
 

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { Plus, Trash2 } from "@lucide/vue"
 import { AppButton } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { deleteSlot, listSlots, SLOT_COUNT, type SlotMeta } from "@/modules/world/services/saves"
 import { useWorldStore } from "@/modules/world/store"
-import { NATION_DEFS } from "@/modules/world/services/statics"
-import { formatDate } from "@/engine/calendar/dates"
+import { nationName } from "@/i18n/text"
+import { formatDate } from "@/i18n/dates"
 import { showConfirm } from "@/composables/useDialog"
 
 const props = defineProps<{
@@ -16,6 +17,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ pick: [slot: number] }>()
 
+const { t } = useI18n()
 const world = useWorldStore()
 const slots = ref<(SlotMeta | null)[]>(Array(SLOT_COUNT).fill(null))
 
@@ -25,14 +27,14 @@ async function refresh() {
 
 onMounted(refresh)
 
-const nationName = (id: string | null) => NATION_DEFS.find((n) => n.id === id)?.name ?? "Unemployed"
+const nationLabel = (id: string | null) => (id ? nationName(id) : t("career.slots.unemployed"))
 
 async function choose(n: number) {
   const meta = slots.value[n - 1]
   if (props.mode === "load" && !meta) return
   if (props.mode === "new" && meta) {
-    const ok = await showConfirm(`Overwrite ${meta.managerName}'s career in slot ${n}?`, {
-      confirmLabel: "Overwrite",
+    const ok = await showConfirm(t("career.slots.overwrite", { name: meta.managerName, n }), {
+      confirmLabel: t("career.slots.overwriteBtn"),
       dangerous: true,
     })
     if (!ok) return
@@ -41,8 +43,8 @@ async function choose(n: number) {
 }
 
 async function remove(n: number) {
-  const ok = await showConfirm("Delete this save? This cannot be undone.", {
-    confirmLabel: "Delete",
+  const ok = await showConfirm(t("career.slots.deleteConfirm"), {
+    confirmLabel: t("career.slots.delete"),
     dangerous: true,
   })
   if (!ok) return
@@ -62,15 +64,17 @@ async function remove(n: number) {
           <span class="slot-text">
             <span class="slot-title">{{ meta.managerName }}</span>
             <span class="slot-sub">
-              {{ nationName(meta.nationId) }} · {{ formatDate(meta.date) }}
+              {{ nationLabel(meta.nationId) }} · {{ formatDate(meta.date) }}
             </span>
           </span>
         </template>
         <template v-else>
           <span class="slot-empty-icon"><Plus :size="20" /></span>
           <span class="slot-text">
-            <span class="slot-title">Empty slot</span>
-            <span class="slot-sub">{{ mode === "new" ? "Start here" : "No save" }}</span>
+            <span class="slot-title">{{ t("career.slots.empty") }}</span>
+            <span class="slot-sub">
+              {{ mode === "new" ? t("career.slots.startHere") : t("career.slots.noSave") }}
+            </span>
           </span>
         </template>
       </button>
@@ -78,7 +82,7 @@ async function remove(n: number) {
         v-if="meta && mode === 'load'"
         variant="text"
         icon-only
-        aria-label="Delete save"
+        :aria-label="t('career.slots.deleteSave')"
         @click="remove(i + 1)"
       >
         <Trash2 :size="18" />

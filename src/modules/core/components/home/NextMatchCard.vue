@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import { ClipboardList } from "@lucide/vue"
 import { AppButton } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
-import { daysBetween, formatDate } from "@/engine/calendar/dates"
+import { daysBetween } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 import type { Fixture } from "@/engine/competition/types"
 import { venueOf } from "@/engine/world/stadiums"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 
@@ -21,12 +24,15 @@ const next = world.derive<Fixture | null>((w) => {
 const meta = world.derive((w) => {
   const f = next.value
   if (!f) return null
-  const comp =
-    f.compId === "friendly"
-      ? "International friendly"
-      : (w.state.competitions[f.compId]?.name ?? "")
+  const inst0 = w.state.competitions[f.compId]
+  const compInst =
+    f.compId !== "friendly" && inst0 ? { defId: inst0.defId, year: inst0.year } : null
   const me = w.state.career.nationId
-  const venue = !f.atHome ? "Neutral venue" : f.home === me ? "Home" : "Away"
+  const venue = !f.atHome
+    ? t("core.nextMatch.neutral")
+    : f.home === me
+      ? t("core.nextMatch.home")
+      : t("core.nextMatch.away")
   // Hosted tournaments are played in the hosts' grounds; everything else at the home side's.
   const inst = w.state.competitions[f.compId]
   const hosted = inst && inst.kind !== "qualifier" && inst.hosts.length ? inst.hosts : null
@@ -35,11 +41,9 @@ const meta = world.derive((w) => {
   )
   const ground = venueOf(grounds, f.id, f.importance !== "friendly")
   return {
-    comp,
+    compInst,
     homeRank: w.fifaRank(f.home),
     awayRank: w.fifaRank(f.away),
-    homeName: w.def(f.home).name,
-    awayName: w.def(f.away).name,
     venue,
     ground: ground ? `${ground.name}, ${ground.city}` : "",
   }
@@ -48,32 +52,38 @@ const meta = world.derive((w) => {
 const countdown = computed(() => {
   if (!next.value || !world.date) return ""
   const d = daysBetween(world.date, next.value.date)
-  return d <= 0 ? "Today" : d === 1 ? "Tomorrow" : `In ${d} days`
+  return d <= 0
+    ? t("core.nextMatch.today")
+    : d === 1
+      ? t("core.nextMatch.tomorrow")
+      : t("core.nextMatch.inDays", { n: d })
 })
 </script>
 
 <template>
   <section v-if="next && meta" class="next">
     <div class="next-head">
-      <span class="eyebrow">Next match</span>
+      <span class="eyebrow">{{ t("core.nextMatch.eyebrow") }}</span>
       <span class="countdown">{{ countdown }}</span>
     </div>
-    <div class="comp">{{ meta.comp }}</div>
-    <div class="label">{{ next.label }}</div>
+    <div class="comp">
+      {{ meta.compInst ? $comp(meta.compInst) : t("core.nextMatch.friendly") }}
+    </div>
+    <div class="label">{{ $tx(next.label) }}</div>
 
     <RouterLink :to="`/match/${next.id}`" class="teams">
       <div class="team">
         <NationFlag :id="next.home" :size="52" />
-        <span class="team-name">{{ meta.homeName }}</span>
+        <span class="team-name">{{ $nation(next.home) }}</span>
         <span v-if="meta.homeRank" class="team-rank">#{{ meta.homeRank }}</span>
       </div>
       <div class="vs">
-        <span>VS</span>
+        <span>{{ t("core.nextMatch.vs") }}</span>
         <small>{{ formatDate(next.date) }}</small>
       </div>
       <div class="team">
         <NationFlag :id="next.away" :size="52" />
-        <span class="team-name">{{ meta.awayName }}</span>
+        <span class="team-name">{{ $nation(next.away) }}</span>
         <span v-if="meta.awayRank" class="team-rank">#{{ meta.awayRank }}</span>
       </div>
     </RouterLink>
@@ -85,7 +95,7 @@ const countdown = computed(() => {
       </span>
       <AppButton variant="tonal" @click="router.push('/squad/tactics')">
         <ClipboardList :size="16" />
-        Team &amp; tactics
+        {{ t("core.nextMatch.teamTactics") }}
       </AppButton>
     </div>
   </section>

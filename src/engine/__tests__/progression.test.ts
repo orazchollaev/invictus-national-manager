@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { resolveText as say } from "@/i18n/text"
 import nations from "@/data/nations.json"
 import clubRows from "@/data/clubs.json"
 import playerRows from "@/data/players.json"
@@ -141,7 +142,7 @@ describe("the board meeting", () => {
     const up = shiftObjective(w, reach, 1)!
     expect(up.stage).toBe("Semi-finals")
     expect(up.critical).toBe(true)
-    expect(up.text).toBe("Reach the semi-finals of the UEFA Euro 2028")
+    expect(say(up.text)).toBe("Reach the semi-finals of the UEFA Euro 2028")
     const down = shiftObjective(w, reach, -1)!
     expect(down.stage).toBe("knockout")
     const final = shiftObjective(w, { ...reach, stage: "Final" }, 1)!
@@ -150,12 +151,16 @@ describe("the board meeting", () => {
 
     const qualify: BoardObjective = {
       ...reach,
+      comp: "wcq-uefa",
+      compInstance: "wcq-uefa-2030",
       kind: "qualify",
       stage: undefined,
       text: "Qualify for the FIFA World Cup 2030",
       critical: true,
     }
-    expect(shiftObjective(w, qualify, 1)!.text).toBe("Qualify for the FIFA World Cup 2030 unbeaten")
+    expect(say(shiftObjective(w, qualify, 1)!.text)).toBe(
+      "Qualify for the FIFA World Cup 2030 unbeaten"
+    )
     expect(shiftObjective(w, qualify, -1)!.critical).toBe(false)
     expect(shiftObjective(w, { ...qualify, critical: false }, -1)).toBeNull()
   })
@@ -447,8 +452,8 @@ describe("the review of a competition", () => {
     expect(r.played).toBeGreaterThan(0)
     expect(r.won + r.drawn + r.lost).toBe(r.played)
     expect(r.objectives.length).toBeGreaterThan(0)
-    expect(r.reached).toMatch(/League|Champions/)
-    expect(r.message.length).toBeGreaterThan(20)
+    expect(say(r.reached)).toMatch(/League|Champions/)
+    expect(say(r.message).length).toBeGreaterThan(20)
     expect(r.stars.length).toBeGreaterThan(0)
     expect(w.state.pendingReview).toBeNull()
   })
@@ -473,7 +478,7 @@ describe("youth", () => {
     playerMoments(w, f, report)
     expect(c.debuts).toBe(young.length)
     expect(obj.progress).toBe(young.length)
-    expect(w.state.news[0].title).toMatch(/debut|First cap/)
+    expect(say(w.state.news[0].title)).toMatch(/debut|First cap/)
     checkObjectives(w)
     expect(obj.status).toBe("met")
   })
@@ -546,13 +551,13 @@ describe("the starting eleven", () => {
     a.injury = { until: "2099-01-01", label: "Knee" }
     b.banned = 1
     w.state.userTeam.xi = sheet.xi.slice(0, 10)
-    const problems = w.lineupProblems(f)
+    const problems = w.lineupProblems(f).map((p) => say(p))
     expect(problems.some((p) => p.includes("injured"))).toBe(true)
     expect(problems.some((p) => p.includes("suspended"))).toBe(true)
     expect(problems.some((p) => p.startsWith("No one is playing"))).toBe(true)
 
     w.state.nations.TUR.squad = w.state.nations.TUR.squad.filter((id) => id !== c.id)
-    expect(w.lineupProblems(f).some((p) => p.includes("not in the squad"))).toBe(true)
+    expect(w.lineupProblems(f).some((p) => say(p).includes("not in the squad"))).toBe(true)
   })
 
   it("is not checked when no eleven has been saved", () => {
@@ -580,7 +585,7 @@ describe("milestones", () => {
     const w = newWorld("SMR")
     afterUserResult(w, fixture(w, "ESP", "qualifier", 1, 0))
     const result = w.state.news.find((n) => n.kind === "result")
-    expect(result?.title).toMatch(/Shock win/)
+    expect(say(result!.title)).toMatch(/Shock win/)
   })
 })
 

@@ -4,6 +4,7 @@
  * view of each, and a tap to follow the ones worth watching.
  */
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { Eye, EyeOff, Sprout } from "@lucide/vue"
 import { AppButton, AppSheet, AppStarRating } from "@/components/ui"
@@ -11,6 +12,7 @@ import { useWorldStore } from "@/modules/world/store"
 import { ageOn } from "@/engine/players/ability"
 import { isWonderkid, potentialStars } from "@/modules/squad/utils/stars"
 
+const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 const sheet = ref<InstanceType<typeof AppSheet> | null>(null)
@@ -54,7 +56,7 @@ function onClose() {
 <template>
   <AppSheet
     ref="sheet"
-    title="Youth intake"
+    :title="t('core.intake.title')"
     max-height="85dvh"
     max-height-mobile="85dvh"
     @close="onClose"
@@ -62,11 +64,10 @@ function onClose() {
     <div v-if="info" class="intake">
       <div class="badge">
         <Sprout :size="16" />
-        Class of {{ info.year }}
+        {{ t("core.intake.classOf", { year: info.year }) }}
       </div>
       <p class="lead">
-        {{ info.players.length }} youngsters have come through the academies. Give them minutes in
-        your shirt and they will develop faster.
+        {{ t("core.intake.lead", { n: info.players.length }) }}
       </p>
       <ul class="list">
         <li v-for="p in info.players" :key="p.id" class="row">
@@ -74,7 +75,7 @@ function onClose() {
           <div class="main">
             <div class="name">
               {{ p.name }}
-              <strong v-if="p.wonder" class="wonder">Wonderkid</strong>
+              <strong v-if="p.wonder" class="wonder">{{ t("core.intake.wonderkid") }}</strong>
             </div>
             <div class="sub">{{ p.age }} · {{ p.club }}</div>
           </div>
@@ -82,7 +83,7 @@ function onClose() {
           <button
             class="watch"
             :class="{ on: p.watched }"
-            :aria-label="p.watched ? 'Stop watching' : 'Watch'"
+            :aria-label="p.watched ? t('core.intake.stopWatching') : t('core.intake.watch')"
             @click="world.toggleWatch(p.id)"
           >
             <Eye v-if="p.watched" :size="18" />
@@ -93,8 +94,12 @@ function onClose() {
     </div>
     <template #footer>
       <div class="actions">
-        <AppButton variant="tonal" block @click="prospects">All prospects</AppButton>
-        <AppButton variant="filled" block @click="sheet?.close()">Continue</AppButton>
+        <AppButton variant="tonal" block @click="prospects">
+          {{ t("core.intake.allProspects") }}
+        </AppButton>
+        <AppButton variant="filled" block @click="sheet?.close()">
+          {{ t("common.continue") }}
+        </AppButton>
       </div>
     </template>
   </AppSheet>

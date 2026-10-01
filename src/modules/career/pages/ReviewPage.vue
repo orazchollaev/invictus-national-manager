@@ -6,6 +6,7 @@
  */
 import { computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { useI18n } from "vue-i18n"
 import { FileText } from "@lucide/vue"
 import { AppButton, AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { PageShell, StickyCta } from "@/modules/core/components"
@@ -16,8 +17,9 @@ import {
   ReviewPlayers,
 } from "@/modules/career/components/review"
 import { useWorldStore } from "@/modules/world/store"
-import { formatDate } from "@/engine/calendar/dates"
+import { formatDate } from "@/i18n/dates"
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const world = useWorldStore()
@@ -34,7 +36,7 @@ const stars = computed(() =>
   (review.value?.stars ?? []).map((s) => ({
     id: s.id,
     name: s.name,
-    detail: `${s.apps} ${s.apps === 1 ? "match" : "matches"} · ${s.goals} ${s.goals === 1 ? "goal" : "goals"}`,
+    detail: `${t("career.review.match", s.apps)} · ${t("career.review.goal", s.goals)}`,
     value: s.rating.toFixed(2),
   }))
 )
@@ -42,22 +44,27 @@ const youngsters = computed(() =>
   (review.value?.youngsters ?? []).map((y) => ({
     id: y.id,
     name: y.name,
-    detail: `Aged ${y.age} · ${y.apps} ${y.apps === 1 ? "match" : "matches"}`,
+    detail: t("career.review.youngsterDetail", {
+      age: y.age,
+      apps: t("career.review.match", y.apps),
+    }),
   }))
 )
 
 const CONTRACT = {
-  renewed: "Your contract has been renewed",
-  extended: "Your contract has been extended by a year",
-  expired: "Your contract will not be renewed",
+  renewed: "career.review.contractRenewed",
+  extended: "career.review.contractExtended",
+  expired: "career.review.contractExpired",
 } as const
 
 const contract = computed(() => {
   const r = review.value
   if (!r?.contract) return ""
   const until =
-    r.contract !== "expired" && r.contractUntil ? `, now until ${formatDate(r.contractUntil)}` : ""
-  return `${CONTRACT[r.contract]}${until}.`
+    r.contract !== "expired" && r.contractUntil
+      ? t("career.review.contractNowUntil", { date: formatDate(r.contractUntil) })
+      : ""
+  return t("career.review.contractLine", { text: t(CONTRACT[r.contract]), until })
 })
 
 function done() {
@@ -69,35 +76,35 @@ function done() {
 </script>
 
 <template>
-  <PageShell :back="!pending" title="Federation review" :subtitle="review?.name">
-    <AppEmptyState v-if="!review" :icon="FileText" title="Review not found" />
+  <PageShell :back="!pending" :title="t('career.review.title')" :subtitle="$tx(review?.name)">
+    <AppEmptyState v-if="!review" :icon="FileText" :title="t('career.review.notFound')" />
     <template v-else>
       <ReviewHeader :review="review" />
-      <p class="message">{{ review.message }}</p>
+      <p class="message">{{ $tx(review.message) }}</p>
       <p v-if="contract" class="contract" :class="`contract--${review.contract}`">
         {{ contract }}
       </p>
 
       <template v-if="review.objectives.length">
-        <AppSectionHeader title="Objectives" />
+        <AppSectionHeader :title="t('career.review.objectives')" />
         <ReviewObjectives :objectives="review.objectives" />
       </template>
 
-      <AppSectionHeader title="Standing" />
+      <AppSectionHeader :title="t('career.review.standing')" />
       <ReviewMeters :before="review.before" :after="review.after" />
 
       <template v-if="stars.length">
-        <AppSectionHeader title="Stand-out players" />
+        <AppSectionHeader :title="t('career.review.standOut')" />
         <ReviewPlayers :players="stars" />
       </template>
 
       <template v-if="youngsters.length">
-        <AppSectionHeader title="Youngsters who played" />
+        <AppSectionHeader :title="t('career.review.youngsters')" />
         <ReviewPlayers :players="youngsters" />
       </template>
 
       <StickyCta v-if="pending" above-nav>
-        <AppButton variant="filled" block @click="done">Continue</AppButton>
+        <AppButton variant="filled" block @click="done">{{ t("common.continue") }}</AppButton>
       </StickyCta>
     </template>
   </PageShell>

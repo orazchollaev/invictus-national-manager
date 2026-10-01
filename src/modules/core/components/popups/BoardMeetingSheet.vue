@@ -5,6 +5,7 @@
  * board's trust, and at a price). Closing the sheet accepts the target as set.
  */
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { Landmark } from "@lucide/vue"
 import { AppButton, AppSheet } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -14,6 +15,7 @@ import { ambitionChoices } from "@/engine/career/career"
 
 const props = defineProps<{ objectiveId: string }>()
 
+const { t } = useI18n()
 const world = useWorldStore()
 const sheet = ref<InstanceType<typeof AppSheet> | null>(null)
 const level = ref<-1 | 0 | 1>(0)
@@ -24,13 +26,19 @@ const info = world.derive((w) => {
   if (!obj || !c.nationId) return null
   return {
     nationId: c.nationId,
-    comp: w.state.competitions[obj.compInstance]?.name ?? "",
+    compInst: ((c) => (c ? { defId: c.defId, year: c.year } : null))(
+      w.state.competitions[obj.compInstance]
+    ),
     confidence: c.confidence,
     choices: ambitionChoices(w, props.objectiveId),
   }
 }, null)
 
-const LABELS = { 1: "Promise more", 0: "Accept", [-1]: "Lower expectations" } as const
+const LABELS = {
+  1: "core.board.promise",
+  0: "core.board.accept",
+  [-1]: "core.board.lower",
+} as const
 const chosen = computed(() => info.value?.choices.find((c) => c.level === level.value))
 
 let decided = false
@@ -49,7 +57,7 @@ function onClose() {
 <template>
   <AppSheet
     ref="sheet"
-    title="Federation meeting"
+    :title="t('core.board.title')"
     max-height="90dvh"
     max-height-mobile="90dvh"
     :dismiss-on-outside-click="false"
@@ -58,14 +66,15 @@ function onClose() {
     <div v-if="info" class="board">
       <div class="badge">
         <Landmark :size="16" />
-        The board sets a target
+        {{ t("core.board.badge") }}
       </div>
       <NationFlag :id="info.nationId" :size="48" />
-      <p class="lead">
-        The federation tells you what it expects from the
-        <strong>{{ info.comp }}.</strong>
-        Confidence stands at {{ info.confidence }}%.
-      </p>
+      <i18n-t keypath="core.board.lead" tag="p" class="lead">
+        <template #comp>
+          <strong>{{ info.compInst ? $comp(info.compInst) : "" }}</strong>
+        </template>
+        <template #confidence>{{ info.confidence }}</template>
+      </i18n-t>
       <div class="choices" role="radiogroup">
         <button
           v-for="c in info.choices"
@@ -78,21 +87,19 @@ function onClose() {
           @click="level = c.level"
         >
           <span class="choice-head">
-            <strong>{{ LABELS[c.level] }}</strong>
-            <StatPill v-if="c.critical" value="Key" tone="var(--danger)" />
+            <strong>{{ t(LABELS[c.level]) }}</strong>
+            <StatPill v-if="c.critical" :value="t('common.key')" tone="var(--danger)" />
           </span>
-          <span class="choice-text">{{ c.text }}</span>
-          <span v-if="c.note" class="choice-note">{{ c.note }}</span>
+          <span class="choice-text">{{ $tx(c.text) }}</span>
+          <span v-if="c.note" class="choice-note">{{ $tx(c.note) }}</span>
         </button>
       </div>
-      <p class="note">
-        Missing a key objective can cost you the job unless the board still has faith in you.
-      </p>
+      <p class="note">{{ t("core.board.note") }}</p>
     </div>
     <template #footer>
       <div class="actions">
         <AppButton variant="filled" block :disabled="!chosen?.allowed" @click="confirm">
-          {{ level === 0 ? "Accept the target" : LABELS[level] }}
+          {{ level === 0 ? t("core.board.acceptTarget") : t(LABELS[level]) }}
         </AppButton>
       </div>
     </template>

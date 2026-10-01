@@ -57,6 +57,8 @@ const RED_PER_FOUL = 0.003
 const INJURY_PER_MINUTE = 0.00011
 const STAMINA_DRAIN = 0.42
 const HOME_BOOST = 2.5
+/** Ability points a tournament host gains in its own tournament, on top of home advantage. */
+const HOST_BOOST = 0.75
 
 /** Share of each role's work that goes to defence, midfield and attack. */
 const ROLE_WEIGHTS: Record<Position, [number, number, number]> = {
@@ -227,6 +229,8 @@ export interface MatchSetup {
   homeBoost?: number
   /** A small lift in ability points for one side: the user's, for the manager's touch. */
   edge?: { side: Side; value: number }
+  /** Sides that host the tournament this match belongs to: each gets a small lift. */
+  hosts?: Side[]
   /** Ties that need a winner. `aggregate` is earlier legs, from this match's home side. */
   knockout?: { aggregate?: [number, number]; extraTime: boolean }
   /** Finals, deciders: players' big-match temperament comes into play. */
@@ -255,6 +259,8 @@ export interface MatchState {
   pens?: [number, number]
   /** Injured players on the managed side waiting for the manager to act. */
   pendingInjuries: string[]
+  /** Who has the ball, the lane they work and how far up the pitch (3 is in the box), for the live view. */
+  ball: { side: Side; lane: Lane; depth: 1 | 2 | 3 }
 }
 
 // ── Setup ───────────────────────────────────────────────────────────────────
@@ -386,6 +392,7 @@ export function createMatch(setup: MatchSetup): MatchState {
     away: buildSide(setup.away, setup, rng),
     events: [],
     pendingInjuries: [],
+    ball: { side: "home", lane: "centre", depth: 1 },
   }
   state.events.push({ minute: 0, kind: "kickoff", side: null })
   return state
@@ -451,7 +458,8 @@ function units(state: MatchState, side: LiveSide, opp: LiveSide, isHome: boolean
   const edge = state.setup.edge
   const home =
     (isHome && state.setup.homeAdvantage ? (state.setup.homeBoost ?? HOME_BOOST) : 0) +
-    (edge && edge.side === (isHome ? "home" : "away") ? edge.value : 0)
+    (edge && edge.side === (isHome ? "home" : "away") ? edge.value : 0) +
+    (state.setup.hosts?.includes(isHome ? "home" : "away") ? HOST_BOOST : 0)
   return {
     def: (unit(0) * keeperUnit[0] * (1 - 0.03 * m) * play.def + home) * short,
     mid: (unit(1) * keeperUnit[1] * (1 + 0.02 * press) * play.mid + home) * short,
@@ -648,6 +656,11 @@ function playMinute(state: MatchState, out: MatchEvent[]) {
   const defSide = sideOf(state, other(attacking))
 
   const edge = Math.tanh((att.att - def.def) / 22)
+  state.ball = {
+    side: attacking,
+    lane: state.ball.side === attacking ? state.ball.lane : "centre",
+    depth: edge > 0.3 ? 3 : edge > -0.15 ? 2 : 1,
+  }
   const pAttack =
     ATTACK_BASE *
     (1 + 0.5 * edge) *
@@ -731,6 +744,8 @@ function attack(state: MatchState, out: MatchEvent[], s: Side, edge: number, gkA
   }
 
   const lane = pickLane(state, side, opp)
+  state.ball.lane = lane
+  state.ball.depth = 3
 
   if (rng() < BREAKDOWN * (1 - 0.3 * edge)) {
     const carrier = choose(
