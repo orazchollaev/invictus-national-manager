@@ -5,12 +5,17 @@ import { AppChip } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 import { ZONE_INFO, type Zone } from "@/modules/competitions/utils/zones"
+import type { Outlook } from "@/modules/competitions/utils/outlook"
 
 const props = defineProps<{
   rows: Standing[]
   title: string
   /** What each position leads to (qualify, play-off, relegation…). */
   zones?: (Zone | null)[]
+  /** Who is already through or out, per position. */
+  outlook?: Outlook[]
+  /** A line drawn under this many rows: the cut of a best-placed ranking. */
+  cut?: number
   /** The finals' hosts, marked in the table (also in their qualifying groups). */
   hosts?: string[]
 }>()
@@ -47,7 +52,7 @@ const tone = (i: number) => {
       :key="r.team"
       :to="r.team.startsWith('?') ? '' : `/nation/${r.team}`"
       class="row"
-      :class="{ mine: r.team === world.me }"
+      :class="{ mine: r.team === world.me, cut: cut === i + 1 }"
       :style="{ '--zone': tone(i) }"
     >
       <span class="pos">{{ i + 1 }}</span>
@@ -55,6 +60,12 @@ const tone = (i: number) => {
         <NationFlag :id="r.team" :size="18" name />
         <AppChip v-if="hosts?.includes(r.team)" size="xs" variant="accent" class="host">
           Host
+        </AppChip>
+        <AppChip v-if="outlook?.[i] === 'qualified'" size="xs" variant="success" class="host">
+          Q
+        </AppChip>
+        <AppChip v-else-if="outlook?.[i] === 'eliminated'" size="xs" variant="danger" class="host">
+          E
         </AppChip>
       </span>
       <span>{{ r.p }}</span>
@@ -64,7 +75,9 @@ const tone = (i: number) => {
       <span class="gd">{{ r.gd > 0 ? `+${r.gd}` : r.gd }}</span>
       <span class="pts">{{ r.pts }}</span>
     </RouterLink>
-    <div v-if="legend.length" class="legend">
+    <div v-if="legend.length || outlook?.some(Boolean)" class="legend">
+      <span v-if="outlook?.includes('qualified')" class="legend-item">Q Through</span>
+      <span v-if="outlook?.includes('eliminated')" class="legend-item">E Out</span>
       <span v-for="l in legend" :key="l.zone" class="legend-item">
         <span class="legend-dot" :style="{ background: l.tone }"></span>
         {{ l.label }}
@@ -127,6 +140,10 @@ const tone = (i: number) => {
 
 .mine {
   background: var(--accent-subtle);
+}
+
+.cut {
+  border-bottom: 2px solid var(--success);
 }
 
 .pts {

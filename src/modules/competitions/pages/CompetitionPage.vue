@@ -7,10 +7,9 @@ import { NationFlag } from "@/modules/nations/components/badge"
 import { FixtureRow, StandingsTable } from "@/modules/competitions/components/tables"
 import { useWorldStore } from "@/modules/world/store"
 import { competitionDef } from "@/engine/competition/defs"
-import { groupStandings } from "@/engine/competition/tables"
 import { formatDate } from "@/engine/calendar/dates"
-import type { Fixture, StageState } from "@/engine/competition/types"
-import { zonesFor } from "@/modules/competitions/utils/zones"
+import type { Fixture, StageState, Tie } from "@/engine/competition/types"
+import { bestPlaced, groupView } from "@/modules/competitions/utils/groupView"
 import { AWARDED_HOSTS } from "@/data/start"
 
 const route = useRoute()
@@ -77,13 +76,10 @@ const plan = computed(() => {
 const tables = computed(() => {
   const w = world.world
   const s = stage.value
-  if (!w || !s?.groups) return []
-  const rule = plan.value?.groups?.tiebreak ?? "gd"
+  const c = inst.value
+  if (!w || !s?.groups || !c) return []
   const ctx = w.ctx()
-  const list = s.groups.map((g) => ({
-    group: g,
-    rows: groupStandings(g, ctx.fixture, rule, ctx.points),
-  }))
+  const list = s.groups.map((g) => ({ group: g, ...groupView(c, s, g, ctx) }))
   // Your group first.
   return list.sort(
     (a, b) =>
@@ -92,11 +88,13 @@ const tables = computed(() => {
   )
 })
 
-/** What each position in a group leads to, for the coloured markers. */
-function zones(groupName: string, size: number) {
+/** The ranking across groups that decides the last places, with the cut. */
+const best = computed(() => {
   const w = world.world
-  return w && inst.value ? zonesFor(inst.value, groupName, size, w.ctx(), stageKey.value) : []
-}
+  const s = stage.value
+  const c = inst.value
+  return w && s?.groups && c && s.status !== "waiting" ? bestPlaced(c, s, w.ctx()) : null
+})
 
 const fx = (id: string) => world.world?.state.fixtures[id]
 const groupFixtures = (ids: string[]) =>
@@ -105,6 +103,29 @@ const groupFixtures = (ids: string[]) =>
     .filter((f): f is Fixture => !!f)
     .sort((a, b) => (a.date < b.date ? -1 : 1))
 const openGroup = ref<string | null>(null)
+
+/** Who goes through a decided tie, and on what: "BRA advance · 3–2 on aggregate". */
+function advance(t: Tie) {
+  if (!t.winner || !t.home || !t.away) return null
+  const played = t.fixtures.map(fx).filter((f): f is Fixture => !!f?.result)
+  if (!played.length) return null
+  const goals = (team: string) =>
+    played.reduce((n, f) => n + (f.home === team ? f.result!.h : f.result!.a), 0)
+  const loser = t.winner === t.home ? t.away : t.home
+  const last = played[played.length - 1]
+  const level = goals(t.winner) === goals(loser)
+  const how = level
+    ? last.result!.pens
+      ? "on penalties"
+      : ""
+    : t.fixtures.length > 1
+      ? "on aggregate"
+      : last.result!.ft
+        ? "after extra time"
+        : ""
+  const score = t.fixtures.length > 1 ? `${goals(t.winner)}–${goals(loser)} ` : ""
+  return { team: t.winner, text: `${score}${how}`.trim() }
+}
 </script>
 
 <template>
@@ -191,11 +212,20 @@ const openGroup = ref<string | null>(null)
     />
 
     <template v-else-if="stage.groups">
+      <StandingsTable
+        v-if="best"
+        :rows="best.rows"
+        :title="best.title"
+        :cut="best.places"
+        :hosts="hosts"
+        class="best"
+      />
       <div v-for="t in tables" :key="t.group.name" class="group">
         <StandingsTable
           :rows="t.rows"
           :title="t.group.name.length <= 2 ? `Group ${t.group.name}` : t.group.name"
-          :zones="zones(t.group.name, t.rows.length)"
+          :zones="t.zones"
+          :outlook="t.outlook"
           :hosts="hosts"
         />
         <button
@@ -221,6 +251,11 @@ const openGroup = ref<string | null>(null)
         <div v-if="r.ties.length" class="fixtures">
           <template v-for="t in r.ties" :key="t.id">
             <FixtureRow v-for="id in t.fixtures" :key="id" :fixture="fx(id)!" show-date />
+            <div v-if="advance(t)" class="advance">
+              <NationFlag :id="advance(t)!.team" :size="16" name="short" />
+              advance
+              <span v-if="advance(t)!.text">· {{ advance(t)!.text }}</span>
+            </div>
             <div v-if="!t.fixtures.length && t.winner" class="bye">
               <NationFlag :id="t.winner" :size="16" name />
               · bye
@@ -303,6 +338,17 @@ const openGroup = ref<string | null>(null)
   border-radius: var(--radius);
   background: var(--surface);
   overflow: hidden;
+}
+
+.advance {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--success);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .bye {

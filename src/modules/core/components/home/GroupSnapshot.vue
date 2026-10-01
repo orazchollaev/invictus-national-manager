@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { StandingsTable } from "@/modules/competitions/components/tables"
 import { useWorldStore } from "@/modules/world/store"
-import { competitionDef } from "@/engine/competition/defs"
-import { groupStandings } from "@/engine/competition/tables"
-import { zonesFor } from "@/modules/competitions/utils/zones"
+import { groupView } from "@/modules/competitions/utils/groupView"
 
 const world = useWorldStore()
 
@@ -21,15 +19,11 @@ const snapshot = world.derive((w) => {
     )
     const group = stage?.groups?.find((g) => g.teams.includes(me))
     if (!stage || !group) continue
-    const plan = competitionDef(inst.defId)
-      .plan(inst, ctx)
-      .find((p) => p.key === stage.key)
-    const rows = groupStandings(group, ctx.fixture, plan?.groups?.tiebreak ?? "gd", ctx.points)
+    const view = groupView(inst, stage, group, ctx)
     return {
       id: inst.id,
       title: `${inst.short} · ${group.name.length <= 2 ? `Group ${group.name}` : group.name}`,
-      rows,
-      zones: zonesFor(inst, group.name, rows.length, ctx, stage.key),
+      ...view,
     }
   }
   return null
@@ -38,7 +32,12 @@ const snapshot = world.derive((w) => {
 
 <template>
   <RouterLink v-if="snapshot" :to="`/competitions/${snapshot.id}`" class="snap">
-    <StandingsTable :rows="snapshot.rows" :title="snapshot.title" :zones="snapshot.zones" />
+    <StandingsTable
+      :rows="snapshot.rows"
+      :title="snapshot.title"
+      :zones="snapshot.zones"
+      :outlook="snapshot.outlook"
+    />
   </RouterLink>
 </template>
 
