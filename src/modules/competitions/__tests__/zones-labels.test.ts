@@ -76,3 +76,29 @@ describe("zone labels", () => {
     expect(zonesFor(inst("e1", "regional"), "A", 4, ctx)).toEqual(["champion", null, null, null])
   })
 })
+
+describe("European qualifying with hosts in the group", () => {
+  const confedOf = (t: string) => (["ESP", "POR"].includes(t) ? "UEFA" : "CAF")
+  const ctx2 = { confedOf, instance: () => undefined } as unknown as CompContext
+
+  it("passes a host's place down the table", () => {
+    // 2030: Spain and Portugal are hosts, so 14 places and two direct per group.
+    const rows = ["ESP", "SRB", "CRO", "TUR", "UKR", "GRE", "ALB"]
+    expect(zonesFor(inst("wcq-uefa", "qualifier"), "1B", 7, ctx2, "l1", rows)).toEqual([
+      "host",
+      "through",
+      "through",
+      "playoff",
+      "playoff",
+      "playoff",
+      "playoff",
+    ])
+  })
+
+  it("is unchanged where no host plays", () => {
+    const rows = ["FRA", "BEL", "NOR", "ITA", "ROU", "AUT", "SCO"]
+    const plain = zonesFor(inst("wcq-uefa", "qualifier"), "1A", 7, ctx2, "l1")
+    expect(zonesFor(inst("wcq-uefa", "qualifier"), "1A", 7, ctx2, "l1", rows)).toEqual(plain)
+    expect(plain.slice(0, 2)).toEqual(["through", "through"])
+  })
+})

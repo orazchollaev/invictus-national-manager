@@ -32,6 +32,7 @@ export type Zone =
   | "down-pi"
   | "qf-third"
   | "playoff-risk"
+  | "host"
 
 export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
   qf: { label: "Quarter-finals", tone: "var(--pos-2)" },
@@ -65,6 +66,7 @@ export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
     label: "Relegation play-off if among the two worst thirds",
     tone: "var(--warning)",
   },
+  host: { label: "Qualified as host", tone: "var(--success)" },
 }
 
 /**
@@ -74,12 +76,24 @@ export const ZONE_INFO: Record<Zone, { label: string; tone: string }> = {
 function europeanQualifierZones(
   places: number,
   stageKey: string,
-  z: (...list: (Zone | null)[]) => (Zone | null)[]
+  z: (...list: (Zone | null)[]) => (Zone | null)[],
+  hosts: string[] = [],
+  rows: string[] = []
 ) {
   if (stageKey === "l2") return z("playoff")
   const { perGroup, ties } = qualifierSplit(places)
   const playoffRows = Math.ceil(Math.max(0, ties * 2 - 3) / 3)
-  return z(...Array<Zone>(perGroup).fill("through"), ...Array<Zone>(playoffRows).fill("playoff"))
+  if (!rows.some((t) => hosts.includes(t)))
+    return z(...Array<Zone>(perGroup).fill("through"), ...Array<Zone>(playoffRows).fill("playoff"))
+  // A host has its place already and takes none of the group's: the places pass down.
+  let others = 0
+  return z(
+    ...rows.map((t): Zone | null => {
+      if (hosts.includes(t)) return "host"
+      others++
+      return others <= perGroup ? "through" : others <= perGroup + playoffRows ? "playoff" : null
+    })
+  )
 }
 
 const letterOf = (name: string) => name.replace(/\d+$/, "")
@@ -108,7 +122,9 @@ export function zonesFor(
   groupName: string,
   size: number,
   ctx: CompContext,
-  stageKey = "groups"
+  stageKey = "groups",
+  /** The group's teams in table order, for competitions whose places depend on who they are. */
+  rows: string[] = []
 ): (Zone | null)[] {
   const z = (...list: (Zone | null)[]) => Array.from({ length: size }, (_, i) => list[i] ?? null)
   /** `top` from first place down, and `zone` for last place. */
@@ -152,7 +168,7 @@ export function zonesFor(
     // World Cup qualifying (see defs/fifa.ts).
     case "wcq-uefa": {
       const hosts = worldCupHosts(inst.year, ctx).filter((h) => ctx.confedOf(h) === "UEFA")
-      return europeanQualifierZones(WC_PLACES.UEFA - hosts.length, stageKey, z)
+      return europeanQualifierZones(WC_PLACES.UEFA - hosts.length, stageKey, z, hosts, rows)
     }
     case "wcq-caf":
       return z("through", "playoff")
@@ -190,8 +206,11 @@ export function zonesFor(
     case "euroq": {
       // Euro 2028: winners, the eight best runners-up, then play-offs.
       if (inst.year <= 2028) return z("through", "maybe")
-      const hosts = ctx.instance(`euro-${inst.year}`)?.hosts ?? []
-      return europeanQualifierZones(24 - Math.min(2, hosts.length), stageKey, z)
+      const all =
+        ctx.instance(`euro-${inst.year}`)?.hosts ?? AWARDED_HOSTS[`euro-${inst.year}`] ?? []
+      // The two best ranked hosts qualify without playing for it.
+      const hosts = [...all].sort((a, b) => ctx.points(b) - ctx.points(a)).slice(0, 2)
+      return europeanQualifierZones(24 - hosts.length, stageKey, z, hosts, rows)
     }
     case "afconq":
       return hostGroup(inst, stageKey, groupName, ctx)
