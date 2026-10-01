@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { useRoute } from "vue-router"
-import { AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
-import { PageShell, StatPill } from "@/modules/core/components"
+import { useRoute, useRouter } from "vue-router"
+import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
+import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { CommentaryFeed, StatsPanel } from "@/modules/match/components/live"
 import { laneCounts } from "@/engine/match/lanes"
@@ -12,6 +12,7 @@ import { matchRatingTone } from "@/modules/core/utils/format"
 import type { Side } from "@/engine/match/types"
 
 const route = useRoute()
+const router = useRouter()
 const world = useWorldStore()
 const id = computed(() => String(route.params.id))
 const fixture = world.derive((w) => w.state.fixtures[id.value] ?? null, null)
@@ -163,6 +164,9 @@ const motm = computed(() => [...(report.value?.lines ?? [])].sort((a, b) => b.ra
       <AppSectionHeader title="Summary" />
       <p class="muted">Only goals and cards are kept for matches you did not play.</p>
     </AppCard>
+    <StickyCta above-nav>
+      <AppButton variant="filled" block @click="router.push('/home')">Continue</AppButton>
+    </StickyCta>
   </PageShell>
   <PageShell v-else back title="Match">
     <AppEmptyState title="Match not found" />
