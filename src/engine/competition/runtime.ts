@@ -47,6 +47,8 @@ export interface CompContext {
   readiness(teams: string[], level: HostLevel): number
   /** The nation has put in a bid to host tournaments of this level. */
   bid(team: string, level: HostLevel): boolean
+  /** Final tournaments the nation hosts or has hosted, awarded ones included. */
+  hosted(team: string): { defId: string; year: number }[]
   /** A team has any fixture between these dates. */
   busyBetween(team: string, from: ISODate, to: ISODate): boolean
 }

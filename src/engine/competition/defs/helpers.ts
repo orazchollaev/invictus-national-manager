@@ -6,6 +6,7 @@ import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
 import type { Tiebreak } from "../tables"
 import type { HostLevel } from "@/engine/world/stadiums"
+import { CENTRES, NEIGHBOURS } from "@/data/geo"
 
 export function everyNYears(first: number, n: number) {
   return (from: number, to: number) => {
@@ -105,13 +106,53 @@ export function finalsOutcome(
   return { winner: ko.winner, runnerUp: ko.runnerUp, third: ko.third, placings }
 }
 
+/** Kilometres between two nations' centres. */
+export function distanceKm(a: string, b: string): number {
+  const pa = CENTRES[a]
+  const pb = CENTRES[b]
+  if (!pa || !pb) return Infinity
+  const rad = Math.PI / 180
+  const dLat = (pb[0] - pa[0]) * rad
+  const dLon = (pb[1] - pa[1]) * rad
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(pa[0] * rad) * Math.cos(pb[0] * rad) * Math.sin(dLon / 2) ** 2
+  return 2 * 6371 * Math.asin(Math.sqrt(h))
+}
+
+/** Close enough to share a tournament: a border or short sea crossing, or centres within 700 km. */
+export function nearby(a: string, b: string): boolean {
+  return !!NEIGHBOURS.get(a)?.has(b) || distanceKm(a, b) <= 700
+}
+
+/**
+ * How much less likely a nation is to be given an edition for having hosted
+ * lately: the same tournament within sixteen years counts heavily, any other
+ * final tournament within four years a little.
+ */
+function hostingFatigue(ctx: CompContext, team: string, key: string): number {
+  const m = /^(.+)-(d{4})$/.exec(key)
+  if (!m) return 1
+  const defId = m[1]
+  const year = Number(m[2])
+  let f = 1
+  for (const h of ctx.hosted(team)) {
+    if (h.defId === defId && h.year === year) continue
+    const gap = Math.abs(year - h.year)
+    if (h.defId === defId && gap <= 16) f *= 0.03 + (gap / 16) * 0.4
+    else if (gap <= 4) f *= 0.5
+  }
+  return f
+}
+
 /**
  * Pick hosts for an edition no one has been awarded yet: weighted towards stronger,
- * bigger football nations whose stadiums can stage it, deterministic for the world
- * seed. A bid (the user's federation) counts four times over. A World Cup or
- * continental host whose grounds fall short is joined by co-hosts from its
- * confederation until together they meet the requirements (up to three for a World
- * Cup, two otherwise).
+ * bigger football nations whose stadiums can stage it, and away from those that
+ * hosted lately, deterministic for the world seed. A bid (the user's federation)
+ * counts four times over. A World Cup or continental host whose grounds fall short
+ * is joined by co-hosts from its confederation — neighbours, or nations close by —
+ * until together they meet the requirements (up to three for a World Cup, two
+ * otherwise).
  */
 export function pickHosts(
   ctx: CompContext,
@@ -123,14 +164,15 @@ export function pickHosts(
   const rng = makeRng(deriveSeed(ctx.seed, "hosts", key))
   const ready = (t: string) => ctx.readiness([t], level)
   const bidders = candidates.filter((t) => ctx.bid(t, level) && ready(t) >= 0.5)
-  let pool = [...new Set([...candidates.slice(0, Math.max(count, 16)), ...bidders])]
+  let pool = [...new Set([...candidates.slice(0, Math.max(count, 24)), ...bidders])]
   const able = pool.filter((t) => ready(t) >= 0.5)
   if (able.length >= count) pool = able
   const weight = (t: string) =>
-    Math.max(1, ctx.points(t) - 900) ** 1.5 *
+    Math.max(1, ctx.points(t) - 900) ** 1.2 *
     ctx.stature(t) *
     (0.2 + ready(t) ** 2) *
-    (ctx.bid(t, level) ? 4 : 1)
+    (ctx.bid(t, level) ? 4 : 1) *
+    hostingFatigue(ctx, t, key)
   const out: string[] = []
   while (out.length < count && pool.length) {
     const choice = pickWeighted(rng, pool, weight)
@@ -140,13 +182,21 @@ export function pickHosts(
   if (count === 1 && out.length && level !== "regional") {
     const most = level === "world-cup" ? 3 : 2
     const confed = ctx.confedOf(out[0])
+    const gap = (t: string) => Math.min(...out.map((h) => distanceKm(h, t)))
     while (out.length < most && ctx.readiness(out, level) < 1) {
-      const partners = candidates
-        .filter((t) => !out.includes(t) && ctx.confedOf(t) === confed && ready(t) > 0.2)
-        .sort((a, b) => ready(b) - ready(a))
-        .slice(0, 8)
+      const able = candidates.filter(
+        (t) => !out.includes(t) && ctx.confedOf(t) === confed && ready(t) > 0.2
+      )
+      let partners = able.filter((t) => out.some((h) => nearby(h, t)))
+      // No neighbour can help: the closest within a short flight.
+      if (!partners.length)
+        partners = able
+          .filter((t) => gap(t) <= 1800)
+          .sort((a, b) => gap(a) - gap(b))
+          .slice(0, 3)
+      partners = partners.sort((a, b) => ready(b) - ready(a)).slice(0, 8)
       if (!partners.length) break
-      out.push(pickWeighted(rng, partners, weight))
+      out.push(pickWeighted(rng, partners, (t) => weight(t) / (1 + (gap(t) / 600) ** 2)))
     }
   }
   return out

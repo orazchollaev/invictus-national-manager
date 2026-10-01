@@ -277,6 +277,10 @@ export class World {
       stature: (t) => (s.nations[t]?.reputation ?? 5) * (s.nations[t]?.stadium ?? 3),
       readiness: (teams, level) => this.hostReadiness(teams, level),
       bid: (t, level) => t === s.career.nationId && !!s.career.bids?.includes(level),
+      hosted: (t) =>
+        Object.values(s.competitions)
+          .filter((c) => c.kind !== "qualifier" && c.hosts.includes(t))
+          .map((c) => ({ defId: c.defId, year: c.year })),
       busyBetween: (team, from, to) => {
         for (let d = from; d <= to; d = addDays(d, 1))
           if (this.busyIndex.has(`${team}|${d}`)) return true

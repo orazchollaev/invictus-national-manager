@@ -1,0 +1,300 @@
+/**
+ * Rough geography for choosing co-hosts: each nation's approximate centre
+ * (latitude, longitude) and the pairs that share a land border or a short sea
+ * crossing.
+ */
+export const CENTRES: Record<string, [number, number]> = {
+  // Europe
+  ALB: [41.1, 20.0],
+  AND: [42.5, 1.6],
+  ARM: [40.1, 45.0],
+  AUT: [47.5, 14.6],
+  AZE: [40.3, 47.7],
+  BEL: [50.6, 4.6],
+  BIH: [44.2, 17.8],
+  BLR: [53.7, 28.0],
+  BUL: [42.7, 25.3],
+  CRO: [45.1, 15.2],
+  CYP: [35.0, 33.2],
+  CZE: [49.8, 15.5],
+  DEN: [56.0, 10.0],
+  ENG: [52.5, -1.5],
+  ESP: [40.2, -3.6],
+  EST: [58.7, 25.5],
+  FIN: [62.5, 26.0],
+  FRA: [46.6, 2.4],
+  FRO: [62.0, -6.9],
+  GEO: [42.2, 43.5],
+  GER: [51.1, 10.4],
+  GIB: [36.1, -5.4],
+  GRE: [39.3, 22.0],
+  HUN: [47.2, 19.4],
+  IRL: [53.2, -8.0],
+  ISL: [64.9, -18.6],
+  ISR: [31.4, 35.0],
+  ITA: [42.8, 12.6],
+  KAZ: [48.0, 67.0],
+  KOS: [42.6, 20.9],
+  LIE: [47.2, 9.6],
+  LTU: [55.2, 23.9],
+  LUX: [49.8, 6.1],
+  LVA: [56.9, 24.6],
+  MDA: [47.2, 28.5],
+  MKD: [41.6, 21.7],
+  MLT: [35.9, 14.4],
+  MNE: [42.8, 19.3],
+  NED: [52.2, 5.5],
+  NIR: [54.6, -6.7],
+  NOR: [61.0, 9.0],
+  POL: [52.0, 19.4],
+  POR: [39.6, -8.0],
+  ROU: [45.9, 25.0],
+  RUS: [56.0, 40.0],
+  SCO: [56.8, -4.2],
+  SMR: [43.9, 12.4],
+  SRB: [44.0, 20.8],
+  SUI: [46.8, 8.2],
+  SVK: [48.7, 19.7],
+  SVN: [46.1, 14.8],
+  SWE: [60.1, 15.6],
+  TUR: [39.0, 35.2],
+  UKR: [49.0, 31.4],
+  WAL: [52.3, -3.7],
+  // Asia and the Middle East
+  AFG: [33.9, 67.7],
+  BAN: [23.7, 90.4],
+  BHR: [26.0, 50.6],
+  BHU: [27.5, 90.4],
+  BRU: [4.5, 114.7],
+  CAM: [12.6, 104.9],
+  CHN: [35.0, 104.0],
+  GUM: [13.4, 144.8],
+  HKG: [22.3, 114.2],
+  IDN: [-2.5, 118.0],
+  IND: [22.0, 79.0],
+  IRN: [32.4, 53.7],
+  IRQ: [33.2, 43.7],
+  JOR: [31.2, 36.5],
+  JPN: [36.2, 138.3],
+  KGZ: [41.2, 74.8],
+  KOR: [36.5, 127.9],
+  KSA: [24.0, 45.0],
+  KUW: [29.3, 47.5],
+  LAO: [19.9, 102.5],
+  LBN: [33.9, 35.9],
+  MAC: [22.2, 113.5],
+  MAS: [3.5, 108.0],
+  MDV: [3.2, 73.2],
+  MNG: [46.9, 103.8],
+  MNP: [15.1, 145.7],
+  MYA: [21.0, 96.0],
+  NEP: [28.4, 84.1],
+  OMA: [21.5, 55.9],
+  PAK: [30.4, 69.3],
+  PHI: [12.9, 121.8],
+  PLE: [31.9, 35.2],
+  PRK: [40.3, 127.5],
+  QAT: [25.3, 51.2],
+  SGP: [1.35, 103.8],
+  SRI: [7.9, 80.8],
+  SYR: [35.0, 38.5],
+  THA: [15.9, 101.0],
+  TJK: [38.9, 71.3],
+  TKM: [38.97, 59.6],
+  TLS: [-8.9, 125.7],
+  TPE: [23.7, 121.0],
+  UAE: [24.0, 54.0],
+  UZB: [41.4, 64.6],
+  VIE: [16.0, 107.8],
+  YEM: [15.6, 48.0],
+  // Africa
+  ALG: [28.0, 2.6],
+  ANG: [-11.2, 17.9],
+  BDI: [-3.4, 29.9],
+  BEN: [9.3, 2.3],
+  BFA: [12.2, -1.6],
+  BOT: [-22.3, 24.7],
+  CGO: [-0.7, 15.8],
+  CHA: [15.5, 18.7],
+  CIV: [7.5, -5.5],
+  CMR: [7.4, 12.4],
+  COD: [-2.9, 23.7],
+  COM: [-11.9, 43.9],
+  CPV: [16.0, -24.0],
+  CTA: [6.6, 20.9],
+  DJI: [11.8, 42.6],
+  EGY: [26.8, 30.8],
+  EQG: [1.6, 10.3],
+  ERI: [15.2, 39.8],
+  ETH: [9.1, 40.5],
+  GAB: [-0.8, 11.6],
+  GAM: [13.4, -15.3],
+  GHA: [7.9, -1.0],
+  GNB: [11.8, -15.2],
+  GUI: [9.9, -9.7],
+  KEN: [0.0, 37.9],
+  LBR: [6.4, -9.4],
+  LBY: [26.3, 17.2],
+  LES: [-29.6, 28.2],
+  MAD: [-18.8, 46.9],
+  MAR: [31.8, -7.1],
+  MLI: [17.6, -4.0],
+  MOZ: [-18.7, 35.5],
+  MRI: [-20.3, 57.6],
+  MTN: [21.0, -10.9],
+  MWI: [-13.3, 34.3],
+  NAM: [-22.9, 18.5],
+  NGA: [9.1, 8.7],
+  NIG: [17.6, 8.1],
+  REU: [-21.1, 55.5],
+  RSA: [-30.6, 22.9],
+  RWA: [-1.9, 29.9],
+  SDN: [12.9, 30.2],
+  SEN: [14.5, -14.5],
+  SEY: [-4.7, 55.5],
+  SLE: [8.5, -11.8],
+  SOM: [5.2, 46.2],
+  SSD: [7.9, 30.0],
+  STP: [0.2, 6.6],
+  SWZ: [-26.5, 31.5],
+  TAN: [-6.4, 34.9],
+  TOG: [8.6, 0.8],
+  TUN: [34.0, 9.5],
+  UGA: [1.4, 32.3],
+  ZAM: [-13.1, 27.8],
+  ZAN: [-6.1, 39.3],
+  ZIM: [-19.0, 29.2],
+  // North and Central America, the Caribbean
+  AIA: [18.2, -63.1],
+  ATG: [17.1, -61.8],
+  ARU: [12.5, -70.0],
+  BAH: [25.0, -77.4],
+  BER: [32.3, -64.8],
+  BLZ: [17.2, -88.5],
+  BOE: [12.2, -68.3],
+  BRB: [13.2, -59.5],
+  CAN: [56.1, -106.3],
+  CAY: [19.3, -81.3],
+  CRC: [9.7, -83.8],
+  CUB: [21.5, -77.8],
+  CUW: [12.2, -69.0],
+  DMA: [15.4, -61.4],
+  DOM: [18.7, -70.2],
+  GLP: [16.3, -61.6],
+  GRN: [12.1, -61.7],
+  GUA: [15.8, -90.2],
+  GUF: [4.0, -53.0],
+  GUY: [4.9, -58.9],
+  HAI: [19.0, -72.3],
+  HON: [15.2, -86.2],
+  JAM: [18.1, -77.3],
+  LCA: [13.9, -61.0],
+  MEX: [23.6, -102.6],
+  MSR: [16.7, -62.2],
+  MTQ: [14.6, -61.0],
+  NCA: [12.9, -85.2],
+  PAN: [8.5, -80.8],
+  PUR: [18.2, -66.6],
+  SKN: [17.3, -62.7],
+  SLV: [13.8, -88.9],
+  SMN: [18.07, -63.05],
+  SUR: [4.0, -56.0],
+  SXM: [18.04, -63.07],
+  TCA: [21.7, -71.8],
+  TRI: [10.7, -61.2],
+  USA: [39.8, -98.6],
+  VGB: [18.4, -64.6],
+  VIN: [13.3, -61.2],
+  VIR: [18.3, -64.9],
+  // South America
+  ARG: [-38.4, -63.6],
+  BOL: [-16.3, -63.6],
+  BRA: [-14.2, -51.9],
+  CHI: [-35.7, -71.5],
+  COL: [4.6, -74.3],
+  ECU: [-1.8, -78.2],
+  PAR: [-23.4, -58.4],
+  PER: [-9.2, -75.0],
+  URU: [-32.5, -55.8],
+  VEN: [6.4, -66.6],
+  // Oceania
+  ASA: [-14.3, -170.7],
+  AUS: [-25.3, 133.8],
+  COK: [-21.2, -159.8],
+  FIJ: [-17.7, 178.1],
+  KIR: [1.9, -157.4],
+  NCL: [-21.0, 165.6],
+  NZL: [-41.0, 174.0],
+  PNG: [-6.3, 143.9],
+  SAM: [-13.8, -172.1],
+  SOL: [-9.6, 160.2],
+  TAH: [-17.7, -149.4],
+  TGA: [-21.2, -175.2],
+  TUV: [-7.1, 177.6],
+  VAN: [-15.4, 166.9],
+}
+
+const BORDERS = `
+FRA-BEL FRA-LUX FRA-GER FRA-SUI FRA-ITA FRA-ESP FRA-AND FRA-ENG
+ESP-POR ESP-AND ESP-GIB ESP-MAR
+GER-DEN GER-NED GER-BEL GER-LUX GER-SUI GER-AUT GER-CZE GER-POL
+ITA-SUI ITA-AUT ITA-SVN ITA-SMR ITA-MLT ITA-CRO ITA-ALB
+SUI-LIE SUI-AUT AUT-LIE AUT-CZE AUT-SVK AUT-HUN AUT-SVN NED-BEL BEL-LUX
+POL-CZE POL-SVK POL-UKR POL-BLR POL-LTU POL-RUS CZE-SVK SVK-HUN SVK-UKR
+HUN-UKR HUN-ROU HUN-SRB HUN-CRO HUN-SVN SVN-CRO CRO-BIH CRO-SRB CRO-MNE
+BIH-SRB BIH-MNE SRB-MNE SRB-KOS SRB-MKD SRB-BUL SRB-ROU MNE-ALB MNE-KOS
+ALB-KOS ALB-MKD ALB-GRE MKD-KOS MKD-BUL MKD-GRE GRE-BUL GRE-TUR GRE-CYP
+BUL-ROU BUL-TUR ROU-MDA ROU-UKR UKR-MDA UKR-BLR UKR-RUS BLR-LTU BLR-LVA
+BLR-RUS LTU-LVA LTU-RUS LVA-EST LVA-RUS EST-RUS EST-FIN FIN-SWE FIN-NOR
+FIN-RUS SWE-NOR SWE-DEN NOR-DEN ENG-SCO ENG-WAL ENG-IRL ENG-NIR SCO-NIR
+IRL-NIR IRL-WAL ISL-FRO FRO-SCO CYP-ISR CYP-LBN CYP-TUR
+TUR-GEO TUR-ARM TUR-SYR TUR-IRQ TUR-IRN TUR-AZE GEO-ARM GEO-AZE GEO-RUS
+ARM-AZE ARM-IRN AZE-RUS AZE-IRN RUS-KAZ RUS-CHN RUS-MNG RUS-PRK
+KAZ-UZB KAZ-KGZ KAZ-TKM KAZ-CHN UZB-TKM UZB-KGZ UZB-TJK UZB-AFG TJK-KGZ
+TJK-AFG TJK-CHN KGZ-CHN TKM-IRN TKM-AFG AFG-IRN AFG-PAK AFG-CHN PAK-IND
+PAK-IRN PAK-CHN IND-NEP IND-BHU IND-BAN IND-MYA IND-CHN IND-SRI IND-MDV
+NEP-CHN BHU-CHN BAN-MYA MYA-THA MYA-LAO MYA-CHN THA-LAO THA-CAM THA-MAS
+LAO-VIE LAO-CAM LAO-CHN CAM-VIE VIE-CHN MAS-SGP MAS-BRU MAS-IDN SGP-IDN
+IDN-TLS IDN-PNG IDN-PHI CHN-MNG CHN-PRK CHN-HKG CHN-MAC CHN-TPE HKG-MAC
+KOR-PRK KOR-JPN PHI-TPE GUM-MNP
+SYR-LBN SYR-ISR SYR-JOR SYR-IRQ LBN-ISR ISR-PLE ISR-JOR ISR-EGY PLE-JOR
+PLE-EGY JOR-IRQ JOR-KSA IRQ-KSA IRQ-KUW IRQ-IRN KSA-KUW KSA-QAT KSA-UAE
+KSA-OMA KSA-YEM KSA-BHR UAE-OMA UAE-QAT OMA-YEM QAT-BHR KUW-IRN IRN-UAE
+EGY-LBY EGY-SDN LBY-TUN LBY-ALG LBY-NIG LBY-CHA LBY-SDN TUN-ALG ALG-MAR
+ALG-MTN ALG-MLI ALG-NIG MAR-MTN MTN-SEN MTN-MLI SEN-GAM SEN-GNB SEN-GUI
+SEN-MLI SEN-CPV GNB-GUI GUI-SLE GUI-LBR GUI-CIV GUI-MLI SLE-LBR LBR-CIV
+CIV-MLI CIV-BFA CIV-GHA MLI-BFA MLI-NIG BFA-NIG BFA-BEN BFA-TOG BFA-GHA
+GHA-TOG TOG-BEN BEN-NIG BEN-NGA NIG-NGA NIG-CHA NGA-CHA NGA-CMR CHA-CMR
+CHA-CTA CHA-SDN CMR-CTA CMR-EQG CMR-GAB CMR-CGO EQG-GAB EQG-STP GAB-CGO
+GAB-STP CGO-CTA CGO-COD CGO-ANG CTA-SDN CTA-SSD CTA-COD SDN-SSD SDN-ETH
+SDN-ERI SSD-ETH SSD-KEN SSD-UGA SSD-COD ETH-ERI ETH-DJI ETH-SOM ETH-KEN
+ERI-DJI DJI-SOM SOM-KEN KEN-UGA KEN-TAN UGA-TAN UGA-RWA UGA-COD RWA-TAN
+RWA-BDI RWA-COD BDI-TAN BDI-COD TAN-ZAM TAN-MWI TAN-MOZ TAN-COD TAN-ZAN
+KEN-ZAN COD-ZAM COD-ANG ZAM-ANG ZAM-NAM ZAM-BOT ZAM-ZIM ZAM-MOZ ZAM-MWI
+MWI-MOZ MOZ-ZIM MOZ-RSA MOZ-SWZ MOZ-MAD MOZ-COM ZIM-BOT ZIM-RSA BOT-NAM
+BOT-RSA NAM-ANG NAM-RSA RSA-LES RSA-SWZ COM-MAD MRI-REU MAD-REU MAD-MRI
+SEY-MRI SEY-MAD
+USA-CAN USA-MEX USA-BAH USA-CUB MEX-GUA MEX-BLZ GUA-BLZ GUA-SLV GUA-HON
+SLV-HON HON-NCA BLZ-HON NCA-CRC CRC-PAN PAN-COL COL-VEN COL-ECU COL-PER
+COL-BRA VEN-GUY VEN-BRA VEN-TRI GUY-SUR GUY-BRA SUR-GUF GUF-BRA ECU-PER
+PER-BRA PER-BOL PER-CHI BOL-BRA BOL-PAR BOL-ARG BOL-CHI PAR-BRA PAR-ARG
+ARG-CHI ARG-URU ARG-BRA URU-BRA HAI-DOM CUB-JAM CUB-BAH CUB-HAI JAM-CAY
+CUB-CAY DOM-PUR PUR-VIR VIR-VGB TCA-BAH TCA-HAI ARU-CUW CUW-BOE ARU-VEN
+CUW-VEN SXM-SMN SXM-AIA SMN-AIA SKN-ATG SKN-MSR ATG-MSR ATG-GLP MSR-GLP
+GLP-DMA DMA-MTQ MTQ-LCA LCA-VIN VIN-BRB VIN-GRN GRN-TRI TRI-BRB
+AUS-PNG AUS-NZL PNG-SOL SOL-VAN VAN-NCL VAN-FIJ FIJ-TGA FIJ-TUV SAM-ASA
+SAM-TGA TGA-COK COK-TAH NCL-AUS
+`
+
+/** Each nation's neighbours by land or a short sea crossing. */
+export const NEIGHBOURS = new Map<string, Set<string>>()
+for (const pair of BORDERS.trim().split(/\s+/)) {
+  const [a, b] = pair.split("-")
+  for (const [x, y] of [
+    [a, b],
+    [b, a],
+  ]) {
+    if (!NEIGHBOURS.has(x)) NEIGHBOURS.set(x, new Set())
+    NEIGHBOURS.get(x)!.add(y)
+  }
+}
