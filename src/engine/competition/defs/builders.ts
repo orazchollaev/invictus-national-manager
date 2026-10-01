@@ -227,9 +227,17 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
         entrants: (c, i) => {
           const all = o.entrants(i, c)
           if (!usePrelim) return all
-          const cut = all.length - 2 * prelimTies(c)
+          // Everyone the preliminary round did not involve — read from its draw, not
+          // from the ranking, which has moved since: a team must neither play twice
+          // nor be left out.
+          const played = new Set(
+            (i.stages.find((s) => s.key === "prelim")?.rounds?.[0]?.ties ?? []).flatMap((t) => [
+              t.home,
+              t.away,
+            ])
+          )
           const winners = knockoutResult(i, "prelim").finalWinners
-          return [...all.slice(0, cut), ...winners]
+          return [...all.filter((t) => !played.has(t)), ...winners]
         },
         groups: {
           count: groupCount,
