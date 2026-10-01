@@ -7,9 +7,11 @@ import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PlayerRow } from "@/modules/squad/components/list"
 import { FixtureRow } from "@/modules/competitions/components/tables"
-import { compName } from "@/i18n/text"
+import { compName, resolveText } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { COMPETITION_DEFS } from "@/engine/competition/defs"
+import { stageText } from "@/engine/text"
+import { achievementsOf, type Finish } from "@/modules/nations/utils/achievements"
 import type { Fixture } from "@/engine/competition/types"
 import type { Player } from "@/engine/types"
 
@@ -35,8 +37,25 @@ const played = computed(() =>
   fixtures.value
     .filter((f) => f.result)
     .reverse()
-    .slice(0, 10)
+    .slice(0, 20)
 )
+
+const achievements = world.derive((w) => achievementsOf(w.state.competitions, id.value), {
+  finishes: [],
+  records: [],
+} as ReturnType<typeof achievementsOf>)
+
+function finishLabel(f: Finish): string {
+  if (f.place === 1) return t("nation.honours.champions")
+  if (f.place === 2) return t("nation.honours.runnersUp")
+  if (f.place === 3) return t("nation.honours.third")
+  if (f.round) return resolveText(stageText(f.round))
+  if (f.position) return t("nation.honours.position", { n: f.position })
+  return t("nation.honours.groups")
+}
+
+const tone = (f: Finish) =>
+  f.place === 1 ? "gold" : f.place ? "podium" : f.round ? "knockout" : "out"
 
 const trophies = world.derive((w) => {
   const out: { name: string; years: number[] }[] = []
@@ -111,6 +130,7 @@ const record = computed(() => {
       :model-value="tab"
       :options="[
         { value: 'overview', label: t('nation.fixtures') },
+        { value: 'honours', label: t('nation.honours.tab') },
         { value: 'squad', label: t('nation.squad') },
         { value: 'pool', label: t('nation.players') },
       ]"
@@ -132,6 +152,35 @@ const record = computed(() => {
         </div>
       </template>
       <AppEmptyState v-if="!upcoming.length && !played.length" :title="t('nation.noFixtures')" />
+    </template>
+
+    <template v-else-if="tab === 'honours'">
+      <template v-if="achievements.records.length">
+        <AppSectionHeader :title="t('nation.honours.summary')" />
+        <div class="list">
+          <div v-for="r in achievements.records" :key="r.defId" class="honour">
+            <div class="honour-main">
+              <strong>{{ compName({ defId: r.defId, year: 0 }, "plain") }}</strong>
+              <span class="muted">
+                {{ t("nation.honours.appearances", { n: r.appearances }, r.appearances) }}
+                · {{ t("nation.honours.best", { finish: finishLabel(r.best) }) }}
+              </span>
+            </div>
+            <span v-if="r.titles.length" class="titles">★ {{ r.titles.length }}</span>
+          </div>
+        </div>
+        <AppSectionHeader :title="t('nation.honours.editions')" />
+        <div class="list">
+          <div v-for="f in achievements.finishes" :key="f.compId" class="honour">
+            <div class="honour-main">
+              <strong>{{ compName(f) }}</strong>
+              <span v-if="f.host" class="muted">{{ t("nation.honours.host") }}</span>
+            </div>
+            <span class="finish" :class="tone(f)">{{ finishLabel(f) }}</span>
+          </div>
+        </div>
+      </template>
+      <AppEmptyState v-else :title="t('nation.honours.none')" />
     </template>
 
     <div v-else class="list">
@@ -172,6 +221,49 @@ const record = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.honour {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-sm);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.honour:last-child {
+  border-bottom: none;
+}
+
+.honour-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.honour-main .muted {
+  font-size: var(--fs-xs);
+}
+
+.titles,
+.finish.gold {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.finish {
+  flex-shrink: 0;
+  text-align: end;
+}
+
+.finish.podium {
+  font-weight: 600;
+}
+
+.finish.out {
+  color: var(--text-muted);
 }
 
 .list {
