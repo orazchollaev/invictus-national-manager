@@ -12,9 +12,9 @@ import type { Fixture } from "@/engine/competition/types"
 const { t } = useI18n()
 const world = useWorldStore()
 
-/** The user's fixtures, past and future, month by month. */
+/** The user's fixtures, past and future, month by month — newest first. */
 const fixtures = world.derive(
-  (w) => (w.state.career.nationId ? w.fixturesOf(w.state.career.nationId) : []),
+  (w) => (w.state.career.nationId ? w.fixturesOf(w.state.career.nationId).reverse() : []),
   [] as Fixture[]
 )
 
