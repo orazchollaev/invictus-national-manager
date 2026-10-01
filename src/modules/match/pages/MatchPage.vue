@@ -5,22 +5,25 @@ import {
   ArrowLeftRight,
   CalendarClock,
   ClipboardList,
+  ChartNoAxesColumn,
   FastForward,
   Pause,
   Play,
   SkipForward,
   TriangleAlert,
 } from "@lucide/vue"
-import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
+import { AppButton, AppCard, AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
-import { PitchView } from "@/modules/squad/components/pitch"
 import { ScoutReportCard } from "@/modules/match/components/scout"
 import {
-  CommentaryFeed,
+  BallPitch,
+  KeyEvents,
+  LiveNarration,
   LiveTacticsSheet,
+  PressureBar,
   Scoreboard,
-  StatsPanel,
+  StatsSheet,
   SubSheet,
 } from "@/modules/match/components/live"
 import { useWorldStore } from "@/modules/world/store"
@@ -38,7 +41,7 @@ import {
   type MatchState,
   type TeamTalk,
 } from "@/engine/match/engine"
-import { KEY_EVENTS, type Side, type Tactics } from "@/engine/match/types"
+import { KEY_EVENTS, type MatchEventKind, type Side, type Tactics } from "@/engine/match/types"
 import { clock } from "@/engine/match/commentary"
 import { laneCounts } from "@/engine/match/lanes"
 import { FORMATIONS } from "@/engine/match/formations"
@@ -102,14 +105,14 @@ const problems = world.derive(
 
 const match = shallowRef<MatchState | null>(null)
 const running = ref(false)
-const tab = ref("feed")
+const showStats = ref(false)
 const showSubs = ref(false)
 const forceOut = ref<string | null>(null)
 const showTactics = ref(false)
 const talkGiven = ref(false)
 let timer: ReturnType<typeof setTimeout> | null = null
 
-const MS_PER_MINUTE: Record<LiveMatchSpeed, number> = { 1: 1100, 2: 550, 4: 260, 10: 90 }
+const MS_PER_MINUTE: Record<LiveMatchSpeed, number> = { 1: 1100, 2: 550, 4: 260 }
 
 const names = {
   player: (id: string | undefined) => {
@@ -196,7 +199,7 @@ function toggle() {
 }
 
 function cycleSpeed() {
-  const order: LiveMatchSpeed[] = [1, 2, 4, 10]
+  const order: LiveMatchSpeed[] = [1, 2, 4]
   settings.liveMatchSpeed = order[(order.indexOf(settings.liveMatchSpeed) + 1) % order.length]
 }
 
@@ -293,6 +296,54 @@ const clockLabel = computed(() => {
 const aggregate = computed<[number, number] | undefined>(() => {
   const agg = match.value?.setup.knockout?.aggregate
   return agg ? [agg[0] + score.value[0], agg[1] + score.value[1]] : undefined
+})
+
+/** Each nation's colour; when the two clash the away side plays in white. */
+const colors = computed<[string, string]>(() => {
+  const f = fixture.value
+  const w = world.world
+  if (!f || !w) return ["var(--accent)", "var(--pitch-token-text)"]
+  const h = w.def(f.home).color
+  const a = w.def(f.away).color
+  return [h, h.toLowerCase() === a.toLowerCase() ? "var(--pitch-token-text)" : a]
+})
+
+const SHOUTS: Partial<Record<MatchEventKind, string>> = {
+  "shot-saved": "SAVED!",
+  "shot-wide": "WIDE!",
+  "shot-blocked": "BLOCKED!",
+  woodwork: "OFF THE POST!",
+  "big-chance-missed": "BIG CHANCE!",
+  corner: "CORNER",
+  "penalty-awarded": "PENALTY!",
+  "pen-miss": "MISSED!",
+  "pen-saved": "SAVED!",
+}
+const GOAL_KINDS = new Set<MatchEventKind>(["goal", "pen-goal", "own-goal"])
+
+/** A pop on the ball for the latest event, if it was a shot or a goal. */
+const flash = computed<{ key: number; kind: "goal" | "shot"; label?: string } | null>(() => {
+  const evs = match.value?.events
+  const last = evs?.[evs.length - 1]
+  if (!evs || !last) return null
+  if (GOAL_KINDS.has(last.kind)) return { key: evs.length, kind: "goal" }
+  const label = SHOUTS[last.kind]
+  return label ? { key: evs.length, kind: "shot", label } : null
+})
+
+/** The strip across the pitch when the latest event is a goal. */
+const banner = computed(() => {
+  const evs = match.value?.events
+  const last = evs?.[evs.length - 1]
+  if (!evs || !last?.side || !GOAL_KINDS.has(last.kind)) return null
+  const title =
+    last.kind === "own-goal" ? "OWN GOAL" : last.kind === "pen-goal" ? "PENALTY!" : "GOAL!"
+  return {
+    key: evs.length,
+    title,
+    text: `${clock(last)} ${names.player(last.playerId)}`,
+    color: colors.value[last.side === "home" ? 0 : 1],
+  }
 })
 
 const mySide = computed(() => (match.value && mine.value ? match.value[mine.value] : null))
@@ -444,53 +495,34 @@ const pitchSlots = computed(() => {
         <AppButton variant="filled" block @click="resume">Take the penalties</AppButton>
       </AppCard>
 
-      <AppCard v-if="match.phase === 'done'" padding="md" class="break">
-        <AppSectionHeader title="Full-time" />
-        <AppButton variant="filled" block @click="finish">Match report</AppButton>
-      </AppCard>
-
-      <AppSubTabBar
-        :model-value="tab"
-        :options="[
-          { value: 'feed', label: 'Commentary' },
-          { value: 'stats', label: 'Stats' },
-          { value: 'team', label: 'My team' },
-        ]"
-        size="sm"
-        @update:model-value="(v) => (tab = v)"
+      <LiveNarration
+        :events="match.events.slice()"
+        :names="names"
+        :verbose="settings.verboseCommentary"
       />
-      <div class="panel">
-        <CommentaryFeed
-          v-if="tab === 'feed'"
-          :events="match.events.slice()"
-          :names="names"
-          :verbose="settings.verboseCommentary"
-          :mine="mine"
-        />
-        <StatsPanel
-          v-else-if="tab === 'stats'"
-          :home="{ ...match.home.stats, possession: livePossession[0] }"
-          :away="{ ...match.away.stats, possession: livePossession[1] }"
-          :lanes="laneCounts(match.events)"
-        />
-        <div v-else-if="mySide" class="team-panel">
-          <PitchView
-            :formation="mySide.tactics.formation"
-            :slots="pitchSlots"
-            :player="(id) => world.world?.state.players[id]"
-          />
-          <ul class="stamina">
-            <li v-for="p in mySide.pitch" :key="p.id">
-              <span class="role">{{ p.slot }}</span>
-              <span class="name">{{ names.player(p.id) }}</span>
-              <span class="bar"><span :style="{ width: `${p.stamina}%` }"></span></span>
-            </li>
-          </ul>
-        </div>
-      </div>
+      <BallPitch
+        :ball="match.ball"
+        :home="fixture.home"
+        :away="fixture.away"
+        :home-color="colors[0]"
+        :away-color="colors[1]"
+        :flash="flash"
+        :banner="banner"
+      />
+      <PressureBar
+        :home="fixture.home"
+        :away="fixture.away"
+        :share="livePossession"
+        :home-color="colors[0]"
+        :away-color="colors[1]"
+      />
+      <KeyEvents :events="match.events.slice()" :names="names" />
     </div>
 
-    <div v-if="match.phase !== 'done'" class="controls">
+    <StickyCta v-if="match.phase === 'done'">
+      <AppButton variant="filled" block @click="finish">Match report</AppButton>
+    </StickyCta>
+    <div v-else class="controls">
       <button class="control" @click="toggle">
         <Pause v-if="running" :size="20" />
         <Play v-else :size="20" />
@@ -508,6 +540,10 @@ const pitchSlots = computed(() => {
         <ClipboardList :size="20" />
         <span>Tactics</span>
       </button>
+      <button class="control" @click="showStats = true">
+        <ChartNoAxesColumn :size="20" />
+        <span>Stats</span>
+      </button>
       <button class="control" @click="skipToEnd">
         <SkipForward :size="20" />
         <span>Skip</span>
@@ -522,6 +558,17 @@ const pitchSlots = computed(() => {
       :force-out="forceOut"
       @close="closeSubs"
       @sub="doSub"
+    />
+    <StatsSheet
+      v-if="showStats && mySide"
+      :home="{ ...match.home.stats, possession: livePossession[0] }"
+      :away="{ ...match.away.stats, possession: livePossession[1] }"
+      :lanes="laneCounts(match.events)"
+      :side="mySide"
+      :slots="pitchSlots"
+      :player="(id) => world.world?.state.players[id]"
+      :name="(id) => names.player(id)"
+      @close="showStats = false"
     />
     <LiveTacticsSheet
       v-if="showTactics && mySide"
@@ -633,60 +680,6 @@ const pitchSlots = computed(() => {
   gap: var(--sp-2);
 }
 
-.panel {
-  border-radius: var(--radius);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.team-panel {
-  padding: var(--sp-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-
-.stamina {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1-5);
-}
-
-.stamina li {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-sm);
-}
-
-.role {
-  width: 28px;
-  font-weight: 800;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-}
-
-.name {
-  flex: 1;
-}
-
-.bar {
-  width: 90px;
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--border-light);
-  overflow: hidden;
-}
-
-.bar span {
-  display: block;
-  height: 100%;
-  background: var(--success);
-}
-
 .controls {
   position: fixed;
   left: 0;
@@ -694,10 +687,9 @@ const pitchSlots = computed(() => {
   bottom: 0;
   z-index: var(--z-bottom-bar);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   padding: var(--sp-1) var(--sp-2) calc(var(--safe-bottom) + var(--sp-1));
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(16px);
+  background: var(--surface);
   border-top: 1px solid var(--border-light);
 }
 

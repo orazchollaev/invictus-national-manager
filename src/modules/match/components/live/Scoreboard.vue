@@ -21,9 +21,9 @@ defineProps<{
         <span class="team-code">{{ home }}</span>
       </div>
       <div class="score">
-        <span>{{ score[0] }}</span>
+        <span :key="score[0]" class="num">{{ score[0] }}</span>
         <span class="dash">–</span>
-        <span>{{ score[1] }}</span>
+        <span :key="score[1]" class="num">{{ score[1] }}</span>
       </div>
       <div class="team">
         <NationFlag :id="away" :size="36" />
@@ -83,6 +83,17 @@ defineProps<{
   font-size: var(--fs-2xl);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
+}
+
+.num {
+  animation: score-bump 0.8s var(--ease);
+}
+
+@keyframes score-bump {
+  30% {
+    transform: scale(1.5);
+    color: var(--live);
+  }
 }
 
 .dash {
