@@ -289,7 +289,8 @@ export function newgen(
   const born = addDays(date, -(age * 365 + randInt(rng, 0, 364)))
   const pos = neededPosition(pool, rng)
   // Same distribution as the starting pool: a rank within an 80-man generation.
-  const top = nationTop(nation.youthLevel)
+  // African academies produce a touch fewer world-class players than their level suggests.
+  const top = nationTop(nation.youthLevel) - (nation.confed === "CAF" ? 1.5 : 0)
   const rank = rng() * POOL_TARGET
   const wonder = rng() < 0.04 ? randInt(rng, 5, 10) : 0
   const peak = clamp(peakAt(top, rank) + gauss(rng, 0, 2.5) + wonder, 25, 96)
