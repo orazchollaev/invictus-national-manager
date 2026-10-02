@@ -11,6 +11,7 @@ import { nationDef } from "@/modules/world/services/statics"
 import { formatDate } from "@/i18n/dates"
 
 const { t } = useI18n()
+const version = __APP_VERSION__
 const router = useRouter()
 const world = useWorldStore()
 const last = ref<SlotMeta | null>(null)
@@ -34,6 +35,7 @@ async function resume() {
 
 <template>
   <div class="menu">
+    <span class="version">v{{ version }}</span>
     <div class="brand">
       <AppLogo class="brand-logo" />
       <h1 class="brand-title">{{ t("app.name") }}</h1>
@@ -87,6 +89,7 @@ async function resume() {
 
 <style scoped>
 .menu {
+  position: relative;
   min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
   min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
   max-width: 480px;
@@ -96,6 +99,15 @@ async function resume() {
   flex-direction: column;
   justify-content: space-between;
   gap: var(--sp-6);
+}
+
+.version {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--sp-3));
+  left: var(--sp-4);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .brand {

@@ -1,11 +1,17 @@
 import { defineConfig } from "vitest/config"
 import vue from "@vitejs/plugin-vue"
 import { fileURLToPath, URL } from "node:url"
+import { readFileSync } from "node:fs"
+
+const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"))
 
 export default defineConfig({
   // Leave absolute URLs such as <img src="/logo.png"> (served from public/) alone:
   // as imports they resolve to file:///logo.png, which Node cannot load.
   plugins: [vue({ template: { transformAssetUrls: { includeAbsolute: false } } })],
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
