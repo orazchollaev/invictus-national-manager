@@ -19,6 +19,7 @@ import {
   CAREER_TUNING,
   checkObjectives,
   decideContract,
+  makeOffers,
   monthlyDrift,
   playerMoments,
   setAmbition,
@@ -158,9 +159,7 @@ describe("the board meeting", () => {
       text: "Qualify for the World Cup 2030",
       critical: true,
     }
-    expect(say(shiftObjective(w, qualify, 1)!.text)).toBe(
-      "Qualify for the World Cup 2030 unbeaten"
-    )
+    expect(say(shiftObjective(w, qualify, 1)!.text)).toBe("Qualify for the World Cup 2030 unbeaten")
     expect(shiftObjective(w, qualify, -1)!.critical).toBe(false)
     expect(shiftObjective(w, { ...qualify, critical: false }, -1)).toBeNull()
   })
@@ -435,6 +434,24 @@ describe("the contract", () => {
     c.confidence = 10
     w.nextDay()
     expect(c.nationId).toBeNull()
+  })
+
+  it("waits, as offers do, for finals the nation is still playing in", () => {
+    const w = newWorld("TUR")
+    const c = w.state.career
+    const finals = Object.values(w.state.competitions).find(
+      (i) => i.kind === "continental" && i.confed === "UEFA"
+    )!
+    finals.status = "active"
+    finals.stages[0].groups = [{ name: "A", teams: ["TUR"], fixtures: [] }]
+    c.contractFor = undefined
+    c.contractUntil = w.state.date
+    c.confidence = 10
+    w.nextDay()
+    expect(c.nationId).toBe("TUR")
+    c.reputation = 100
+    for (let i = 0; i < 40; i++) makeOffers(w)
+    expect(c.offers).toEqual([])
   })
 })
 

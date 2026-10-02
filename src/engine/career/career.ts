@@ -775,7 +775,11 @@ function reviewCompetition(
   before: CareerSnapshot | undefined
 ) {
   const c = world.state.career
-  const contractDue = c.nationId === me && c.contractFor === inst.id
+  // Also a contract whose date passed while this competition was still being played.
+  const contractDue =
+    c.nationId === me &&
+    (c.contractFor === inst.id ||
+      (!!c.contractUntil && world.state.date > c.contractUntil && !atTournament(world)))
   if (!REVIEWED.has(inst.kind) || !before || !playedIn(world, inst.id, me).length) {
     if (contractDue) decideContract(world)
     return
@@ -936,10 +940,28 @@ export function monthlyDrift(world: World) {
   nudgeConfidence(world, c.confidence < T.settle ? step : -step)
 }
 
+/**
+ * The manager's nation is at finals (a World Cup or its continental championship)
+ * that are still being played. Contracts and offers wait for the end — no federation
+ * lets its coach go, or poaches another's, the day before a final.
+ */
+export function atTournament(world: World): boolean {
+  const me = world.state.career.nationId
+  if (!me) return false
+  return Object.values(world.state.competitions).some(
+    (inst) =>
+      inst.status === "active" &&
+      (inst.kind === "world-cup" || inst.kind === "continental") &&
+      reached(inst, me).length > 0
+  )
+}
+
 /** Daily: a contract whose date has passed without its finals deciding it. */
 export function checkContract(world: World) {
   const c = world.state.career
-  if (c.nationId && c.contractUntil && world.state.date > c.contractUntil) decideContract(world)
+  if (!c.nationId || !c.contractUntil || world.state.date <= c.contractUntil) return
+  if (atTournament(world)) return
+  decideContract(world)
 }
 
 function aiCoachName(world: World, nationId: string): string {
@@ -984,6 +1006,7 @@ function aiCoachChanges(world: World, compId: string) {
  */
 export function makeOffers(world: World, unemployed = false) {
   const c = world.state.career
+  if (c.nationId && atTournament(world)) return
   const rng = makeRng(deriveSeed(world.state.seed, "offers", world.state.date))
   const ranked = world.ctx().ranked()
   const current = c.nationId ? ranked.indexOf(c.nationId) : ranked.length

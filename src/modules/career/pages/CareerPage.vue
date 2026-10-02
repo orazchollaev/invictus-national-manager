@@ -16,7 +16,9 @@ import { verdictKey, verdictTone } from "@/modules/career/utils/verdict"
 const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
-const career = world.derive((w) => w.state.career, null)
+// A fresh copy each tick: the raw career object keeps its identity, so without it the
+// page would not notice a declined offer.
+const career = world.derive((w) => ({ ...w.state.career }), null)
 const objectives = computed(() => [...(career.value?.objectives ?? [])].reverse())
 const history = computed(() => [...(career.value?.history ?? [])].reverse())
 const trophies = computed(() =>
