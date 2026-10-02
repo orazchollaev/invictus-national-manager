@@ -8,7 +8,14 @@ import type { CompContext, CompetitionDef, StagePlan } from "../runtime"
 import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, CompetitionKind, CompetitionOutcome, Importance } from "../types"
 import type { Tiebreak } from "../tables"
-import { bracketSeeds, fillFromRanking, finalsOutcome, finalsSchedule, roundNames } from "./helpers"
+import {
+  bracketSeeds,
+  fillFromRanking,
+  finalsOutcome,
+  finalsSchedule,
+  hostedSchedule,
+  roundNames,
+} from "./helpers"
 import { makePlaceholder } from "../placeholders"
 
 export interface FinalsOptions {
@@ -61,7 +68,22 @@ export function finalsDef(o: FinalsOptions): CompetitionDef {
       const koTeams = o.groups * o.perGroup + o.bestThirds
       const names = o.noKnockout ? [] : roundNames(koTeams)
       const koLegs = o.koLegs ?? 1
-      const sched = finalsSchedule(o.start(inst.year), rounds, names.length * koLegs, o.gap ?? 4)
+      const venue = o.venue ?? "neutral"
+      const koVenue = o.koVenue ?? venue
+      // A hosted tournament spreads its matchdays and rounds over several days.
+      const hosted = venue === "neutral" && koVenue === "neutral" && koLegs === 1
+      const gap = o.gap ?? 4
+      const start = o.start(inst.year)
+      const spread = hosted
+        ? hostedSchedule(start, rounds, o.groups, names.length, koTeams / 2, gap)
+        : undefined
+      const sched = spread
+        ? {
+            groups: spread.groups,
+            ko: spread.ko.map((k) => k.date),
+            final: spread.thirdPlace,
+          }
+        : finalsSchedule(start, rounds, names.length * koLegs, gap)
       const tiebreak = o.tiebreak ?? "gd"
       const plans: StagePlan[] = [
         {
@@ -78,9 +100,10 @@ export function finalsDef(o: FinalsOptions): CompetitionDef {
             fixed: o.fixedGroups?.(inst.year),
             // Hosts head groups A, B, C… and the first of them opens the tournament.
             seeded: inst.hosts,
-            opening: (o.venue ?? "neutral") === "neutral" ? inst.hosts : undefined,
+            opening: venue === "neutral" ? inst.hosts : undefined,
+            spread: spread?.groupSpread,
             spreadConfeds: o.spreadConfeds,
-            venue: o.venue ?? "neutral",
+            venue,
             tiebreak,
           },
         },
@@ -96,10 +119,11 @@ export function finalsDef(o: FinalsOptions): CompetitionDef {
             rounds: names.map((name, r) => ({
               name,
               dates: sched.ko.slice(r * koLegs, r * koLegs + koLegs),
+              spread: spread?.ko[r].spread,
             })),
             pairing: "bracket",
             thirdPlace: o.thirdPlace ? sched.final : undefined,
-            venue: o.koVenue ?? o.venue ?? "neutral",
+            venue: koVenue,
           },
         })
       }

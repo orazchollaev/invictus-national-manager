@@ -7,6 +7,7 @@ import type { CompetitionInstance, Standing } from "../types"
 import type { Tiebreak } from "../tables"
 import type { HostLevel } from "@/engine/world/stadiums"
 import { CENTRES, NEIGHBOURS } from "@/data/geo"
+import { AWARDED_HOSTS } from "@/data/start"
 
 export function everyNYears(first: number, n: number) {
   return (from: number, to: number) => {
@@ -39,6 +40,45 @@ export function finalsSchedule(start: ISODate, groupRounds: number, koRounds: nu
   const koStart = addDays(groups[groups.length - 1], gap + 1)
   const ko = spaced(koStart, koRounds, gap)
   return { groups, ko, final: ko[ko.length - 1] }
+}
+
+/** Days a hosted round of `matches` games is spread over: about four a day, never fewer than two days. */
+function spreadOver(games: number): number {
+  return games <= 1 ? 1 : Math.min(4, Math.max(2, Math.ceil(games / 2)))
+}
+
+/**
+ * A hosted tournament's schedule, played the way real ones are: a matchday spread over
+ * several days, two groups a day in order (A first), and each knockout round over a
+ * few days, the bracket's top ties first — the round of 16 over four days, the
+ * quarter-finals over two. Every team gets at least `gap` days between its rounds.
+ * `koTies` is the first knockout round's number of ties.
+ */
+export function hostedSchedule(
+  start: ISODate,
+  groupRounds: number,
+  groups: number,
+  koRounds: number,
+  koTies: number,
+  gap = 4
+) {
+  const groupSpread = groups <= 1 ? 1 : Math.max(2, Math.ceil(groups / 2))
+  // A day more than the spread: the first matchday starts a day late after the opening match.
+  const groupDates = spaced(start, groupRounds, Math.max(gap, groupSpread + 1))
+  const lastGroupDay = addDays(groupDates[groupDates.length - 1], groupSpread - 1)
+  const ko: { date: ISODate; spread: number }[] = []
+  let day = addDays(lastGroupDay, Math.max(2, gap - 1))
+  for (let r = 0; r < koRounds; r++) {
+    const spread = spreadOver(Math.max(1, Math.round(koTies / 2 ** r)))
+    if (r > 0) {
+      // The last tie of a round feeds the last of the next: it needs its rest too.
+      const prev = ko[r - 1].spread
+      day = addDays(ko[r - 1].date, Math.max(gap, prev - spread + gap))
+    }
+    ko.push({ date: day, spread })
+  }
+  const final = ko[ko.length - 1]?.date ?? lastGroupDay
+  return { groups: groupDates, groupSpread, ko, final, thirdPlace: addDays(final, -1) }
 }
 
 /** Knockout round names for a bracket of `teams`. */
@@ -125,21 +165,37 @@ export function nearby(a: string, b: string): boolean {
   return !!NEIGHBOURS.get(a)?.has(b) || distanceKm(a, b) <= 700
 }
 
+/** An edition id: the definition and the year ("euro-2032"). */
+const EDITION = /^(.+)-(\d{4})$/
+
+/** Final tournaments a nation hosts or has hosted, the ones awarded before the start included. */
+function hostings(ctx: CompContext, team: string): { defId: string; year: number }[] {
+  const out = [...ctx.hosted(team)]
+  for (const [key, hosts] of Object.entries(AWARDED_HOSTS)) {
+    const m = EDITION.exec(key)
+    if (!m || !hosts.includes(team)) continue
+    const year = Number(m[2])
+    if (!out.some((h) => h.defId === m[1] && h.year === year)) out.push({ defId: m[1], year })
+  }
+  return out
+}
+
 /**
  * How much less likely a nation is to be given an edition for having hosted
- * lately: the same tournament within sixteen years counts heavily, any other
- * final tournament within four years a little.
+ * lately: the same tournament within eight years all but rules it out, within
+ * sixteen counts heavily; any other final tournament within four years a little.
  */
 function hostingFatigue(ctx: CompContext, team: string, key: string): number {
-  const m = /^(.+)-(d{4})$/.exec(key)
+  const m = EDITION.exec(key)
   if (!m) return 1
   const defId = m[1]
   const year = Number(m[2])
   let f = 1
-  for (const h of ctx.hosted(team)) {
+  for (const h of hostings(ctx, team)) {
     if (h.defId === defId && h.year === year) continue
     const gap = Math.abs(year - h.year)
-    if (h.defId === defId && gap <= 16) f *= 0.03 + (gap / 16) * 0.4
+    if (h.defId === defId && gap <= 8) f *= 0.002
+    else if (h.defId === defId && gap <= 16) f *= 0.05 + ((gap - 8) / 8) * 0.4
     else if (gap <= 4) f *= 0.5
   }
   return f

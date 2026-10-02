@@ -67,6 +67,11 @@ export interface GroupPlan {
    * the first matchday follows the next day (hosts, in order).
    */
   opening?: string[]
+  /**
+   * Days each matchday is spread over, groups in order (A first): a hosted tournament.
+   * Defaults to every group on the round's date.
+   */
+  spread?: number
   /** Keep confederations apart (World Cup): at most one per group, two for UEFA. */
   spreadConfeds?: boolean
   /** Teams to keep in different groups (hosts playing qualifying). */
@@ -83,8 +88,11 @@ export interface GroupPlan {
 }
 
 export interface KnockoutPlan {
-  /** Each round's dates: one for a single match, two for home and away legs. */
-  rounds: { name: string; dates: ISODate[] }[]
+  /**
+   * Each round's dates: one for a single match, two for home and away legs. A round
+   * with a `spread` plays its ties over that many days from the date, in bracket order.
+   */
+  rounds: { name: string; dates: ISODate[]; spread?: number }[]
   /**
    * bracket: seeds split by group; seeded: 1 v n, the top seeds taking any byes;
    * pots: the better half drawn against the rest, no byes (preliminary rounds);
@@ -197,6 +205,11 @@ function roundLabel(stage: string, round: string, leg: number): Msg {
     : msg("fx.stageRound", { stage: s, round: r })
 }
 
+/** Day offset of the `i`th of `n` groups or ties when they are spread over `days`. */
+function offset(i: number, n: number, days = 1): number {
+  return days > 1 ? Math.floor((i * days) / n) : 0
+}
+
 function roundDate(dates: ISODate[], r: number): ISODate {
   if (r < dates.length) return dates[r]
   const gap = dates.length > 1 ? 3 : 3
@@ -256,7 +269,8 @@ function drawGroupStage(
     ;(own?.rounds ?? roundRobin(list, gp.legs)).forEach((pairs, r) => {
       for (const [h, a] of pairs) {
         const v = venueFor(inst, h, a, gp.venue)
-        const day = roundDate(dates, r)
+        const day = addDays(roundDate(dates, r), offset(gi, teams.length, own ? 1 : gp.spread))
+        // The opening match is the only one on its day.
         const alone = !opener || r > 0 || h === opener || a === opener
         const date = freeDate(ctx, v.home, v.away, alone ? day : addDays(day, 1))
         const f: Fixture = {
@@ -336,7 +350,9 @@ function drawKnockoutStage(
   }
 
   stage.rounds = kp.rounds.map((r) => ({ name: r.name, dates: r.dates, ties: [] }))
-  stage.rounds[0].ties = pairs.map(([a, b], i) => makeTie(inst, stage, plan, ctx, 0, i, a, b))
+  stage.rounds[0].ties = pairs.map(([a, b], i) =>
+    makeTie(inst, stage, plan, ctx, 0, i, pairs.length, a, b)
+  )
   stage.status = "active"
   settleByes(stage)
 }
@@ -348,12 +364,17 @@ function makeTie(
   ctx: CompContext,
   round: number,
   index: number,
+  /** Ties in the round. */
+  count: number,
   a: string | null,
   b: string | null,
   third = false
 ): Tie {
   const kp = plan.knockout!
-  const roundPlan = third ? { name: "Third place", dates: [kp.thirdPlace!] } : kp.rounds[round]
+  const roundPlan: KnockoutPlan["rounds"][number] = third
+    ? { name: "Third place", dates: [kp.thirdPlace!] }
+    : kp.rounds[round]
+  const shift = offset(index, count, roundPlan.spread)
   const tie: Tie = {
     id: `${inst.id}:${stage.key}:${third ? "3rd" : `r${round}t${index}`}`,
     home: a,
@@ -370,7 +391,7 @@ function makeTie(
       compId: inst.id,
       stage: stage.key,
       label: roundLabel(stage.name, roundPlan.name, legs > 1 ? leg + 1 : 0),
-      date: freeDate(ctx, v.home, v.away, date),
+      date: freeDate(ctx, v.home, v.away, addDays(date, shift)),
       ...v,
       importance: plan.importance,
       knockout: { tie: tie.id, leg: (leg + 1) as 1 | 2, legs, decisive: leg === legs - 1 },
@@ -418,13 +439,14 @@ function progressKnockout(
       const prev = rounds[r - 1]
       if (!prev.ties.every((t) => t.winner)) return
       const winners = prev.ties.map((t) => t.winner!)
+      const count = Math.ceil(winners.length / 2)
       for (let i = 0; i < winners.length; i += 2)
         round.ties.push(
-          makeTie(inst, stage, plan, ctx, r, i / 2, winners[i], winners[i + 1] ?? null)
+          makeTie(inst, stage, plan, ctx, r, i / 2, count, winners[i], winners[i + 1] ?? null)
         )
       if (r === rounds.length - 1 && plan.knockout!.thirdPlace && prev.ties.length === 2) {
         const losers = prev.ties.map((t) => t.loser!)
-        stage.thirdPlace = makeTie(inst, stage, plan, ctx, r, 0, losers[0], losers[1], true)
+        stage.thirdPlace = makeTie(inst, stage, plan, ctx, r, 0, 1, losers[0], losers[1], true)
       }
       return
     }
