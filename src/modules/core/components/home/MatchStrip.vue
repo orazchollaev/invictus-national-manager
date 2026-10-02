@@ -42,42 +42,35 @@ function cell(f: Fixture, me: string): Cell {
   }
 }
 
-/** The last result, then the next four. */
-const strip = world.derive<{ last: Cell | null; next: Cell[] }>(
-  (w) => {
-    const me = w.state.career.nationId
-    if (!me) return { last: null, next: [] }
-    const last = w
-      .fixturesOf(me, undefined, w.state.date)
-      .filter((f) => f.result)
-      .at(-1)
-    const hidden = w.state.pendingDraw?.compId
-    const next = w
-      .fixturesOf(me, w.state.date)
-      .filter((f) => !f.result && f.compId !== hidden)
-      .slice(0, 4)
-    return { last: last ? cell(last, me) : null, next: next.map((f) => cell(f, me)) }
-  },
-  { last: null, next: [] }
-)
+const SIZE = 5
+
+/** Always five matches: up to four to come, the rest filled with the latest results. */
+const strip = world.derive<Cell[]>((w) => {
+  const me = w.state.career.nationId
+  if (!me) return []
+  const played = w.fixturesOf(me, undefined, w.state.date).filter((f) => f.result)
+  const hidden = w.state.pendingDraw?.compId
+  const coming = w.fixturesOf(me, w.state.date).filter((f) => !f.result && f.compId !== hidden)
+  const past = played.slice(-(SIZE - Math.min(coming.length, SIZE - 1)))
+  const next = coming.slice(0, SIZE - past.length)
+  return [...past, ...next].map((f) => cell(f, me))
+}, [])
 </script>
 
 <template>
-  <nav v-if="strip.last || strip.next.length" class="strip">
+  <nav v-if="strip.length" class="strip">
     <RouterLink
-      v-if="strip.last"
-      :to="strip.last.to"
-      class="cell cell--past"
-      :style="{ '--tone': strip.last.tone }"
+      v-for="c in strip"
+      :key="c.id"
+      :to="c.to"
+      class="cell"
+      :class="{ 'cell--past': c.score }"
+      :style="c.tone ? { '--tone': c.tone } : undefined"
     >
-      <span class="date">{{ strip.last.date }}</span>
-      <NationFlag :id="strip.last.opp" :size="18" name="short" />
-      <span class="foot score">{{ strip.last.score }}</span>
-    </RouterLink>
-    <RouterLink v-for="c in strip.next" :key="c.id" :to="c.to" class="cell">
       <span class="date">{{ c.date }}</span>
       <NationFlag :id="c.opp" :size="18" name="short" />
-      <span class="foot">{{ c.venue }}</span>
+      <span v-if="c.score" class="foot score">{{ c.score }}</span>
+      <span v-else class="foot">{{ c.venue }}</span>
     </RouterLink>
   </nav>
 </template>
