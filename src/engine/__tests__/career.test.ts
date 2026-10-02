@@ -66,7 +66,9 @@ describe("call-ups", () => {
         const i = w.advance(60)
         if (w.settle(i)) continue
         if (i.kind === "callup") {
-          if (w.state.date >= "2030-05-01") calls.push(`${w.state.date} ${i.squadFor}`)
+          // The last step can run on past the final into September's window.
+          if (w.state.date >= "2030-05-01" && w.state.date < "2030-08-01")
+            calls.push(`${w.state.date} ${i.squadFor}`)
           w.setSquad(i.nationId, i.squadFor, pickSquad(w.pool(i.nationId), w.state.date, 26))
         } else if (i.kind === "match") {
           const f = w.state.fixtures[i.fixtureId]
