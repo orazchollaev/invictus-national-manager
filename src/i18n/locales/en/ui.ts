@@ -211,6 +211,7 @@ export default {
       all: "All",
     },
     nextMatch: {
+      none: "No match scheduled yet",
       friendly: "International friendly",
       neutral: "Neutral venue",
       home: "Home",

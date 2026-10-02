@@ -18,7 +18,9 @@ const world = useWorldStore()
 const next = world.derive<Fixture | null>((w) => {
   const id = w.state.career.nationId
   if (!id) return null
-  return w.fixturesOf(id, w.state.date).find((f) => !f.result) ?? null
+  // A competition whose draw has not been watched yet stays hidden.
+  const hidden = w.state.pendingDraw?.compId
+  return w.fixturesOf(id, w.state.date).find((f) => !f.result && f.compId !== hidden) ?? null
 }, null)
 
 const meta = world.derive((w) => {
@@ -61,7 +63,19 @@ const countdown = computed(() => {
 </script>
 
 <template>
-  <section v-if="next && meta" class="next">
+  <section v-if="!next || !meta" class="next">
+    <div class="next-head">
+      <span class="eyebrow">{{ t("core.nextMatch.eyebrow") }}</span>
+    </div>
+    <p class="none">{{ t("core.nextMatch.none") }}</p>
+    <div class="foot foot--end">
+      <AppButton variant="tonal" @click="router.push('/squad/tactics')">
+        <ClipboardList :size="16" />
+        {{ t("core.nextMatch.teamTactics") }}
+      </AppButton>
+    </div>
+  </section>
+  <section v-else class="next">
     <div class="next-head">
       <span class="eyebrow">{{ t("core.nextMatch.eyebrow") }}</span>
       <span class="countdown">{{ countdown }}</span>
@@ -194,6 +208,16 @@ const countdown = computed(() => {
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-2);
+}
+
+.foot--end {
+  justify-content: flex-end;
+}
+
+.none {
+  margin: var(--sp-4) 0;
+  text-align: center;
+  color: var(--text-muted);
 }
 
 .venue {

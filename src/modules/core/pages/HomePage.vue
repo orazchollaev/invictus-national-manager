@@ -156,10 +156,10 @@ const cta = computed(() => {
       <ChevronRight :size="18" class="muted" />
     </section>
 
-    <NextMatchCard v-if="me && !drawReady" />
+    <NextMatchCard v-if="me" />
     <MatchStrip v-if="me" />
     <QuickActions v-if="me" />
-    <GroupSnapshot v-if="me && !drawReady" />
+    <GroupSnapshot v-if="me" />
 
     <section v-if="news.length" class="panel">
       <AppSectionHeader>

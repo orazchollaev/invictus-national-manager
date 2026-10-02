@@ -214,6 +214,7 @@ const pt: typeof en = {
       all: "Todas",
     },
     nextMatch: {
+      none: "Nenhuma partida marcada ainda",
       friendly: "Amistoso internacional",
       neutral: "Campo neutro",
       home: "Casa",

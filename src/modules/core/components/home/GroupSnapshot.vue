@@ -4,32 +4,45 @@ import { compName } from "@/i18n/text"
 import { StandingsTable } from "@/modules/competitions/components/tables"
 import { useWorldStore } from "@/modules/world/store"
 import { groupView } from "@/modules/competitions/utils/groupView"
+import type { GroupTable } from "@/engine/competition/types"
 
 const { t } = useI18n()
 const world = useWorldStore()
 
-/** The user's group in the competition he is currently playing a group stage of. */
+/**
+ * The user's group in the group stage he is playing now; once it is over, the last one he
+ * played stays until the next begins. A draw not watched yet stays hidden.
+ */
 const snapshot = world.derive((w) => {
   const me = w.state.career.nationId
   if (!me) return null
-  const ctx = w.ctx()
-  const live = Object.values(w.state.competitions)
-    .filter((c) => c.status === "active")
-    .sort((a, b) => (a.end < b.end ? -1 : 1))
-  for (const inst of live) {
-    const stage = inst.stages.find(
-      (s) => s.status === "active" && s.groups?.some((g) => g.teams.includes(me))
+  const hidden = w.state.pendingDraw?.compId
+  const lastPlayed = (g: GroupTable) =>
+    g.fixtures.reduce((d, id) => {
+      const f = w.state.fixtures[id]
+      return f?.result && f.date > d ? f.date : d
+    }, "")
+  const groups = Object.values(w.state.competitions)
+    .filter((inst) => inst.status !== "upcoming" && inst.id !== hidden)
+    .flatMap((inst) =>
+      inst.stages.flatMap((stage) => {
+        const group =
+          stage.status === "waiting" ? undefined : stage.groups?.find((g) => g.teams.includes(me))
+        return group ? [{ inst, stage, group, live: stage.status === "active" }] : []
+      })
     )
-    const group = stage?.groups?.find((g) => g.teams.includes(me))
-    if (!stage || !group) continue
-    const view = groupView(inst, stage, group, ctx)
-    return {
-      id: inst.id,
-      title: `${compName(inst, "short")} · ${group.name.length <= 2 ? t("common.group", { name: group.name }) : group.name}`,
-      ...view,
-    }
+  // A live group first, the one ending soonest; otherwise the last one played.
+  const best =
+    groups.filter((g) => g.live).sort((a, b) => (a.inst.end < b.inst.end ? -1 : 1))[0] ??
+    groups.sort((a, b) => (lastPlayed(a.group) > lastPlayed(b.group) ? -1 : 1))[0]
+  if (!best) return null
+  const { inst, stage, group } = best
+  const view = groupView(inst, stage, group, w.ctx())
+  return {
+    id: inst.id,
+    title: `${compName(inst, "short")} · ${group.name.length <= 2 ? t("common.group", { name: group.name }) : group.name}`,
+    ...view,
   }
-  return null
 }, null)
 </script>
 
