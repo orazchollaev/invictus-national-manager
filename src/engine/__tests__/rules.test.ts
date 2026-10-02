@@ -76,7 +76,7 @@ describe("world events", () => {
   it("announces tournament hosts in the news", () => {
     const w = newWorld()
     const titles = w.state.news.map((n) => say(n.title))
-    expect(titles.some((t) => t.includes("to host the FIFA World Cup 2030"))).toBe(true)
+    expect(titles.some((t) => t.includes("to host the World Cup 2030"))).toBe(true)
     expect(titles.some((t) => t.includes("host the UEFA Euro 2028"))).toBe(true)
   })
 
@@ -173,7 +173,7 @@ describe("career", () => {
       }
     }
     const texts = w.state.career.objectives.map((o) => say(o.text))
-    expect(texts).toContain("Qualify for the FIFA World Cup 2030")
+    expect(texts).toContain("Qualify for the World Cup 2030")
     expect(texts).toContain("Qualify for the AFC Asian Cup 2031")
   })
 

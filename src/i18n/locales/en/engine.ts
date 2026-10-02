@@ -227,7 +227,7 @@ const engine = {
     debuts: "{n} players have won their first cap under you.",
     youthDebuts: "Five players aged 21 or under blooded at international level.",
     unbeaten: "Ten competitive matches unbeaten.",
-    top10: "{nation} are in the FIFA top ten under you.",
+    top10: "{nation} are in the world top ten under you.",
     no1: "{nation} are the best team in the world.",
   },
   review: {
@@ -336,9 +336,9 @@ const engine = {
   },
   comp: {
     wc: {
-      name: "FIFA World Cup {year}",
+      name: "World Cup {year}",
       short: "World Cup",
-      plain: "FIFA World Cup",
+      plain: "World Cup",
     },
     "wcq-uefa": {
       name: "World Cup {year} Qualifying · UEFA",
@@ -441,9 +441,9 @@ const engine = {
       plain: "CONCACAF Gold Cup",
     },
     "arab-cup": {
-      name: "FIFA Arab Cup {year}",
+      name: "Arab Cup {year}",
       short: "Arab Cup",
-      plain: "FIFA Arab Cup",
+      plain: "Arab Cup",
     },
     "gulf-cup": {
       name: "Arabian Gulf Cup {year}",

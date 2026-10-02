@@ -30,6 +30,10 @@ const router = createRouter({
     { path: "/home", component: () => import("../modules/core/pages/HomePage.vue") },
     { path: "/career", component: () => import("../modules/career/pages/CareerPage.vue") },
     {
+      path: "/career/federation",
+      component: () => import("../modules/career/pages/FederationPage.vue"),
+    },
+    {
       path: "/career/review/:id",
       component: () => import("../modules/career/pages/ReviewPage.vue"),
     },

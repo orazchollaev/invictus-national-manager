@@ -82,7 +82,7 @@ function splitId(instanceId: string): { defId: string; year: number } {
   return { defId: instanceId.slice(0, dash), year: Number(instanceId.slice(dash + 1)) }
 }
 
-/** "FIFA World Cup 2030" from "wc-2030", in the language being played. */
+/** "World Cup 2030" from "wc-2030", in the language being played. */
 function compOf(instanceId: string): Msg {
   const { defId, year } = splitId(instanceId)
   return compText(defId, year)

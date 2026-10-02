@@ -99,7 +99,7 @@ function hostOf(c: CompetitionInstance): string | undefined {
       :options="
         ['all', 'FIFA', 'UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'].map((v) => ({
           value: v,
-          label: v === 'all' ? t('common.all') : v,
+          label: v === 'all' ? t('common.all') : v === 'FIFA' ? t('competitions.ranking.world') : v,
         }))
       "
       @update:model-value="(v) => (filter = v)"

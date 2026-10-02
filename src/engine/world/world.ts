@@ -570,11 +570,7 @@ export class World {
   nextDay() {
     const s = this.state
     this.catchUp()
-    for (const f of this.fixturesOn(s.date)) {
-      if (f.result || this.isUserFixture(f) || isPlaceholder(f.home) || isPlaceholder(f.away))
-        continue
-      this.playAi(f)
-    }
+    this.playRestOfDay()
     this.advanceCompetitions()
 
     s.date = addDays(s.date, 1)
@@ -611,6 +607,15 @@ export class World {
       if (f.result || f.date >= this.state.date) continue
       f.date = this.state.date
       this.indexFixture(f)
+    }
+  }
+
+  /** Play today's AI fixtures that are still unplayed; the user's own is left alone. */
+  private playRestOfDay() {
+    for (const f of this.fixturesOn(this.state.date)) {
+      if (f.result || this.isUserFixture(f) || isPlaceholder(f.home) || isPlaceholder(f.away))
+        continue
+      this.playAi(f)
     }
   }
 
@@ -1166,6 +1171,9 @@ export class World {
       // Through to the next round: a "reach" objective may be met now.
       if (this.isUserFixture(f)) checkObjectives(this)
     }
+    // The rest of the day is played straight after the user's match, so his
+    // rivals' results are there when he leaves the ground, not a day later.
+    if (this.isUserFixture(f) && f.date === s.date) this.playRestOfDay()
   }
 
   // ── Calendar events ───────────────────────────────────────────────────────

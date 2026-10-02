@@ -37,8 +37,7 @@ const current = computed(() => {
 
 <style scoped>
 .narration {
-  /* Room for three lines so a longer sentence never moves the pitch below it. */
-  min-height: calc(var(--fs-md) * 1.4 * 3 + var(--sp-2) * 2);
+  min-height: calc(var(--fs-md) * 1.4 * 2 + var(--sp-1));
   display: flex;
   align-items: center;
   padding: var(--sp-2) var(--sp-3);

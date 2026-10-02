@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n"
-import { CalendarDays, ClipboardList, ListOrdered, Users } from "@lucide/vue"
+import { CalendarDays, ClipboardList, Landmark, ListOrdered, Users } from "@lucide/vue"
 
 const { t } = useI18n()
 
@@ -9,6 +9,7 @@ const items = [
   { to: "/squad/tactics", icon: ClipboardList, label: "core.quick.tactics" },
   { to: "/calendar", icon: CalendarDays, label: "core.quick.calendar" },
   { to: "/rankings", icon: ListOrdered, label: "core.quick.ranking" },
+  { to: "/career/federation", icon: Landmark, label: "core.quick.federation" },
 ]
 </script>
 
@@ -24,8 +25,15 @@ const items = [
 <style scoped>
 .quick {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-2);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(64px, 1fr);
+  gap: var(--sp-1-5);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.quick::-webkit-scrollbar {
+  display: none;
 }
 
 .tile {
@@ -33,7 +41,7 @@ const items = [
   flex-direction: column;
   align-items: center;
   gap: var(--sp-1);
-  padding: var(--sp-3) var(--sp-1);
+  padding: var(--sp-2) var(--sp-1);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   background: var(--surface);
@@ -53,6 +61,10 @@ const items = [
 }
 
 .tile-label {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: var(--fs-xs);
   font-weight: 600;
 }

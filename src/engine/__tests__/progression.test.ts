@@ -155,11 +155,11 @@ describe("the board meeting", () => {
       compInstance: "wcq-uefa-2030",
       kind: "qualify",
       stage: undefined,
-      text: "Qualify for the FIFA World Cup 2030",
+      text: "Qualify for the World Cup 2030",
       critical: true,
     }
     expect(say(shiftObjective(w, qualify, 1)!.text)).toBe(
-      "Qualify for the FIFA World Cup 2030 unbeaten"
+      "Qualify for the World Cup 2030 unbeaten"
     )
     expect(shiftObjective(w, qualify, -1)!.critical).toBe(false)
     expect(shiftObjective(w, { ...qualify, critical: false }, -1)).toBeNull()

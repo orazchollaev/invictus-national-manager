@@ -228,7 +228,7 @@ const engine: typeof en = {
     debuts: "{n} jogadores ganharam a primeira convocação sob o seu comando.",
     youthDebuts: "Cinco jogadores de até 21 anos estrearam na seleção.",
     unbeaten: "Dez partidas oficiais sem perder.",
-    top10: "{nation} está entre as dez melhores do ranking da FIFA sob o seu comando.",
+    top10: "{nation} está entre as dez melhores do ranking mundial sob o seu comando.",
     no1: "{nation} é a melhor seleção do mundo.",
   },
   review: {
@@ -335,9 +335,9 @@ const engine: typeof en = {
   },
   comp: {
     wc: {
-      name: "Copa do Mundo da FIFA {year}",
+      name: "Copa do Mundo {year}",
       short: "Copa do Mundo",
-      plain: "Copa do Mundo da FIFA",
+      plain: "Copa do Mundo",
     },
     "wcq-uefa": {
       name: "Eliminatórias da Copa {year} · UEFA",
@@ -440,9 +440,9 @@ const engine: typeof en = {
       plain: "Copa Ouro da CONCACAF",
     },
     "arab-cup": {
-      name: "Copa Árabe da FIFA {year}",
+      name: "Copa Árabe {year}",
       short: "Copa Árabe",
-      plain: "Copa Árabe da FIFA",
+      plain: "Copa Árabe",
     },
     "gulf-cup": {
       name: "Copa do Golfo Arábico {year}",

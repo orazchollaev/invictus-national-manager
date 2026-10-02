@@ -20,7 +20,7 @@ const router = useRouter()
 const world = useWorldStore()
 const inst = world.derive((w) => w.state.competitions[String(route.params.id)] ?? null, null)
 
-/** "FIFA World Cup 2030" for "wc-2030", whether or not the edition exists yet. */
+/** "World Cup 2030" for "wc-2030", whether or not the edition exists yet. */
 function editionName(id: string) {
   const dash = id.lastIndexOf("-")
   return compName({ defId: id.slice(0, dash), year: Number(id.slice(dash + 1)) })

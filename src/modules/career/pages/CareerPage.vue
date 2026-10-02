@@ -3,13 +3,14 @@ import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
 import { Flag, Trophy } from "@lucide/vue"
-import { AppButton, AppCard, AppEmptyState, AppSectionHeader } from "@/components/ui"
+import { AppButton, AppCard, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
 import { showConfirm } from "@/composables/useDialog"
+import { ObjectiveList } from "@/modules/career/components/objectives"
 import { verdictKey, verdictTone } from "@/modules/career/utils/verdict"
 
 const { t } = useI18n()
@@ -52,9 +53,6 @@ async function resign() {
   world.resignJob()
   router.push("/career/farewell")
 }
-
-const statusTone = (s: string) =>
-  s === "met" ? "var(--success)" : s === "failed" ? "var(--danger)" : "var(--text-muted)"
 
 const LEFT = {
   sacked: "career.left.sacked",
@@ -105,28 +103,8 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
       </AppCard>
     </template>
 
-    <AppSectionHeader :title="t('career.objectives')" />
-    <AppEmptyState v-if="!objectives.length" :title="t('career.noObjectives')" />
-    <div v-else class="list">
-      <div v-for="o in objectives" :key="o.id" class="row">
-        <span class="row-text">
-          {{ $tx(o.text) }}
-          <small v-if="o.ambition === 1" class="ambition up">{{ t("career.ambition.up") }}</small>
-          <small v-else-if="o.ambition === -1" class="ambition down">
-            {{ t("career.ambition.down") }}
-          </small>
-          <small v-else-if="o.broken" class="ambition down">
-            {{ t("career.ambition.broken") }}
-          </small>
-        </span>
-        <StatPill
-          v-if="o.kind === 'debuts' && o.status === 'open'"
-          :value="`${o.progress ?? 0}/${o.count}`"
-        />
-        <StatPill v-if="o.critical" :value="t('career.key')" tone="var(--danger)" />
-        <StatPill :value="t(`career.status.${o.status}`)" :tone="statusTone(o.status)" wide />
-      </div>
-    </div>
+    <AppSectionHeader id="objectives" :title="t('career.objectives')" />
+    <ObjectiveList :objectives="objectives" />
 
     <template v-if="trophies.length">
       <AppSectionHeader :title="t('career.trophyCabinet')" />
@@ -264,19 +242,6 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
   min-width: 0;
   display: flex;
   flex-direction: column;
-}
-
-.ambition {
-  font-size: var(--fs-xs);
-  font-weight: 700;
-}
-
-.ambition.up {
-  color: var(--accent);
-}
-
-.ambition.down {
-  color: var(--warning);
 }
 
 .milestone-icon {

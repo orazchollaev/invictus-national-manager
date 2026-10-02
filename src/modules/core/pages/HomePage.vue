@@ -2,31 +2,19 @@
 import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
-import {
-  Briefcase,
-  ChevronRight,
-  CircleCheck,
-  CircleX,
-  Landmark,
-  Play,
-  Shuffle,
-  Target,
-  Users,
-} from "@lucide/vue"
+import { Briefcase, ChevronRight, Landmark, Play, Shuffle, Users } from "@lucide/vue"
 import { AppButton, AppSectionHeader } from "@/components/ui"
-import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
+import { PageShell, StickyCta } from "@/modules/core/components"
 import {
   GroupSnapshot,
-  HomeHero,
+  MatchStrip,
   NextMatchCard,
   QuickActions,
 } from "@/modules/core/components/home"
-import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 import { useSettingsStore } from "@/modules/settings/store"
 import { formatDate, formatShort } from "@/i18n/dates"
 import { compName, stageLabel } from "@/i18n/text"
-import { resultLetter } from "@/modules/core/utils/format"
 import type { Interrupt } from "@/engine/world/types"
 
 const { t } = useI18n()
@@ -79,17 +67,8 @@ const drawLabel = computed(() => {
   return `${compName(d.inst)} · ${d.stage ? stageLabel(d.stage) : t("core.home.draw")}`
 })
 
-const results = world.derive((w) => {
-  const id = w.state.career.nationId
-  return id ? [...w.state.nations[id].results].reverse().slice(0, 5) : []
-}, [])
-
 const news = world.derive((w) => w.state.news.filter((n) => n.mine).slice(0, 3), [])
 const unread = world.derive((w) => w.state.news.filter((n) => n.mine && !n.read).length, 0)
-const objectives = world.derive((w) => w.state.career.objectives.slice(-5).reverse(), [])
-
-const letterTone = (l: "W" | "D" | "L") =>
-  l === "W" ? "var(--success)" : l === "L" ? "var(--danger)" : "var(--text-muted)"
 
 function go(i: Interrupt) {
   if (i.kind === "callup") router.push("/squad/callup")
@@ -133,9 +112,7 @@ const cta = computed(() => {
 
 <template>
   <PageShell>
-    <HomeHero v-if="me" />
-
-    <section v-else class="panel jobless">
+    <section v-if="!me" class="panel jobless">
       <Briefcase :size="28" class="jobless-icon" />
       <div>
         <div class="panel-title">{{ t("core.home.outOfWork") }}</div>
@@ -180,50 +157,9 @@ const cta = computed(() => {
     </section>
 
     <NextMatchCard v-if="me && !drawReady" />
+    <MatchStrip v-if="me" />
     <QuickActions v-if="me" />
     <GroupSnapshot v-if="me && !drawReady" />
-
-    <section v-if="objectives.length" class="panel">
-      <AppSectionHeader>
-        <span class="section-title">
-          <Target :size="16" />
-          {{ t("core.home.objectives") }}
-        </span>
-      </AppSectionHeader>
-      <ul class="objectives">
-        <li v-for="o in objectives" :key="o.id" :class="`obj--${o.status}`">
-          <CircleCheck v-if="o.status === 'met'" :size="18" class="obj-icon" />
-          <CircleX v-else-if="o.status === 'failed'" :size="18" class="obj-icon" />
-          <span v-else class="obj-dot"></span>
-          <span class="obj-text">{{ $tx(o.text) }}</span>
-          <StatPill
-            v-if="o.kind === 'debuts' && o.status === 'open'"
-            :value="`${o.progress ?? 0}/${o.count}`"
-          />
-          <StatPill v-if="o.critical" :value="t('common.key')" tone="var(--danger)" />
-        </li>
-      </ul>
-    </section>
-
-    <section v-if="results.length" class="panel">
-      <AppSectionHeader :title="t('core.home.form')" />
-      <div class="form-strip">
-        <StatPill
-          v-for="r in [...results].reverse()"
-          :key="r.fixture"
-          :value="resultLetter(r.gf, r.ga, r.pens)"
-          :tone="letterTone(resultLetter(r.gf, r.ga, r.pens))"
-        />
-      </div>
-      <RouterLink v-for="r in results" :key="r.fixture" :to="`/report/${r.fixture}`" class="result">
-        <span class="result-date">{{ formatShort(r.date) }}</span>
-        <NationFlag :id="r.opp" :size="20" name />
-        <span class="result-comp">{{ r.comp }}</span>
-        <span class="result-score" :style="{ color: letterTone(resultLetter(r.gf, r.ga, r.pens)) }">
-          {{ r.gf }}–{{ r.ga }}
-        </span>
-      </RouterLink>
-    </section>
 
     <section v-if="news.length" class="panel">
       <AppSectionHeader>
@@ -276,12 +212,6 @@ const cta = computed(() => {
   font-size: var(--fs-sm);
 }
 
-.section-title {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-1-5);
-}
-
 .jobless {
   display: flex;
   flex-direction: column;
@@ -319,91 +249,6 @@ const cta = computed(() => {
 .alert-text {
   flex: 1;
   min-width: 0;
-}
-
-.objectives {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-
-.objectives li {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-}
-
-.obj-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.obj-dot {
-  width: 10px;
-  height: 10px;
-  margin: 0 4px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  flex-shrink: 0;
-}
-
-.obj--met .obj-icon {
-  color: var(--success);
-}
-
-.obj--failed .obj-icon {
-  color: var(--danger);
-}
-
-.obj--met .obj-text,
-.obj--failed .obj-text {
-  color: var(--text-muted);
-}
-
-.form-strip {
-  display: flex;
-  gap: var(--sp-1);
-  margin-bottom: var(--sp-2);
-}
-
-.result {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-2) 0;
-  border-top: 1px solid var(--border-light);
-  color: var(--text);
-  text-decoration: none;
-}
-
-.result :deep(.nation) {
-  flex: 1;
-  min-width: 0;
-}
-
-.result-date {
-  width: 48px;
-  font-size: var(--fs-sm);
-  color: var(--text-muted);
-}
-
-.result-comp {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-  max-width: 90px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.result-score {
-  width: 40px;
-  text-align: end;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
 }
 
 .news {
