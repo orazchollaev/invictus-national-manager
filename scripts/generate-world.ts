@@ -1,6 +1,6 @@
 /**
- * Builds the static starting world, once: nations, clubs and 80 fictional players per
- * nation. Output is committed and never regenerated at runtime. The seed is fixed, so
+ * Builds the static starting world, once: nations, clubs and 80 players per nation, the
+ * best of them real (data/real-players), the rest fictional. Output is committed and never regenerated at runtime. The seed is fixed, so
  * running this twice produces byte-identical files.
  *
  *   pnpm gen:world
@@ -18,6 +18,7 @@ import { NATION_META } from "./data/nation-meta"
 import { NON_FIFA } from "./data/non-fifa"
 import { NAME_ALIASES, NAME_POOLS } from "../src/data/names"
 import { CLUBS, GENERIC_PATTERNS, LEAGUES } from "./data/leagues"
+import { REAL_PLAYERS, type RealPlayer } from "./data/real-players"
 import { clamp, gauss, makeRng, pick, pickWeighted, randInt, type Rng } from "../src/engine/rng"
 import type { Club, Confed, NationDef, Position } from "../src/engine/types"
 import { nationTop, peakAt } from "../src/engine/players/quality"
@@ -267,6 +268,23 @@ for (const nation of nations) {
     })
   )
   clubIndex.set(nation.id, byTier)
+}
+
+/** A real player's club by its leagues.ts name: his own nation's first, else anywhere. */
+const clubsByName = new Map<string, Club[]>()
+for (const c of clubs) clubsByName.set(c.name, [...(clubsByName.get(c.name) ?? []), c])
+function realClub(nationId: string, name: string): string | null {
+  if (name === "-") return null
+  const [, prefix, bare] = /^(?:([A-Z]{3}):)?(.+)$/.exec(name)!
+  const all = clubsByName.get(bare) ?? []
+  const found = prefix
+    ? all.filter((c) => c.nationId === prefix)
+    : all.length > 1
+      ? all.filter((c) => c.nationId === nationId)
+      : all
+  if (found.length !== 1)
+    throw new Error(`${nationId}: club "${name}" ${found.length ? "is ambiguous" : "not found"}`)
+  return found[0].id
 }
 
 // Where players from each confederation go when their own league is too small.
@@ -570,6 +588,64 @@ type PlayerRow = [
   string,
 ]
 
+function personality(r: Rng): string {
+  return [
+    trait(r), // professionalism
+    trait(r), // ambition
+    trait(r), // temperament
+    trait(r), // consistency
+    trait(r), // bigMatch
+    trait(r, 8), // injuryProne
+    trait(r), // loyalty
+  ].join(",")
+}
+
+function ageAtStart(born: string): number {
+  const b = new Date(born)
+  const birthday = Date.UTC(START.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate())
+  return START.getUTCFullYear() - b.getUTCFullYear() - (START.getTime() < birthday ? 1 : 0)
+}
+
+/**
+ * How far to move a nation's listed abilities so that, together, they match what its
+ * strength gives the fictional players of the same ranks (whose current ability, after
+ * age and chance, sits just under the peak curve). The order and the gaps between them
+ * stay as listed; the nation stays as strong as its Elo says, within 5.
+ */
+function realShift(nation: BuiltNation, real: RealPlayer[]): number {
+  if (!real.length) return 0
+  const top = nationTop(nation.level)
+  const target = real.map((_, k) => peakAt(top, k) - 0.2)
+  const gap = (target.reduce((s, v) => s + v, 0) - real.reduce((s, p) => s + p.ca, 0)) / real.length
+  return clamp(gap, -5, 5)
+}
+
+/** A real player, as listed, with a personality drawn from a stream of his own. */
+function realRow(nation: BuiltNation, p: RealPlayer, i: number, shift: number, rc: Rng): PlayerRow {
+  const age = ageAtStart(p.born)
+  const key = [...`${p.first}${p.last}${p.born}`].reduce(
+    (h, c) => (h * 31 + c.charCodeAt(0)) | 0,
+    11
+  )
+  const ca = Math.round(clamp(p.ca + shift, 20, 96) * 10) / 10
+  // Room to grow for the young, less the older he is.
+  const listedPa = p.pa === null ? null : clamp(p.pa + shift, ca, 96)
+  const pa = Math.round(listedPa ?? (age <= 23 ? clamp(ca + (24 - age) * 1.6, ca, 96) : ca))
+  return [
+    `${nation.id.toLowerCase()}${i}`,
+    p.first.replace(/_/g, " "),
+    p.last.replace(/_/g, " "),
+    p.born,
+    p.pos,
+    p.alt.join(","),
+    p.foot,
+    ca,
+    pa,
+    personality(makeRng(WORLD_SEED ^ key)),
+    realClub(nation.id, p.club) ?? clubFor(nation, ca, age, rc),
+  ]
+}
+
 const playersByNation: Record<string, PlayerRow[]> = {}
 
 for (const nation of nations) {
@@ -579,16 +655,24 @@ for (const nation of nations) {
   const rc = makeRng(WORLD_SEED ^ hash ^ 0x2c1b3c6d)
   // Peak ability of the nation's best player (engine/players/quality.ts).
   const top = nationTop(nation.level)
+  const real = REAL_PLAYERS[nation.id] ?? []
+  // The real players take the best ranks and their positions out of the pool; the
+  // fictional rest fill the 80 below them.
   const positions = POOL_POSITIONS.flatMap(([p, n]) => Array<Position>(n).fill(p))
+  for (const p of real) {
+    const k = positions.lastIndexOf(p.pos)
+    positions.splice(k >= 0 ? k : positions.length - 1, 1)
+  }
   const ages = positions.map(() => pickWeighted(r, AGE_WEIGHTS, ([, w]) => w)[0])
   // The best ranks go mostly to players in their prime, some to young stars.
   const ranks: number[] = []
   positions
     .map((_, i) => ({ i, score: Math.abs(ages[i] - 27) + gauss(r, 0, 3.5) }))
     .sort((a, b) => a.score - b.score)
-    .forEach((o, rank) => (ranks[o.i] = rank))
-  const usedNames = new Set<string>()
-  const rows: PlayerRow[] = []
+    .forEach((o, rank) => (ranks[o.i] = rank + real.length))
+  const usedNames = new Set(real.map((p) => `${p.first} ${p.last}`.replace(/_/g, " ")))
+  const shift = realShift(nation, real)
+  const rows: PlayerRow[] = real.map((p, i) => realRow(nation, p, i, shift, rc))
 
   positions.forEach((pos, i) => {
     const gk = pos === "GK"
@@ -629,18 +713,10 @@ for (const nation of nations) {
     }
     usedNames.add(`${first} ${last}`)
 
-    const pers = [
-      trait(r), // professionalism
-      trait(r), // ambition
-      trait(r), // temperament
-      trait(r), // consistency
-      trait(r), // bigMatch
-      trait(r, 8), // injuryProne
-      trait(r), // loyalty
-    ].join(",")
+    const pers = personality(r)
 
     rows.push([
-      `${nation.id.toLowerCase()}${i}`,
+      `${nation.id.toLowerCase()}${i + real.length}`,
       first,
       last,
       iso(born),
@@ -669,9 +745,12 @@ writeFileSync(
 )
 writeFileSync(join(out, "players.json"), JSON.stringify(playersByNation) + "\n")
 
+for (const id of Object.keys(REAL_PLAYERS))
+  if (!playersByNation[id]) throw new Error(`Real players for unknown nation ${id}`)
 const total = Object.values(playersByNation).reduce((s, p) => s + p.length, 0)
+const realTotal = Object.values(REAL_PLAYERS).reduce((s, p) => s + p.length, 0)
 console.log(
-  `${nations.length} nations (${nations.filter((n) => n.nonFifa).length} outside FIFA), ${clubs.length} clubs, ${total} players (${POOL_SIZE}/nation)`
+  `${nations.length} nations (${nations.filter((n) => n.nonFifa).length} outside FIFA), ${clubs.length} clubs, ${total} players (${POOL_SIZE}/nation, ${realTotal} real)`
 )
 for (const id of ["ESP", "BRA", "FRA", "ARG", "TUR", "JPN", "USA", "NZL", "IND", "SMR"]) {
   const best = playersByNation[id].map((p) => p[7]).sort((a, b) => b - a)

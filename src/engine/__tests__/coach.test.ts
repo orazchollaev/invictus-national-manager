@@ -93,7 +93,8 @@ describe("the user's sheet", () => {
       w.state.nations[me].squad.map((id) => w.state.players[id]),
       w.state.date
     )
-    sheet.xi[9] = { ...sheet.xi[9], role: "target-man" }
+    const st = sheet.xi.findIndex((s) => s.pos === "ST")
+    sheet.xi[st] = { ...sheet.xi[st], role: "target-man" }
     w.state.userTeam = {
       tactics: { ...sheet.tactics, line: 2, counter: true },
       xi: sheet.xi,
@@ -101,15 +102,15 @@ describe("the user's sheet", () => {
     }
     const fixture = { id: "x", date: w.state.date } as never
     const out = w.userSheet(fixture)
-    expect(out.xi[9].role).toBe("target-man")
+    expect(out.xi[st].role).toBe("target-man")
     expect(out.tactics).toMatchObject({ line: 2, counter: true })
 
     // An unavailable player's slot is refilled with someone else, and a role that suits him.
-    const gone = out.xi[9].playerId
+    const gone = out.xi[st].playerId
     w.state.players[gone].injury = { until: "2027-01-01", label: "Knock" }
     const again = w.userSheet(fixture)
-    expect(again.xi[9].playerId).not.toBe(gone)
-    const stand = w.state.players[again.xi[9].playerId]
-    expect(again.xi[9].role).toBe(suggestedRole(archetypeOf(stand), again.xi[9].pos))
+    expect(again.xi[st].playerId).not.toBe(gone)
+    const stand = w.state.players[again.xi[st].playerId]
+    expect(again.xi[st].role).toBe(suggestedRole(archetypeOf(stand), again.xi[st].pos))
   })
 })

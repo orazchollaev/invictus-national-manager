@@ -41,8 +41,13 @@ next match (Settings → Continue moves on) — painting each day.
   Manchester U), placed in tiers by real strength. Club moves draw from their own stream,
   so editing these lists never changes the players.
 
-Every nation gets 80 fictional players drawn from its strength; the seed is fixed, so
-the output is byte-identical on every run. Real draws already made on the start date
+Every nation gets 80 players drawn from its strength. The best of them are real
+(`scripts/data/real-players`: about 1,400, from 40 for the biggest nations to one or two
+for the smallest), each name changed a little (Cristiano Rolando), at his real club. The
+rest of the pool — back-ups and youngsters — is fictional. A nation's real players keep
+their order and gaps but are moved together to the strength its Elo gives it, so the
+balance between nations stays as it was. The seed is fixed, so the output is
+byte-identical on every run. Real draws already made on the start date
 (Nations League 2026–27 leagues, AFCON 2027 qualifying groups, Asian Cup 2027 groups,
 awarded hosts) live in `src/data/start.ts`.
 
