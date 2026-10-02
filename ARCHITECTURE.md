@@ -36,7 +36,10 @@ next match (Settings → Continue moves on) — painting each day.
   Cup qualifying and their matches do not move the FIFA ranking (`NationDef.nonFifa`);
 - eloratings.net (the strength signal, blended 70/30 with FIFA points);
 - `scripts/data/nation-meta.ts`: flags, regional federations, naming cultures;
-- `src/data/names`: ~55 naming cultures (the runtime needs them for newgens too).
+- `src/data/names`: ~55 naming cultures (the runtime needs them for newgens too);
+- `scripts/data/leagues.ts`: every nation's real clubs, names changed a little (R. Madrid,
+  Manchester U), placed in tiers by real strength. Club moves draw from their own stream,
+  so editing these lists never changes the players.
 
 Every nation gets 80 fictional players drawn from its strength; the seed is fixed, so
 the output is byte-identical on every run. Real draws already made on the start date

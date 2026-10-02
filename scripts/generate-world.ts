@@ -17,17 +17,8 @@ import { fileURLToPath } from "node:url"
 import { NATION_META } from "./data/nation-meta"
 import { NON_FIFA } from "./data/non-fifa"
 import { NAME_ALIASES, NAME_POOLS } from "../src/data/names"
-import { CLUB_PATTERNS, LEAGUES, type ClubFamily } from "./data/leagues"
-import {
-  clamp,
-  gauss,
-  makeRng,
-  pick,
-  pickWeighted,
-  randInt,
-  shuffle,
-  type Rng,
-} from "../src/engine/rng"
+import { CLUBS, GENERIC_PATTERNS, LEAGUES } from "./data/leagues"
+import { clamp, gauss, makeRng, pick, pickWeighted, randInt, type Rng } from "../src/engine/rng"
 import type { Club, Confed, NationDef, Position } from "../src/engine/types"
 import { nationTop, peakAt } from "../src/engine/players/quality"
 
@@ -230,14 +221,9 @@ for (const line of NON_FIFA.trim().split("\n")) {
 
 // ── Clubs ───────────────────────────────────────────────────────────────────
 
-const rng = makeRng(WORLD_SEED)
 const clubs: Club[] = []
 /** clubs[nation][tier-1] → club ids */
 const clubIndex = new Map<string, string[][]>()
-
-function familyFor(nation: BuiltNation): ClubFamily | "generic" {
-  return LEAGUES[nation.id]?.family ?? "generic"
-}
 
 function defaultTiers(level: number): [number, number, number, number, number] {
   if (level >= 60) return [0, 0, 1, 3, 4]
@@ -246,29 +232,40 @@ function defaultTiers(level: number): [number, number, number, number, number] {
   return [0, 0, 0, 0, 5]
 }
 
-for (const nation of nations) {
+/** Clubs per tier, best first: placed by hand, or spread over the tiers the nation's strength allows. */
+function clubsByTier(nation: BuiltNation): string[][] {
   const league = LEAGUES[nation.id]
-  const tiers = league?.tiers ?? defaultTiers(nation.level)
-  const cities = league ? league.cities.split(" ").map((c) => c.replace(/_/g, " ")) : [nation.name]
-  const patterns = CLUB_PATTERNS[familyFor(nation)]
-  const names: string[] = []
-  for (const city of shuffle(rng, cities))
-    for (const p of shuffle(rng, patterns)) names.push(p.replace("{c}", city).replace(/_/g, " "))
-  const used = new Set<string>()
+  if (league) return league.map((t) => (t ? t.split("|") : []))
+  const counts = defaultTiers(nation.level)
+  const names =
+    CLUBS[nation.id]?.split("|") ??
+    counts
+      .flatMap((n, t) => Array<number>(n).fill(t))
+      .map(
+        (_, i) =>
+          GENERIC_PATTERNS[i % GENERIC_PATTERNS.length].replace("{c}", nation.name) +
+          (i >= GENERIC_PATTERNS.length ? ` ${Math.floor(i / GENERIC_PATTERNS.length) + 1}` : "")
+      )
+  // The best club takes the best tier the nation runs; the rest follow down the ladder.
+  const ladder = counts.flatMap((n, t) => Array<number>(n).fill(t))
   const byTier: string[][] = [[], [], [], [], []]
-  let n = 0
-  for (let t = 0; t < 5; t++) {
-    for (let i = 0; i < tiers[t]; i++) {
-      // Walk the shuffled list but never reuse a city twice in a row within a tier.
-      let name = names[n++ % names.length]
-      while (used.has(name) && n < names.length * 2) name = names[n++ % names.length]
-      if (used.has(name)) name = `${name} ${i + 2}`
+  names.forEach((name, i) =>
+    byTier[ladder[Math.floor((i * ladder.length) / names.length)]].push(name)
+  )
+  return byTier
+}
+
+for (const nation of nations) {
+  const used = new Set<string>()
+  const byTier = clubsByTier(nation).map((names, t) =>
+    names.map((name, i) => {
+      if (used.has(name)) throw new Error(`${nation.id}: club "${name}" listed twice`)
       used.add(name)
       const id = `${nation.id.toLowerCase()}-${t + 1}-${i}`
       clubs.push({ id, name, nationId: nation.id, tier: t + 1 })
-      byTier[t].push(id)
-    }
-  }
+      return id
+    })
+  )
   clubIndex.set(nation.id, byTier)
 }
 
@@ -576,7 +573,10 @@ type PlayerRow = [
 const playersByNation: Record<string, PlayerRow[]> = {}
 
 for (const nation of nations) {
-  const r = makeRng(WORLD_SEED ^ [...nation.id].reduce((h, c) => h * 31 + c.charCodeAt(0), 7))
+  const hash = [...nation.id].reduce((h, c) => h * 31 + c.charCodeAt(0), 7)
+  const r = makeRng(WORLD_SEED ^ hash)
+  // Clubs draw from a stream of their own, so editing the club lists never shifts the players.
+  const rc = makeRng(WORLD_SEED ^ hash ^ 0x2c1b3c6d)
   // Peak ability of the nation's best player (engine/players/quality.ts).
   const top = nationTop(nation.level)
   const positions = POOL_POSITIONS.flatMap(([p, n]) => Array<Position>(n).fill(p))
@@ -650,7 +650,7 @@ for (const nation of nations) {
       ca,
       pa,
       pers,
-      clubFor(nation, ca, age, r),
+      clubFor(nation, ca, age, rc),
     ])
   })
   playersByNation[nation.id] = rows

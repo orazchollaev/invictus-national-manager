@@ -1,370 +1,524 @@
 /**
- * Club football, abstracted: which nations run leagues at which quality tiers, and
- * the cities their fictional clubs are named after. Tier 1 is an elite club, tier 5
- * a semi-professional one. Counts are clubs per tier.
+ * Club football, abstracted: every nation's real clubs, each name changed a little so
+ * no club's own name appears as such (R. Madrid, Manchester U, G. Saray). Place names
+ * stay as they are. Tier 1 is an elite club, tier 5 a semi-professional one.
  *
- * Nations not listed get a small domestic league sized from their strength, with
- * clubs named after the nation itself.
+ * The big leagues place every club by hand: one "|"-separated list per tier, best
+ * first. Every other nation lists its clubs best first in CLUBS, and generate-world.ts
+ * spreads them over the tiers its strength allows. A nation in neither gets clubs
+ * named after itself.
  */
-export type ClubFamily =
-  | "english"
-  | "spanish"
-  | "portuguese"
-  | "german"
-  | "italian"
-  | "french"
-  | "dutch"
-  | "turkish"
-  | "slavic"
-  | "nordic"
-  | "greek"
-  | "arabic"
-  | "asian"
-  | "hungarian"
-  | "romanian"
+export type Tiers = [string, string, string, string, string]
 
-export interface LeagueDef {
-  tiers: [number, number, number, number, number]
-  family: ClubFamily
-  cities: string
+export const LEAGUES: Record<string, Tiers> = {
+  ENG: [
+    "Manchester C|N. London|L. Pool|Chelsea|Manchester U|Newcastle U",
+    "Tottenham H|A. Villa|Brighton|Nottingham F|C. Palace|West Ham U|Brentford|Bournemouth|Fulham|Everton",
+    "Wolverhampton W|Leeds U|Burnley|Sunderland|Leicester C|Southampton|Ipswich T|Sheffield U|Middlesbrough|Coventry C|West Brom A|Norwich C",
+    "Watford|Hull C|Derby C|Stoke C|Swansea C|Cardiff C|Bristol C|Millwall|Blackburn R|Preston|QP Rangers|Portsmouth|Oxford U|Charlton A|Wrexham|Birmingham C|Sheffield W",
+    "Plymouth A|Luton T|Reading|Bolton W|Barnsley|Huddersfield T|Wigan A|Blackpool|Peterborough U|Stockport C",
+  ],
+  ESP: [
+    "R. Madrid|Barcelona|A. Madrid",
+    "A. Bilbao|R. Sociedad|Villarreal|B. Sevilla|Sevilla|Girona|Valencia",
+    "C. Vigo|O. Pamplona|R. Mallorca|R. Vallecano|Getafe|E. Barcelona|D. Alavés|Elche|Levante|R. Oviedo",
+    "Las Palmas|R. Valladolid|Leganés|Almería|Granada|Cádiz|S. Gijón|R. Santander|D. Coruña|R. Zaragoza|Eibar|Málaga|Huesca|Burgos|Albacete|Córdoba",
+    "Mirandés|Castellón|C. Leonesa|Ceuta|Tenerife|H. Alicante|R. Murcia|G. Tarragona",
+  ],
+  GER: [
+    "B. München|B. Dortmund|B. Leverkusen",
+    "R. Leipzig|E. Frankfurt|Stuttgart|Freiburg|Wolfsburg|Hoffenheim|Mainz|M'gladbach",
+    "W. Bremen|U. Berlin|Augsburg|Köln|Hamburg|Heidenheim|St. Pauli|H. Berlin|Schalke",
+    "Hannover|Kaiserslautern|F. Düsseldorf|Nürnberg|Karlsruhe|Paderborn|Darmstadt|Magdeburg|Bochum|Kiel|Elversberg|E. Braunschweig|A. Bielefeld|P. Münster|D. Dresden",
+    "G. Fürth|Regensburg|Ulm|Osnabrück|H. Rostock|München 1860|Saarbrücken|A. Aachen",
+  ],
+  ITA: [
+    "I. Milano|AC Milano|Napoli|J. Torino",
+    "A. Bergamo|Roma|Lazio|Como|Bologna|Firenze",
+    "Torino|Udine|Genoa|Cagliari|Parma|Sassuolo|Lecce|H. Verona|Cremona|Pisa",
+    "S. Genova|Palermo|Venezia|Monza|Empoli|Bari|Spezia|Modena|Salerno|Frosinone|Catanzaro|Cesena|Reggio Emilia|Padova",
+    "Terni|Avellino|Catania|Perugia|L. Vicenza|Ascoli|Trieste",
+  ],
+  FRA: [
+    "Paris SG|O. Marseille",
+    "Monaco|Lille|O. Lyon|Lens|Nice|S. Rennes|Strasbourg",
+    "Lorient|S. Brest|Nantes|Toulouse|Auxerre|Angers|Le Havre|Metz|Paris",
+    "Saint-Étienne|Montpellier|S. Reims|Guingamp|Troyes|Grenoble|Pau|Clermont|Annecy|Laval|Amiens|Bastia|Saint-Ouen",
+    "Rodez|Dunkerque|Nancy|Sochaux|Bordeaux|Caen|Le Mans|Nîmes",
+  ],
+  POR: [
+    "B. Lisboa|S. Lisboa|Porto",
+    "S. Braga|V. Guimarães|Famalicão|G. Vicente",
+    "Vila do Conde|Estoril|C. Pia|Arouca|Moreira|S. Clara|N. Madeira|E. Amadora",
+    "Alverca|Tondela|AVS|Chaves|M. Funchal|B. Porto|A. Coimbra",
+    "Leixões|Feira|Penafiel|Torres Vedras|Faro|Vizela",
+  ],
+  NED: [
+    "P. Eindhoven",
+    "F. Rotterdam|A. Amsterdam|Alkmaar|T. Enschede",
+    "Utrecht|Heerenveen|N. Nijmegen|G. A. Deventer|S. Rotterdam|Groningen",
+    "F. Sittard|H. Almelo|Zwolle|N. Breda|E. Rotterdam|Volendam|Velsen",
+    "W. Tilburg|V. Arnhem|R. Kerkrade|C. Leeuwarden|Den Haag|Doetinchem",
+  ],
+  BEL: [
+    "",
+    "Brugge|Saint-Gilles|Anderlecht|Genk",
+    "Gent|Antwerpen|S. Liège|C. Brugge|Mechelen|Westerlo",
+    "Charleroi|Leuven|Sint-Truiden|Dender|La Louvière|Waregem|Kortrijk",
+    "B. Antwerpen|Lommel|Lier|Eupen|Beveren|Molenbeek",
+  ],
+  TUR: [
+    "",
+    "G. Saray|F. Bahçe|Beşiktaş|Trabzon",
+    "Başakşehir|Göztepe|Samsun|Kasımpaşa|Eyüp|Ç. Rize",
+    "Konya|Kayseri|Antalya|Alanya|Gaziantep|Kocaeli|G. Birliği|Karagümrük",
+    "Sivas|A. Gücü|Bodrum|A. Demir",
+  ],
+  SCO: [
+    "",
+    "Glasgow C|Glasgow R",
+    "H. Midlothian|Aberdeen|H. Leith",
+    "Motherwell|Dundee U|Dundee|Kilmarnock|S. Paisley|Livingston|Falkirk",
+    "S. Perth|Dingwall|Partick T|Ayr U|R. Kirkcaldy",
+  ],
+  AUT: [
+    "",
+    "R. Salzburg|S. Graz",
+    "R. Wien|A. Wien|L. Linz",
+    "Wolfsberg|Hartberg|Altach|Ried|BW Linz|W. Tirol|G. Graz",
+    "Klagenfurt|A. Mödling|Lustenau|St. Pölten",
+  ],
+  SUI: [
+    "",
+    "Basel|Y. Bern",
+    "Lugano|S. Genève|Lausanne|Zürich|St. Gallen",
+    "Luzern|Sion|Thun|Winterthur|G. Zürich",
+    "Aarau|Schaffhausen|Yverdon|Neuchâtel",
+  ],
+  GRE: [
+    "",
+    "O. Piraeus|P. Thessaloníki",
+    "A. Athína|P. Athína|A. Thessaloníki",
+    "O. Iráklio|A. Tripoli|Vólos|A. Peristeri|Livadeia|Agrinio",
+    "Lárisa|Serres|Kifisia|Lamia",
+  ],
+  RUS: [
+    "",
+    "Z. St Petersburg|Krasnodar",
+    "S. Moskva|C. Moskva|L. Moskva|D. Moskva",
+    "Rostov|R. Kazan|A. Grozny|K. Samara|Kaliningrad|Orenburg|Nizhny Novgorod",
+    "D. Makhachkala|Sochi|Tolyatti|Ekaterinburg|Voronezh",
+  ],
+  UKR: [
+    "",
+    "S. Donetsk|D. Kyiv",
+    "P. Zhytomyr|K. Kryvyi Rih|Cherkasy|Oleksandriya",
+    "K. Lviv|Z. Luhansk|R. Lviv|K. Kovalivka|Rivne|O. Kyiv",
+    "Odesa|Kharkiv|Poltava|Petrove",
+  ],
+  CRO: [
+    "",
+    "D. Zagreb|H. Split",
+    "Rijeka|Osijek",
+    "Varaždin|L. Zagreb|Velika Gorica|Pula|Koprivnica",
+    "Šibenik|Vukovar|Zadar|Dubrava",
+  ],
+  SRB: [
+    "",
+    "C. Beograd|P. Beograd",
+    "V. Novi Sad|Bačka Topola",
+    "Čukarica|Novi Pazar|R. Niš|S. Subotica",
+    "Lučani|Kruševac|Surdulica|Novi Beograd",
+  ],
+  CZE: [
+    "",
+    "S. Praha|AC Praha",
+    "V. Plzeň|B. Ostrava|Jablonec",
+    "Liberec|Olomouc|Hradec Králové|B. Praha",
+    "Teplice|Zlín|Karviná|Pardubice",
+  ],
+  POL: [
+    "",
+    "L. Warszawa|L. Poznań",
+    "R. Częstochowa|J. Białystok|P. Szczecin",
+    "G. Zabrze|C. Kraków|W. Łódź|L. Gdańsk|Z. Lubin|W. Kraków",
+    "Ś. Wrocław|Gliwice|Kielce|M. Lublin|Radom",
+  ],
+  DEN: [
+    "",
+    "København|Midtjylland",
+    "Brøndby|Aarhus|Nordsjælland",
+    "Randers|Silkeborg|Viborg|Odense",
+    "Aalborg|Vejle|Haderslev|Fredericia|Lyngby",
+  ],
+  SWE: [
+    "",
+    "Malmö|Hammarby",
+    "Solna|D. Stockholm",
+    "H. Göteborg|Göteborg|Borås|Mjällby|Uppsala",
+    "Norrköping|Kalmar|Halmstad|Värnamo|Degerfors",
+  ],
+  NOR: [
+    "",
+    "Bodø|Bergen",
+    "Molde|Trondheim",
+    "Stavanger|Tromsø|Sarpsborg|Fredrikstad|Vålerenga",
+    "Lillestrøm|Drammen|Hamar|Sandefjord|Kristiansund",
+  ],
+  HUN: [
+    "",
+    "",
+    "Ferencváros|Felcsút",
+    "Paks|Debrecen|Győr|M. Budapest|Újpest",
+    "Kecskemét|Zalaegerszeg|Miskolc|Nyíregyháza",
+  ],
+  ROU: [
+    "",
+    "",
+    "S. București|C. Cluj",
+    "U. Craiova|R. București|U. Cluj|D. București",
+    "Constanța|Sfântu Gheorghe|Galați|Ploiești",
+  ],
+  ISR: [
+    "",
+    "",
+    "M. Tel Aviv|H. Be'er Sheva",
+    "M. Haifa|B. Jerusalem|H. Tel Aviv",
+    "Sakhnin|M. Netanya|H. Haifa|Ashdod",
+  ],
+  CYP: [
+    "",
+    "",
+    "A. Lefkosia|Paphos",
+    "O. Lefkosia|Larnaca|A. Limassol",
+    "Limassol|Famagusta|Achna",
+  ],
+  KSA: [
+    "",
+    "H. Riyadh|N. Riyadh|I. Jeddah",
+    "A. Jeddah|Q. Khobar|E. Dammam|S. Riyadh",
+    "T. Buraidah|F. Hofuf|Ar Rass|Majmaah|Riyadh|Khamis Mushait|Najran",
+    "Unaizah|Abha|Mecca|Buraidah",
+  ],
+  QAT: [
+    "",
+    "S. Doha",
+    "Duhail|Rayyan",
+    "Gharafa|A. Doha|Wakrah|Q. Doha",
+    "Umm Salal|Shamal|Khor|Ah. Doha",
+  ],
+  UAE: [
+    "",
+    "Al Ain",
+    "S. Dubai|W. Abu Dhabi",
+    "Sharjah|J. Abu Dhabi|W. Dubai|N. Dubai",
+    "B. Abu Dhabi|Ajman|Kalba|Khor Fakkan",
+  ],
+  EGY: [
+    "",
+    "A. Cairo",
+    "Zamalek|Giza",
+    "Port Said|C. Cleopatra|Ismailia|Alexandria",
+    "E. Cairo|S. Alexandria|Mahalla|Z. Cairo",
+  ],
+  MAR: [
+    "",
+    "W. Casablanca",
+    "R. Casablanca|F. Rabat",
+    "R. Berkane|U. Rabat|M. Fès|H. Agadir",
+    "I. Tanger|El Jadida|Safi|Tétouan",
+  ],
+  TUN: [
+    "",
+    "",
+    "E. Tunis|É. Sousse",
+    "C. Africain|Sfax|Monastir",
+    "S. Tunisien|Bizerte|Ben Guerdane|Gabès",
+  ],
+  ALG: ["", "", "M. Alger|Belouizdad", "Kabylie|U. Alger|Constantine", "Sétif|Oran|Hydra|Chlef"],
+  RSA: [
+    "",
+    "",
+    "Mamelodi S|Orlando P",
+    "Kaizer C|Stellenbosch|Tshwane U|Sekhukhune",
+    "Durban|Cape Town C|Polokwane|G. Arrows",
+  ],
+  USA: [
+    "",
+    "I. Miami|Los Angeles",
+    "G. Los Angeles|Columbus|Cincinnati|Seattle|Philadelphia|Minnesota|San Diego",
+    "R. New York|New York C|Atlanta U|Nashville|Austin|Charlotte|Orlando C|Portland|Houston|Kansas City|R. Salt Lake",
+    "Dallas|Colorado|Chicago|N. England|San Jose|St. Louis|D.C. U",
+  ],
+  MEX: [
+    "",
+    "A. México|Monterrey|T. Nuevo León|Toluca",
+    "C. Azul|Guadalajara|Pachuca|U. México",
+    "León|A. Guadalajara|Torreón|Tijuana|Aguascalientes|Puebla|Querétaro",
+    "Mazatlán|San Luis|Juárez|A. Cancún",
+  ],
+  BRA: [
+    "",
+    "F. Rio|P. São Paulo|B. Rio",
+    "A. Mineiro|C. Belo Horizonte|I. Porto Alegre|São Paulo|Fl. Rio",
+    "C. São Paulo|G. Porto Alegre|Bahia|Bragança|V. Rio|Fortaleza|Santos|Mirassol",
+    "A. Paranaense|Ceará|V. Salvador|S. Recife|Caxias|Coritiba|Goiás|Chapecó",
+  ],
+  ARG: [
+    "",
+    "Boca J|River P",
+    "R. Avellaneda|I. Avellaneda|V. Liniers|E. La Plata",
+    "S. Lorenzo|T. Córdoba|Lanús|A. Juniors|R. Central|N. Rosario",
+    "B. Córdoba|H. Buenos Aires|Florencio Varela|G. La Plata|Tigre",
+  ],
+  COL: [
+    "",
+    "",
+    "N. Medellín|M. Bogotá",
+    "J. Barranquilla|A. Cali|Ibagué|I. Santa Fe",
+    "I. Medellín|D. Cali|Manizales|Bucaramanga",
+  ],
+  CHI: [
+    "",
+    "",
+    "C. Santiago|U. Chile",
+    "U. Católica|Coquimbo|P. Santiago|Rancagua",
+    "La Florida|Viña del Mar|Talcahuano|Chillán",
+  ],
+  URU: [
+    "",
+    "",
+    "P. Montevideo|N. Montevideo",
+    "D. Montevideo|L. Montevideo|Racing M",
+    "B. River|M. Wanderers|Cerro|Colonia",
+  ],
+  ECU: ["", "", "Sangolquí", "L. Quito|B. Guayaquil|E. Guayaquil", "Quito|Machala|Cuenca|Ambato"],
+  PAR: [
+    "",
+    "",
+    "L. Asunción",
+    "O. Asunción|C. Porteño|G. Asunción",
+    "N. Asunción|Luque|Villa Elisa|Pedro Juan Caballero",
+  ],
+  PER: ["", "", "U. Lima", "A. Lima|S. Cristal|Cusco", "Arequipa|C. Cusco|Huancayo|Tarma"],
+  JPN: [
+    "",
+    "Kobe",
+    "Kashima|Hiroshima|Machida",
+    "U. Saitama|Kawasaki|Kashiwa|G. Osaka|C. Osaka|Yokohama M|Nagoya|Tokyo",
+    "Kyoto|Shimizu|Niigata|Okayama|Sapporo",
+  ],
+  KOR: [
+    "",
+    "Ulsan|Jeonbuk",
+    "Pohang|Seoul|Gangwon",
+    "Daejeon|Gimcheon|Gwangju|Suwon|Incheon",
+    "Jeju|Daegu|Anyang|Busan",
+  ],
+  CHN: [
+    "",
+    "Shanghai P|Shanghai S",
+    "Chengdu|Beijing",
+    "Shandong|Tianjin|Hangzhou|Wuhan|Zhengzhou",
+    "Qingdao|Dalian|Changchun|Shenzhen|Meizhou",
+  ],
+  AUS: [
+    "",
+    "",
+    "Melbourne C|Sydney",
+    "Melbourne V|W. Sydney|Adelaide U|Central Coast",
+    "Brisbane|Perth|Newcastle J|Macarthur",
+  ],
 }
 
-export const LEAGUES: Record<string, LeagueDef> = {
-  ENG: {
-    tiers: [6, 8, 10, 12, 8],
-    family: "english",
-    cities:
-      "London Manchester Liverpool Birmingham Leeds Newcastle Sheffield Bristol Nottingham Leicester Southampton Brighton Norwich Derby Sunderland Middlesbrough Portsmouth Coventry Stoke Ipswich Reading Hull Plymouth Blackburn Burnley Preston Wigan Bolton Luton Watford Swindon Oxford Cambridge Exeter Bradford Barnsley Wolverhampton Bournemouth Huddersfield Charlton",
-  },
-  ESP: {
-    tiers: [5, 6, 7, 8, 6],
-    family: "spanish",
-    cities:
-      "Madrid Barcelona Sevilla Valencia Bilbao Málaga Zaragoza Vigo Gijón Oviedo Santander Pamplona Vitoria Granada Cádiz Almería Murcia Córdoba Valladolid Salamanca Alicante Elche Huelva Burgos Girona Tarragona Castellón Albacete Logroño León",
-  },
-  GER: {
-    tiers: [4, 6, 8, 8, 6],
-    family: "german",
-    cities:
-      "Berlin Hamburg München Köln Frankfurt Stuttgart Düsseldorf Dortmund Essen Leipzig Bremen Dresden Hannover Nürnberg Duisburg Bochum Bielefeld Bonn Mannheim Karlsruhe Augsburg Freiburg Kiel Rostock Mainz Kassel Magdeburg Braunschweig",
-  },
-  ITA: {
-    tiers: [4, 6, 8, 8, 6],
-    family: "italian",
-    cities:
-      "Milano Roma Torino Napoli Genova Firenze Bologna Palermo Bari Verona Venezia Catania Parma Cagliari Lecce Bergamo Udine Brescia Pisa Modena Salerno Perugia Ancona Trieste Como Cremona Ferrara Monza",
-  },
-  FRA: {
-    tiers: [2, 6, 8, 8, 6],
-    family: "french",
-    cities:
-      "Paris Marseille Lyon Toulouse Nice Nantes Strasbourg Montpellier Bordeaux Lille Rennes Reims Le_Havre Saint-Étienne Toulon Grenoble Dijon Angers Nîmes Brest Metz Lens Caen Lorient Amiens Tours Auxerre Sochaux",
-  },
-  POR: {
-    tiers: [1, 3, 5, 6, 4],
-    family: "portuguese",
-    cities:
-      "Lisboa Porto Braga Guimarães Coimbra Setúbal Funchal Aveiro Faro Leiria Viseu Barcelos Famalicão Chaves Vizela Estoril Arouca",
-  },
-  NED: {
-    tiers: [1, 3, 5, 6, 4],
-    family: "dutch",
-    cities:
-      "Amsterdam Rotterdam Eindhoven Utrecht Den_Haag Groningen Tilburg Almere Breda Nijmegen Enschede Arnhem Zwolle Heerenveen Alkmaar Sittard Waalwijk Deventer",
-  },
-  BEL: {
-    tiers: [0, 3, 4, 6, 4],
-    family: "dutch",
-    cities:
-      "Brussel Antwerpen Gent Brugge Luik Charleroi Genk Mechelen Leuven Kortrijk Oostende Westerlo Sint-Truiden Eupen Aalst Lommel",
-  },
-  TUR: {
-    tiers: [0, 4, 5, 8, 4],
-    family: "turkish",
-    cities:
-      "İstanbul Ankara İzmir Bursa Antalya Konya Adana Gaziantep Kayseri Trabzon Samsun Eskişehir Sivas Rize Kocaeli Sakarya Malatya Denizli Manisa Hatay Alanya Bodrum",
-  },
-  SCO: {
-    tiers: [0, 1, 3, 5, 4],
-    family: "english",
-    cities:
-      "Glasgow Edinburgh Aberdeen Dundee Kilmarnock Motherwell Perth Inverness Paisley Livingston Hamilton Falkirk Ayr",
-  },
-  AUT: {
-    tiers: [0, 1, 3, 5, 4],
-    family: "german",
-    cities: "Wien Graz Salzburg Linz Innsbruck Klagenfurt Altach Wolfsberg Hartberg Ried",
-  },
-  SUI: {
-    tiers: [0, 1, 3, 5, 4],
-    family: "german",
-    cities: "Zürich Basel Bern Genève Lausanne Luzern Lugano St._Gallen Sion Winterthur Thun Aarau",
-  },
-  GRE: {
-    tiers: [0, 1, 3, 5, 4],
-    family: "greek",
-    cities: "Athína Thessaloníki Piraeus Pátra Iráklio Lárisa Vólos Ioánnina Kalamáta Xánthi",
-  },
-  RUS: {
-    tiers: [0, 2, 4, 6, 4],
-    family: "slavic",
-    cities:
-      "Moskva Sankt-Peterburg Kazan Krasnodar Rostov Samara Sochi Ekaterinburg Nizhny_Novgorod Tula Voronezh Makhachkala Grozny Omsk",
-  },
-  UKR: {
-    tiers: [0, 1, 3, 5, 4],
-    family: "slavic",
-    cities: "Kyiv Kharkiv Dnipro Lviv Odesa Donetsk Zaporizhzhia Poltava Kryvyi_Rih Oleksandriya",
-  },
-  CRO: {
-    tiers: [0, 1, 2, 4, 4],
-    family: "slavic",
-    cities: "Zagreb Split Rijeka Osijek Varaždin Pula Zadar Šibenik",
-  },
-  SRB: {
-    tiers: [0, 1, 2, 4, 4],
-    family: "slavic",
-    cities: "Beograd Novi_Sad Niš Kragujevac Subotica Čačak Novi_Pazar",
-  },
-  CZE: {
-    tiers: [0, 1, 3, 4, 4],
-    family: "slavic",
-    cities: "Praha Brno Ostrava Plzeň Olomouc Liberec Jablonec Zlín Teplice",
-  },
-  POL: {
-    tiers: [0, 1, 3, 5, 4],
-    family: "slavic",
-    cities:
-      "Warszawa Kraków Łódź Wrocław Poznań Gdańsk Szczecin Katowice Lublin Białystok Chorzów Zabrze",
-  },
-  DEN: {
-    tiers: [0, 1, 3, 4, 4],
-    family: "nordic",
-    cities: "København Aarhus Odense Aalborg Brøndby Herning Randers Silkeborg Viborg Vejle",
-  },
-  SWE: {
-    tiers: [0, 1, 2, 5, 4],
-    family: "nordic",
-    cities:
-      "Stockholm Göteborg Malmö Uppsala Norrköping Helsingborg Örebro Kalmar Halmstad Värnamo",
-  },
-  NOR: {
-    tiers: [0, 1, 2, 4, 4],
-    family: "nordic",
-    cities: "Oslo Bergen Trondheim Stavanger Bodø Tromsø Molde Fredrikstad Lillestrøm Sarpsborg",
-  },
-  HUN: {
-    tiers: [0, 0, 2, 4, 4],
-    family: "hungarian",
-    cities: "Budapest Debrecen Szeged Győr Pécs Kecskemét Zalaegerszeg Paks",
-  },
-  ROU: {
-    tiers: [0, 0, 2, 4, 4],
-    family: "romanian",
-    cities: "București Cluj Craiova Iași Constanța Timișoara Ploiești Brașov",
-  },
-  ISR: {
-    tiers: [0, 0, 2, 3, 4],
-    family: "english",
-    cities: "Tel_Aviv Haifa Jerusalem Be'er_Sheva Netanya Ashdod",
-  },
-  CYP: {
-    tiers: [0, 0, 2, 3, 3],
-    family: "greek",
-    cities: "Lefkosia Limassol Larnaca Paphos Famagusta",
-  },
-  KSA: {
-    tiers: [0, 3, 4, 6, 4],
-    family: "arabic",
-    cities: "Riyadh Jeddah Dammam Mecca Medina Taif Abha Buraidah Khobar Hofuf Tabuk Najran",
-  },
-  QAT: {
-    tiers: [0, 1, 2, 4, 4],
-    family: "arabic",
-    cities: "Doha Rayyan Wakrah Khor Umm_Salal Gharafa Lusail Shahaniya",
-  },
-  UAE: {
-    tiers: [0, 1, 2, 4, 4],
-    family: "arabic",
-    cities: "Dubai Abu_Dhabi Sharjah Ain Ajman Fujairah Ras_Al_Khaimah Khor_Fakkan",
-  },
-  EGY: {
-    tiers: [0, 1, 2, 4, 4],
-    family: "arabic",
-    cities: "Cairo Alexandria Giza Port_Said Ismailia Suez Mansoura Tanta Aswan",
-  },
-  MAR: {
-    tiers: [0, 1, 2, 4, 4],
-    family: "french",
-    cities: "Casablanca Rabat Fès Marrakech Tanger Agadir Oujda Berkane Tétouan Safi",
-  },
-  TUN: {
-    tiers: [0, 0, 2, 3, 4],
-    family: "french",
-    cities: "Tunis Sfax Sousse Bizerte Monastir Gabès",
-  },
-  ALG: {
-    tiers: [0, 0, 2, 3, 4],
-    family: "french",
-    cities: "Alger Oran Constantine Sétif Annaba Tlemcen",
-  },
-  RSA: {
-    tiers: [0, 0, 2, 4, 4],
-    family: "english",
-    cities: "Johannesburg Pretoria Durban Cape_Town Soweto Polokwane Bloemfontein Gqeberha",
-  },
-  USA: {
-    tiers: [0, 2, 5, 8, 6],
-    family: "english",
-    cities:
-      "New_York Los_Angeles Chicago Houston Dallas Seattle Atlanta Miami Denver Portland Boston Philadelphia San_Diego Nashville Austin Charlotte Columbus Cincinnati Orlando Kansas_City Salt_Lake Minneapolis St._Louis San_Jose",
-  },
-  MEX: {
-    tiers: [0, 2, 4, 6, 4],
-    family: "spanish",
-    cities:
-      "Ciudad_de_México Guadalajara Monterrey Puebla Toluca León Tijuana Querétaro Torreón Pachuca Mazatlán Aguascalientes Morelia Veracruz",
-  },
-  BRA: {
-    tiers: [0, 3, 5, 8, 6],
-    family: "portuguese",
-    cities:
-      "São_Paulo Rio_de_Janeiro Belo_Horizonte Porto_Alegre Salvador Recife Fortaleza Curitiba Goiânia Belém Manaus Florianópolis Campinas Santos Natal Cuiabá Maceió Juiz_de_Fora Ribeirão_Preto Londrina",
-  },
-  ARG: {
-    tiers: [0, 2, 4, 6, 5],
-    family: "spanish",
-    cities:
-      "Buenos_Aires Rosario Córdoba La_Plata Mendoza Avellaneda Santa_Fe Tucumán Mar_del_Plata Bahía_Blanca Salta Quilmes Lanús Banfield",
-  },
-  COL: {
-    tiers: [0, 0, 2, 4, 4],
-    family: "spanish",
-    cities: "Bogotá Medellín Cali Barranquilla Bucaramanga Manizales Pereira Pasto",
-  },
-  CHI: {
-    tiers: [0, 0, 2, 4, 4],
-    family: "spanish",
-    cities: "Santiago Valparaíso Concepción Viña_del_Mar Antofagasta Temuco La_Serena Rancagua",
-  },
-  URU: {
-    tiers: [0, 0, 2, 3, 4],
-    family: "spanish",
-    cities: "Montevideo Maldonado Paysandú Salto Rivera Colonia",
-  },
-  ECU: {
-    tiers: [0, 0, 1, 3, 4],
-    family: "spanish",
-    cities: "Quito Guayaquil Cuenca Manta Ambato Loja",
-  },
-  PAR: {
-    tiers: [0, 0, 1, 3, 4],
-    family: "spanish",
-    cities: "Asunción Luque Encarnación Ciudad_del_Este Villarrica Itauguá",
-  },
-  PER: {
-    tiers: [0, 0, 1, 3, 4],
-    family: "spanish",
-    cities: "Lima Arequipa Trujillo Cusco Chiclayo Piura",
-  },
-  JPN: {
-    tiers: [0, 1, 3, 6, 4],
-    family: "asian",
-    cities:
-      "Tokyo Yokohama Osaka Nagoya Kobe Kawasaki Saitama Hiroshima Kashima Sapporo Fukuoka Sendai Niigata Shimizu Kyoto Iwata",
-  },
-  KOR: {
-    tiers: [0, 1, 2, 5, 4],
-    family: "asian",
-    cities: "Seoul Busan Incheon Daegu Daejeon Gwangju Ulsan Suwon Jeonju Pohang Gangneung Jeju",
-  },
-  CHN: {
-    tiers: [0, 1, 2, 5, 4],
-    family: "asian",
-    cities:
-      "Beijing Shanghai Guangzhou Shenzhen Chengdu Wuhan Tianjin Chongqing Jinan Hangzhou Dalian Qingdao Changchun Zhengzhou",
-  },
-  AUS: {
-    tiers: [0, 0, 2, 4, 4],
-    family: "english",
-    cities:
-      "Sydney Melbourne Brisbane Perth Adelaide Newcastle Wellington Gold_Coast Canberra Central_Coast",
-  },
+/** Every other nation's clubs, best first. */
+export const CLUBS: Record<string, string> = {
+  // UEFA
+  WAL: "TN Saints|Connah's Quay|Penybont|Bala|Caernarfon|Barry|Cardiff Met|Colwyn Bay",
+  SVK: "S. Bratislava|Dunajská Streda|Žilina|Trnava|Podbrezová|Ružomberok|Michalovce|Košice",
+  IRL: "Shamrock R|Shelbourne|B. Dublin|Derry C|Inchicore|Dundalk|Sligo R|Galway U",
+  SVN: "O. Ljubljana|Maribor|Celje|Koper|M. Sobota|B. Ljubljana|Domžale",
+  BIH: "Z. Mostar|B. Banja Luka|Sarajevo|Ž. Sarajevo|V. Mostar|Široki Brijeg|Doboj|Tuzla",
+  ALB: "Rrogozhinë|P. Tirana|Tirana|Shkodër|D. Tirana|Durrës|Korçë|Elbasan",
+  MKD: "Tetovo|Struga|V. Skopje|S. Skopje|R. Skopje|Kratovo|Štip",
+  NIR: "L. Belfast|Larne|G. Belfast|C. Belfast|Coleraine|Cr. Belfast|Dungannon|Portadown",
+  GEO: "D. Tbilisi|D. Batumi|Kutaisi|I. Tbilisi|Gori|Saburtalo|Tskaltubo|Telavi",
+  ISL: "V. Reykjavík|Kópavogur|Va. Reykjavík|K. Reykjavík|Garðabær|Hafnarfjörður|Akranes|Akureyri",
+  FIN: "Helsinki|Kuopio|Seinäjoki|Tampere|Turku|Lahti|Vaasa|Mariehamn",
+  KOS: "Suharekë|Gjilan|Prishtina|Podujevë|Drenas|Malishevë|Klinë",
+  MNE: "B. Podgorica|Tuzi|Nikšić|Bijelo Polje|Petrovac|Bar|M. Podgorica|Tivat",
+  BUL: "Razgrad|L. Sofia|C. Sofia|L. Plovdiv|B. Plovdiv|Varna|Kardzhali|S. Sofia",
+  BLR: "Borisov|D. Minsk|Soligorsk|Grodno|Zhodino|Minsk|Gomel|Mogilev",
+  LUX: "Differdange|Dudelange|Niederkorn|Hesperange|R. Luxembourg|Esch",
+  ARM: "N. Yerevan|A. Yerevan|P. Yerevan|U. Yerevan|Martuni|Gyumri|Ararat|Kapan",
+  KAZ: "Astana|K. Almaty|Kostanay|Aktobe|Shymkent|Semey|Kyzylorda|Atyrau",
+  FRO: "Klaksvík|Gøta|Tórshavn H|Tórshavn B|Runavík|Streymnes|Sørvágur",
+  AZE: "Q. Ağdam|N. Bakı|S. Bakı|Zirə|Sumqayıt|Tovuz|Naxçıvan|Gəncə",
+  EST: "F. Tallinn|L. Tallinn|Nõmme|Paide|Narva|Tartu|Kuressaare",
+  LVA: "R. Rīga|Rīga|Ķekava|Valmiera|Liepāja|Daugavpils|Jelgava",
+  LTU: "Ž. Vilnius|Kaunas|Kaunas H|Marijampolė|Panevėžys|Trakai|Šiauliai",
+  MDA: "S. Tiraspol|Hîncești|Orhei|Z. Chișinău|Buiucani|Bălți",
+  MLT: "Ħamrun|Floriana|Valletta|Paola|Birkirkara|Marsaxlokk|Sliema|Gżira",
+  AND: "Escaldes|A. Escaldes|Santa Coloma|Pas de la Casa|Engordany",
+  GIB: "L. Gibraltar|S. Gibraltar|E. Gibraltar|Magpies",
+  LIE: "Vaduz|Eschen|Balzers|Triesen|Schaan|Ruggell",
+  SMR: "San Marino C|Montegiardino|Acquaviva|Fiorentino|Falciano|Domagnano|Faetano|Dogana",
+
+  // CAF
+  SEN: "Génération F|J. Dakar|Rufisque|Ziguinchor|Pikine|Gorée|Guédiawaye|Douanes Dakar",
+  NGA: "Enugu R|Remo S|Aba|Rivers U|Kano P|Ibadan|Jos|Ilorin",
+  CIV: "A. Abidjan|S. Abidjan|Africa S|San-Pédro|Yamoussoukro|Bouaké|Adjamé",
+  CMR: "C. Garoua|C. Yaoundé|U. Douala|Bamenda|Sangmélima|Baham|Douala A",
+  COD: "M. Lubumbashi|V. Kinshasa|M. Pembe|Lupopo|Kindu|Mbuji-Mayi|Lubumbashi S",
+  MLI: "S. Bamako|D. Bamako|R. Bamako|Niaréla|Kayes|Sikasso",
+  BFA: "Kadiogo|R. Bobo|S. Ouaga|Y. Ouaga|Bobo-Dioulasso|Koudougou",
+  CPV: "Mindelo|S. Praia|A. Praia|B. Praia|D. Mindelo",
+  GHA: "A. Kotoko|Accra H|Tarkwa|Bechem|Dormaa|Dawu|Legon",
+  GUI: "H. Conakry|Hafia C|Kankan|Kamsar|Boké|Kindia",
+  GAB: "Moanda|Koulamoutou|Libreville|Lambaréné|Akanda|Mounana",
+  ANG: "P. Luanda|Agosto Luanda|Dundo|Benguela|K. Luanda|I. Luanda",
+  UGA: "Kampala|Kitende|V. Kampala|E. Kampala|Jinja|Kampala Police",
+  ZAM: "Ndola|Kitwe|Z. Lusaka|R. Arrows|N. Kitwe|G. Buffaloes|Ndola R",
+  BEN: "Ouidah|Porto-Novo|Cotonou|Dadjè|Parakou",
+  MOZ: "Maputo B|F. Maputo|C. Sol|Songo|Beira|Nampula",
+  MAD: "Antananarivo|Miarinarivo|Mahajanga|Toamasina",
+  EQG: "Ebebiyín|Malabo|Bata|Mongomo|F. Kings",
+  COM: "Moroni|Mutsamudu|Fomboni|Mitsamiouli",
+  KEN: "G. Nairobi|L. Nairobi|T. Nairobi|Kenya Police|Kisii|Kakamega|Nairobi C",
+  LBY: "A. Tripoli|I. Tripoli|N. Benghazi|A. Benghazi|H. Benghazi|M. Tripoli",
+  TAN: "S. Dar|Y. Dar|Chamazi|Singida|Tanga|Ruangwa",
+  MTN: "Nouadhibou|Tevragh-Zeina|Nouakchott|Zouérat",
+  NIG: "Niamey|Zinder|Maradi|Tahoua",
+  GAM: "R. Banjul|H. Banjul|W. Banjul|Brikama|Bakau|Farato",
+  SDN: "H. Omdurman|M. Omdurman|Khartoum|Port Sudan|Wad Madani",
+  TOG: "Kara|Lomé|Kpalimé|Sokodé|Fiokpo",
+  NAM: "Windhoek S|B. Africa|Walvis Bay|Katutura|Swakopmund",
+  SLE: "Bo|E. Lions|Freetown B|Kenema|Kallon",
+  RWA: "A. Kigali|Nyanza|Kigali Police|Huye|Kigali|K. Kigali",
+  MWI: "Blantyre B|Lilongwe S|Blantyre W|Mzuzu|Lilongwe C",
+  ZIM: "D. Harare|Harare C|Bulawayo|Zvishavane|Ngezi|Shamva|Mutare|Bulawayo C",
+  GNB: "S. Bissau|B. Bissau|Bafatá|Canchungo",
+  CGO: "Oyo|D. Brazzaville|C. Brazzaville|Dolisie|É. Brazzaville",
+  CTA: "R. Bangui|T. Bangui|Bangui 8|Bangui",
+  LBR: "Monrovia L|W. Monrovia|B. Monrovia|I. Monrovia|Paynesville",
+  BDI: "Gitega|Makamba|Bujumbura V|Bujumbura|Buganda",
+  ETH: "S. Addis Ababa|Addis B|Gondar|Mekelle|Hawassa|Bahir Dar",
+  LES: "Mafeteng|M. Maseru|Teyateyaneng|Maseru Army|Leribe",
+  BOT: "Gaborone U|Gaborone R|Jwaneng|Orapa|Mochudi|Gaborone Police",
+  SWZ: "Mbabane S|Matsapha|Simunye|Big Bend|Mbabane H",
+  SSD: "Juba|Wau|Malakal|Yei",
+  MRI: "Pamplemousses|Curepipe|Port Louis|Chamarel|Petite Rivière",
+  CHA: "N'Djamena|Moundou|Abéché|Sarh",
+  ERI: "Asmara|Massawa|Keren|Mendefera",
+  STP: "São Tomé|Agrosport|Príncipe|Neves|Trindade",
+  DJI: "Djibouti|Arta|Ali Sabieh|Dikhil|Tadjourah",
+  SOM: "Mogadishu|Kismayo|Baidoa|Beledweyne",
+  SEY: "Victoria|La Passe|Côte d'Or|Anse Royale|Saint Louis",
+  REU: "Saint-Pierre|Saint-Joseph|Saint-Louis|Le Port|Saint-Denis|Le Tampon|Sainte-Suzanne|Saint-Paul",
+  ZAN: "Malindi|Mlandege|Zimamoto|Stone Town|Mwera",
+
+  // AFC
+  IRN: "P. Tehran|E. Tehran|S. Isfahan|T. Tabriz|F. Ahvaz|G. Sirjan|Z. Isfahan|M. Anzali",
+  UZB: "P. Tashkent|Qarshi|Namangan|Olmaliq|Fergana|B. Tashkent|Termiz|Andijan",
+  IRQ: "S. Baghdad|Z. Baghdad|Q. Baghdad|Erbil|Duhok|T. Baghdad|Basra|Karkh",
+  JOR: "H. Irbid|F. Amman|W. Amman|S. Amman|Ramtha|Salt|J. Amman|Ma'an",
+  OMA: "Seeb|Buraimi|D. Salalah|N. Salalah|S. Muscat|Sur|Sohar|Rustaq",
+  SYR: "W. Damascus|J. Damascus|Latakia|H. Latakia|Homs|Aleppo|Deir ez-Zor|Jableh",
+  BHR: "Khaldiya|Muharraq|Riffa|East Riffa|A. Manama|Hidd|Sitra|Manama",
+  THA: "Buriram|Bangkok U|Pathum Thani|Bangkok P|Nonthaburi|Chiangrai|Ratchaburi",
+  PLE: "Jerusalem|H. Al Quds|Hebron|Nablus|Tulkarm|Al Bireh",
+  VIE: "Hà Nội|CA Hà Nội|Nam Định|Hải Phòng|Bình Dương|Thể Công|Thanh Hóa|Pleiku",
+  TJK: "Dushanbe|Kulob|Khujand|Tursunzoda|Pamir Dushanbe|E. Khujand",
+  KGZ: "Kant|D. Bishkek|Osh|Kochkor-Ata|Bishkek|Jalal-Abad",
+  LBN: "A. Beirut|N. Beirut|Ah. Beirut|S. Beirut|Sahel|Tripoli|Bourj",
+  IDN: "Bandung|Jakarta|Surabaya|Bali|Samarinda|Makassar|Malang|Tangerang|Madura|Semarang",
+  PRK: "April 25|Rimyongsu|Kigwancha|Sobaeksu|Pyongyang",
+  KUW: "Kaifan|Hawalli|Mansouriya|Salmiya|Jahra|Adailiya|Fahaheel|Farwaniya",
+  PHI: "Iloilo|Cebu|Laguna|Taguig|Manila",
+  MAS: "Johor|Selangor|Sabah|Terengganu|Kuching|Pahang|Penang|Negeri Sembilan",
+  IND: "M. Kolkata|Mumbai C|Bengaluru|Goa|E. Kolkata|Kochi|Jamshedpur|Guwahati|Bhubaneswar|Mohali",
+  TKM: "Arkadag|Ashgabat|Anew|K. Ashgabat|Balkanabat|Mary",
+  YEM: "A. Sanaa|Aden|W. Aden|Taiz|Mukalla",
+  SGP: "Bishan|Tampines|Geylang|Balestier|Hougang|Tanjong Pagar",
+  HKG: "K. Hong Kong|Eastern HK|Tseung Kwan O|Tai Po|Southern|HK Rangers",
+  MYA: "Taunggyi|Yangon U|Bago|Pathein|Sittwe|Mandalay",
+  AFG: "Kabul|Herat|Kandahar|Mazar-i-Sharif",
+  MDV: "Malé M|Malé E|Malé TC|Malé R",
+  TPE: "Kaohsiung P|Tainan|Taichung|Taipei|Hsinchu",
+  CAM: "Svay Rieng|Phnom Penh|V. Phnom Penh|Kampong Cham|Siem Reap",
+  NEP: "Kathmandu|Lalitpur|Manang|Pokhara|Biratnagar",
+  BAN: "Dhaka A|Dhaka K|Dhaka M|Dhanmondi|Chattogram",
+  LAO: "Vientiane|Luang Prabang|Savannakhet|Champasak",
+  SRI: "Colombo|Kandy|Galle|Jaffna|Negombo",
+  MNG: "Ulaanbaatar|Erchim|Deren|Khovd|Darkhan",
+  BHU: "Thimphu|Paro|Phuentsholing|Punakha",
+  MAC: "B. Macau|Ka I|Chao Pak Kei|Macau",
+  BRU: "Bandar Seri Begawan|Kasuka|Indera|Tutong",
+  PAK: "Karachi|Lahore|Islamabad|Quetta|Peshawar",
+  TLS: "Dili|Baucau|Maliana|Ermera",
+  GUM: "Tamuning|Dededo|Hagåtña|Barrigada",
+  MNP: "Saipan|Tinian|Rota|Garapan",
+
+  // CONCACAF
+  CAN: "Vancouver W|Toronto|Montréal|Hamilton|Calgary|A. Ottawa|Halifax|Victoria",
+  PAN: "T. Panamá|P. Amador|La Chorrera|Colón|San Miguelito|A. Panamá",
+  CRC: "S. Tibás|Alajuela|Heredia|Cartago|Pérez Zeledón|San Carlos|Liberia|Puntarenas",
+  HON: "O. Tegucigalpa|M. Tegucigalpa|R. San Pedro|M. San Pedro|Olancho|Comayagua|La Ceiba",
+  JAM: "Mount P|Kingston C|Harbour View|Arnett G|Waterhouse|Portmore U|Dunbeholden|Montego Bay U",
+  CUW: "Dominguito|J. Holland|Scherpenheuvel|H. Fortuna|Barber|Willemstad",
+  HAI: "V. Port-au-Prince|R. Haïtien|Arcahaie|Pétion-Ville|Léogâne|Cap-Haïtien",
+  GUA: "C. Guatemala|M. Guatemala|Quetzaltenango|Antigua|Cobán|Mixco|Malacatán",
+  SLV: "A. San Salvador|Santa Ana|San Miguel|Metapán|Usulután|H. San Salvador|Zacatecoluca",
+  TRI: "Defence Force|Point Lisas|Port of Spain",
+  SUR: "Moengo|R. Paramaribo|T. Paramaribo|V. Paramaribo|Paramaribo LV",
+  NCA: "Estelí|Diriamba|Managua|W. Managua|Matagalpa",
+  DOM: "Santiago|P. Santo Domingo|Moca|Jarabacoa|La Romana|Santo Domingo",
+  GUY: "Slingerz|Fruta|Georgetown|Linden",
+  SKN: "St Paul's|Basseterre V|Cayon|Conaree",
+  PUR: "Bayamón|Mayagüez|Ponce|Guaynabo|Carolina",
+  ATG: "St John's|Parham|Old Road|English Harbour|Liberta",
+  GRN: "St George's|Grenville|Gouyave|Sauteurs",
+  CUB: "Santiago de Cuba|Pinar del Río|Villa Clara|Camagüey|La Habana|Cienfuegos",
+  LCA: "Castries|Gros Islet|Vieux Fort|Soufrière|Micoud",
+  BER: "Pembroke|North Village|Warwick|Somerset|Hamilton",
+  VIN: "Kingstown|Layou|Barrouallie|Georgetown",
+  MSR: "Brades|Look Out|Salem",
+  BRB: "Bridgetown|Brittons Hill|Holetown|Speightstown",
+  BLZ: "Belmopan|Belize City|Dangriga|San Pedro|Orange Walk",
+  DMA: "Roseau|Portsmouth|Grand Bay|Marigot",
+  ARU: "Oranjestad|Dakota|San Nicolas|Noord|Santa Cruz",
+  CAY: "George Town|Bodden Town|West Bay|East End",
+  TCA: "Providenciales|Cockburn Town|Grand Turk|Blue Hills",
+  BAH: "Nassau|Freeport|Andros|Abaco",
+  VIR: "Charlotte Amalie|Christiansted|Frederiksted|Cruz Bay",
+  VGB: "Road Town|Virgin Gorda|Jost Van Dyke|Tortola",
+  AIA: "The Valley|Sandy Ground|Blowing Point|Island Harbour",
+  MTQ: "Le François|Fort-de-France|Le Lamentin|Saint-Joseph|Le Robert",
+  GLP: "Le Moule|Pointe-à-Pitre|Les Abymes|Baie-Mahault|Sainte-Rose|Basse-Terre|Le Gosier|Capesterre",
+  GUF: "Cayenne|Kourou|Matoury|Saint-Laurent|Rémire",
+  BOE: "Kralendijk|Rincon|Antriol|Nikiboko",
+  SXM: "Philipsburg|Cole Bay|Simpson Bay|Dutch Quarter",
+  SMN: "Marigot|Grand Case|Quartier d'Orléans|Sandy Ground",
+
+  // CONMEBOL
+  VEN: "Caracas|D. Táchira|U. Caracas|Carabobo|Maturín|Puerto Cabello|M. Caracas|Barinas",
+  BOL: "B. La Paz|S. La Paz|El Alto|B. Santa Cruz|O. Santa Cruz|Cochabamba|Bulo Bulo|Potosí",
+
+  // OFC
+  NZL: "Auckland|Wellington P|Auckland C|Christchurch U|Wellington O|E. Suburbs|Birkenhead U",
+  NCL: "Hienghène|Nouméa M|Tiga|Lifou",
+  SOL: "Honiara C|Honiara W|Henderson|Laugu",
+  FIJ: "Rewa|Lautoka|Ba|Suva|Labasa|Nadi|Navua",
+  TAH: "Pirae|Mahina|Papeete D|Faa'a|Papeete C",
+  VAN: "Port Vila G|Ifira|Port Vila T|Erakor|Port Vila A",
+  PNG: "Port Moresby|Lae|Madang|Rabaul|Mount Hagen",
+  COK: "Tupapa|Nikao|Avarua|Titikaveka",
+  SAM: "Lupe|Vaitele|Vaivase|Apia",
+  ASA: "Pago Pago|Vaiala|Ilaoa|Utulei",
+  TGA: "Veitongo|Lotohaʻapai|Nukuʻalofa|Kolofoʻou",
+  KIR: "Tarawa|Betio|Bairiki|Abaiang",
+  TUV: "Funafuti|Nauti|Tofaga|Nanumea",
 }
 
-/** Name patterns per family; `{c}` is the city. */
-export const CLUB_PATTERNS: Record<ClubFamily | "generic", string[]> = {
-  english: [
-    "{c} United",
-    "{c} City",
-    "{c} Athletic",
-    "{c} Rovers",
-    "{c} Town",
-    "{c} FC",
-    "{c} Wanderers",
-    "{c} Albion",
-  ],
-  spanish: [
-    "Real {c}",
-    "Deportivo {c}",
-    "Atlético {c}",
-    "CD {c}",
-    "{c} CF",
-    "Racing {c}",
-    "Club {c}",
-    "Unión {c}",
-    "Sporting {c}",
-  ],
-  portuguese: [
-    "Sporting {c}",
-    "{c} FC",
-    "Atlético {c}",
-    "EC {c}",
-    "SC {c}",
-    "Clube {c}",
-    "União {c}",
-  ],
-  german: [
-    "FC {c}",
-    "{c} SV",
-    "VfB {c}",
-    "SC {c}",
-    "1. FC {c}",
-    "SpVgg {c}",
-    "TSV {c}",
-    "Fortuna {c}",
-  ],
-  italian: ["AC {c}", "{c} Calcio", "US {c}", "FC {c}", "SS {c}", "Virtus {c}"],
-  french: ["{c} FC", "Olympique {c}", "Stade {c}", "AS {c}", "RC {c}", "FC {c}", "US {c}"],
-  dutch: ["{c} FC", "SC {c}", "FC {c}", "VV {c}", "Sparta {c}", "Go_Ahead {c}"],
-  turkish: ["{c}spor", "{c} FK", "{c} Gençlik", "{c} Belediyespor", "{c} İdmanyurdu"],
-  slavic: [
-    "FK {c}",
-    "Dinamo {c}",
-    "Lokomotiv {c}",
-    "Slavia {c}",
-    "{c} FC",
-    "Spartak {c}",
-    "Rudar {c}",
-  ],
-  nordic: ["{c} IF", "{c} FK", "{c} BK", "IK {c}", "{c} FC"],
-  greek: ["{c} FC", "Asteras {c}", "Ethnikos {c}", "Apollon {c}", "Aris {c}"],
-  arabic: ["Al {c}", "{c} Club", "Al-Shabab {c}", "Al-Nasr {c}", "{c} SC", "Al-Wahda {c}"],
-  asian: ["{c} FC", "{c} United", "FC {c}", "{c} Reds", "{c} Stars", "{c} Lions"],
-  hungarian: ["{c} FC", "{c} SE", "{c} TE", "Vasas {c}"],
-  romanian: ["FC {c}", "CS {c}", "Universitatea {c}", "Rapid {c}", "Dinamo {c}"],
-  generic: [
-    "{c} Police",
-    "{c} Army",
-    "{c} Stars",
-    "{c} United",
-    "{c} Rangers",
-    "{c} Dynamos",
-    "{c} Rovers",
-    "Real {c}",
-    "{c} City",
-    "Sporting {c}",
-    "{c} Warriors",
-    "{c} Eagles",
-  ],
-}
+/** Names for a nation with no clubs listed; `{c}` is the nation. */
+export const GENERIC_PATTERNS = ["{c} Police", "{c} Army", "{c} Stars", "{c} United", "{c} Rangers"]
