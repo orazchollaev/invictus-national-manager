@@ -37,7 +37,7 @@ const current = computed(() => {
 
 <style scoped>
 .narration {
-  min-height: calc(var(--fs-md) * 1.4 * 2 + var(--sp-1));
+  min-height: calc(var(--fs-md) * 1.4 * 2.2 + var(--sp-1));
   display: flex;
   align-items: center;
   padding: var(--sp-2) var(--sp-3);
@@ -47,7 +47,7 @@ const current = computed(() => {
 
 .text {
   margin: 0;
-  font-size: var(--fs-md);
+  font-size: var(--fs-sm);
   font-weight: 600;
   line-height: 1.4;
   animation: fade-up var(--dur) var(--ease);
