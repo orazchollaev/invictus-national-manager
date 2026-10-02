@@ -149,10 +149,10 @@ describe("play-off places", { timeout: 600000 }, () => {
         expect(games.filter((f) => f.home === t)).toHaveLength(3)
       }
     expect(stage("l2").groups!.map((g) => g.teams.length)).toEqual([6, 6, 6])
-    // Spain and Portugal play; eight two-legged ties include League 2's winners.
+    // Spain and Portugal play; five two-legged ties include League 2's winners.
     expect(l1.flatMap((g) => g.teams)).toContain("ESP")
     const ties = stage("playoff").rounds![0].ties
-    expect(ties).toHaveLength(8)
+    expect(ties).toHaveLength(5)
     expect(ties.every((t) => t.fixtures.length === 2)).toBe(true)
     const inPlayoffs = ties.flatMap((t) => [t.home, t.away])
     const l2Winners = standingsOf(q, "l2", w.ctx()).map((t) => t[0].team)

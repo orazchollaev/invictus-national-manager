@@ -82,13 +82,13 @@ describe("European qualifying with hosts in the group", () => {
   const ctx2 = { confedOf, instance: () => undefined } as unknown as CompContext
 
   it("passes a host's place down the table", () => {
-    // 2030: Spain and Portugal are hosts, so 14 places and two direct per group.
+    // 2030: Spain and Portugal are hosts, so 14 places and three direct per group.
     const rows = ["ESP", "SRB", "CRO", "TUR", "UKR", "GRE", "ALB"]
     expect(zonesFor(inst("wcq-uefa", "qualifier"), "1B", 7, ctx2, "l1", rows)).toEqual([
       "host",
       "through",
       "through",
-      "playoff",
+      "through",
       "playoff",
       "playoff",
       "playoff",
@@ -99,6 +99,6 @@ describe("European qualifying with hosts in the group", () => {
     const rows = ["FRA", "BEL", "NOR", "ITA", "ROU", "AUT", "SCO"]
     const plain = zonesFor(inst("wcq-uefa", "qualifier"), "1A", 7, ctx2, "l1")
     expect(zonesFor(inst("wcq-uefa", "qualifier"), "1A", 7, ctx2, "l1", rows)).toEqual(plain)
-    expect(plain.slice(0, 2)).toEqual(["through", "through"])
+    expect(plain.slice(0, 3)).toEqual(["through", "through", "through"])
   })
 })

@@ -14,8 +14,8 @@
  *    League 2's group winners.
  *
  * UEFA left the split between direct places and play-offs "to be fine-tuned"; here
- * about half the places are direct (World Cup 2030: the top two of each group and
- * eight ties; Euro 2032: the top four and ten ties).
+ * most places are direct and four or five go to play-offs (World Cup 2030: the top
+ * three of each group and five ties; Euro 2032: the top six and four ties).
  */
 import type { ISODate } from "@/engine/types"
 import { deriveSeed, makeRng } from "@/engine/rng"
@@ -47,9 +47,16 @@ export interface EuropeanQualifiersOptions {
   playoffDates(year: number): [ISODate, ISODate]
 }
 
-/** Direct places per League 1 group, and the play-off ties for the rest. */
+/** Fewest play-off ties: one per League 2 winner and one more between League 1 teams. */
+const MIN_TIES = GROUPS + 1
+
+/**
+ * Direct places per League 1 group, and the play-off ties for the rest: as many
+ * direct places as leave at least MIN_TIES ties, so the play-offs reach a place or
+ * two below them rather than most of a group of twelve.
+ */
 export function qualifierSplit(places: number) {
-  const perGroup = Math.max(1, Math.round(places / (2 * GROUPS)))
+  const perGroup = Math.max(1, Math.floor((places - MIN_TIES) / GROUPS))
   return { perGroup, ties: Math.max(0, places - perGroup * GROUPS) }
 }
 
