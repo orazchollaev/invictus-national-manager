@@ -308,6 +308,7 @@ const engine: typeof en = {
     final: "Final",
     finals: "Fase final",
     "third-place": "Terceiro lugar",
+    "bronze-final": "Final de bronze",
     "group-stage": "Fase de grupos",
     "knockout-stage": "Fase eliminatória",
     "league-phase": "Fase de liga",
@@ -453,6 +454,16 @@ const engine: typeof en = {
       name: "Campeonato da ASEAN {year}",
       short: "Campeonato da ASEAN",
       plain: "Campeonato da ASEAN",
+    },
+    "asean-cup": {
+      name: "Taça ASEAN {year}",
+      short: "Taça ASEAN",
+      plain: "Taça ASEAN",
+    },
+    "asean-challenge": {
+      name: "Taça Desafio ASEAN {year}",
+      short: "Taça Desafio ASEAN",
+      plain: "Taça Desafio ASEAN",
     },
     e1: {
       name: "Campeonato E-1 da EAFF {year}",

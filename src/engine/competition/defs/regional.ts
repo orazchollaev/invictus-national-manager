@@ -6,6 +6,8 @@
  *  - FIFA Arab Cup: December 2029 and 2033 in Qatar, then every four years.
  *  - Arabian Gulf Cup: every two years, December (2026: Saudi Arabia).
  *  - ASEAN Championship: every two years from 2028, July–August.
+ *  - FIFA ASEAN Cup and Challenge Cup: every four years from 2026, 24 September to
+ *    5 October, in the FIFA window (clubs release players). Not the AFF's.
  *  - EAFF E-1: every two years from 2027, July.
  *  - CAFA Nations Cup: every two years from 2027, in the September window (as in
  *    2025), so clubs must release players.
@@ -20,7 +22,8 @@ import type { ISODate } from "@/engine/types"
 import { addDays, iso } from "@/engine/calendar/dates"
 import { window } from "@/engine/calendar/windows"
 import type { CompContext, CompetitionDef } from "../runtime"
-import { AWARDED_HOSTS } from "@/data/start"
+import { ASEAN_CUP_2026, AWARDED_HOSTS } from "@/data/start"
+import { finishers, knockoutResult, standingsOf } from "../runtime"
 import { finalsDef, type FinalsOptions } from "./builders"
 import { everyNYears, pickHosts, yearly } from "./helpers"
 
@@ -58,6 +61,8 @@ function regional(o: RegionalOptions): CompetitionDef {
     // Regional cups go ahead with whoever is free rather than calling up outsiders.
     eligible: () => false,
     entrants: (inst, ctx) => {
+      const fixed = o.fixedGroups?.(inst.year)
+      if (fixed) return fixed.flat()
       const list = ctx.ranked((t) => o.members(t, ctx) && free(t, ctx, inst.year))
       return [
         ...inst.hosts.filter((h) => list.includes(h)),
@@ -125,6 +130,90 @@ export const aseanChampionship = regional({
   koLegs: 2,
   hosted: false,
   members: (t, ctx) => member("AFF")(t, ctx) && t !== "AUS",
+})
+
+/**
+ * FIFA ASEAN Cup: FIFA's own Southeast Asian tournament (not the AFF's ASEAN
+ * Championship), played in the September–October window so clubs must release
+ * players. Two divisions in two host countries, drawn one after the other so the
+ * Challenge Cup takes the next best teams the Cup left free: the ASEAN Cup's eight
+ * play two groups of four, the winners meet in the final and the runners-up in the
+ * bronze final; the Challenge Cup's six play two groups of three and the winners
+ * meet in the final. AFF members (less Australia) and invited guests.
+ */
+const ASEAN_GUESTS = ["HKG", "PAK", "BAN"]
+const aseanMember = (t: string, ctx: CompContext) =>
+  (member("AFF")(t, ctx) && t !== "AUS") || ASEAN_GUESTS.includes(t)
+
+const aseanCupBase = regional({
+  id: "asean-cup",
+  short: "ASEAN Cup",
+  confed: "AFC",
+  name: (y) => `FIFA ASEAN Cup ${y}`,
+  editions: everyNYears(2026, 4),
+  offWindow: false,
+  teams: 8,
+  groups: 2,
+  perGroup: 1,
+  bestThirds: 0,
+  thirdPlace: false,
+  start: (y) => iso(y, 9, 25),
+  drawDate: (y) => iso(y, 7, 1),
+  span: 12,
+  gap: 3,
+  fixedGroups: (y) => (y === 2026 ? ASEAN_CUP_2026.cup : undefined),
+  members: aseanMember,
+})
+
+export const aseanCup: CompetitionDef = {
+  ...aseanCupBase,
+  plan(inst, ctx) {
+    const plans = aseanCupBase.plan(inst, ctx)
+    const ko = plans.find((p) => p.key === "knockout")!
+    // The bronze final is played on the final's day, between the runners-up.
+    plans.push({
+      key: "bronze",
+      name: "Bronze final",
+      drawDate: ko.drawDate,
+      after: "groups",
+      importance: ko.importance,
+      entrants: (c, i) => finishers(standingsOf(i, "groups", c), 1).map((r) => r.team),
+      knockout: {
+        rounds: [{ name: "Bronze final", dates: ko.knockout!.rounds[0].dates }],
+        pairing: "ordered",
+        venue: "neutral",
+      },
+    })
+    return plans
+  },
+  finalize(inst, ctx) {
+    const out = aseanCupBase.finalize(inst, ctx)
+    const bronze = knockoutResult(inst, "bronze")
+    const placings = [
+      ...new Set([out.winner, out.runnerUp, bronze.winner, bronze.runnerUp, ...out.placings!]),
+    ].filter((t): t is string => !!t)
+    return { ...out, third: bronze.winner, placings }
+  },
+}
+
+export const aseanChallengeCup = regional({
+  id: "asean-challenge",
+  short: "ASEAN Challenge Cup",
+  confed: "AFC",
+  name: (y) => `FIFA ASEAN Challenge Cup ${y}`,
+  editions: everyNYears(2026, 4),
+  offWindow: false,
+  teams: 6,
+  groups: 2,
+  perGroup: 1,
+  bestThirds: 0,
+  thirdPlace: false,
+  start: (y) => iso(y, 9, 24),
+  drawDate: (y) => iso(y, 7, 2),
+  span: 11,
+  gap: 3,
+  fixedGroups: (y) => (y === 2026 ? ASEAN_CUP_2026.challenge : undefined),
+  members: aseanMember,
 })
 
 export const eafE1 = regional({
@@ -283,6 +372,8 @@ export const REGIONAL_DEFS: CompetitionDef[] = [
   arabCup,
   gulfCup,
   aseanChampionship,
+  aseanCup,
+  aseanChallengeCup,
   eafE1,
   cafaNationsCup,
   waffChampionship,

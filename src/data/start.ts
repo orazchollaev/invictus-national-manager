@@ -96,6 +96,23 @@ export const ASIAN_CUP_2027: string[][] = [
 ]
 
 /**
+ * The inaugural FIFA ASEAN Cup (24 September – 5 October 2026): eight teams in two
+ * groups of four in Indonesia, and the FIFA ASEAN Challenge Cup, six teams in two
+ * groups of three in Hong Kong. Not to be confused with the AFF's own ASEAN
+ * Championship, played in July–August.
+ */
+export const ASEAN_CUP_2026: { cup: string[][]; challenge: string[][] } = {
+  cup: [
+    ["IDN", "MAS", "SGP", "BAN"],
+    ["THA", "VIE", "PHI", "PAK"],
+  ],
+  challenge: [
+    ["HKG", "LAO", "BRU"],
+    ["CAM", "MYA", "TLS"],
+  ],
+}
+
+/**
  * Hosts of tournaments already awarded. Later editions are awarded in-game. The
  * order matters: hosts head groups A, B, C… and the first plays the opening match
  * (2030: the centenary opener in Montevideo).
@@ -108,6 +125,8 @@ export const AWARDED_HOSTS: Record<string, string[]> = {
   "afcon-2027": ["KEN", "TAN", "UGA"],
   "asian-cup-2027": ["KSA"],
   "gulf-cup-2026": ["KSA"],
+  "asean-cup-2026": ["IDN"],
+  "asean-challenge-2026": ["HKG"],
   "arab-cup-2029": ["QAT"],
   "arab-cup-2033": ["QAT"],
 }

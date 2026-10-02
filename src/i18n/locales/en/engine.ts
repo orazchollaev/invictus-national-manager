@@ -309,6 +309,7 @@ const engine = {
     final: "Final",
     finals: "Finals",
     "third-place": "Third place",
+    "bronze-final": "Bronze final",
     "group-stage": "Group stage",
     "knockout-stage": "Knockout stage",
     "league-phase": "League phase",
@@ -454,6 +455,16 @@ const engine = {
       name: "ASEAN Championship {year}",
       short: "ASEAN Championship",
       plain: "ASEAN Championship",
+    },
+    "asean-cup": {
+      name: "ASEAN Cup {year}",
+      short: "ASEAN Cup",
+      plain: "ASEAN Cup",
+    },
+    "asean-challenge": {
+      name: "ASEAN Challenge Cup {year}",
+      short: "ASEAN Challenge Cup",
+      plain: "ASEAN Challenge Cup",
     },
     e1: {
       name: "EAFF E-1 Championship {year}",

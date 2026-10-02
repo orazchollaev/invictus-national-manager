@@ -223,7 +223,10 @@ export function zonesFor(
       return z("advance", "maybe")
     case "wafu":
     case "cafa":
+    case "asean-challenge":
       return z("advance")
+    case "asean-cup":
+      return z("advance", "maybe")
 
     // Round-robin tournaments: the table is the result.
     case "e1":
