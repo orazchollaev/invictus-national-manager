@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.0.4](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.3...v0.0.4) (2026-10-02)
+
+### 🚀 New Features
+
+- **calendar:** list matches newest first ([12018de](https://github.com/orazchollaev/invictus-national-manager/commit/12018de92dd66f504c1efbf6be05f87bf1f1a685))
+- **career:** allow the manager to resign ([f754c09](https://github.com/orazchollaev/invictus-national-manager/commit/f754c098722e91dd8d920abd96225e295953309a))
+- **clubs:** use real clubs with slightly changed names ([1f492ae](https://github.com/orazchollaev/invictus-national-manager/commit/1f492ae1266c549cc28dcb3dd996c3d5752ccf95))
+- **competitions:** explain UEFA's six-match group format ([ffca1c5](https://github.com/orazchollaev/invictus-national-manager/commit/ffca1c5c63adea814c9f1e9e943fa8035d2f2e9d))
+- **competitions:** hide the best-placed ranking behind a button ([72848e0](https://github.com/orazchollaev/invictus-national-manager/commit/72848e0f13e210d3bbc91338e2bb95e34cdf4375))
+- **competitions:** show who is through or out and the best-placed table ([fd1ce23](https://github.com/orazchollaev/invictus-national-manager/commit/fd1ce23e296b7644d7645823af04187a9b6270a0))
+- **engine:** track ball side, lane and depth each minute ([92a5f25](https://github.com/orazchollaev/invictus-national-manager/commit/92a5f255bc52bced0cf01a0c895ae2c1222308b6))
+- **home:** always show five matches in the strip ([90282eb](https://github.com/orazchollaev/invictus-national-manager/commit/90282eba7f0a8bde60ee199841fb813dcfb4c520))
+- **home:** keep next match and last group visible between competitions ([f29d051](https://github.com/orazchollaev/invictus-national-manager/commit/f29d05164daf1f82c8a224f524adaddcc7787c06))
+- **home:** simplify home page and add federation page ([2e5a64c](https://github.com/orazchollaev/invictus-national-manager/commit/2e5a64c848abbb9f1126f10abd624c8c34355e07))
+- **i18n:** move all text to keys, add Portuguese and a language setting ([7b5cf1c](https://github.com/orazchollaev/invictus-national-manager/commit/7b5cf1c43a843f0f405fc98dca9103d1bfddaf03))
+- **match:** attack lanes with arrows in the feed and zones in the stats ([15b1a30](https://github.com/orazchollaev/invictus-national-manager/commit/15b1a301f7ae1303f87da81ed15fa8472bd15d67))
+- **match:** rebuild live screen with narration, ball pitch, key events and pressure bar ([60052d5](https://github.com/orazchollaev/invictus-national-manager/commit/60052d57819397aea8f9d5c027316c301ed9e81c))
+- **match:** scouting report and assistant advice before each match ([d082fe5](https://github.com/orazchollaev/invictus-national-manager/commit/d082fe514199c668c8f2c68c26bbd23774597421))
+- **match:** small strength boost for tournament hosts ([f91ab69](https://github.com/orazchollaev/invictus-national-manager/commit/f91ab69c214a470e84500714a1f2a68308f81cf3))
+- **menu:** show the app version on the main menu ([a368491](https://github.com/orazchollaev/invictus-national-manager/commit/a368491104a5eefae169c1cf155b714e0e60931a))
+- **mods:** add mod editor and custom game data ([8b81b15](https://github.com/orazchollaev/invictus-national-manager/commit/8b81b1542f1b08f72b7aaf5d166a09e6d487e5fd))
+- **nations:** add honours tab with past tournament finishes ([dfb1334](https://github.com/orazchollaev/invictus-national-manager/commit/dfb1334e5b6388c186dfb7fb4a72bc1d49d90c86))
+- **players:** add real players with slightly changed names ([55f0294](https://github.com/orazchollaev/invictus-national-manager/commit/55f029482817cd92a53ce9b88ffe1f064d71c586))
+- **players:** archetypes and badges that shape the match ([4862e4e](https://github.com/orazchollaev/invictus-national-manager/commit/4862e4e4e381d0d1b79d2ef04628101b8f9b1d0a))
+- **report:** add a sticky continue button ([a30e770](https://github.com/orazchollaev/invictus-national-manager/commit/a30e770e62f868704000a41b23e945bf756b8ac6))
+- **settings:** drop the 10x live match speed ([09ecb67](https://github.com/orazchollaev/invictus-national-manager/commit/09ecb678d73d47169671ad5630e328bec90b2ed6))
+- **squad:** chemistry and bonds between players ([172bd7b](https://github.com/orazchollaev/invictus-national-manager/commit/172bd7b3eeeaf0cc425d3372498d304fb83df3d1))
+- **tactics:** roles, team instructions and matchups ([4c26dc9](https://github.com/orazchollaev/invictus-national-manager/commit/4c26dc90af94f49c7051225711c957efa2687594))
+
+### 🐛 Bug Fixes
+
+- **asian-cup:** keep third-round replacements out of Asian Cup qualifying ([1a64dea](https://github.com/orazchollaev/invictus-national-manager/commit/1a64dea8539a91123d5926b937ebe74289e4dea3))
+- **career:** hold contracts and offers until finals end ([51b6b2d](https://github.com/orazchollaev/invictus-national-manager/commit/51b6b2d16ca6c45a9465f3a9fa61d9b535ebc44e))
+- **competitions:** fewer European Qualifiers play-off ties ([191c2c0](https://github.com/orazchollaev/invictus-national-manager/commit/191c2c0c3b12f70815e0ac6c903d2f1a28062079))
+- **competitions:** rotate hosts and pick neighbouring co-hosts ([9ae0374](https://github.com/orazchollaev/invictus-national-manager/commit/9ae0374c8cbb3de8b01da24ca1893dd04f69e24a))
+- **competitions:** spread hosted tournaments over days and stop repeat hosts ([fb8b350](https://github.com/orazchollaev/invictus-national-manager/commit/fb8b350948209915cde32a6c171168ca47607528))
+- **draw:** balance home and away runs, keep confederations apart, news on progress ([03df4e8](https://github.com/orazchollaev/invictus-national-manager/commit/03df4e8bbf1797ae42840b25bf33bfdc5ec7c730))
+- **match:** pin the pre-match buttons to the bottom of the screen ([2b42e8f](https://github.com/orazchollaev/invictus-national-manager/commit/2b42e8fbbc21b857699cd06cb72eb383de31acf4))
+- **match:** scroll the substitution sheet and show who goes off ([cf2efd8](https://github.com/orazchollaev/invictus-national-manager/commit/cf2efd8b96a4f169d5934ae345d269218489373d))
+- **more:** match the action buttons to the menu links ([5dc3117](https://github.com/orazchollaev/invictus-national-manager/commit/5dc3117eecd7707e75b0a978f263e1d0cc15b4fb))
+- **players:** slightly weaker youth intake for African nations ([28dc7de](https://github.com/orazchollaev/invictus-national-manager/commit/28dc7de7844150a2a34a43f9338d297befd87c89))
+- **qualifying:** take group entrants from the preliminary round's draw ([bd514d1](https://github.com/orazchollaev/invictus-national-manager/commit/bd514d1becb1e62372cc7a9eeb3dc440a045b177))
+- **world:** stop the same friendly opponents repeating ([c6c6b06](https://github.com/orazchollaev/invictus-national-manager/commit/c6c6b06b10f2158db6fd86a2b3c56cbd9e9be712))
+- **zones:** shift European qualifying places down past hosts ([f997429](https://github.com/orazchollaev/invictus-national-manager/commit/f99742922d95cb50aed61357adbb92f72c9832d4))
+
+### 🔧 Maintenance
+
+- bump gradle ([19e23cb](https://github.com/orazchollaev/invictus-national-manager/commit/19e23cb5f35e6925eaac0f2c3594e9e8986ba2e2))
+- merge ([2755d2f](https://github.com/orazchollaev/invictus-national-manager/commit/2755d2f8d7e95d9dc41ec47b3817d529230058f2))
+
+### ✅ Tests
+
+- **career:** count only World Cup call-ups before August ([419c649](https://github.com/orazchollaev/invictus-national-manager/commit/419c649b4dc17027f149ab642011598af9ae678a))
+
 ## [0.0.3](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.2...v0.0.3) (2026-09-30)
 
 ### 🚀 New Features
