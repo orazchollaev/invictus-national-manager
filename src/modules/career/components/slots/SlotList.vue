@@ -65,6 +65,7 @@ async function remove(n: number) {
             <span class="slot-title">{{ meta.managerName }}</span>
             <span class="slot-sub">
               {{ nationLabel(meta.nationId) }} · {{ formatDate(meta.date) }}
+              <template v-if="meta.modName">· {{ meta.modName }}</template>
             </span>
           </span>
         </template>

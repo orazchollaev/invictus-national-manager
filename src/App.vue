@@ -24,6 +24,7 @@ const FULLSCREEN = [
   /^\/new$/,
   /^\/menu$/,
   /^\/load$/,
+  /^\/mods/,
   /^\/squad\/callup$/,
   /^\/draw\//,
 ]

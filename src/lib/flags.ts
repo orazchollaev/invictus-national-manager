@@ -17,3 +17,8 @@ for (const path in raws) {
 export function flagUrl(code: string | undefined | null): string | undefined {
   return code ? urls[code.toLowerCase()] : undefined
 }
+
+/** Every flag code there is a picture for, for pickers. */
+export function flagCodes(): string[] {
+  return Object.keys(urls).sort()
+}

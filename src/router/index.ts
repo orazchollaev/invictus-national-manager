@@ -27,6 +27,8 @@ const router = createRouter({
     { path: "/load", component: () => import("../modules/career/pages/LoadGamePage.vue") },
     { path: "/saves", redirect: "/load" },
     { path: "/new", component: () => import("../modules/career/pages/NewGamePage.vue") },
+    { path: "/mods", component: () => import("../modules/mods/pages/ModsPage.vue") },
+    { path: "/mods/:id", component: () => import("../modules/mods/pages/ModEditorPage.vue") },
     { path: "/home", component: () => import("../modules/core/pages/HomePage.vue") },
     { path: "/career", component: () => import("../modules/career/pages/CareerPage.vue") },
     {
@@ -90,7 +92,7 @@ const router = createRouter({
 
 // Every game screen needs a loaded world: resume the last save, or pick one.
 router.beforeEach(async (to) => {
-  if (OPEN.has(to.path)) return true
+  if (OPEN.has(to.path) || to.path.startsWith("/mods")) return true
   const world = useWorldStore()
   if (world.world) return true
   const ok = await world.resume()

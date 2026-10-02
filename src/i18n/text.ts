@@ -2,6 +2,7 @@ import nations from "@/data/nations.json"
 import { placeholderText, isPlaceholder } from "@/engine/competition/placeholders"
 import { compText, type Msg, type MsgParam, type Text } from "@/engine/text"
 import { formatDate } from "./dates"
+import { nationDef } from "@/modules/world/services/statics"
 import { i18n } from "./index"
 
 const slug = (s: string) =>
@@ -23,15 +24,20 @@ function stageName(name: string): string {
   return name
 }
 
-const DEFS = new Map(nations.map((n) => [n.id, n]))
+const BASE = new Map(nations.map((n) => [n.id, n]))
 const displayNames = new Map<string, Intl.DisplayNames>()
 
-/** A nation's name in the language being played, from its flag's region (English where it has none). */
+/**
+ * A nation's name in the language being played, from its flag's region (English where
+ * it has none). A nation whose name or flag a mod changed keeps its name in every language.
+ */
 export function nationName(id: string | null | undefined): string {
   if (!id) return ""
   if (isPlaceholder(id)) return resolveText(placeholderText(id))
-  const def = DEFS.get(id)
+  const def = nationDef(id)
   if (!def) return id
+  const base = BASE.get(id)
+  if (def.name !== base?.name || def.flag !== base.flag) return def.name
   const locale = i18n.global.locale.value
   if (locale === "en" || !/^[a-z]{2}$/.test(def.flag)) return def.name
   let names = displayNames.get(locale)

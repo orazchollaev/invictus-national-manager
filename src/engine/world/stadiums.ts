@@ -115,9 +115,9 @@ export function initialStadiums(
   reputation: number,
   date: ISODate
 ): { stadiums: Stadium[]; projects: StadiumProject[] } {
-  const rows = STADIUMS[def.id]
-  const stadiums: Stadium[] = rows
-    ? rows.map((r, i) => ({ id: `${def.id}-s${i}`, ...parse(r) }))
+  const rows = def.grounds ?? STADIUMS[def.id]?.map(parse)
+  const stadiums: Stadium[] = rows?.length
+    ? rows.map((r, i) => ({ id: `${def.id}-s${i}`, ...r }))
     : [
         {
           id: `${def.id}-s0`,
@@ -155,7 +155,7 @@ function nextId(n: NationState, prefix: "s" | "p"): string {
 /** Cities with a ground, then towns without one yet. */
 export function citiesOf(n: NationState): string[] {
   const own = [...new Set((n.stadiums ?? []).map((s) => s.city))]
-  return [...own, ...(CITIES[n.id] ?? []).filter((c) => !own.includes(c))]
+  return [...own, ...(n.cities ?? CITIES[n.id] ?? []).filter((c) => !own.includes(c))]
 }
 
 const NEW_NAMES = ["{c} Arena", "New {c} Stadium", "{c} Olympic Stadium", "{c} Municipal Stadium"]

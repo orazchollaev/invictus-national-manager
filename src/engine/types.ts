@@ -118,4 +118,11 @@ export interface NationDef {
   nonFifa?: "confederation" | "regional"
   /** Naming cultures its players are drawn from, with weights. */
   cultures: [string, number][]
+  /**
+   * Grounds on the start date, set by a mod; without them the bundled ones
+   * (src/data/stadiums.ts) are used.
+   */
+  grounds?: { city: string; name: string; capacity: number }[]
+  /** Towns where new grounds can go, set by a mod (else the bundled CITIES). */
+  cities?: string[]
 }

@@ -10,8 +10,17 @@ import { acceptOffer, declineOffer, resign, setAmbition } from "@/engine/career/
 import { pickSquad } from "@/engine/ai/squad"
 import { randomSeed } from "@/engine/rng"
 import { START_DATE } from "@/data/start"
-import { loadSlot, saveSlot, activeSlot } from "./services/saves"
-import { startingPlayers, statics } from "./services/statics"
+import {
+  loadSlot,
+  saveSlot,
+  activeSlot,
+  loadSlotStatics,
+  setSlotStatics,
+  type SlotStatics,
+} from "./services/saves"
+import { setActiveNations, startingPlayers, statics } from "./services/statics"
+import { loadMod } from "@/modules/mods/services/mods"
+import { clubsFromRows } from "@/engine/world/create"
 import { useSettingsStore } from "@/modules/settings/store"
 import { daysBetween } from "@/engine/calendar/dates"
 import { i18n } from "@/i18n"
@@ -31,6 +40,8 @@ export const useWorldStore = defineStore(
     const busy = ref(false)
     const busyLabel = ref("")
     const interrupt = ref<Interrupt>({ kind: "none" })
+    /** The mod the loaded career runs on, or null for the bundled dataset. */
+    const mod = shallowRef<SlotStatics | null>(null)
 
     function touch() {
       tick.value++
@@ -51,7 +62,9 @@ export const useWorldStore = defineStore(
     const date = derive((w) => w.state.date, "")
     const me = derive((w) => w.state.career.nationId, null as string | null)
 
-    function adopt(w: World, n: number) {
+    function adopt(w: World, n: number, from: SlotStatics | null) {
+      mod.value = from
+      setActiveNations(from?.nations ?? null)
       markRaw(w)
       markRaw(w.state)
       world.value = w
@@ -68,15 +81,28 @@ export const useWorldStore = defineStore(
         /** null: start out of work, with `reputation` deciding who calls. */
         nationId: string | null
         reputation?: number
+        /** Start from a mod instead of the bundled dataset. */
+        modId?: string | null
       }
     ) {
       busy.value = true
       busyLabel.value = i18n.global.t("world.building")
       await nextFrame()
       try {
-        const rows = await startingPlayers()
-        const w = createWorld({ seed: randomSeed(), start: START_DATE, ...opts }, statics(), rows)
-        adopt(w, n)
+        const { modId, ...rest } = opts
+        const data = modId ? await loadMod(modId) : null
+        if (modId && !data) throw new Error(`mod ${modId} not found`)
+        const from: SlotStatics | null = data
+          ? { modName: data.name, nations: data.nations, clubs: clubsFromRows(data.clubs) }
+          : null
+        const rows = data ? data.players : await startingPlayers()
+        const w = createWorld(
+          { seed: randomSeed(), start: START_DATE, ...rest },
+          from ?? statics(),
+          rows
+        )
+        await setSlotStatics(n, from)
+        adopt(w, n, from)
         await save()
       } finally {
         busy.value = false
@@ -90,7 +116,8 @@ export const useWorldStore = defineStore(
       try {
         const s = await loadSlot(n)
         if (!s) return false
-        adopt(new World(s, statics()), n)
+        const from = await loadSlotStatics(n)
+        adopt(new World(s, from ?? statics()), n, from)
         savedOn = s.date
         return true
       } finally {
@@ -109,7 +136,7 @@ export const useWorldStore = defineStore(
 
     async function save() {
       if (!world.value || slot.value === null) return
-      await saveSlot(slot.value, world.value.state)
+      await saveSlot(slot.value, world.value.state, mod.value?.modName)
       savedOn = world.value.state.date
     }
 
@@ -208,6 +235,8 @@ export const useWorldStore = defineStore(
     function discard() {
       world.value = null
       slot.value = null
+      mod.value = null
+      setActiveNations(null)
       touch()
     }
 
@@ -334,6 +363,8 @@ export const useWorldStore = defineStore(
     function close() {
       world.value = null
       slot.value = null
+      mod.value = null
+      setActiveNations(null)
       touch()
     }
 
@@ -344,6 +375,7 @@ export const useWorldStore = defineStore(
       busy,
       busyLabel,
       interrupt,
+      mod,
       state,
       date,
       me,

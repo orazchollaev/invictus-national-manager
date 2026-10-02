@@ -2,7 +2,7 @@
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { flagUrl } from "@/lib/flags"
-import { NATION_DEFS } from "@/modules/world/services/statics"
+import { nationDef } from "@/modules/world/services/statics"
 import { isPlaceholder, placeholderText } from "@/engine/competition/placeholders"
 import { nationName, resolveText } from "@/i18n/text"
 
@@ -20,7 +20,7 @@ const props = withDefaults(
 
 const { t } = useI18n()
 
-const def = computed(() => NATION_DEFS.find((n) => n.id === props.id))
+const def = computed(() => nationDef(props.id))
 /** A place still to be decided in a draw ("UEFA play-off Path A winner"). */
 const pending = computed(() => isPlaceholder(props.id))
 const label = computed(() => {

@@ -1,0 +1,116 @@
+<script setup lang="ts">
+import { computed, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
+import { Plus } from "@lucide/vue"
+import { AppButton, AppPagination, AppSearchInput, AppSelect } from "@/components/ui"
+import { POSITIONS } from "@/engine/types"
+import { START_DATE } from "@/data/start"
+import { useModsStore } from "@/modules/mods/store"
+import { ageOn, editFromRow, type PlayerEdit } from "@/modules/mods/utils/format"
+import PlayerSheet from "./PlayerSheet.vue"
+
+const PAGE_SIZE = 50
+const ALL = "ALL"
+
+const { t } = useI18n()
+const store = useModsStore()
+
+const query = ref("")
+const nation = ref(ALL)
+const pos = ref(ALL)
+const page = ref(1)
+const editing = ref<PlayerEdit | null>(null)
+
+const nationOptions = store.derive(
+  (m) => [
+    { value: ALL, label: t("mods.player.allNations") },
+    ...[...m.nations]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((n) => ({ value: n.id, label: n.name })),
+  ],
+  []
+)
+const posOptions = computed(() => [
+  { value: ALL, label: t("mods.player.allPositions") },
+  ...POSITIONS.map((p) => ({ value: p, label: p })),
+])
+const clubNames = store.derive((m) => new Map(m.clubs.map((c) => [c[0], c[1]])), new Map())
+
+const fold = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+
+const filtered = computed(() => {
+  const q = fold(query.value.trim())
+  return store.allPlayers
+    .filter(
+      ({ nationId, row }) =>
+        (nation.value === ALL || nationId === nation.value) &&
+        (pos.value === ALL || row[4] === pos.value) &&
+        (!q || fold(`${row[1]} ${row[2]}`).includes(q))
+    )
+    .sort((a, b) => b.row[7] - a.row[7])
+})
+
+const shown = computed(() =>
+  filtered.value.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE)
+)
+
+watch([query, nation, pos], () => (page.value = 1))
+
+function add() {
+  const id = nation.value === ALL ? store.mod?.nations[0]?.id : nation.value
+  if (id) editing.value = store.newPlayer(id)
+}
+</script>
+
+<template>
+  <div class="panel">
+    <AppSearchInput v-model="query" :placeholder="t('mods.search')" />
+    <div class="toolbar">
+      <div class="grow"><AppSelect v-model="nation" :options="nationOptions" searchable /></div>
+      <div class="pos-filter"><AppSelect v-model="pos" :options="posOptions" /></div>
+    </div>
+    <div class="toolbar">
+      <span class="count grow">
+        {{ t("mods.player.count", { n: filtered.length.toLocaleString() }) }}
+      </span>
+      <AppButton size="sm" variant="filled" @click="add">
+        <Plus :size="14" />
+        {{ t("mods.player.add") }}
+      </AppButton>
+    </div>
+    <div class="list">
+      <button
+        v-for="{ nationId, row } in shown"
+        :key="row[0]"
+        class="row"
+        @click="editing = editFromRow(nationId, row)"
+      >
+        <span class="row-pos">{{ row[4] }}</span>
+        <span class="row-main">
+          <span class="row-title">{{ row[1] }} {{ row[2] }}</span>
+          <span class="row-sub">
+            {{ nationId }} · {{ t("mods.player.age", { n: ageOn(row[3], START_DATE) }) }} ·
+            {{ clubNames.get(row[10]) ?? row[10] }}
+          </span>
+        </span>
+        <span class="row-sub">{{ row[8] }}</span>
+        <span class="row-value">{{ Math.round(row[7]) }}</span>
+      </button>
+    </div>
+    <AppPagination v-model="page" :total-items="filtered.length" :page-size="PAGE_SIZE" />
+    <PlayerSheet v-if="editing" :player="editing" @close="editing = null" />
+  </div>
+</template>
+
+<style scoped>
+.pos-filter {
+  width: 130px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+</style>
+<style scoped src="./editor.css"></style>

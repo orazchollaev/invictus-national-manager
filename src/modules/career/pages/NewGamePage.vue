@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
 import {
@@ -14,10 +14,12 @@ import {
 import { PageShell, StickyCta } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { SlotList } from "@/modules/career/components/slots"
-import { NATION_DEFS } from "@/modules/world/services/statics"
+import { NATION_DEFS, setActiveNations } from "@/modules/world/services/statics"
+import { listMods, loadMod } from "@/modules/mods/services/mods"
+import type { ModMeta } from "@/modules/mods/utils/format"
 import { nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
-import { CONFEDS, type Confed } from "@/engine/types"
+import { CONFEDS, type Confed, type NationDef } from "@/engine/types"
 
 const { t } = useI18n()
 const route = useRoute()
@@ -63,20 +65,55 @@ const reputationHint = computed(
   () => REPUTATIONS.value.find((r) => r.value === reputation.value)?.hint
 )
 
-const byPoints = [...NATION_DEFS].filter((n) => !n.banned).sort((a, b) => b.points - a.points)
-const strengthOf = new Map(byPoints.map((n, i) => [n.id, i + 1]))
+/** The dataset the career starts from: the original, or a mod. */
+const ORIGINAL = "original"
+const mods = ref<ModMeta[]>([])
+const dataset = ref<string>(typeof route.query.mod === "string" ? route.query.mod : ORIGINAL)
+const nations = shallowRef<NationDef[]>(NATION_DEFS)
+
+const datasetOptions = computed(() => [
+  { value: ORIGINAL, label: t("career.newGame.original") },
+  ...mods.value.map((m) => ({ value: m.id, label: m.name })),
+])
+
+async function pickDataset(id: string) {
+  dataset.value = id
+  const mod = id === ORIGINAL ? null : await loadMod(id)
+  if (dataset.value !== id) return
+  if (id !== ORIGINAL && !mod) dataset.value = ORIGINAL
+  nations.value = mod?.nations ?? NATION_DEFS
+  // Flags and names on this screen follow the chosen data.
+  setActiveNations(mod?.nations ?? null)
+  if (chosen.value && !nations.value.some((n) => n.id === chosen.value && !n.banned))
+    chosen.value = null
+}
+
+onMounted(async () => {
+  mods.value = await listMods()
+  if (dataset.value !== ORIGINAL) await pickDataset(dataset.value)
+})
+
+// Leaving without starting: back to the data of whatever career is loaded.
+onUnmounted(() => setActiveNations(world.mod?.nations ?? null))
+
+const byPoints = computed(() =>
+  [...nations.value].filter((n) => !n.banned).sort((a, b) => b.points - a.points)
+)
+const strengthOf = computed(() => new Map(byPoints.value.map((n, i) => [n.id, i + 1])))
 /** FIFA ranking position; teams outside FIFA have none. */
-const rankOf = new Map(byPoints.filter((n) => !n.nonFifa).map((n, i) => [n.id, i + 1]))
+const rankOf = computed(
+  () => new Map(byPoints.value.filter((n) => !n.nonFifa).map((n, i) => [n.id, i + 1]))
+)
 
 const nationalityOptions = computed(() =>
-  [...NATION_DEFS]
+  [...nations.value]
     .map((n) => ({ value: n.id, label: nationName(n.id) }))
     .sort((a, b) => a.label.localeCompare(b.label))
 )
 
 const list = computed(() => {
   const q = query.value.trim().toLowerCase()
-  return byPoints.filter((n) =>
+  return byPoints.value.filter((n) =>
     q
       ? n.name.toLowerCase().includes(q) || nationName(n.id).toLowerCase().includes(q)
       : n.confed === confed.value
@@ -85,7 +122,7 @@ const list = computed(() => {
 
 /** Stars for how big a job it is, from the team's strength. */
 function stars(id: string) {
-  const r = strengthOf.get(id) ?? byPoints.length
+  const r = strengthOf.value.get(id) ?? byPoints.value.length
   return r <= 10 ? 5 : r <= 30 ? 4 : r <= 70 ? 3 : r <= 130 ? 2 : 1
 }
 
@@ -125,6 +162,7 @@ async function start() {
     nationality: nationality.value,
     nationId: free ? null : chosen.value,
     reputation: free ? Number(reputation.value) : undefined,
+    modId: dataset.value === ORIGINAL ? null : dataset.value,
   })
   router.replace("/home")
 }
@@ -136,6 +174,22 @@ async function start() {
 
     <template v-else-if="step === 1">
       <AppCard padding="md" class="form">
+        <AppField :label="t('career.newGame.dataset')" layout="stack">
+          <div class="dataset">
+            <div class="dataset-select">
+              <AppSelect
+                style="width: 100%"
+                :model-value="dataset"
+                :options="datasetOptions"
+                @update:model-value="pickDataset"
+              />
+            </div>
+            <AppButton variant="text" size="sm" @click="router.push('/mods')">
+              {{ t("career.newGame.editMods") }}
+            </AppButton>
+          </div>
+        </AppField>
+        <!-- <p class="hint">{{ t("career.newGame.datasetHint") }}</p> -->
         <AppField :label="t('career.newGame.yourName')" layout="stack">
           <input
             v-model="name"
@@ -238,6 +292,22 @@ async function start() {
   margin: 0;
   font-size: var(--fs-sm);
   color: var(--text-muted);
+}
+
+.dataset {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+
+  :deep(.asel-trigger) {
+    width: 100%;
+  }
+}
+
+.dataset-select {
+  flex: 1;
+  min-width: 0;
 }
 
 .select-nation {

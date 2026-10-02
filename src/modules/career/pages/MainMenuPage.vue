@@ -2,12 +2,12 @@
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
-import { FolderOpen, Play, Plus, Settings } from "@lucide/vue"
+import { FolderOpen, Play, Plus, Settings, Wrench } from "@lucide/vue"
 import { AppLogo } from "@/components/layout"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { activeSlot, listSlots, type SlotMeta } from "@/modules/world/services/saves"
 import { useWorldStore } from "@/modules/world/store"
-import { NATION_DEFS } from "@/modules/world/services/statics"
+import { nationDef } from "@/modules/world/services/statics"
 import { formatDate } from "@/i18n/dates"
 
 const { t } = useI18n()
@@ -23,7 +23,7 @@ onMounted(async () => {
   last.value = (n && slots[n - 1]) || slots.find(Boolean) || null
 })
 
-const lastNation = computed(() => NATION_DEFS.find((n) => n.id === last.value?.nationId))
+const lastNation = computed(() => nationDef(last.value?.nationId))
 
 async function resume() {
   if (!last.value) return
@@ -67,6 +67,13 @@ async function resume() {
           <span class="item-hint">{{ t("career.menu.loadGameHint") }}</span>
         </span>
       </button>
+      <button class="item" @click="router.push('/mods')">
+        <Wrench :size="22" />
+        <span class="item-text">
+          <span class="item-label">{{ t("career.menu.mods") }}</span>
+          <span class="item-hint">{{ t("career.menu.modsHint") }}</span>
+        </span>
+      </button>
       <button class="item" @click="router.push('/settings')">
         <Settings :size="22" />
         <span class="item-text">
@@ -80,13 +87,11 @@ async function resume() {
 
 <style scoped>
 .menu {
-  /* Viewport minus what <html> pads on top and the no-nav spacer adds below;
-     a plain 100vh overflows by both insets and scrolls on Android. */
   min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
   min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
   max-width: 480px;
   margin: 0 auto;
-  padding: calc(var(--safe-top) + var(--sp-7)) var(--sp-4) calc(var(--safe-bottom) + var(--sp-5));
+  padding: calc(var(--safe-top) + var(--sp-5)) var(--sp-4) calc(var(--safe-bottom) + var(--sp-5));
   display: flex;
   flex-direction: column;
   justify-content: space-between;

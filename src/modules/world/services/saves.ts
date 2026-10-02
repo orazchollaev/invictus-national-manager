@@ -4,6 +4,7 @@
  */
 import { del, get, set } from "idb-keyval"
 import type { WorldState } from "@/engine/world/types"
+import type { WorldStatics } from "@/engine/world/world"
 
 export const SLOT_COUNT = 3
 
@@ -14,10 +15,13 @@ export interface SlotMeta {
   date: string
   savedAt: number
   version: number
+  /** The mod the career was started from, if any. */
+  modName?: string
 }
 
 const dataKey = (n: number) => `ntm:slot:${n}`
 const metaKey = (n: number) => `ntm:slot:${n}:meta`
+const staticsKey = (n: number) => `ntm:slot:${n}:statics`
 const ACTIVE_KEY = "ntm:active"
 
 export async function listSlots(): Promise<(SlotMeta | null)[]> {
@@ -27,8 +31,9 @@ export async function listSlots(): Promise<(SlotMeta | null)[]> {
   return out
 }
 
-export async function saveSlot(n: number, state: WorldState): Promise<void> {
+export async function saveSlot(n: number, state: WorldState, modName?: string): Promise<void> {
   const meta: SlotMeta = {
+    ...(modName ? { modName } : {}),
     slot: n,
     managerName: state.career.managerName,
     nationId: state.career.nationId,
@@ -51,9 +56,29 @@ export async function loadSlot(n: number): Promise<WorldState | null> {
 export async function deleteSlot(n: number): Promise<void> {
   await del(dataKey(n))
   await del(metaKey(n))
+  await del(staticsKey(n))
   if ((await get(ACTIVE_KEY)) === n) await del(ACTIVE_KEY)
 }
 
 export async function activeSlot(): Promise<number | null> {
   return ((await get(ACTIVE_KEY)) as number | undefined) ?? null
+}
+
+/** A career started from a mod keeps the mod's nations and clubs beside its world. */
+export interface SlotStatics extends WorldStatics {
+  modName: string
+}
+
+/**
+ * Write (or, with null, clear) the dataset a slot's career runs on. Called once when
+ * a career begins, before its first save.
+ */
+export async function setSlotStatics(n: number, statics: SlotStatics | null): Promise<void> {
+  if (statics) await set(staticsKey(n), JSON.stringify(statics))
+  else await del(staticsKey(n))
+}
+
+export async function loadSlotStatics(n: number): Promise<SlotStatics | null> {
+  const raw = (await get(staticsKey(n))) as string | undefined
+  return raw ? (JSON.parse(raw) as SlotStatics) : null
 }

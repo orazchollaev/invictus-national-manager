@@ -35,6 +35,8 @@ export interface NationState {
   stadiums?: Stadium[]
   /** Grounds being built or expanded. */
   projects?: StadiumProject[]
+  /** Towns for new grounds when a mod named its own (else the bundled CITIES). */
+  cities?: string[]
 }
 
 export interface Stadium {

@@ -1765,5 +1765,6 @@ export function initialNationState(
     stadium: grounds.stadiums.length ? stadiumLevel(grounds.stadiums) : initialStadium(reputation),
     stadiums: grounds.stadiums,
     projects: grounds.projects,
+    ...(def.cities ? { cities: def.cities } : {}),
   }
 }
