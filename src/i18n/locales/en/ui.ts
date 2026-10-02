@@ -349,6 +349,10 @@ export default {
       watchDraw: "Watch the draw",
       notDrawn: "Not drawn yet",
       drawOn: "The draw is on {date}.",
+      formatSix:
+        "Six matches against five opponents: once against each team from the other pots, home and away against the team from your own pot.",
+      formatTwelve:
+        "Six matches against six of the eleven opponents: two from each pot, three at home and three away.",
       hide: "Hide matches",
       show: "Show matches",
       advance: "advance",

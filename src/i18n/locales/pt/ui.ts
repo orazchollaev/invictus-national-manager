@@ -352,6 +352,10 @@ const pt: typeof en = {
       watchDraw: "Assistir ao sorteio",
       notDrawn: "Ainda não sorteado",
       drawOn: "O sorteio será em {date}.",
+      formatSix:
+        "Seis partidas contra cinco adversários: uma vez contra cada seleção dos outros potes, ida e volta contra a seleção do seu próprio pote.",
+      formatTwelve:
+        "Seis partidas contra seis dos onze adversários: dois de cada pote, três em casa e três fora.",
       hide: "Ocultar partidas",
       show: "Mostrar partidas",
       advance: "avança",

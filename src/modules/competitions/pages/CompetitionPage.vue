@@ -12,6 +12,7 @@ import { competitionDef } from "@/engine/competition/defs"
 import { formatDate } from "@/i18n/dates"
 import type { Fixture, StageState, Tie } from "@/engine/competition/types"
 import { bestPlaced, groupView } from "@/modules/competitions/utils/groupView"
+import { formatNote } from "@/modules/competitions/utils/formatNote"
 import { AWARDED_HOSTS } from "@/data/start"
 
 const { t } = useI18n()
@@ -98,6 +99,11 @@ const best = computed(() => {
   const c = inst.value
   return w && s?.groups && c && s.status !== "waiting" ? bestPlaced(c, s, w.ctx()) : null
 })
+
+/** How a group format works where not everyone plays everyone. */
+const note = computed(() =>
+  inst.value && stage.value ? formatNote(inst.value, stage.value) : null
+)
 
 const fx = (id: string) => world.world?.state.fixtures[id]
 const groupFixtures = (ids: string[]) =>
@@ -223,6 +229,7 @@ function advance(tie: Tie) {
     />
 
     <template v-else-if="stage.groups">
+      <p v-if="note" class="note">{{ t(note) }}</p>
       <StandingsTable
         v-if="best"
         :rows="best.rows"
@@ -331,6 +338,12 @@ function advance(tie: Tie) {
 }
 
 .muted {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.note {
+  margin: 0;
   color: var(--text-muted);
   font-size: var(--fs-sm);
 }
