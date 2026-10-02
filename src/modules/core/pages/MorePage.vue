@@ -122,8 +122,22 @@ async function saveAndExit() {
   border-bottom: 1px solid var(--border-light);
   background: none;
   color: var(--text);
+  border-radius: 0;
+  font: inherit;
   text-decoration: none;
   text-align: start;
+}
+
+/* The buttons drop the global button look so they read like the links above. */
+button.item:hover {
+  border-color: var(--border-light);
+  background: none;
+  color: var(--text);
+  box-shadow: none;
+}
+
+button.item:active:not(:disabled) {
+  transform: none;
 }
 
 .icon {
