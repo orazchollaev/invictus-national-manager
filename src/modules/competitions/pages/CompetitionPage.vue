@@ -99,6 +99,9 @@ const best = computed(() => {
   const c = inst.value
   return w && s?.groups && c && s.status !== "waiting" ? bestPlaced(c, s, w.ctx()) : null
 })
+/** Hidden until asked for: shown first, it reads as if it were one of the groups. */
+const showBest = ref(false)
+watch(stageKey, () => (showBest.value = false))
 
 /** How a group format works where not everyone plays everyone. */
 const note = computed(() =>
@@ -230,8 +233,16 @@ function advance(tie: Tie) {
 
     <template v-else-if="stage.groups">
       <p v-if="note" class="note">{{ t(note) }}</p>
-      <StandingsTable
+      <AppButton
         v-if="best"
+        :variant="showBest ? 'tonal' : 'outlined'"
+        class="best-toggle"
+        @click="showBest = !showBest"
+      >
+        {{ t(best.title) }}
+      </AppButton>
+      <StandingsTable
+        v-if="best && showBest"
         :rows="best.rows"
         :title="t(best.title)"
         :cut="best.places"
@@ -346,6 +357,10 @@ function advance(tie: Tie) {
   margin: 0;
   color: var(--text-muted);
   font-size: var(--fs-sm);
+}
+
+.best-toggle {
+  align-self: flex-start;
 }
 
 .group {
