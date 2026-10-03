@@ -288,6 +288,16 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
       })
       return plans
     },
+    // The four of the Finals play the semi-final, then the third-place match or the
+    // final: no friendly is arranged for them in the gap between.
+    reserved(inst, _ctx, date) {
+      const { semi, final } = o.finalsDates(inst.year)
+      if (date <= semi || date >= final) return []
+      const finals = inst.stages.find((s) => s.key === "finals")
+      const drawn = finals?.rounds?.[0]?.ties.flatMap((t) => [t.home, t.away])
+      const teams = drawn?.length ? drawn : knockoutResult(inst, "quarter-finals").finalWinners
+      return teams.filter((t): t is string => !!t)
+    },
     finalize(inst, ctx) {
       const ko = knockoutResult(inst, "finals")
       const t = tablesByLetter(inst, ctx)
