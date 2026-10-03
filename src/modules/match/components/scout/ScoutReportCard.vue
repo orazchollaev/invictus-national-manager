@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PersonFace } from "@/modules/core/components/face"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { RouterLink } from "vue-router"
@@ -38,15 +39,18 @@ const who = { you: "match.scout.you", them: "match.scout.them" }
     <ul class="players">
       <li v-for="k in report.key" :key="k.playerId">
         <RouterLink :to="`/player/${k.playerId}`" class="player">
-          <span class="player-name">
-            {{ player(k.playerId)?.last ?? "—" }}
-            <span class="player-pos">{{ player(k.playerId)?.pos }}</span>
-          </span>
-          <span class="player-note">
-            {{ $tx(k.note) }} · {{ $tx(k.archetype) }}
-            <template v-if="k.role && $tx(k.role) !== $tx(k.archetype)">
-              ({{ $tx(k.role) }})
-            </template>
+          <PersonFace v-if="player(k.playerId)" :player="player(k.playerId)" :size="36" head />
+          <span class="player-text">
+            <span class="player-name">
+              {{ player(k.playerId)?.last ?? "—" }}
+              <span class="player-pos">{{ player(k.playerId)?.pos }}</span>
+            </span>
+            <span class="player-note">
+              {{ $tx(k.note) }} · {{ $tx(k.archetype) }}
+              <template v-if="k.role && $tx(k.role) !== $tx(k.archetype)">
+                ({{ $tx(k.role) }})
+              </template>
+            </span>
           </span>
         </RouterLink>
       </li>
@@ -133,9 +137,16 @@ const who = { you: "match.scout.you", them: "match.scout.them" }
   list-style: none;
 }
 
-.player {
+.player-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
   padding: var(--sp-1) 0;
   color: var(--text);
   text-decoration: none;

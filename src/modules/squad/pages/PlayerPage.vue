@@ -16,6 +16,7 @@ import { archetypeOf, badgesOf } from "@/engine/players/archetypes"
 import { relationsOf, signed } from "@/modules/squad/utils/chemistry"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
+import { PersonFace } from "@/modules/core/components/face"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
 import {
@@ -116,6 +117,7 @@ onBeforeUnmount(() => chart?.destroy())
     back
   >
     <AppCard padding="md" class="head">
+      <PersonFace :player="p" :size="84" class="face" />
       <NationFlag :id="p.nationId" :size="40" name link />
       <div class="head-stats">
         <div class="stat">
@@ -150,6 +152,7 @@ onBeforeUnmount(() => chart?.destroy())
       <ul v-if="relations.length" class="rels">
         <li v-for="r in relations" :key="r.player.id" class="rel" :class="`rel--${r.kind}`">
           <span class="rel-points">{{ signed(r.points) }}</span>
+          <PersonFace :player="r.player" :size="28" head />
           <RouterLink :to="`/player/${r.player.id}`" class="rel-name">
             {{ r.player.first }} {{ r.player.last }}
           </RouterLink>
@@ -231,9 +234,14 @@ onBeforeUnmount(() => chart?.destroy())
 
 <style scoped>
 .head :deep(.card-body) {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
   gap: var(--sp-3);
+}
+
+.face {
+  grid-row: span 2;
 }
 
 .head-stats {
@@ -280,7 +288,7 @@ onBeforeUnmount(() => chart?.destroy())
 
 .rel {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--sp-2);
 }
 

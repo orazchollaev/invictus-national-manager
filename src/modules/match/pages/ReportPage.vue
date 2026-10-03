@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PersonFace } from "@/modules/core/components/face"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
@@ -148,6 +149,12 @@ const motm = computed(() => [...(report.value?.lines ?? [])].sort((a, b) => b.ra
             class="line"
           >
             <span class="role">{{ l.pos }}</span>
+            <PersonFace
+              v-if="world.world?.state.players[l.playerId]"
+              :player="world.world.state.players[l.playerId]"
+              :size="32"
+              head
+            />
             <span class="name">
               {{ playerName(l.playerId) }}
               <span class="muted">

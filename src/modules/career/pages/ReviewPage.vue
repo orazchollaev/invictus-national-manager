@@ -95,12 +95,12 @@ function done() {
 
       <template v-if="stars.length">
         <AppSectionHeader :title="t('career.review.standOut')" />
-        <ReviewPlayers :players="stars" />
+        <ReviewPlayers :players="stars" :nation-id="review!.nationId" />
       </template>
 
       <template v-if="youngsters.length">
         <AppSectionHeader :title="t('career.review.youngsters')" />
-        <ReviewPlayers :players="youngsters" />
+        <ReviewPlayers :players="youngsters" :nation-id="review!.nationId" />
       </template>
 
       <StickyCta v-if="pending" above-nav>

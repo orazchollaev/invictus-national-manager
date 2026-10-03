@@ -3,6 +3,7 @@
  * 1 January: the year's youngsters have come through the academies. The scouts'
  * view of each, and a tap to follow the ones worth watching.
  */
+import { PersonFace } from "@/modules/core/components/face"
 import { ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
@@ -29,6 +30,8 @@ const info = world.derive((w) => {
     .map((p) => ({
       id: p.id,
       name: `${p.first} ${p.last}`,
+      last: p.last,
+      nationId: p.nationId,
       pos: p.pos,
       age: ageOn(p.born, w.state.date),
       club: w.clubs.get(p.clubId)?.name ?? "",
@@ -72,6 +75,7 @@ function onClose() {
       <ul class="list">
         <li v-for="p in info.players" :key="p.id" class="row">
           <span class="pos">{{ p.pos }}</span>
+          <PersonFace :player="p" :size="36" head />
           <div class="main">
             <div class="name">
               {{ p.name }}

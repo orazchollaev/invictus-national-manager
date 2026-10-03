@@ -8,6 +8,7 @@ import type { Formation } from "@/engine/match/types"
 import { positionFit } from "@/engine/players/ability"
 import { FORMATIONS } from "@/engine/match/formations"
 import { slotPositions } from "@/modules/squad/utils/pitch"
+import { PersonFace } from "@/modules/core/components/face"
 
 const props = defineProps<{
   formation: Formation
@@ -63,12 +64,21 @@ function fitClass(i: number) {
       :style="{ left: `${c[0]}%`, top: `${c[1]}%` }"
       @click="emit('select', i)"
     >
-      <span class="slot-dot">
-        <template v-if="slots[i] && ratings?.[slots[i]!] !== undefined">
-          {{ ratings[slots[i]!].toFixed(1) }}
-        </template>
-        <template v-else-if="slots[i]">{{ Math.round(player(slots[i]!)?.ca ?? 0) }}</template>
+      <span class="slot-dot" :class="{ 'slot-dot--face': slots[i] && player(slots[i]!) }">
+        <PersonFace
+          v-if="slots[i] && player(slots[i]!)"
+          :player="player(slots[i]!)"
+          :size="36"
+          round
+          class="slot-face"
+        />
         <template v-else>+</template>
+        <span v-if="slots[i] && player(slots[i]!)" class="slot-value">
+          <template v-if="ratings?.[slots[i]!] !== undefined">
+            {{ ratings[slots[i]!].toFixed(1) }}
+          </template>
+          <template v-else>{{ Math.round(player(slots[i]!)?.ca ?? 0) }}</template>
+        </span>
         <span v-if="status(i).injured || status(i).banned" class="slot-badges">
           <span
             v-if="status(i).injured"
@@ -167,6 +177,27 @@ function fitClass(i: number) {
   font-size: var(--fs-sm);
   box-shadow: 0 2px 6px var(--pitch-shadow);
   border: 3px solid transparent;
+}
+
+.slot-dot--face {
+  width: 42px;
+  height: 42px;
+  background: var(--surface);
+}
+
+/* Ability (or the live rating), top right of the token. */
+.slot-value {
+  position: absolute;
+  right: -10px;
+  top: -6px;
+  min-width: 22px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--pitch-token);
+  color: var(--pitch-token-text);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+  box-shadow: 0 1px 3px var(--pitch-shadow);
 }
 
 .fit .slot-dot {

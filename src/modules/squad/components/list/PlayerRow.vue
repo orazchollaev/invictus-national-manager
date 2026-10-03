@@ -5,6 +5,7 @@ import { Ban, Cross, TrendingDown, TrendingUp } from "@lucide/vue"
 import type { Player } from "@/engine/types"
 import { archetypeOf } from "@/engine/players/archetypes"
 import { StatPill } from "@/modules/core/components"
+import { PersonFace } from "@/modules/core/components/face"
 import { abilityTone, age, positionTone } from "@/modules/core/utils/format"
 import { useWorldStore } from "@/modules/world/store"
 
@@ -31,6 +32,7 @@ const archId = computed(() => archetypeOf(props.player))
     class="prow"
   >
     <span class="prow-pos" :style="{ color: positionTone(player.pos) }">{{ player.pos }}</span>
+    <PersonFace :player="player" :size="36" head />
     <div class="prow-main">
       <div class="prow-name">
         {{ player.first }}
