@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { useRouter } from "vue-router"
+import { onBeforeRouteLeave, useRouter } from "vue-router"
 import { Sparkles } from "@lucide/vue"
 import {
   AppButton,
@@ -31,7 +31,7 @@ import { matchAbility, positionFit, positionGroup } from "@/engine/players/abili
 import type { Role } from "@/engine/match/roles"
 import type { Formation, Level, Mentality, Tactics } from "@/engine/match/types"
 import type { Player, PositionGroup } from "@/engine/types"
-import { showAlert } from "@/composables/useDialog"
+import { showAlert, showConfirm } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
 import { spiritLabel, spiritOf } from "@/engine/players/bonds"
 import { bondLines, chemistryWith, signed } from "@/modules/squad/utils/chemistry"
@@ -72,6 +72,17 @@ function initial() {
 
 const team = ref(initial())
 const selectedSlot = ref<number | null>(null)
+
+/** Leaving with edits that were never saved would play the old eleven; ask first. */
+const baseline = JSON.stringify(team.value)
+let saved = false
+onBeforeRouteLeave(async () => {
+  if (saved || JSON.stringify(team.value) === baseline) return true
+  return showConfirm(t("squad.tactics.leaveConfirm"), {
+    confirmLabel: t("squad.tactics.leave"),
+    dangerous: true,
+  })
+})
 
 const positions = computed(() => FORMATIONS[team.value.tactics.formation])
 const slots = computed(() => positions.value.map((_, i) => team.value.xi[i]?.playerId || null))
@@ -213,6 +224,7 @@ async function save() {
     return showAlert(t("squad.tactics.replaceFirst", { list: blocked.join("; ") }))
   const bench = pickBench(squad.value, xi, world.date)
   world.setUserTeam({ ...team.value, xi, bench, tactics: { ...(team.value.tactics as Tactics) } })
+  saved = true
   router.back()
 }
 </script>

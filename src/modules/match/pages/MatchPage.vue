@@ -45,6 +45,7 @@ import {
 } from "@/engine/match/engine"
 import { KEY_EVENTS, type MatchEventKind, type Side, type Tactics } from "@/engine/match/types"
 import { clock } from "@/engine/match/commentary"
+import { surname } from "@/engine/players/ability"
 import type { Msg } from "@/engine/text"
 import { laneCounts } from "@/engine/match/lanes"
 import { FORMATIONS } from "@/engine/match/formations"
@@ -123,7 +124,7 @@ const MS_PER_MINUTE: Record<LiveMatchSpeed, number> = { 1: 1100, 2: 550, 4: 260 
 const names = {
   player: (id: string | undefined) => {
     const p = id ? world.world?.state.players[id] : undefined
-    return p ? p.last : "—"
+    return p ? surname(p) : "—"
   },
   team: (s: Side) =>
     fixture.value ? nationName(s === "home" ? fixture.value.home : fixture.value.away) : "",

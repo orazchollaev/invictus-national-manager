@@ -965,6 +965,8 @@ const pt: typeof en = {
       setPieces: "Bolas paradas",
       choose: "Escolher",
       save: "Salvar tática",
+      leaveConfirm: "Sair sem salvar? Seu time titular e suas táticas não foram salvos.",
+      leave: "Sair",
       fillAll: "Preencha as onze posições.",
       replaceFirst: "Substitua antes os jogadores indisponíveis: {list}.",
       pick: "Escolha um {pos}",

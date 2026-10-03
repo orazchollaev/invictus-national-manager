@@ -64,11 +64,16 @@ export function matchAbility(player: Player): number {
   return Math.max(1, player.ca + form + sharp + morale)
 }
 
-export function fullName(p: Pick<Player, "first" | "last">): string {
-  return `${p.first} ${p.last}`
+/** The name a player is known by, for a player with one name only that name. */
+export function surname(p: Pick<Player, "first" | "last">): string {
+  return p.last || p.first
 }
 
-/** "L. Messi" style, for tight rows. */
+export function fullName(p: Pick<Player, "first" | "last">): string {
+  return [p.first, p.last].filter(Boolean).join(" ")
+}
+
+/** "L. Messi" style, for tight rows. A player with one name shows it whole. */
 export function shortName(p: Pick<Player, "first" | "last">): string {
-  return p.first ? `${p.first[0]}. ${p.last}` : p.last
+  return p.first && p.last ? `${p.first[0]}. ${p.last}` : surname(p)
 }

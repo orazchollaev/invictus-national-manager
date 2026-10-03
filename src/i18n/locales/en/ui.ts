@@ -961,6 +961,8 @@ export default {
       setPieces: "Set pieces",
       choose: "Choose",
       save: "Save tactics",
+      leaveConfirm: "Leave without saving? Your eleven and tactics have not been saved.",
+      leave: "Leave",
       fillAll: "Fill all eleven positions.",
       replaceFirst: "Replace unavailable players first: {list}.",
       pick: "Pick a {pos}",

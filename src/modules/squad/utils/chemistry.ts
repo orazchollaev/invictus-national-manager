@@ -1,5 +1,6 @@
 import { i18n } from "@/i18n"
 import type { Player } from "@/engine/types"
+import { shortName } from "@/engine/players/ability"
 import {
   BOND_POINTS,
   bondBetween,
@@ -36,7 +37,7 @@ export interface BondLine {
   points: number
 }
 
-const name = (p: Player) => `${p.first ? `${p.first[0]}. ` : ""}${p.last}`
+const name = shortName
 
 /** The bonds inside an eleven, one line each, feuds first. */
 export function bondLines(

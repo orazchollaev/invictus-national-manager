@@ -103,10 +103,13 @@ const clamp = (v: number, lo: number, hi: number) =>
 
 export function rowFromEdit(p: PlayerEdit): PlayerRow {
   const ca = Math.round(clamp(p.ca, 1, 99) * 10) / 10
+  // A player known by one name keeps it as his surname, where every list reads it.
+  const first = p.first.trim()
+  const last = p.last.trim()
   return [
     p.id,
-    p.first.trim(),
-    p.last.trim(),
+    last ? first : "",
+    last || first,
     p.born,
     p.pos,
     p.alt.filter((x) => x !== p.pos).join(","),

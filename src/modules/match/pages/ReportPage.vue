@@ -13,6 +13,7 @@ import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
 import { matchRatingTone } from "@/modules/core/utils/format"
 import type { Side } from "@/engine/match/types"
+import { shortName } from "@/engine/players/ability"
 
 const { t } = useI18n()
 const route = useRoute()
@@ -32,7 +33,7 @@ const tab = ref("summary")
 
 const playerName = (pid?: string) => {
   const p = pid ? world.world?.state.players[pid] : undefined
-  return p ? `${p.first[0]}. ${p.last}` : "—"
+  return p ? shortName(p) : "—"
 }
 
 const names = {
