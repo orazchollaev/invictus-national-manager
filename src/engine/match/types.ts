@@ -101,6 +101,17 @@ export const KEY_EVENTS: ReadonlySet<MatchEventKind> = new Set([
   "injury",
 ])
 
+/**
+ * What kind of shot it was, which sets how likely it is to go in, be blocked or hit the
+ * target: a speculative effort from distance, a shot from inside the box, a tap-in or
+ * cut-back from close range, a header, a one-on-one with the keeper, a direct free kick,
+ * or a follow-up after a save.
+ */
+export type ShotType = "long" | "box" | "close" | "header" | "one-on-one" | "free-kick" | "rebound"
+
+/** How a chance came about, when it was not settled possession. */
+export type Move = "counter" | "press" | "set-piece"
+
 export interface MatchEvent {
   /** Match clock minute (1–120). Stoppage time repeats the last minute of the half. */
   minute: number
@@ -114,6 +125,10 @@ export interface MatchEvent {
   xg?: number
   /** Where the attack came from, on attacks, shots and offsides. */
   lane?: Lane
+  /** The kind of shot, on shots and goals from open play and set pieces. */
+  shot?: ShotType
+  /** A counter-attack, a ball won high up the pitch, or a set piece. */
+  move?: Move
   /** Score after the event, for goals. */
   score?: [number, number]
 }

@@ -45,6 +45,28 @@ export function makePlayer(
   }
 }
 
+/** A match between two sides of `makeTeam`, at the levels given, on neutral ground. */
+export function levelSetup(homeCa: number, awayCa: number, seed: number, extra = {}) {
+  const home = makeTeam("h", homeCa)
+  const away = makeTeam("a", awayCa)
+  const byId = new Map([...home.players, ...away.players].map((p) => [p.id, p]))
+  return {
+    id: `m${seed}`,
+    date: "2026-09-24",
+    home: home.sheet,
+    away: away.sheet,
+    player: (id: string) => byId.get(id)!,
+    homeAdvantage: false,
+    seed,
+    ...extra,
+  }
+}
+
+/** `n` matches between sides at those levels, seeds 1 to n. */
+export function playLevel(homeCa: number, awayCa: number, n: number, extra = {}): MatchReport[] {
+  return Array.from({ length: n }, (_, i) => playMatch(levelSetup(homeCa, awayCa, i + 1, extra)))
+}
+
 /** A full squad (XI in formation + seven on the bench) at one ability level. */
 export function makeTeam(prefix: string, ca: number, formation: Formation = "4-2-3-1") {
   const roles = FORMATIONS[formation]

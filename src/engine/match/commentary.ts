@@ -4,7 +4,7 @@
  * each line is picked from the event's position in the match, so re-opening a
  * report reads the same.
  */
-import type { Lane, MatchEvent, MatchEventKind } from "./types"
+import type { Lane, MatchEvent, MatchEventKind, Move, ShotType } from "./types"
 
 export interface CommentaryNames {
   player: (id: string | undefined) => string
@@ -12,6 +12,10 @@ export interface CommentaryNames {
 }
 
 type Template = string
+
+/** The events that are a shot, which can have lines for the kind of shot it was. */
+export type ShotKind =
+  "goal" | "shot-saved" | "shot-wide" | "shot-blocked" | "woodwork" | "big-chance-missed"
 
 /** Everything the commentary says, so a language can swap the whole set. */
 export interface CommentaryText {
@@ -21,6 +25,10 @@ export interface CommentaryText {
   lane: Record<Lane, string>
   /** Used in an attack line that has no lane. */
   forward: string
+  /** Lines for a kind of shot, used instead of the plain ones when there are any. */
+  shots?: Partial<Record<ShotType, Partial<Record<ShotKind, Template[]>>>>
+  /** Said before a shot from a counter-attack or a ball won high, and after such a goal. */
+  moves?: Partial<Record<Move, { before: string; after: string }>>
 }
 
 const T: Partial<Record<MatchEventKind, Template[]>> = {
@@ -141,6 +149,89 @@ const T: Partial<Record<MatchEventKind, Template[]>> = {
   "shootout-end": ["{team} win the shootout!", "It's {team} who hold their nerve!"],
 }
 
+const SHOTS: CommentaryText["shots"] = {
+  long: {
+    goal: [
+      "GOAL! {p} lets fly from distance and it flies in!{assist}",
+      "GOAL! A thunderbolt from {p} from outside the box!{assist}",
+    ],
+    "shot-saved": [
+      "{p} tries his luck from range — {o} gathers it.",
+      "A long-range drive from {p}, held by {o}.",
+    ],
+    "shot-wide": [
+      "{p} shoots from distance. Wide.",
+      "{p} tries his luck from twenty-five yards — over the bar.",
+    ],
+    "shot-blocked": ["{p}'s effort from distance is blocked by {o}."],
+    woodwork: ["{p} hits the woodwork from long range!"],
+  },
+  close: {
+    goal: [
+      "GOAL! {p} taps in from close range!{assist}",
+      "GOAL! {p} turns in the cut-back!{assist}",
+    ],
+    "shot-saved": ["{o} somehow keeps out {p} from point-blank range!"],
+    "big-chance-missed": [
+      "{p} somehow misses from six yards!",
+      "It's on a plate for {p}... and he scuffs it wide!",
+    ],
+  },
+  header: {
+    goal: [
+      "GOAL! {p} rises highest and heads it in!{assist}",
+      "GOAL! A towering header from {p}!{assist}",
+    ],
+    "shot-saved": [
+      "{p} gets his head to it, but {o} saves.",
+      "A header from {p} — straight at {o}.",
+    ],
+    "shot-wide": [
+      "{p} heads it over.",
+      "{p} gets on the end of the cross but his header goes wide.",
+    ],
+    woodwork: ["{p}'s header crashes off the bar!"],
+    "big-chance-missed": ["{p} has a free header and misses the target!"],
+  },
+  "one-on-one": {
+    goal: [
+      "GOAL! {p} rounds the keeper and scores!{assist}",
+      "GOAL! {p} keeps his cool one-on-one and slots it past the keeper!{assist}",
+    ],
+    "shot-saved": [
+      "{p} is clean through... {o} spreads himself and saves!",
+      "Brilliant from {o}! He stands up to {p} one-on-one.",
+    ],
+    "big-chance-missed": [
+      "{p} is through on goal... and puts it wide! What a miss!",
+      "{p} is one-on-one with the keeper and drags it past the post!",
+    ],
+  },
+  "free-kick": {
+    goal: [
+      "GOAL! {p} curls the free kick into the top corner!",
+      "GOAL! What a free kick from {p}!",
+    ],
+    "shot-saved": [
+      "{p} goes for goal from the free kick — {o} tips it over!",
+      "{p}'s free kick is saved by {o}.",
+    ],
+    "shot-wide": ["{p}'s free kick clears the bar.", "{p} curls the free kick just wide."],
+    "shot-blocked": ["{p}'s free kick hits the wall."],
+    woodwork: ["{p}'s free kick smacks the post!"],
+  },
+  rebound: {
+    goal: ["GOAL! {p} pounces on the rebound!", "GOAL! The keeper parries and {p} is first to it!"],
+    "shot-saved": ["{p} follows up, but {o} saves again!"],
+    "shot-wide": ["{p} snatches at the rebound and it goes wide."],
+  },
+}
+
+const MOVES: CommentaryText["moves"] = {
+  counter: { before: "On the break! ", after: " A devastating counter-attack." },
+  press: { before: "Won back high up the pitch! ", after: " Punished for giving the ball away." },
+}
+
 const LANE_PHRASE: Record<Lane, string> = {
   left: "down the left",
   centre: "through the middle",
@@ -153,6 +244,14 @@ export const DEFAULT_COMMENTARY: CommentaryText = {
   assist: " Assisted by {a}.",
   lane: LANE_PHRASE,
   forward: "forward",
+  shots: SHOTS,
+  moves: MOVES,
+}
+
+/** The lines to pick from: the kind of shot's own, if the language has any. */
+function optionsFor(ev: MatchEvent, text: CommentaryText): Template[] | undefined {
+  const own = ev.shot && text.shots?.[ev.shot]?.[ev.kind as ShotKind]
+  return own && own.length ? own : text.lines[ev.kind]
 }
 
 /** The text for one event. `index` is the event's place in the match, for variety. */
@@ -162,19 +261,22 @@ export function commentaryLine(
   names: CommentaryNames,
   text: CommentaryText = DEFAULT_COMMENTARY
 ): string {
-  const options = text.lines[ev.kind]
+  const options = optionsFor(ev, text)
   if (!options) return ""
   const template = options[(index * 7 + ev.minute) % options.length]
+  const move = ev.move && ev.move !== "set-piece" ? text.moves?.[ev.move] : undefined
   const team = ev.side ? names.team(ev.side) : ""
   const assist =
     ev.kind === "goal" && ev.otherId ? text.assist.replace("{a}", names.player(ev.otherId)) : ""
-  return template
+  const line = template
     .replace("{team:home}", names.team("home"))
     .replace(/\{team\}/g, team)
     .replace(/\{p\}/g, names.player(ev.playerId))
     .replace(/\{o\}/g, names.player(ev.otherId))
     .replace("{assist}", assist)
     .replace(/{lane}/g, ev.lane ? text.lane[ev.lane] : text.forward)
+  if (!move) return line
+  return ev.kind === "goal" ? line + move.after : move.before + line
 }
 
 /** Clock label: 45+2', 90', 105+1'. */

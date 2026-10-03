@@ -9,6 +9,81 @@ const commentary: CommentaryText = {
     centre: "pelo meio",
     right: "pela direita",
   },
+  shots: {
+    long: {
+      goal: [
+        "GOL! {p} solta a bomba de longe e ela entra!{assist}",
+        "GOL! Um petardo de {p} de fora da área!{assist}",
+      ],
+      "shot-saved": [
+        "{p} arrisca de longe — {o} segura.",
+        "Chute de longa distância de {p}, firme nas mãos de {o}.",
+      ],
+      "shot-wide": [
+        "{p} chuta de longe. Para fora.",
+        "{p} arrisca de fora da área — por cima do gol.",
+      ],
+      "shot-blocked": ["O chute de longe de {p} é bloqueado por {o}."],
+      woodwork: ["{p} acerta a trave de longa distância!"],
+    },
+    close: {
+      goal: [
+        "GOL! {p} só empurra para dentro, de perto!{assist}",
+        "GOL! {p} completa o passe para trás!{assist}",
+      ],
+      "shot-saved": ["{o} consegue evitar o gol de {p} à queima-roupa!"],
+      "big-chance-missed": [
+        "{p} perde inacreditavelmente da pequena área!",
+        "A bola fica servida para {p}... e ele manda para fora!",
+      ],
+    },
+    header: {
+      goal: [
+        "GOL! {p} sobe mais alto que todos e cabeceia para dentro!{assist}",
+        "GOL! Que cabeçada de {p}!{assist}",
+      ],
+      "shot-saved": ["{p} cabeceia, mas {o} defende.", "Cabeçada de {p} — em cima de {o}."],
+      "shot-wide": ["{p} cabeceia por cima.", "{p} chega no cruzamento, mas a cabeçada sai."],
+      woodwork: ["A cabeçada de {p} explode no travessão!"],
+      "big-chance-missed": ["{p} cabeceia livre e erra o alvo!"],
+    },
+    "one-on-one": {
+      goal: [
+        "GOL! {p} dribla o goleiro e marca!{assist}",
+        "GOL! {p} tem frieza no mano a mano e toca na saída do goleiro!{assist}",
+      ],
+      "shot-saved": [
+        "{p} sai cara a cara... {o} fecha o ângulo e defende!",
+        "Que defesa de {o}! Fica de pé no mano a mano com {p}.",
+      ],
+      "big-chance-missed": [
+        "{p} sai livre na cara do gol... e manda para fora! Que perda!",
+        "{p} fica cara a cara com o goleiro e chuta rente à trave!",
+      ],
+    },
+    "free-kick": {
+      goal: ["GOL! {p} coloca a falta no ângulo!", "GOL! Que cobrança de falta de {p}!"],
+      "shot-saved": [
+        "{p} bate a falta direto — {o} espalma para escanteio!",
+        "A cobrança de falta de {p} é defendida por {o}.",
+      ],
+      "shot-wide": [
+        "A falta cobrada por {p} passa por cima.",
+        "{p} bate a falta com curva, rente à trave.",
+      ],
+      "shot-blocked": ["A cobrança de {p} explode na barreira."],
+      woodwork: ["A falta de {p} explode na trave!"],
+    },
+    rebound: {
+      goal: ["GOL! {p} aproveita o rebote!", "GOL! O goleiro dá rebote e {p} chega primeiro!"],
+      "shot-saved": ["{p} pega o rebote, mas {o} defende de novo!"],
+      "shot-wide": ["{p} se apressa no rebote e manda para fora."],
+    },
+  },
+  moves: {
+    counter: { before: "No contra-ataque! ", after: " Um contra-ataque fulminante." },
+    press: { before: "Roubou a bola no campo de ataque! ", after: " Castigo por perder a bola." },
+  },
   lines: {
     kickoff: [
       "Começa o jogo!",
