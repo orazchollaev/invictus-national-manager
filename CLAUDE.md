@@ -41,7 +41,7 @@ src/
   i18n/           vue-i18n setup. One folder per language in locales/<code>/ (index.ts,
                   ui.ts, engine.ts, commentary.ts): a new folder is picked up by itself.
   lib/            Infrastructure adapters (IndexedDB, flags).
-  modules/        Feature modules (career, competitions, core, match, nations, news,
+  modules/        Feature modules (career, coaches, competitions, core, match, nations, news,
                   settings, squad, stadiums, world).
   router/
 ```

@@ -5,6 +5,10 @@ import { useRoute } from "vue-router"
 import { AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
+import { PersonFace } from "@/modules/core/components/face"
+import { formatDate } from "@/i18n/dates"
+import { USER_COACH } from "@/engine/career/coaches"
+import { NationRecords, RivalList } from "@/modules/nations/components/records"
 import { PlayerRow } from "@/modules/squad/components/list"
 import { FixtureRow } from "@/modules/competitions/components/tables"
 import { compName, resolveText } from "@/i18n/text"
@@ -21,6 +25,27 @@ const world = useWorldStore()
 const id = computed(() => String(route.params.id))
 const def = world.derive((w) => w.defs.get(id.value) ?? null, null)
 const nation = world.derive((w) => w.state.nations[id.value] ?? null, null)
+/** The head coach (a copy, so a change of coach redraws), or null while the job is vacant. */
+const coach = world.derive((w) => {
+  const n = w.state.nations[id.value]
+  if (!n?.coachId) return null
+  if (n.coachId === USER_COACH) {
+    const c = w.state.career
+    return {
+      link: "/coach/me",
+      name: c.managerName,
+      coach: null,
+      manager: {
+        name: c.managerName,
+        nationality: c.nationality,
+        nationId: c.nationId,
+        seed: w.state.seed,
+      },
+    }
+  }
+  const c = w.state.coaches?.[n.coachId]
+  return c ? { link: `/coach/${c.id}`, name: n.coach, coach: { ...c }, manager: null } : null
+}, null)
 const rank = world.derive((w) => w.fifaRank(id.value), 0)
 const tab = ref("overview")
 
@@ -106,9 +131,19 @@ const record = computed(() => {
             }}
           </RouterLink>
         </div>
-        <div>
+        <div class="coach">
           <span class="muted">{{ t("nation.coach") }}</span>
-          {{ nation.coach }}
+          <RouterLink v-if="coach" :to="coach.link" class="coach-link">
+            <PersonFace :coach="coach.coach" :manager="coach.manager" :size="28" head />
+            {{ coach.name }}
+          </RouterLink>
+          <span v-else-if="nation.coachId === null" class="vacant">
+            {{ t("nation.vacant") }}
+            <template v-if="nation.vacantSince">
+              · {{ t("coaches.vacantSince", { date: formatDate(nation.vacantSince) }) }}
+            </template>
+          </span>
+          <template v-else>{{ nation.coach }}</template>
         </div>
         <div>
           <span class="muted">{{ t("nation.last", { n: nation.results.length }) }}</span>
@@ -139,6 +174,7 @@ const record = computed(() => {
     />
 
     <template v-if="tab === 'overview'">
+      <RivalList :nation-id="def.id" />
       <template v-if="upcoming.length">
         <AppSectionHeader :title="t('nation.upcoming')" />
         <div class="list">
@@ -155,6 +191,7 @@ const record = computed(() => {
     </template>
 
     <template v-else-if="tab === 'honours'">
+      <NationRecords :nation-id="def.id" />
       <template v-if="achievements.records.length">
         <AppSectionHeader :title="t('nation.honours.summary')" />
         <div class="list">
@@ -180,7 +217,7 @@ const record = computed(() => {
           </div>
         </div>
       </template>
-      <AppEmptyState v-else :title="t('nation.honours.none')" />
+      <AppEmptyState v-else-if="!nation.record?.played" :title="t('nation.honours.none')" />
     </template>
 
     <div v-else class="list">
@@ -194,6 +231,26 @@ const record = computed(() => {
 </template>
 
 <style scoped>
+.coach {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.coach-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1-5);
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vacant {
+  color: var(--warning);
+  font-weight: 600;
+}
+
 .stadiums-link {
   color: var(--accent);
   text-decoration: none;

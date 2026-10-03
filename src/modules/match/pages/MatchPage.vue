@@ -433,7 +433,9 @@ const pitchSlots = computed(() => {
         <span v-if="!oppForm.length" class="muted">{{ t("match.page.noRecent") }}</span>
       </div>
       <div class="muted">
-        {{ t("match.page.coach", { name: world.world?.nation(opp).coach }) }}
+        {{
+          t("match.page.coach", { name: world.world?.nation(opp).coach || t("coaches.caretaker") })
+        }}
       </div>
     </AppCard>
 

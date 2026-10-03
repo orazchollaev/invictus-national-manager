@@ -6,6 +6,7 @@ import { Flag, Trophy } from "@lucide/vue"
 import { AppButton, AppCard, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
+import { PersonFace } from "@/modules/core/components/face"
 import { nationName } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
@@ -67,10 +68,27 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 
 <template>
   <PageShell back :title="t('career.title')" :subtitle="career?.managerName">
+    <RouterLink v-if="career" to="/coach/me" class="profile">
+      <PersonFace
+        :manager="{
+          name: career.managerName,
+          nationality: career.nationality,
+          nationId: career.nationId,
+          seed: world.state?.seed ?? 0,
+        }"
+        :size="36"
+        head
+      />
+      {{ t("career.profile") }}
+    </RouterLink>
     <AppCard v-if="career" padding="md" class="stats">
       <div class="stat">
         <span class="muted">{{ t("career.confidence") }}</span>
         <strong>{{ career.nationId ? `${career.confidence}%` : "—" }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">{{ t("career.support") }}</span>
+        <strong>{{ career.nationId ? `${Math.round(career.support ?? 55)}%` : "—" }}</strong>
       </div>
       <div class="stat">
         <span class="muted">{{ t("career.reputation") }}</span>
@@ -168,9 +186,18 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 </template>
 
 <style scoped>
+.profile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .stats :deep(.card-body) {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--sp-2);
 }
 

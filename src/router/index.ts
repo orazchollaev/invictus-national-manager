@@ -71,10 +71,16 @@ const router = createRouter({
     { path: "/rankings", component: () => import("../modules/competitions/pages/RankingPage.vue") },
     { path: "/honours", component: () => import("../modules/competitions/pages/HonoursPage.vue") },
     {
+      path: "/invitational",
+      component: () => import("../modules/competitions/pages/InvitationalPage.vue"),
+    },
+    {
       path: "/calendar",
       component: () => import("../modules/competitions/pages/CalendarPage.vue"),
     },
 
+    { path: "/coaches", component: () => import("../modules/coaches/pages/CoachesPage.vue") },
+    { path: "/coach/:id", component: () => import("../modules/coaches/pages/CoachPage.vue") },
     { path: "/nation/:id", component: () => import("../modules/nations/pages/NationPage.vue") },
     { path: "/stadiums", component: () => import("../modules/stadiums/pages/StadiumsPage.vue") },
     {

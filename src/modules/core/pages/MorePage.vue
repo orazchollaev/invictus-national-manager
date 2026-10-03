@@ -11,6 +11,8 @@ import {
   Medal,
   Save,
   Settings,
+  Trophy,
+  Users,
 } from "@lucide/vue"
 import { AppCard } from "@/components/ui"
 import { showConfirm } from "@/composables/useDialog"
@@ -29,6 +31,12 @@ const items = [
     hint: t("core.more.careerHint"),
   },
   {
+    to: "/coaches",
+    icon: Users,
+    label: t("core.more.coaches"),
+    hint: t("core.more.coachesHint"),
+  },
+  {
     to: "/stadiums",
     icon: Landmark,
     label: t("core.more.stadiums"),
@@ -45,6 +53,12 @@ const items = [
     icon: CalendarDays,
     label: t("core.more.calendar"),
     hint: t("core.more.calendarHint"),
+  },
+  {
+    to: "/invitational",
+    icon: Trophy,
+    label: t("core.more.invitational"),
+    hint: t("core.more.invitationalHint"),
   },
   { to: "/honours", icon: Medal, label: t("core.more.honours"), hint: t("core.more.honoursHint") },
   {
