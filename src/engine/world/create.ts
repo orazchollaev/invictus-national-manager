@@ -87,6 +87,10 @@ export interface NewWorldOptions {
   nationId: string | null
   /** Starting reputation 1–100 when out of work (a job sets its own). */
   reputation?: number
+  /** Key the manager's face is drawn from. */
+  face?: string
+  /** No sacking, no contract end. */
+  jobSecurity?: boolean
 }
 
 /** 20 for the smallest job, 80 for the best-ranked nation. */
@@ -123,6 +127,8 @@ export function createWorld(
     career: {
       managerName: opts.managerName,
       nationality: opts.nationality,
+      face: opts.face,
+      jobSecurity: opts.jobSecurity || undefined,
       nationId: opts.nationId,
       confidence: 60,
       // A manager trusted with a big nation starts with a name to match; one out

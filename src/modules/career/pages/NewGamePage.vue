@@ -10,8 +10,10 @@ import {
   AppSearchInput,
   AppSelect,
   AppSubTabBar,
+  AppToggle,
 } from "@/components/ui"
 import { PageShell, StickyCta } from "@/modules/core/components"
+import { PersonFace } from "@/modules/core/components/face"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { SlotList } from "@/modules/career/components/slots"
 import { NATION_DEFS, setActiveNations } from "@/modules/world/services/statics"
@@ -36,6 +38,23 @@ const query = ref("")
 const chosen = ref<string | null>(null)
 /** Take a job now, or start out of work and wait for offers. */
 const mode = ref<"job" | "free">("job")
+/** The board never sacks the manager and his contract never runs out. */
+const jobSecurity = ref(false)
+
+/** Eight random faces to choose from, drawn when the screen opens. */
+const FACE_CHOICES = 8
+const batch = Math.floor(Math.random() * 1e9)
+const faceKeys = Array.from({ length: FACE_CHOICES }, (_, i) => `manager:${batch}:${i}`)
+const face = ref(faceKeys[0])
+
+/** The manager as the faces are drawn: what he has typed and where he is from. */
+const preview = (key: string) => ({
+  name: name.value.trim(),
+  nationality: nationality.value,
+  nationId: null,
+  seed: 0,
+  face: key,
+})
 
 /** Starting reputations out of work: it decides which federations call first. */
 const REPUTATIONS = computed(() => [
@@ -162,6 +181,8 @@ async function start() {
     nationality: nationality.value,
     nationId: free ? null : chosen.value,
     reputation: free ? Number(reputation.value) : undefined,
+    face: face.value,
+    jobSecurity: jobSecurity.value,
     modId: dataset.value === ORIGINAL ? null : dataset.value,
   })
   router.replace("/home")
@@ -213,6 +234,29 @@ async function start() {
               <NationFlag :id="option.value" :size="20" name class="select-nation" />
             </template>
           </AppSelect>
+        </AppField>
+        <AppField :label="t('career.newGame.avatar')" layout="stack">
+          <div class="faces">
+            <button
+              v-for="key in faceKeys"
+              :key="key"
+              type="button"
+              class="face-pick"
+              :class="{ 'face-pick--on': face === key }"
+              :aria-pressed="face === key"
+              :aria-label="t('career.newGame.avatar')"
+              @click="face = key"
+            >
+              <PersonFace :manager="preview(key)" :size="56" head />
+            </button>
+          </div>
+        </AppField>
+        <AppField
+          :label="t('career.newGame.jobSecurity')"
+          :description="t('career.newGame.jobSecurityHint')"
+          layout="split"
+        >
+          <AppToggle v-model="jobSecurity" :aria-label="t('career.newGame.jobSecurity')" />
         </AppField>
       </AppCard>
       <AppButton variant="filled" block :disabled="name.trim().length < 2" @click="step = 2">
@@ -308,6 +352,25 @@ async function start() {
 .dataset-select {
   flex: 1;
   min-width: 0;
+}
+
+.faces {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+  justify-items: center;
+}
+
+.face-pick {
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  line-height: 0;
+}
+
+.face-pick--on {
+  border-color: var(--accent);
 }
 
 .select-nation {

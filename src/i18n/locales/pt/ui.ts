@@ -157,6 +157,10 @@ const pt: typeof en = {
       yourName: "Seu nome",
       managerName: "Nome do técnico",
       nationality: "Nacionalidade",
+      avatar: "Seu rosto",
+      jobSecurity: "Desativar demissão",
+      jobSecurityHint:
+        "Ativado, nenhuma federação jamais demite você e seu contrato nunca termina.",
       searchNations: "Buscar seleções",
       takeJob: "Assumir um emprego",
       yourReputation: "Sua reputação",

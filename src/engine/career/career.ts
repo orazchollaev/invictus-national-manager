@@ -849,7 +849,7 @@ function maybeSack(world: World, criticalMissed: boolean) {
 /** Low confidence puts the manager on a final warning; recovering lifts it. */
 function pressure(world: World) {
   const c = world.state.career
-  if (!c.nationId) return
+  if (!c.nationId || c.jobSecurity) return
   if (!c.ultimatum && c.confidence < T.ultimatumBelow) {
     c.ultimatum = { since: world.state.date, matches: T.ultimatumMatches }
     world.state.pendingUltimatum = true
@@ -866,13 +866,18 @@ function pressure(world: World) {
   }
 }
 
-const LEAVE_NEWS = { sacked: "sacked", expired: "notRenewed", resigned: "resigned" } as const
+/** The contract of a manager with job security: it never runs out. */
+export const JOB_FOR_LIFE = "2999-12-31"
+
+const LEAVE_NEWS ={ sacked: "sacked", expired: "notRenewed", resigned: "resigned" } as const
 const LEAVE_REPUTATION = { sacked: -8, expired: -2, resigned: -4 } as const
 
 /** Out of the job: sacked, the contract was not renewed, or the manager walked away. */
 export function leaveJob(world: World, reason: "sacked" | "expired" | "resigned") {
   const c = world.state.career
   if (!c.nationId) return
+  // With job security only the manager himself can end the spell.
+  if (c.jobSecurity && reason !== "resigned") return
   const nation = nationText(c.nationId)
   const h = c.history[c.history.length - 1]
   if (h) {
@@ -915,6 +920,11 @@ export function setContract(world: World) {
   const c = world.state.career
   const me = c.nationId
   if (!me) return
+  if (c.jobSecurity) {
+    c.contractFor = undefined
+    c.contractUntil = JOB_FOR_LIFE
+    return
+  }
   const def = world.def(me)
   const earliest = addDays(world.state.date, 300)
   const next = Object.values(world.state.competitions)

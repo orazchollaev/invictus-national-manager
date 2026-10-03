@@ -40,6 +40,7 @@ const coach = world.derive((w) => {
         nationality: c.nationality,
         nationId: c.nationId,
         seed: w.state.seed,
+        face: c.face,
       },
     }
   }

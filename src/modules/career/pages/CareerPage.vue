@@ -75,6 +75,7 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
           nationality: career.nationality,
           nationId: career.nationId,
           seed: world.state?.seed ?? 0,
+          face: career.face,
         }"
         :size="36"
         head

@@ -9,8 +9,14 @@ const props = withDefaults(
   defineProps<{
     player?: Pick<Player, "id" | "last" | "nationId"> | null
     coach?: Pick<Coach, "face" | "last" | "nationality" | "nationId"> | null
-    /** The user: his name, nationality, the job he holds and the save's seed. */
-    manager?: { name: string; nationality: string; nationId: string | null; seed: number } | null
+    /** The user: his name, nationality, the job he holds, the save's seed and the face he chose. */
+    manager?: {
+      name: string
+      nationality: string
+      nationId: string | null
+      seed: number
+      face?: string
+    } | null
     /** Width in px. */
     size?: number
     /** Head and shoulders on a card in the nation's colours (for lists). */
@@ -39,7 +45,7 @@ function subject(): FaceSubject | null {
   const nationality = c?.nationality ?? m!.nationality
   const job = c?.nationId ?? m?.nationId ?? nationality
   return {
-    key: c?.face ?? `manager:${m!.seed}:${m!.name}`,
+    key: c?.face ?? m!.face ?? `manager:${m!.seed}:${m!.name}`,
     last: c?.last ?? m!.name.split(" ").pop() ?? "",
     nationId: nationality,
     cultures: nationDef(nationality)?.cultures ?? [],

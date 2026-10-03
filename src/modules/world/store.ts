@@ -88,6 +88,10 @@ export const useWorldStore = defineStore(
         /** null: start out of work, with `reputation` deciding who calls. */
         nationId: string | null
         reputation?: number
+        /** Key the manager's face is drawn from. */
+        face?: string
+        /** No sacking, no contract end. */
+        jobSecurity?: boolean
         /** Start from a mod instead of the bundled dataset. */
         modId?: string | null
       }

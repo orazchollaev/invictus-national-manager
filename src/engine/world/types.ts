@@ -267,6 +267,10 @@ export interface CareerMilestone {
 export interface CareerState {
   managerName: string
   nationality: string
+  /** Key the manager's face is drawn from; saves without one derive it from the name. */
+  face?: string
+  /** The board never sacks him and his contract never runs out. */
+  jobSecurity?: boolean
   nationId: string | null
   /** 0–100: the federation's patience. */
   confidence: number

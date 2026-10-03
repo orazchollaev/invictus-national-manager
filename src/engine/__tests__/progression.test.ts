@@ -19,6 +19,7 @@ import {
   CAREER_TUNING,
   checkObjectives,
   decideContract,
+  leaveJob,
   makeOffers,
   monthlyDrift,
   playerMoments,
@@ -305,6 +306,68 @@ describe("pressure and the sack", () => {
     afterUserResult(w, fixture(w, "SMR", "qualifier", 1, 0))
     expect(c.nationId).toBe("TUR")
     expect(c.ultimatum).toBeNull()
+  })
+
+  describe("with job security", () => {
+    const secure = () => {
+      const w = createWorld(
+        {
+          seed: 21,
+          start: "2026-09-01",
+          managerName: "Test",
+          nationality: "TUR",
+          nationId: "TUR",
+          jobSecurity: true,
+        },
+        statics(),
+        playerRows as unknown as Record<string, PlayerRow[]>
+      )
+      return { w, c: w.state.career }
+    }
+
+    it("signs a contract that runs to 2999", () => {
+      const { c } = secure()
+      expect(c.contractUntil).toBe("2999-12-31")
+      expect(c.contractFor).toBeUndefined()
+    })
+
+    it("survives a missed key objective, a lost final warning and a spent contract", () => {
+      const { w, c } = secure()
+      c.objectives = [lapsed(true)]
+      c.confidence = 5
+      checkObjectives(w)
+      expect(c.nationId).toBe("TUR")
+      expect(c.ultimatum).toBeNull()
+
+      c.ultimatum = { since: w.state.date, matches: 1 }
+      c.confidence = 1
+      afterUserResult(w, fixture(w, "SMR", "qualifier", 0, 3))
+      expect(c.nationId).toBe("TUR")
+
+      decideContract(w)
+      expect(c.nationId).toBe("TUR")
+      expect(c.history[0].left).toBeUndefined()
+    })
+
+    it("leaves a save from before the option as it was: sackable, on a normal contract", () => {
+      const old = newWorld("TUR")
+      delete old.state.career.jobSecurity
+      delete old.state.career.face
+      const w = new World(JSON.parse(JSON.stringify(old.state)) as WorldState, statics())
+      const c = w.state.career
+      expect(c.jobSecurity).toBeUndefined()
+      expect(c.contractUntil).not.toBe("2999-12-31")
+      leaveJob(w, "sacked")
+      expect(c.nationId).toBeNull()
+    })
+
+    it("still lets the manager resign, and keeps the contract with the next job", () => {
+      const { w, c } = secure()
+      leaveJob(w, "resigned")
+      expect(c.nationId).toBeNull()
+      acceptOffer(w, c.offers[0].nationId)
+      expect(c.contractUntil).toBe("2999-12-31")
+    })
   })
 })
 
