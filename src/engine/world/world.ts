@@ -36,7 +36,7 @@ import type { MatchReport, SheetSlot, Side, Tactics, TeamSheet } from "../match/
 import { advise, scoutReport, type ScoutReport } from "../match/scouting"
 import { suggestedRole, validRole } from "../match/roles"
 import { archetypeOf } from "../players/archetypes"
-import { rankingUpdate } from "../ranking"
+import { expectedResult, rankingUpdate } from "../ranking"
 import {
   aiMentality,
   aiTeamSheet,
@@ -112,6 +112,18 @@ import {
   youthObjective,
 } from "../career/career"
 import { checkMilestones } from "../career/milestones"
+import {
+  coachesMonthly,
+  coachesSeason,
+  coachResult,
+  ensureCoaches,
+  fillVacancies,
+  maybeFormerPlayer,
+} from "../career/coaches"
+import { crowdBoost, supportOf } from "../career/support"
+import { rivalry } from "./rivals"
+import { recordCleanSheets, recordMatch, recordRanks } from "./records"
+import { expireInvite, maybeInvite, seenInvite } from "./invitational"
 
 export interface WorldStatics {
   nations: NationDef[]
@@ -153,6 +165,7 @@ export class World {
       ensureStadiums(n, this.defs.get(n.id), state.date)
     }
     this.reindex()
+    ensureCoaches(this)
     ensureCareer(this)
     this.settleHeldFriendlies()
   }
@@ -517,6 +530,7 @@ export class World {
     const board = s.career.objectives.find((o) => o.agreed === false)
     if (board) return { kind: "board", objectiveId: board.id }
     if (s.pendingIntake) return { kind: "intake" }
+    if (s.invite && !s.invite.seen) return { kind: "invite" }
     return null
   }
 
@@ -551,6 +565,9 @@ export class World {
       case "intake":
         this.clearIntake()
         return true
+      case "invite":
+        seenInvite(this)
+        return true
       default:
         return false
     }
@@ -583,17 +600,21 @@ export class World {
       this.monthEnd()
       this.openStadiums()
       monthlyDrift(this)
+      coachesMonthly(this)
       // Objectives with a deadline (debuts by the year's end) are judged by date.
       checkObjectives(this)
       refreshObjectives(this)
       checkMilestones(this, true)
     }
     expireOffers(this)
+    expireInvite(this)
     checkContract(this)
+    fillVacancies(this)
     if (m === 1 && d === 1) this.yearTurn()
     if (m === 7 && d === 1) this.seasonRollover()
     if (new Date(date + "T00:00:00Z").getUTCDay() === 1) this.clubWeek()
     this.planFriendlies()
+    maybeInvite(this)
     this.callUps()
   }
 
@@ -1055,6 +1076,8 @@ export class World {
     const hosts: Side[] = []
     if (hostIds.includes(f.home)) hosts.push("home")
     if (hostIds.includes(f.away)) hosts.push("away")
+    // The user's own crowd, behind him or against him, at home.
+    const crowd = me && f.home === me && f.atHome ? crowdBoost(supportOf(this)) : 0
     return {
       hosts,
       edge: side ? { side, value: USER_EDGE.match } : undefined,
@@ -1064,11 +1087,14 @@ export class World {
       away,
       player: (id: string) => this.state.players[id],
       homeAdvantage: f.atHome,
-      homeBoost: homeBoost(this.state.nations[f.home]?.stadium ?? 3),
+      homeBoost: homeBoost(this.state.nations[f.home]?.stadium ?? 3) + crowd,
       knockout: f.knockout?.decisive
         ? { aggregate: this.aggregateFor(f), extraTime: true }
         : undefined,
-      bigMatch: DECISIVE_IMPORTANCE.includes(f.importance) || f.importance === "world-cup",
+      bigMatch:
+        DECISIVE_IMPORTANCE.includes(f.importance) ||
+        f.importance === "world-cup" ||
+        rivalry(f.home, f.away) === 2,
       seed: deriveSeed(this.state.seed, "match", f.id),
     }
   }
@@ -1117,6 +1143,7 @@ export class World {
 
     // Players: debuts and landmarks, then caps, goals, minutes and bans served.
     if (this.isUserFixture(f)) playerMoments(this, f, report)
+    recordCleanSheets(report, (id) => s.players[id])
     for (const line of report.lines) {
       const p = s.players[line.playerId]
       if (!p) continue
@@ -1143,6 +1170,7 @@ export class World {
     const home = s.nations[f.home]
     const away = s.nations[f.away]
     const shootout = r.pens ? (r.pens[0] > r.pens[1] ? "home" : "away") : undefined
+    const expHome = expectedResult(home.points, away.points)
     if (!this.def(f.home).nonFifa && !this.def(f.away).nonFifa)
       [home.points, away.points] = rankingUpdate(
         home.points,
@@ -1160,6 +1188,9 @@ export class World {
     }
     record(home, f.away, r.home, r.away, shootout ? (shootout === "home" ? "W" : "L") : undefined)
     record(away, f.home, r.away, r.home, shootout ? (shootout === "away" ? "W" : "L") : undefined)
+    recordMatch(home, f, r.home, r.away)
+    recordMatch(away, f, r.away, r.home)
+    coachResult(this, f, r.home, r.away, expHome)
 
     this.strengthCache.delete(f.home)
     this.strengthCache.delete(f.away)
@@ -1211,6 +1242,11 @@ export class World {
       n.pointsHistory.push([this.state.date, Math.round(n.points)])
       if (n.pointsHistory.length > 240) n.pointsHistory.shift()
     }
+    recordRanks(
+      this.ctx().ranked((t) => !this.def(t).nonFifa),
+      this.state.nations,
+      this.state.date
+    )
   }
 
   private playersByNation(): Map<string, Player[]> {
@@ -1226,6 +1262,7 @@ export class World {
   /** 1 July: a season of development, and the summer transfer window. */
   private seasonRollover() {
     const s = this.state
+    coachesSeason(this)
     const season = yearOf(s.date)
     const me = this.userNation
     const rng = streamFor(s.seed, "season", season)
@@ -1310,6 +1347,7 @@ export class World {
         const tier = this.clubs.get(p.clubId)?.tier ?? 5
         if (rng() < retirementChance(p, age, tier)) {
           delete s.players[p.id]
+          maybeFormerPlayer(this, p)
           if (p.caps >= 10) {
             s.retired.push({
               id: p.id,
@@ -1318,6 +1356,8 @@ export class World {
               pos: p.pos,
               caps: p.caps,
               goals: p.goals,
+              assists: p.assists,
+              cleanSheets: p.cleanSheets,
               retired: s.date,
             })
           }
@@ -1510,8 +1550,10 @@ export class World {
     if (!inst || !stage || !me) return
     const group = stage.groups?.find((g) => g.teams.includes(me))
     const tie = stage.rounds?.[0]?.ties.find((t) => t.home === me || t.away === me)
+    // An invitational's final, set by the group tables, is no draw to watch.
+    const settled = inst.kind === "invitational" && inst.stages[0]?.key !== stageKey
     // The user gets to watch his own draws.
-    if ((group && (stage.groups?.length ?? 0) > 1) || tie)
+    if (!settled && ((group && (stage.groups?.length ?? 0) > 1) || tie))
       this.state.pendingDraw = { compId, stageKey }
     if (group) {
       const others = group.teams.filter((t) => t !== me).map((t) => nationText(t))

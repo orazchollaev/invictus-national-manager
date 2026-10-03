@@ -1,12 +1,11 @@
 import type { Club, NationDef, Player, Position } from "../types"
-import { deriveSeed, makeRng, pick } from "../rng"
+import { deriveSeed, makeRng } from "../rng"
 import { addDays } from "../calendar/dates"
 import { windowsForYear } from "../calendar/windows"
-import { NAME_POOLS } from "@/data/names"
 import { roleAt } from "../players/clubs"
 import { initialNationState, World, type WorldStatics } from "./world"
 import type { WorldState } from "./types"
-import { makeOffers, refreshObjectives, setContract } from "../career/career"
+import { makeOffers, openStartingJobs, refreshObjectives, setContract } from "../career/career"
 
 export const WORLD_VERSION = 2
 
@@ -77,14 +76,6 @@ export function playersFromRows(
     }
   }
   return out
-}
-
-/** Coach names for the AI benches, from each nation's own naming culture. */
-function coachName(def: NationDef, seed: number): string {
-  const rng = makeRng(deriveSeed(seed, "coach-name", def.id))
-  const culture = def.cultures[0]?.[0] ?? "english"
-  const pool = NAME_POOLS[culture] ?? NAME_POOLS.english
-  return `${pick(rng, pool.first.split(" "))} ${pick(rng, pool.last.split(" "))}`.replace(/_/g, " ")
 }
 
 export interface NewWorldOptions {
@@ -163,7 +154,6 @@ export function createWorld(
   }
   for (const def of statics.nations) {
     const n = initialNationState(def, opts.seed, opts.start)
-    n.coach = def.id === opts.nationId ? opts.managerName : coachName(def, opts.seed)
     state.nations[def.id] = n
   }
 
@@ -179,6 +169,9 @@ export function createWorld(
   refreshObjectives(world)
   setContract(world)
   // Out of work: federations whose standing matches the chosen name call at once.
-  if (!opts.nationId) makeOffers(world, true)
+  if (!opts.nationId) {
+    openStartingJobs(world)
+    makeOffers(world, true)
+  }
   return world
 }

@@ -5,6 +5,7 @@ import playerRows from "@/data/players.json"
 import type { NationDef } from "../types"
 import { clubsFromRows, createWorld, type ClubRow, type PlayerRow } from "../world/create"
 import { makeOffers } from "../career/career"
+import { openJob } from "../career/coaches"
 import { sixMatchRounds } from "../competition/draw"
 import { pickHosts } from "../competition/defs/helpers"
 import { makeRng } from "../rng"
@@ -214,6 +215,9 @@ describe("job offers", () => {
     const w = newWorld("TUR")
     w.clearHosting()
     w.state.career.reputation = 100
+    // Offers come only from federations without a coach, and not in his first months.
+    w.state.career.since = "2025-01-01"
+    openJob(w, w.ctx().ranked()[8])
     for (let i = 0; i < 40 && !w.state.career.offers.length; i++) makeOffers(w)
     expect(w.state.career.offers.length).toBeGreaterThan(0)
     const offer = w.state.career.offers[0].nationId

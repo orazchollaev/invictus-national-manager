@@ -254,13 +254,13 @@ function trait(rng: Rng, mean = 11) {
   return Math.round(clamp(gauss(rng, mean, 3.5), 1, 20))
 }
 
-function cultureOf(entries: [string, number][], rng: Rng): string {
+export function cultureOf(entries: [string, number][], rng: Rng): string {
   const [c] = pickWeighted(rng, entries, ([, w]) => w)
   const alias = NAME_ALIASES[c]
   return alias ? cultureOf(alias, rng) : c
 }
 
-function nameFrom(culture: string, rng: Rng): [string, string] {
+export function nameFrom(culture: string, rng: Rng): [string, string] {
   const pool = NAME_POOLS[culture] ?? NAME_POOLS.english
   const first = pick(rng, pool.first.split(" ")).replace(/_/g, " ")
   const last = pick(rng, pool.last.split(" ")).replace(/_/g, " ")

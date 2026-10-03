@@ -1,5 +1,5 @@
 import type { ISODate, Player } from "../types"
-import type { CompetitionInstance, Fixture } from "../competition/types"
+import type { CompetitionInstance, Fixture, InvitationalFormat } from "../competition/types"
 import type { Formation, MatchReport, SheetSlot, Tactics } from "../match/types"
 import type { Text } from "../text"
 
@@ -18,7 +18,15 @@ export interface NationState {
   id: string
   points: number
   youthLevel: number
+  /** The head coach's name, for display ("" while the job is vacant). */
   coach: string
+  /**
+   * The head coach: a `Coach` id, `USER_COACH` for the user, or null while the job
+   * is vacant. Missing only in saves from before coaches were people.
+   */
+  coachId?: string | null
+  /** When the job fell vacant. */
+  vacantSince?: ISODate
   formation: Formation
   /** The squad named for the current window or tournament. */
   squad: string[]
@@ -37,6 +45,34 @@ export interface NationState {
   projects?: StadiumProject[]
   /** Towns for new grounds when a mod named its own (else the bundled CITIES). */
   cities?: string[]
+  /** Every match played since the game began: totals and landmarks. */
+  record?: NationRecord
+}
+
+/** A match worth remembering: the biggest win, the heaviest defeat. */
+export interface RecordMatch {
+  fixture: string
+  date: ISODate
+  opp: string
+  gf: number
+  ga: number
+}
+
+/** A nation's all-time record in the game, kept as matches are played. */
+export interface NationRecord {
+  played: number
+  won: number
+  drawn: number
+  lost: number
+  gf: number
+  ga: number
+  /** Matches without conceding. */
+  cleanSheets: number
+  biggestWin?: RecordMatch
+  heaviestDefeat?: RecordMatch
+  /** Best and worst FIFA ranking position at a month's end, with when. */
+  bestRank?: [number, ISODate]
+  worstRank?: [number, ISODate]
 }
 
 export interface Stadium {
@@ -78,6 +114,7 @@ export type NewsKind =
   | "transfer"
   | "stadium"
   | "career"
+  | "fans"
 
 export interface NewsItem {
   id: number
@@ -107,7 +144,44 @@ export interface RetiredPlayer {
   pos: string
   caps: number
   goals: number
+  assists?: number
+  cleanSheets?: number
   retired: ISODate
+}
+
+/** One job a coach held. */
+export interface CoachStint {
+  nationId: string
+  from: ISODate
+  to: ISODate | null
+  played: number
+  won: number
+  drawn: number
+  lost: number
+  left?: "sacked" | "retired"
+}
+
+/** A head coach of the AI world: hired, judged, sacked, ageing and retiring. */
+export interface Coach {
+  id: string
+  first: string
+  last: string
+  nationality: string
+  born: ISODate
+  /** 1–100: how the football world rates him; it decides which jobs he gets. */
+  reputation: number
+  /** The job he holds, or null when out of work. */
+  nationId: string | null
+  /** 0–100: his federation's patience; at the bottom he is sacked. */
+  confidence: number
+  history: CoachStint[]
+  /** First day he can take a job (a former player finishing his badges). */
+  available?: ISODate
+  retired?: ISODate
+  /** Key his face is drawn from: a former player keeps the face he played with. */
+  face: string
+  /** A former international: what he did as a player. */
+  player?: { caps: number; goals: number; pos: string }
 }
 
 export interface BoardObjective {
@@ -146,6 +220,8 @@ export interface BoardObjective {
 /** Confidence, reputation and academy level at one moment, for a before/after. */
 export interface CareerSnapshot {
   confidence: number
+  /** The fans' support (saves from before it existed have none). */
+  support?: number
   reputation: number
   youth: number
 }
@@ -194,11 +270,18 @@ export interface CareerState {
   nationId: string | null
   /** 0–100: the federation's patience. */
   confidence: number
+  /**
+   * 0–100: the fans' support. Quicker to move than the board's confidence and
+   * quicker to forget: results, the manner of them and derbies count most.
+   */
+  support?: number
   /** 1–100: how the wider football world rates the manager. */
   reputation: number
   since: ISODate
   objectives: BoardObjective[]
   offers: { nationId: string; expires: ISODate }[]
+  /** When the last offer came: a manager in work is not approached again for a while. */
+  lastOffer?: ISODate
   history: {
     nationId: string
     from: ISODate
@@ -253,6 +336,8 @@ export type Interrupt =
   | { kind: "ultimatum" }
   /** The board wants the manager's word on a new objective. */
   | { kind: "board"; objectiveId: string }
+  /** Another federation invites the user's nation to its tournament. */
+  | { kind: "invite" }
   /** The year's youngsters have come through. */
   | { kind: "intake" }
   | { kind: "news"; count: number }
@@ -272,6 +357,9 @@ export interface WorldState {
   nextNewsId: number
   honours: Record<string, Honour[]>
   retired: RetiredPlayer[]
+  /** Every AI head coach: in work, out of work or retired. */
+  coaches?: Record<string, Coach>
+  nextCoachId?: number
   career: CareerState
   /** Call-ups the user still has to make, by window/competition key. */
   pendingCallup: Interrupt | null
@@ -289,6 +377,8 @@ export interface WorldState {
   pendingUltimatum?: boolean
   /** The user's new youngsters, not yet shown. */
   pendingIntake?: { year: number; ids: string[] } | null
+  /** An invitation to another federation's tournament, waiting for an answer. */
+  invite?: TournamentInvite | null
   /**
    * Only in saves from when the user picked friendly opponents: dates still
    * waiting for a pick, settled by the federation when the save is loaded.
@@ -298,6 +388,19 @@ export interface WorldState {
   friendlyRequests: Record<ISODate, string>
   /** The user's own team selection and instructions, kept between matches. */
   userTeam: UserTeam | null
+}
+
+/** Another federation's invitational tournament, offered to the user's nation. */
+export interface TournamentInvite {
+  /** The window it would be played in (its id). */
+  window: string
+  format: InvitationalFormat
+  /** The host first, the user's nation among them. */
+  teams: string[]
+  /** The answer is needed by then. */
+  expires: ISODate
+  /** Shown to the user once; it still waits for his answer. */
+  seen?: boolean
 }
 
 /** A friendly date held back for the user (old saves only). */

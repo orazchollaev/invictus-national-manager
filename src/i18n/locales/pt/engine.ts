@@ -41,6 +41,44 @@ const engine: typeof en = {
       body: 'A federação está insatisfeita: não conseguimos cumprir: "{text}".',
     },
     friendly: "um amistoso",
+    derbyWin: {
+      title: "O clássico é de {us}",
+      body: "Vitória por {score} sobre o eterno rival, {them}, em {comp}. As ruas estão em festa.",
+    },
+    derbyLoss: {
+      title: "Derrota no clássico contra {them}",
+      body: "Derrota por {score} para {them} em {comp}. Os torcedores não vão esquecer tão cedo.",
+    },
+    derbyDraw: {
+      title: "Empate no clássico",
+      body: "{us} e {them} empataram por {score} em {comp}. Ninguém fica com o direito de se gabar.",
+    },
+    fans: {
+      angry: {
+        title: "Os torcedores se voltam contra o técnico",
+        body: "Os torcedores de {nation} deixaram clara a sua revolta. A diretoria está atenta.",
+      },
+      adore: {
+        title: "Os torcedores estão com você",
+        body: "Os torcedores de {nation} cantam o nome do técnico. O estádio vai tremer.",
+      },
+    },
+    invitational: {
+      title: "{host} vai sediar o {comp}",
+      body: "{host} recebe o {comp}, com a participação de {teams}. Começa em {date}.",
+    },
+    invite: {
+      title: "Convite de {host}",
+      body: "{host} nos convida para um torneio de {n} seleções na data FIFA que começa em {date}. Precisam de uma resposta.",
+    },
+    inviteLapsed: {
+      title: "Convite expirado",
+      body: "Não respondemos a tempo ao convite de {host}; o torneio segue sem nós.",
+    },
+    inviteOff: {
+      title: "Torneio cancelado",
+      body: "O torneio de {host} não pôde acontecer: nem todas as seleções continuam livres.",
+    },
     riot: {
       title: "{us} atropela {them}",
       body: "Vitória por {score} sobre {them} em {comp}. Os torcedores vão lembrar deste jogo.",
@@ -104,6 +142,14 @@ const engine: typeof en = {
     coachChange: {
       title: "{nation} muda de técnico",
       body: "{nation} nomeou {coach} como novo técnico.",
+    },
+    coachSacked: {
+      title: "{nation} demite {coach}",
+      body: "{nation} demitiu o técnico {coach} após uma má fase. A busca por um sucessor já começou.",
+    },
+    coachRetired: {
+      title: "{coach} se aposenta",
+      body: "{coach} deixou o comando de {nation} e se aposentou como técnico.",
     },
     offer: {
       title: "Oferta de emprego: {nation}",
@@ -464,6 +510,26 @@ const engine: typeof en = {
       name: "Taça Desafio ASEAN {year}",
       short: "Taça Desafio ASEAN",
       plain: "Taça Desafio ASEAN",
+    },
+    "inv-mar": {
+      name: "Torneio Internacional de Março {year}",
+      short: "Torneio de Março",
+      plain: "Torneio Internacional de Março",
+    },
+    "inv-jun": {
+      name: "Torneio Internacional de Junho {year}",
+      short: "Torneio de Junho",
+      plain: "Torneio Internacional de Junho",
+    },
+    "inv-sep": {
+      name: "Torneio Internacional de Outono {year}",
+      short: "Torneio de Outono",
+      plain: "Torneio Internacional de Outono",
+    },
+    "inv-nov": {
+      name: "Torneio Internacional de Novembro {year}",
+      short: "Torneio de Novembro",
+      plain: "Torneio Internacional de Novembro",
     },
     e1: {
       name: "Campeonato E-1 da EAFF {year}",

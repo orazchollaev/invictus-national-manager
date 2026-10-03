@@ -14,7 +14,7 @@ import type { CompetitionInstance, Fixture } from "../competition/types"
 import type { MatchReport } from "../match/types"
 import { addDays } from "../calendar/dates"
 import { expectedResult, IMPORTANCE_WEIGHT } from "../ranking"
-import { clamp, deriveSeed, makeRng, pick } from "../rng"
+import { clamp, deriveSeed, makeRng } from "../rng"
 import type { BoardObjective, CareerSnapshot } from "../world/types"
 import { COMPETITION_DEFS, competitionDef } from "../competition/defs"
 import { standingsOf } from "../competition/runtime"
@@ -26,6 +26,9 @@ import { leagueGroup, ORDER, outcomeFor, playedIn, reached } from "./progress"
 import { buildReview, REVIEWED, snapshotOf } from "./review"
 import { award, checkMilestones } from "./milestones"
 import { compText, lower, msg, nationText, type Msg, type Text } from "../text"
+import { monthlySupport, nudgeSupport, SUPPORT_TUNING, supportForResult } from "./support"
+import { derbyConfidence, rivalry } from "../world/rivals"
+import { atFinals, judgeCoaches, openJob, release, takeJob } from "./coaches"
 
 /** Every number that decides how hard the job is, in one place. */
 export const CAREER_TUNING = {
@@ -65,6 +68,15 @@ export const CAREER_TUNING = {
   reputationMonthly: 0.3,
   reputationSlump: 25,
   reputationLossScale: 0.5,
+  /**
+   * A manager in work is approached rarely: not in his first months, never while
+   * an offer is on the table, at most once per `offerGapDays`, and only by a
+   * nation at least `offerStepUp` places above his own.
+   */
+  offerSettleDays: 240,
+  offerGapDays: 300,
+  offerStepUp: 10,
+  offerChance: 0.25,
 } as const
 
 const T = CAREER_TUNING
@@ -619,8 +631,13 @@ export function afterUserResult(world: World, f: Fixture) {
   let actual = gf > ga ? 1 : gf < ga ? 0 : 0.5
   if (f.result.pens) actual = f.result.w === (home ? "home" : "away") ? 0.75 : 0.5
   const weight = IMPORTANCE_WEIGHT[f.importance] / 4
-  nudgeConfidence(world, (actual - expected) * weight)
+  const derby = rivalry(me, opp)
+  nudgeConfidence(
+    world,
+    (actual - expected) * weight + derbyConfidence(derby, gf > ga ? "W" : gf < ga ? "L" : "D")
+  )
   nudgeReputation(world, (actual - expected) * weight * 0.15)
+  nudgeSupport(world, supportForResult(f, me, gf, ga, actual, expected))
 
   const h = career.history[career.history.length - 1]
   if (h) {
@@ -666,8 +683,10 @@ function resultNews(
   const params = { us, them, score, comp }
   let kind = ""
   if (gf - ga >= 4) kind = "riot"
-  else if (surprise > 0.35 && gf > ga) kind = "shock"
   else if (ga - gf >= 4) kind = "humiliation"
+  // A derby is the story whatever the odds said.
+  else if (rivalry(me, opp)) kind = gf > ga ? "derbyWin" : gf < ga ? "derbyLoss" : "derbyDraw"
+  else if (surprise > 0.35 && gf > ga) kind = "shock"
   else if (surprise < -0.35 && gf < ga) kind = "embarrassing"
   if (kind)
     world.news(
@@ -722,6 +741,7 @@ export function playerMoments(world: World, f: Fixture, report: MatchReport) {
   }
   if (!debuts.length) return
   const young = debuts.filter((p) => ageOn(p.born, f.date) <= 21)
+  nudgeSupport(world, young.length * SUPPORT_TUNING.debut)
   c.debuts = (c.debuts ?? 0) + debuts.length
   c.youthDebuts = (c.youthDebuts ?? 0) + young.length
   for (const o of c.objectives)
@@ -747,11 +767,17 @@ export function afterCompetition(world: World, compId: string) {
   // Taken now: losing the job below clears the snapshots.
   const before = c.snapshots?.[compId]
   if (c.snapshots) delete c.snapshots[compId]
+  if (inst && me) fansAfterCompetition(world, inst, me)
   if (inst && me && inst.outcome.winner === me) {
     const h = c.history[c.history.length - 1]
     h?.trophies.push(compText(inst.defId, inst.year))
-    nudgeReputation(world, inst.kind === "world-cup" ? 25 : inst.kind === "continental" ? 12 : 4)
-    nudgeConfidence(world, 25)
+    // A tournament of friendlies is a nice thing to win, not a career-maker.
+    const invitational = inst.kind === "invitational"
+    nudgeReputation(
+      world,
+      inst.kind === "world-cup" ? 25 : inst.kind === "continental" ? 12 : invitational ? 1 : 4
+    )
+    nudgeConfidence(world, invitational ? 3 : 25)
     const comp = compText(inst.defId, inst.year)
     award(world, "first-trophy", msg("ms.trophy", { comp }))
     if (inst.kind === "world-cup")
@@ -762,9 +788,20 @@ export function afterCompetition(world: World, compId: string) {
   checkObjectives(world)
   if (inst && me) reviewCompetition(world, inst, me, before)
   refreshObjectives(world)
-  aiCoachChanges(world, compId)
+  judgeCoaches(world, compId)
   if (inst && (inst.kind === "world-cup" || inst.kind === "continental") && c.nationId)
     makeOffers(world)
+}
+
+/** The fans at the end of a competition: a trophy, a final, qualifying won or missed. */
+function fansAfterCompetition(world: World, inst: CompetitionInstance, me: string) {
+  const S = SUPPORT_TUNING
+  const scale = inst.kind === "invitational" ? 0.3 : 1
+  if (inst.outcome.winner === me) return nudgeSupport(world, S.trophy * scale)
+  if (inst.outcome.runnerUp === me) return nudgeSupport(world, S.final * scale)
+  if (inst.kind !== "qualifier" || !playedIn(world, inst.id, me).length) return
+  if (inst.outcome.qualified?.includes(me)) nudgeSupport(world, S.qualified)
+  else if (!inst.outcome.interconf?.includes(me)) nudgeSupport(world, S.missedOut)
 }
 
 /** The board's review of a competition the manager took part in, and his contract. */
@@ -850,7 +887,7 @@ export function leaveJob(world: World, reason: "sacked" | "expired" | "resigned"
     true,
     "/career"
   )
-  world.nation(c.nationId).coach = aiCoachName(world, c.nationId)
+  openJob(world, c.nationId)
   c.nationId = null
   c.sacked = world.state.date
   c.objectives = []
@@ -935,9 +972,13 @@ export function monthlyDrift(world: World) {
     world,
     c.confidence >= T.reputationSlump ? T.reputationMonthly : -T.reputationMonthly
   )
-  if (c.confidence === T.settle) return
-  const step = Math.min(T.driftPerMonth, Math.abs(T.settle - c.confidence))
-  nudgeConfidence(world, c.confidence < T.settle ? step : -step)
+  // The fans' mood reaches the board, after the month's fading.
+  const fans = monthlySupport(world)
+  if (c.confidence !== T.settle) {
+    const step = Math.min(T.driftPerMonth, Math.abs(T.settle - c.confidence))
+    nudgeConfidence(world, c.confidence < T.settle ? step : -step)
+  }
+  if (fans) nudgeConfidence(world, fans)
 }
 
 /**
@@ -947,13 +988,7 @@ export function monthlyDrift(world: World) {
  */
 export function atTournament(world: World): boolean {
   const me = world.state.career.nationId
-  if (!me) return false
-  return Object.values(world.state.competitions).some(
-    (inst) =>
-      inst.status === "active" &&
-      (inst.kind === "world-cup" || inst.kind === "continental") &&
-      reached(inst, me).length > 0
-  )
+  return !!me && atFinals(world, me)
 }
 
 /** Daily: a contract whose date has passed without its finals deciding it. */
@@ -964,72 +999,99 @@ export function checkContract(world: World) {
   decideContract(world)
 }
 
-function aiCoachName(world: World, nationId: string): string {
-  const rng = makeRng(deriveSeed(world.state.seed, "coach", nationId, world.state.date))
-  const others = Object.values(world.state.nations)
-    .map((n) => n.coach)
-    .filter(Boolean)
-  return pick(rng, others)
+/** Nations whose head coach's job is open, best-ranked first. */
+function vacancies(world: World): string[] {
+  return world.ctx().ranked((t) => world.state.nations[t]?.coachId === null)
 }
 
-/** AI federations lose patience too, especially after a tournament. */
-function aiCoachChanges(world: World, compId: string) {
-  const inst = world.state.competitions[compId]
-  if (
-    !inst ||
-    (inst.kind !== "world-cup" && inst.kind !== "continental" && inst.kind !== "qualifier")
+/** How far down the ranking the manager's name reaches: 0 is the very top. */
+function reachIndex(world: World): number {
+  // Reputation 100 reaches the very top; 30 reaches about the 120th-ranked nation.
+  return Math.round(world.ctx().ranked().length * (1 - world.state.career.reputation / 110))
+}
+
+/** A manager in work is open to an approach today (see `offerGapDays`). */
+function approachable(world: World): boolean {
+  const c = world.state.career
+  const date = world.state.date
+  if (atTournament(world) || c.offers.length) return false
+  if (addDays(c.since, T.offerSettleDays) > date) return false
+  return !c.lastOffer || addDays(c.lastOffer, T.offerGapDays) <= date
+}
+
+function offerJob(world: World, nationId: string) {
+  const c = world.state.career
+  if (c.offers.some((o) => o.nationId === nationId)) return
+  const expires = addDays(world.state.date, 21)
+  c.offers.push({ nationId, expires })
+  c.lastOffer = world.state.date
+  world.state.pendingOffer = nationId
+  world.news(
+    "job",
+    msg("news.offer.title", { nation: nationText(nationId) }),
+    msg("news.offer.body", { nation: nationText(nationId), date: expires }),
+    true,
+    "/career"
   )
-    return
-  const rng = makeRng(deriveSeed(world.state.seed, "sackings", compId))
-  const me = world.state.career.nationId
-  const teams = new Set(inst.stages.flatMap((s) => s.groups?.flatMap((g) => g.teams) ?? []))
-  for (const t of teams) {
-    if (t === me) continue
-    const expectedTop = rankInConfed(world, t).rank <= 8
-    const qualified = inst.kind !== "qualifier" || inst.outcome.qualified?.includes(t)
-    const chance = !qualified && expectedTop ? 0.6 : inst.outcome.winner === t ? 0.02 : 0.12
-    if (rng() < chance) {
-      world.nation(t).coach = aiCoachName(world, t)
-      world.news(
-        "job",
-        msg("news.coachChange.title", { nation: nationText(t) }),
-        msg("news.coachChange.body", { nation: nationText(t), coach: world.nation(t).coach }),
-        false
-      )
-    }
-  }
 }
 
 /**
- * Offers from federations whose standing matches the manager's reputation. A
- * manager out of work hears from smaller nations; a successful one from bigger.
+ * Offers come only from federations without a coach, whose standing matches the
+ * manager's reputation. A manager out of work hears from the smaller ones; one in
+ * work only from bigger nations than his own.
  */
 export function makeOffers(world: World, unemployed = false) {
   const c = world.state.career
-  if (c.nationId && atTournament(world)) return
+  if (c.nationId && !approachable(world)) return
   const rng = makeRng(deriveSeed(world.state.seed, "offers", world.state.date))
   const ranked = world.ctx().ranked()
   const current = c.nationId ? ranked.indexOf(c.nationId) : ranked.length
-  // Reputation 100 reaches the very top; 30 reaches about the 120th-ranked nation.
-  const reach = Math.round(ranked.length * (1 - c.reputation / 110))
-  const pool = ranked.filter(
-    (t, i) => t !== c.nationId && i >= Math.max(0, reach - 15) && (unemployed || i < current)
-  )
-  const count = unemployed ? 3 : rng() < c.reputation / 150 ? 1 : 0
-  const expires = addDays(world.state.date, 21)
-  for (let i = 0; i < count && pool.length; i++) {
-    const n = pool.splice(Math.floor(rng() * Math.min(pool.length, 12)), 1)[0]
-    if (c.offers.some((o) => o.nationId === n)) continue
-    c.offers.push({ nationId: n, expires })
-    world.state.pendingOffer = n
-    world.news(
-      "job",
-      msg("news.offer.title", { nation: nationText(n) }),
-      msg("news.offer.body", { nation: nationText(n), date: expires }),
-      true,
-      "/career"
+  const reach = reachIndex(world)
+  // Not straight back to the job he has just left.
+  const left = c.history[c.history.length - 1]
+  const justLeft = !c.nationId && left?.to === world.state.date ? left.nationId : null
+  const pool = vacancies(world).filter((t) => {
+    const i = ranked.indexOf(t)
+    return (
+      t !== c.nationId &&
+      t !== justLeft &&
+      i >= Math.max(0, reach - 15) &&
+      (unemployed || i <= current - T.offerStepUp)
     )
+  })
+  const count = unemployed ? 3 : rng() < (T.offerChance * c.reputation) / 100 ? 1 : 0
+  for (let i = 0; i < count && pool.length; i++)
+    offerJob(world, pool.splice(Math.floor(rng() * Math.min(pool.length, 12)), 1)[0])
+}
+
+/**
+ * A new game out of work: a few federations in the manager's reach are looking,
+ * so the first calls come at once.
+ */
+export function openStartingJobs(world: World) {
+  const ranked = world.ctx().ranked()
+  const reach = reachIndex(world)
+  const band = ranked.slice(Math.max(0, reach - 15), reach + 25)
+  const open = band.filter((t) => world.state.nations[t].coachId === null).length
+  const rng = makeRng(deriveSeed(world.state.seed, "starting-jobs"))
+  const taken = band.filter((t) => world.state.nations[t].coachId !== null)
+  for (let i = open; i < 3 && taken.length; i++)
+    release(world, taken.splice(Math.floor(rng() * taken.length), 1)[0])
+}
+
+/** A job has just fallen vacant: the federation may call the user first. */
+export function pitchVacancy(world: World, nationId: string) {
+  const c = world.state.career
+  if (c.nationId && !approachable(world)) return
+  const ranked = world.ctx().ranked()
+  const i = ranked.indexOf(nationId)
+  if (i < 0 || i < reachIndex(world) - 15) return
+  if (c.nationId) {
+    if (i > ranked.indexOf(c.nationId) - T.offerStepUp) return
+    const rng = makeRng(deriveSeed(world.state.seed, "pitch", nationId, world.state.date))
+    if (rng() >= (T.offerChance * c.reputation) / 100) return
   }
+  offerJob(world, nationId)
 }
 
 export function acceptOffer(world: World, nationId: string) {
@@ -1041,13 +1103,14 @@ export function acceptOffer(world: World, nationId: string) {
       h.to = date
       h.left = "moved"
     }
-    world.nation(c.nationId).coach = aiCoachName(world, c.nationId)
+    openJob(world, c.nationId)
   }
   c.nationId = nationId
   c.offers = []
   world.state.pendingOffer = null
   world.state.pendingUltimatum = false
   c.confidence = 60
+  c.support = SUPPORT_TUNING.start
   c.since = date
   c.objectives = []
   c.snapshots = {}
@@ -1064,7 +1127,7 @@ export function acceptOffer(world: World, nationId: string) {
     lost: 0,
     trophies: [],
   })
-  world.nation(nationId).coach = c.managerName
+  takeJob(world, nationId)
   world.news(
     "job",
     msg("news.newJob.title", { nation: nationText(nationId) }),
@@ -1099,5 +1162,6 @@ export function ensureCareer(world: World) {
   c.debuts ??= 0
   c.youthDebuts ??= 0
   c.unbeaten ??= 0
+  c.support ??= SUPPORT_TUNING.start
   if (c.nationId && !c.contractUntil) setContract(world)
 }

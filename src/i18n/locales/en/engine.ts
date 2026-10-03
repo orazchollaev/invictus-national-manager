@@ -40,6 +40,44 @@ const engine = {
       body: 'The federation is unhappy: we failed to "{text}".',
     },
     friendly: "a friendly",
+    derbyWin: {
+      title: "Derby day belongs to {us}",
+      body: "A {score} win over the old enemy, {them}, in {comp}. The streets are celebrating.",
+    },
+    derbyLoss: {
+      title: "Derby defeat to {them}",
+      body: "Beaten {score} by {them} in {comp}. The fans will not forget this one quickly.",
+    },
+    derbyDraw: {
+      title: "Honours even in the derby",
+      body: "{us} and {them} drew {score} in {comp}. Neither side gets the bragging rights.",
+    },
+    fans: {
+      angry: {
+        title: "The fans turn on the manager",
+        body: "Supporters of {nation} have made their anger plain. The board is listening.",
+      },
+      adore: {
+        title: "The fans are behind you",
+        body: "{nation}'s supporters are singing the manager's name. The stadium will be rocking.",
+      },
+    },
+    invitational: {
+      title: "{host} to stage the {comp}",
+      body: "{host} will host the {comp}, with {teams} taking part. It starts on {date}.",
+    },
+    invite: {
+      title: "Invitation from {host}",
+      body: "{host} invite us to a {n}-team tournament in the window starting {date}. They need an answer.",
+    },
+    inviteLapsed: {
+      title: "Invitation lapsed",
+      body: "We did not answer {host}'s invitation in time; the tournament goes ahead without us.",
+    },
+    inviteOff: {
+      title: "Tournament called off",
+      body: "{host}'s tournament could not go ahead: not every team is still free.",
+    },
     riot: {
       title: "{us} run riot against {them}",
       body: "A {score} win over {them} in {comp}. The fans will remember this one.",
@@ -103,6 +141,14 @@ const engine = {
     coachChange: {
       title: "{nation} change coach",
       body: "{nation} have appointed {coach} as their new head coach.",
+    },
+    coachSacked: {
+      title: "{nation} sack {coach}",
+      body: "{nation} have parted company with head coach {coach} after a poor run. The search for a successor has begun.",
+    },
+    coachRetired: {
+      title: "{coach} retires",
+      body: "{coach} has stepped down as head coach of {nation} and retired from coaching.",
     },
     offer: {
       title: "Job offer: {nation}",
@@ -465,6 +511,26 @@ const engine = {
       name: "ASEAN Challenge Cup {year}",
       short: "ASEAN Challenge Cup",
       plain: "ASEAN Challenge Cup",
+    },
+    "inv-mar": {
+      name: "March Invitational {year}",
+      short: "March Invitational",
+      plain: "March Invitational",
+    },
+    "inv-jun": {
+      name: "June Invitational {year}",
+      short: "June Invitational",
+      plain: "June Invitational",
+    },
+    "inv-sep": {
+      name: "Autumn Invitational {year}",
+      short: "Autumn Invitational",
+      plain: "Autumn Invitational",
+    },
+    "inv-nov": {
+      name: "November Invitational {year}",
+      short: "November Invitational",
+      plain: "November Invitational",
     },
     e1: {
       name: "EAFF E-1 Championship {year}",
