@@ -22,6 +22,11 @@ export const ASIA: Record<string, NamePool> = {
       "Eldor Abbosbek Jaloliddin Otabek Oston Khojimat Abdukodir Dostonbek Umar Azizbek Odiljon Jamshid Sherzod Bakhodir Islom Rustam Timur Baktiyar Islambek Maxat Askhat Nurbol Yerkebulan Daniyar Baurzhan Azamat Aidos Kairat Ernist Gulzhigit Mirlan Farkhat Tokhir Ruslan Didar",
     last: "Shomurodov Fayzullaev Masharipov Khusanov Urunov Erkinov Khamrobekov Ashurmatov Nasrullaev Nematov Alikulov Yusupov Rakhimov Tursunov Karimov Rashidov Abdullaev Ergashev Sultanov Zhaksylykov Vorogovskiy Tagybergen Samorodov Zeinulla Seitkhanov Kuat Islamkhan Abdulla Aliyev Kichin Musabekov Alykulov Sagynbaev Alimbekov Murzaev Mishchenko Dzhalilov Nazarov Barotov Umarbayev Soyunov Annaorazov Orazov",
   },
+  turkmen: {
+    first:
+      "Arslanmyrat Altymyrat Ahmet Abdy Atamyrat Annageldi Agajan Azat Batyr Bayramgeldi Begench Begmyrat Bahtiyar Didar Dowlet Dowletmyrat Elman Eziz Gurban Gurbangeldi Guwanch Hojamyrat Ilyas Kerim Kakajan Maksat Mekan Merdan Mergen Myrat Myratberdi Nazar Nurmuhammet Nurmyrat Oraz Orazberdi Orazmyrat Resul Rahman Ruslan Rustam Selim Serdar Shamil Shamyrat Shatlyk Teymur Wahyt Wepa Wezirgeldi Yhlas Ylham Dayanch Babageldi Durdy Mammet Sapar Atajan Bayram",
+    last: "Amanov Annaorazov Annadurdyyev Annayev Atayev Abylov Akmammedov Allaberdiyev Annamyradov Babayev Bashimov Bayramov Berdiyev Charyyev Durdyyev Ezizov Garayev Gurbanov Gylyjov Hallyyev Hojayev Hydyrov Kakayev Magtymov Mammedov Myradov Nazarov Orazov Orazsahedov Owezov Rahmanov Saparov Saryyev Tagayev Tachmyradov Yagshyyev Yazmyradov Ylyasov Agayev Begenchov Gurbanmyradov Annagurbanov Jumayev Kurbanov Nurmyradov Sahatov Allanazarov Gochmyradov",
+  },
   japanese: {
     first:
       "Takumi Kaoru Daichi Ritsu Hiroki Takefusa Wataru Ko Ayase Kyogo Daizen Shogo Yuto Keito Kodai Takehiro Zion Yukinari Junya Takuma Kota Sota Riku Haruto Ren Yuki Hayato Shota Kaito Taisei Kento Yusuke Kenta Ryo Naoki Sho Yuma Koki Hiroto Akira",

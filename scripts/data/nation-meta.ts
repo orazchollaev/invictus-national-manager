@@ -191,7 +191,7 @@ KUW kw WAFF,GULF,UAFA arabic-gulf:100
 PHI ph AFF filipino:70,english:15,spanish:15
 MAS my AFF malay:85,south-asian:15
 IND in SAFF south-asian:100
-TKM tm CAFA central-asian:100
+TKM tm CAFA turkmen:100
 YEM ye WAFF,GULF,UAFA arabic-gulf:100
 SGP sg AFF malay:60,chinese:25,south-asian:15
 HKG hk EAFF chinese:90,english:10
