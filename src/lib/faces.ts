@@ -8,7 +8,8 @@
  * the role: players are drawn young, coaches with lines, grey and thinning hair.
  * A former international keeps his base when he becomes a coach.
  */
-import { display, faceToSvgString, type FaceConfig } from "facesjs"
+import { display, faceToSvgString, svgsIndex, type FaceConfig } from "facesjs"
+import type { FaceEdit } from "@/engine/types"
 import { NAME_ALIASES, NAME_POOLS } from "@/data/names"
 import { CULTURE_LOOKS, NATION_LOOKS, TELLING_LOOKS, type Look } from "@/data/looks"
 import { deriveSeed, makeRng, pick, pickWeighted, type Rng } from "@/engine/rng"
@@ -25,6 +26,8 @@ export interface FaceSubject {
   role: FaceRole
   /** The nation's colour, for the shirt. */
   color?: string
+  /** Features set by hand over the drawn face (a mod's edits). */
+  edit?: FaceEdit
 }
 
 interface LookStyle {
@@ -398,7 +401,99 @@ function shade(hex: string, f: number): string {
   return `#${c.map((v) => v.toString(16).padStart(2, "0")).join("")}`
 }
 
+/** The face drawn for a subject, with any hand edits laid over it. */
 export function buildFace(s: FaceSubject): FaceConfig {
+  const face = drawFace(s)
+  return s.edit ? applyEdit(face, s.edit) : face
+}
+
+// ── Hand edits ──────────────────────────────────────────────────────────────
+
+/** Features picked from a list of facesjs ids. */
+export const FACE_FEATURES = [
+  "hair",
+  "head",
+  "ear",
+  "eye",
+  "eyebrow",
+  "nose",
+  "mouth",
+  "facialHair",
+  "glasses",
+  "eyeLine",
+  "smileLine",
+  "miscLine",
+] as const
+export type FaceFeature = (typeof FACE_FEATURES)[number]
+
+/** The ids a feature can take: facesjs's own, without its women's variants. */
+export function faceOptions(feature: FaceFeature): string[] {
+  return svgsIndex[feature].filter((id) => !id.startsWith("female"))
+}
+
+const luma = (hex: string) => {
+  const n = parseInt(hex.slice(1, 7), 16)
+  return ((n >> 16) & 255) + ((n >> 8) & 255) + (n & 255)
+}
+const lightToDark = (a: string, b: string) => luma(b) - luma(a)
+
+/** The skin tones and hair colours the game draws from, for the editor's swatches. */
+export const SKIN_TONES = [...new Set(Object.values(STYLES).flatMap((s) => s.skin))].sort(
+  lightToDark
+)
+export const HAIR_COLORS = [
+  ...new Set([...Object.values(STYLES).flatMap((s) => s.hair.map(([c]) => c)), ...GREYS]),
+].sort(lightToDark)
+
+const HEX = /^#[0-9a-f]{6}$/i
+
+/** What a value from outside (a mod file) may say about a face; anything else is dropped. */
+export function sanitizeFaceEdit(raw: unknown): FaceEdit {
+  const out: FaceEdit = {}
+  if (!raw || typeof raw !== "object") return out
+  const r = raw as Record<string, unknown>
+  for (const f of FACE_FEATURES) {
+    const v = r[f]
+    if (typeof v === "string" && faceOptions(f).includes(v)) out[f] = v
+  }
+  for (const f of ["skin", "hairColor"] as const) {
+    const v = r[f]
+    if (typeof v === "string" && HEX.test(v)) out[f] = v.toLowerCase()
+  }
+  if (typeof r.fatness === "number" && Number.isFinite(r.fatness))
+    out.fatness = round2(Math.min(1, Math.max(0, r.fatness)))
+  return out
+}
+
+/** One edit field read off a face, as the editor shows it. */
+export function faceValue(face: FaceConfig, key: keyof FaceEdit): string | number {
+  switch (key) {
+    case "skin":
+      return face.body.color
+    case "hairColor":
+      return face.hair.color
+    case "fatness":
+      return face.fatness
+    default:
+      return face[key].id
+  }
+}
+
+function applyEdit(face: FaceConfig, e: FaceEdit): FaceConfig {
+  const f = structuredClone(face)
+  if (e.skin) f.body.color = e.skin
+  if (e.hairColor) f.hair.color = e.hairColor
+  if (e.hair) {
+    f.hair.id = e.hair
+    // The hair behind the head follows the style, as when it is drawn.
+    f.hairBg.id = e.hair === "longHair" ? "longHair" : e.hair.startsWith("shaggy") ? "shaggy" : "none"
+  }
+  for (const k of FACE_FEATURES) if (k !== "hair" && e[k]) f[k].id = e[k]
+  if (e.fatness !== undefined) f.fatness = e.fatness
+  return f
+}
+
+function drawFace(s: FaceSubject): FaceConfig {
   const style = STYLES[lookOf(s)]
   // The base: the same for the player and for the coach he becomes.
   const b = makeRng(deriveSeed(0, "face-base", s.key))
@@ -512,7 +607,7 @@ const CROPS: Record<Exclude<FaceCrop, "full">, string> = {
 }
 
 export function faceSvg(s: FaceSubject, crop: FaceCrop = "full"): string {
-  const id = `${s.role}|${s.key}|${s.nationId}|${s.color ?? ""}|${crop}`
+  const id = `${s.role}|${s.key}|${s.nationId}|${s.color ?? ""}|${crop}|${s.edit ? JSON.stringify(s.edit) : ""}`
   let svg = cache.get(id)
   if (!svg) {
     svg = render(buildFace(s))

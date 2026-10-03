@@ -1,4 +1,4 @@
-import type { Club, NationDef, Player, Position } from "../types"
+import type { Club, FaceEdit, NationDef, Player, Position } from "../types"
 import { deriveSeed, makeRng } from "../rng"
 import { addDays } from "../calendar/dates"
 import { windowsForYear } from "../calendar/windows"
@@ -22,6 +22,8 @@ export type PlayerRow = [
   number,
   string,
   string,
+  /** Face features set by hand; rows without them (older mods, the bundled data) draw it from the id. */
+  FaceEdit?,
 ]
 export type ClubRow = [string, string, string, number]
 
@@ -37,7 +39,7 @@ export function playersFromRows(
   const rng = makeRng(deriveSeed(seed, "hydrate"))
   const out: Player[] = []
   for (const [nationId, rows] of Object.entries(byNation)) {
-    for (const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId] of rows) {
+    for (const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId, face] of rows) {
       const [professionalism, ambition, temperament, consistency, bigMatch, injuryProne, loyalty] =
         pers.split(",").map(Number)
       const tier = clubs.get(clubId)?.tier ?? 5
@@ -62,6 +64,7 @@ export function playersFromRows(
           injuryProne,
           loyalty,
         },
+        ...(face && Object.keys(face).length ? { face } : {}),
         clubId,
         role,
         form: Math.round((rng() * 4 - 2) * 10) / 10,

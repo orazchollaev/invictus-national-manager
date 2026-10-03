@@ -4,10 +4,11 @@ import type { Player } from "@/engine/types"
 import type { Coach } from "@/engine/world/types"
 import { faceSvg, type FaceSubject } from "@/lib/faces"
 import { nationDef } from "@/modules/world/services/statics"
+import { useWorldStore } from "@/modules/world/store"
 
 const props = withDefaults(
   defineProps<{
-    player?: Pick<Player, "id" | "last" | "nationId"> | null
+    player?: Pick<Player, "id" | "last" | "nationId" | "face"> | null
     coach?: Pick<Coach, "face" | "last" | "nationality" | "nationId"> | null
     /** The user: his name, nationality, the job he holds, the save's seed and the face he chose. */
     manager?: {
@@ -27,11 +28,16 @@ const props = withDefaults(
   { player: null, coach: null, manager: null, size: 96, head: false, round: false }
 )
 
+const world = useWorldStore()
+
 function subject(): FaceSubject | null {
   if (props.player) {
     const def = nationDef(props.player.nationId)
+    // A short record (id, name, nation) carries no face edits of its own: ask the world.
+    const edit = props.player.face ?? world.world?.state.players[props.player.id]?.face
     return {
       key: props.player.id,
+      edit,
       last: props.player.last,
       nationId: props.player.nationId,
       cultures: def?.cultures ?? [],

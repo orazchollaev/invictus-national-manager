@@ -55,6 +55,30 @@ export interface PlayerSeason {
   goals: number
 }
 
+/**
+ * A face edited by hand: each field replaces one feature of the face drawn from the
+ * player's id and leaves the others as they were. Ids are facesjs feature ids.
+ */
+export interface FaceEdit {
+  /** Skin and hair colours as `#rrggbb`. */
+  skin?: string
+  hairColor?: string
+  hair?: string
+  head?: string
+  ear?: string
+  eye?: string
+  eyebrow?: string
+  nose?: string
+  mouth?: string
+  facialHair?: string
+  glasses?: string
+  eyeLine?: string
+  smileLine?: string
+  miscLine?: string
+  /** 0 (lean) … 1 (heavy). */
+  fatness?: number
+}
+
 export interface Player {
   id: string
   nationId: string
@@ -70,6 +94,8 @@ export interface Player {
   /** Potential ability, 1–99. Development pulls `ca` toward it. */
   pa: number
   pers: Personality
+  /** Features of his face a mod set by hand; the rest is drawn from his id. */
+  face?: FaceEdit
   clubId: string
   role: ClubRole
   /** Recent club form, −5 (awful) … +5 (superb). */

@@ -3,8 +3,16 @@
  * player, with the grounds and towns of each nation. It is written once from the
  * bundled data and then edited; a new career can start from it instead.
  */
-import { CONFEDS, POSITIONS, type Confed, type NationDef, type Position } from "@/engine/types"
+import {
+  CONFEDS,
+  POSITIONS,
+  type Confed,
+  type FaceEdit,
+  type NationDef,
+  type Position,
+} from "@/engine/types"
 import type { ClubRow, PlayerRow } from "@/engine/world/create"
+import { sanitizeFaceEdit } from "@/lib/faces"
 
 export const MOD_FORMAT = "invictus-mod"
 export const MOD_VERSION = 1
@@ -56,6 +64,8 @@ export interface PlayerEdit {
   pa: number
   pers: number[]
   clubId: string
+  /** Face features set in the editor; the rest is drawn from the id. */
+  face?: FaceEdit
 }
 
 export interface ClubEdit {
@@ -81,7 +91,7 @@ export function newModId(): string {
 }
 
 export function editFromRow(nationId: string, row: PlayerRow): PlayerEdit {
-  const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId] = row
+  const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId, face] = row
   return {
     id,
     nationId,
@@ -95,6 +105,7 @@ export function editFromRow(nationId: string, row: PlayerRow): PlayerEdit {
     pa,
     pers: pers.split(",").map(Number),
     clubId,
+    face,
   }
 }
 
@@ -106,7 +117,7 @@ export function rowFromEdit(p: PlayerEdit): PlayerRow {
   // A player known by one name keeps it as his surname, where every list reads it.
   const first = p.first.trim()
   const last = p.last.trim()
-  return [
+  const row: PlayerRow = [
     p.id,
     last ? first : "",
     last || first,
@@ -119,6 +130,10 @@ export function rowFromEdit(p: PlayerEdit): PlayerRow {
     PERSONALITY.map((_, i) => Math.round(clamp(p.pers[i] ?? 10, 1, 20))).join(","),
     p.clubId,
   ]
+  // Rows keep their old eleven columns unless a face was edited.
+  const face = sanitizeFaceEdit(p.face)
+  if (Object.keys(face).length) row.push(face)
+  return row
 }
 
 /** Age in whole years on a date. */
@@ -218,6 +233,7 @@ export function normalizeMod(raw: unknown, base: NationDef[]): ModData {
           pa: Number(pa),
           pers: isStr(pers) ? pers.split(",").map(Number) : [],
           clubId: isStr(clubId) && clubIds.has(clubId) ? clubId : clubOf(nationId),
+          face: r[11],
         })
       )
     }

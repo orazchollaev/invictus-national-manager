@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import nations from "@/data/nations.json"
 import type { NationDef } from "@/engine/types"
-import type { PlayerRow } from "@/engine/world/create"
+import { playersFromRows, type PlayerRow } from "@/engine/world/create"
 import {
   MOD_FORMAT,
   MOD_VERSION,
@@ -70,6 +70,36 @@ describe("player rows", () => {
   it("ages on a date", () => {
     expect(ageOn("2007-07-13", "2026-09-01")).toBe(19)
     expect(ageOn("2007-09-02", "2026-09-01")).toBe(18)
+  })
+
+  it("carry the face features edited by hand as a twelfth column, and only then", () => {
+    const p = editFromRow("ESP", row)
+    expect(p.face).toBeUndefined()
+    p.face = { hair: "afro", hairColor: "#1C1008", eye: "eye7", fatness: 0.4 }
+    const r = rowFromEdit(p)
+    expect(r).toHaveLength(12)
+    expect(r[11]).toEqual({ hair: "afro", hairColor: "#1c1008", eye: "eye7", fatness: 0.4 })
+    expect(editFromRow("ESP", r).face).toEqual(r[11])
+    p.face = {}
+    expect(rowFromEdit(p)).toHaveLength(11)
+  })
+
+  it("drop face edits the game does not know", () => {
+    const p = editFromRow("ESP", row)
+    p.face = { hair: "no-such-hair", skin: "red", fatness: 7, nose: "female1", mouth: "smile" }
+    expect(rowFromEdit(p)[11]).toEqual({ fatness: 1, mouth: "smile" })
+  })
+
+  it("reach the players of a new world", () => {
+    const clubs = new Map([["esp-1-1", { id: "esp-1-1", name: "B", nationId: "ESP", tier: 1 }]])
+    const withFace = [...row.slice(0, 11), { hair: "afro" }] as unknown as PlayerRow
+    const [a, b] = playersFromRows(
+      { ESP: [withFace, ["esp1", ...row.slice(1)] as PlayerRow] },
+      clubs,
+      1
+    )
+    expect(a.face).toEqual({ hair: "afro" })
+    expect(b.face).toBeUndefined()
   })
 })
 

@@ -13,6 +13,7 @@ import {
 import { POSITIONS, type Position } from "@/engine/types"
 import { START_DATE } from "@/data/start"
 import { showConfirm } from "@/composables/useDialog"
+import FaceEditor from "./FaceEditor.vue"
 import { useModsStore } from "@/modules/mods/store"
 import { PERSONALITY, ageOn, type PlayerEdit } from "@/modules/mods/utils/format"
 
@@ -57,6 +58,13 @@ const FOOT = computed(() => [
 const age = computed(() =>
   /^\d{4}-\d{2}-\d{2}$/.test(draft.born) ? ageOn(draft.born, START_DATE) : null
 )
+
+/** Who the face is drawn for: his id, surname and nation decide what it starts as. */
+const faceOwner = computed(() => ({
+  id: draft.id,
+  last: draft.last.trim() || draft.first.trim(),
+  nationId: draft.nationId,
+}))
 
 function toggleAlt(p: Position) {
   const i = draft.alt.indexOf(p)
@@ -165,6 +173,9 @@ async function remove() {
       <AppField v-for="(key, i) in PERSONALITY" :key="key" :label="t(`mods.player.pers.${key}`)">
         <AppNumberInput v-model="draft.pers[i]" :min="1" :max="20" size="sm" editable />
       </AppField>
+
+      <h3 class="section">{{ t("mods.player.face") }}</h3>
+      <FaceEditor v-model="draft.face" :player="faceOwner" />
 
       <AppButton v-if="!isNew" variant="danger" size="sm" class="delete" @click="remove">
         <Trash2 :size="14" />
