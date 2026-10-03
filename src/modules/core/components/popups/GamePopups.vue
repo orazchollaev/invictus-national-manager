@@ -2,7 +2,7 @@
 /**
  * News that stops the calendar and must be seen wherever the user is: a final
  * warning, a job offer, the nation being awarded a tournament, the board's new
- * objective, the year's youngsters. Held back during a live match, a draw, a
+ * objective, the year's youngsters, another federation's invitation. Held back during a live match, a draw, a
  * call-up and the full-screen career pages, which are finished first. Choices the
  * user handed to the assistant are not shown.
  */
@@ -13,6 +13,7 @@ import { useSettingsStore } from "@/modules/settings/store"
 import BoardMeetingSheet from "./BoardMeetingSheet.vue"
 import HostingSheet from "./HostingSheet.vue"
 import IntakeSheet from "./IntakeSheet.vue"
+import InviteSheet from "./InviteSheet.vue"
 import JobOfferSheet from "./JobOfferSheet.vue"
 import UltimatumSheet from "./UltimatumSheet.vue"
 
@@ -41,6 +42,7 @@ const board = world.derive(
   null
 )
 const intake = world.derive((w) => !!w.state.pendingIntake, false)
+const invite = world.derive((w) => !!w.state.invite && !w.state.invite.seen, false)
 </script>
 
 <template>
@@ -54,5 +56,6 @@ const intake = world.derive((w) => !!w.state.pendingIntake, false)
       :objective-id="board"
     />
     <IntakeSheet v-else-if="intake && settings.showIntake" key="intake" />
+    <InviteSheet v-else-if="invite" key="invite" />
   </template>
 </template>

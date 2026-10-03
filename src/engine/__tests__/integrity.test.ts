@@ -114,8 +114,15 @@ describe("tournament integrity", { timeout: 600000 }, () => {
       const tables = standings(inst, g)
       const into = new Set(teamsOf(k))
       checked++
-      for (const t of tables)
-        expect(into.has(t[0].team), `${inst.id} winner ${t[0].team}`).toBe(true)
+      // The winner, or one dead level with it on points, difference and goals: such a
+      // tie fell to the ranking on the day of the draw, which has moved on since.
+      for (const t of tables) {
+        const level = t.filter((r) => r.pts === t[0].pts && r.gd === t[0].gd && r.gf === t[0].gf)
+        expect(
+          level.some((r) => into.has(r.team)),
+          `${inst.id} winner ${t[0].team}`
+        ).toBe(true)
+      }
       // Of the third-placed teams (or runners-up), those that went on beat those that did not.
       for (const pos of [1, 2]) {
         const row = tables.map((t) => t[pos]).filter(Boolean)

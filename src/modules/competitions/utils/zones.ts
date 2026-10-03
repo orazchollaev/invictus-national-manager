@@ -125,6 +125,11 @@ export function zonesFor(
   const last = (zone: Zone, ...top: (Zone | null)[]) =>
     z(...top, ...Array<null>(Math.max(0, size - 1 - top.length)).fill(null), zone)
 
+  // Invitational tournaments (defs/invitational.ts): the league is the result; group
+  // winners play the final, runners-up for third place.
+  if (inst.kind === "invitational")
+    return inst.invitational?.format === "league" ? z("champion") : z("advance", "third")
+
   switch (inst.defId) {
     // Nations Leagues (see defs/nationsLeague.ts).
     case "unl":

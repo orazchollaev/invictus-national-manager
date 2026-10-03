@@ -8,16 +8,31 @@ import { NationFlag } from "@/modules/nations/components/badge"
 import { nationName } from "@/i18n/text"
 import { formatDate } from "@/i18n/dates"
 import { useWorldStore } from "@/modules/world/store"
+import { SUPPORT_TUNING } from "@/engine/career/support"
+import { rivalsOf } from "@/engine/world/rivals"
 
 const { t } = useI18n()
 const world = useWorldStore()
 const career = world.derive((w) => w.state.career, null)
 const objectives = computed(() => [...(career.value?.objectives ?? [])].reverse())
 
-const tone = computed(() => {
-  const c = career.value?.confidence ?? 50
-  return c >= 60 ? "var(--success)" : c >= 35 ? "var(--warning)" : "var(--danger)"
-})
+const toneOf = (v: number) =>
+  v >= 60 ? "var(--success)" : v >= 35 ? "var(--warning)" : "var(--danger)"
+const tone = computed(() => toneOf(career.value?.confidence ?? 50))
+const support = computed(() => Math.round(career.value?.support ?? SUPPORT_TUNING.start))
+const supportTone = computed(() => toneOf(support.value))
+const supportMood = computed(() =>
+  support.value > SUPPORT_TUNING.high
+    ? "adore"
+    : support.value >= 55
+      ? "happy"
+      : support.value >= 40
+        ? "patient"
+        : support.value >= SUPPORT_TUNING.low
+          ? "restless"
+          : "angry"
+)
+const rivals = computed(() => (career.value?.nationId ? rivalsOf(career.value.nationId) : []))
 </script>
 
 <template>
@@ -38,6 +53,20 @@ const tone = computed(() => {
             <span :style="{ width: `${career.confidence}%`, background: tone }"></span>
           </div>
         </div>
+      </div>
+      <div class="meter">
+        <div class="meter-head">
+          <span>{{ t("career.support") }}</span>
+          <strong :style="{ color: supportTone }">{{ support }}%</strong>
+        </div>
+        <div class="bar">
+          <span :style="{ width: `${support}%`, background: supportTone }"></span>
+        </div>
+        <p class="mood">{{ t(`career.mood.${supportMood}`) }}</p>
+      </div>
+      <div v-if="rivals.length" class="rivals">
+        <span class="muted">{{ t("career.rivals") }}</span>
+        <NationFlag v-for="r in rivals" :id="r.id" :key="r.id" :size="16" name="short" link />
       </div>
       <div class="facts">
         <div class="fact">
@@ -97,6 +126,20 @@ const tone = computed(() => {
   border-radius: var(--radius-pill);
   background: var(--border-light);
   overflow: hidden;
+}
+
+.mood {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.rivals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
 }
 
 .bar span {

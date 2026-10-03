@@ -23,7 +23,7 @@ import {
   type Modifiers,
 } from "../players/archetypes"
 import { ROLE_SUIT_BONUS, combineStyle, suitsRole, validRole, type Role } from "./roles"
-import { instructionsOf, meet, styleOf } from "./matchup"
+import { instructionsOf, playOf } from "./matchup"
 import { BOND_LIMITS, BOND_POINTS, bondBetween } from "../players/bonds"
 import { LANES, laneAffinity, laneOfSlot, mirror, widthBias } from "./lanes"
 import { FORMATIONS } from "./formations"
@@ -454,7 +454,7 @@ function units(state: MatchState, side: LiveSide, opp: LiveSide, isHome: boolean
   const short = 1 - missing * 0.06
   const m = side.tactics.mentality
   const press = side.tactics.pressing - 1
-  const play = meet(styleOf(side.tactics), styleOf(opp.tactics))
+  const play = playOf(side.tactics, opp.tactics)
   const edge = state.setup.edge
   const home =
     (isHome && state.setup.homeAdvantage ? (state.setup.homeBoost ?? HOME_BOOST) : 0) +

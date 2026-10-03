@@ -4,10 +4,17 @@ import { World } from "@/engine/world/world"
 import { createWorld } from "@/engine/world/create"
 import type { Interrupt, UserTeam, WorldState } from "@/engine/world/types"
 import type { HostLevel } from "@/engine/world/stadiums"
-import type { Fixture } from "@/engine/competition/types"
+import type { Fixture, InvitationalFormat } from "@/engine/competition/types"
 import type { MatchReport } from "@/engine/match/types"
 import { acceptOffer, declineOffer, resign, setAmbition } from "@/engine/career/career"
 import { pickSquad } from "@/engine/ai/squad"
+import {
+  acceptInvite,
+  createInvitational,
+  declineInvite,
+  seenInvite,
+  type SetupProblem,
+} from "@/engine/world/invitational"
 import { randomSeed } from "@/engine/rng"
 import { START_DATE } from "@/data/start"
 import {
@@ -336,6 +343,39 @@ export const useWorldStore = defineStore(
       settled("intake")
     }
 
+    /**
+     * Set up the user's own invitational tournament, his nation hosting. Returns the
+     * new competition's id, or what stopped it.
+     */
+    function hostInvitational(
+      windowId: string,
+      guests: string[],
+      format: InvitationalFormat
+    ): { id: string } | { problem: SetupProblem } {
+      const w = world.value
+      const me = w?.state.career.nationId
+      if (!w || !me) return { problem: "window" }
+      const out = createInvitational(w, windowId, [me, ...guests], format)
+      touch()
+      void autoSave()
+      return out
+    }
+
+    /** Answer another federation's invitation. */
+    function answerInvite(yes: boolean): { id: string } | { problem: SetupProblem } | null {
+      const w = world.value
+      if (!w?.state.invite) return null
+      const out = yes ? acceptInvite(w) : (declineInvite(w), null)
+      settled("invite")
+      return out
+    }
+
+    /** The invitation popup was closed without an answer: it waits on its page. */
+    function seenInvitation() {
+      if (world.value) seenInvite(world.value)
+      settled("invite")
+    }
+
     function toggleWatch(playerId: string) {
       world.value?.toggleWatch(playerId)
       touch()
@@ -404,6 +444,9 @@ export const useWorldStore = defineStore(
       seenSacked,
       seenUltimatum,
       seenIntake,
+      hostInvitational,
+      answerInvite,
+      seenInvitation,
       toggleWatch,
       setBid,
       markRead,

@@ -82,6 +82,8 @@ export interface Player {
   caps: number
   goals: number
   assists: number
+  /** International matches kept clean in goal (a goalkeeper who played at least an hour). */
+  cleanSheets?: number
   /** Retired from international football but still playing for a club. */
   intlRetired?: boolean
   /** Last time he was named in a national squad. */

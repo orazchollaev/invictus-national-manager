@@ -7,6 +7,7 @@ import { AppButton, AppSectionHeader } from "@/components/ui"
 import { PageShell, StickyCta } from "@/modules/core/components"
 import {
   GroupSnapshot,
+  InvitationalHint,
   MatchStrip,
   NextMatchCard,
   QuickActions,
@@ -158,6 +159,7 @@ const cta = computed(() => {
 
     <NextMatchCard v-if="me" />
     <MatchStrip v-if="me" />
+    <InvitationalHint v-if="me" />
     <QuickActions v-if="me" />
     <GroupSnapshot v-if="me" />
 

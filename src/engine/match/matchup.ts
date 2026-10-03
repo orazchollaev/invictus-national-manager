@@ -194,6 +194,27 @@ export function midEdge(a: PlayStyle, o: PlayStyle): number {
 }
 
 /** The whole effect on `own` of meeting `opp`: its own instructions and the matchup. */
+/** What a style is made of: everything `styleOf` reads (not the mentality). */
+function styleKey(t: Tactics): string {
+  return `${t.formation}/${t.tempo}${t.pressing}${t.line ?? 1}${t.width ?? 1}${t.counter ? 1 : 0}`
+}
+
+const meetings = new Map<string, Multipliers>()
+
+/**
+ * `meet(styleOf(own), styleOf(opp))`, remembered: the match engine asks every
+ * minute for both sides, and the answer only changes when a style does. Read-only.
+ */
+export function playOf(own: Tactics, opp: Tactics): Readonly<Multipliers> {
+  const key = styleKey(own) + "|" + styleKey(opp)
+  let hit = meetings.get(key)
+  if (!hit) {
+    if (meetings.size > 20000) meetings.clear()
+    meetings.set(key, (hit = meet(styleOf(own), styleOf(opp))))
+  }
+  return hit
+}
+
 export function meet(own: PlayStyle, opp: PlayStyle): Multipliers {
   const self = ownEffect(own)
   return {

@@ -108,7 +108,25 @@ export interface CompetitionOutcome {
 }
 
 export type CompetitionKind =
-  "world-cup" | "continental" | "qualifier" | "nations-league" | "regional" | "super-cup"
+  | "world-cup"
+  | "continental"
+  | "qualifier"
+  | "nations-league"
+  | "regional"
+  | "super-cup"
+  | "invitational"
+
+/** How an invitational tournament is played: 4 or 8 teams in one FIFA window. */
+export type InvitationalFormat = "knockout" | "league" | "groups"
+
+/** What an invitational tournament was set up with. */
+export interface InvitationalSetup {
+  /** The window it is played in (its id: the window's first day). */
+  window: string
+  format: InvitationalFormat
+  /** Every team taking part, the host first. */
+  teams: string[]
+}
 
 export interface CompetitionInstance {
   id: string
@@ -126,6 +144,8 @@ export interface CompetitionInstance {
   end: ISODate
   stages: StageState[]
   outcome: CompetitionOutcome
+  /** An invitational tournament's teams and format. */
+  invitational?: InvitationalSetup
 }
 
 export interface Standing {

@@ -3,13 +3,14 @@ import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
 import { ClipboardList } from "@lucide/vue"
-import { AppButton } from "@/components/ui"
+import { AppButton, AppChip } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
 import { daysBetween } from "@/engine/calendar/dates"
 import { formatDate } from "@/i18n/dates"
 import type { Fixture } from "@/engine/competition/types"
 import { venueOf } from "@/engine/world/stadiums"
+import { rivalry } from "@/engine/world/rivals"
 
 const { t } = useI18n()
 const router = useRouter()
@@ -48,6 +49,7 @@ const meta = world.derive((w) => {
     awayRank: w.fifaRank(f.away),
     venue,
     ground: ground ? `${ground.name}, ${ground.city}` : "",
+    derby: rivalry(f.home, f.away),
   }
 }, null)
 
@@ -78,7 +80,10 @@ const countdown = computed(() => {
   <section v-else class="next">
     <div class="next-head">
       <span class="eyebrow">{{ t("core.nextMatch.eyebrow") }}</span>
-      <span class="countdown">{{ countdown }}</span>
+      <span class="head-right">
+        <AppChip v-if="meta.derby" variant="danger">{{ t("core.nextMatch.derby") }}</AppChip>
+        <span class="countdown">{{ countdown }}</span>
+      </span>
     </div>
     <div class="comp">
       {{ meta.compInst ? $comp(meta.compInst) : t("core.nextMatch.friendly") }}
@@ -135,6 +140,12 @@ const countdown = computed(() => {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
+}
+
+.head-right {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
 }
 
 .countdown {

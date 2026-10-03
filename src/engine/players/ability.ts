@@ -9,11 +9,18 @@ export function positionGroup(pos: Position): PositionGroup {
 
 /** Whole years between `born` and `on`. */
 export function ageOn(born: ISODate, on: ISODate): number {
-  const [by, bm, bd] = born.split("-").map(Number)
-  const [y, m, d] = on.split("-").map(Number)
-  let age = y - by
-  if (m < bm || (m === bm && d < bd)) age--
-  return age
+  // Read straight from the characters: this runs for every player every week and in
+  // every squad sort, and splitting the strings was a fifth of the whole day loop.
+  const age = num(on, 0, 4) - num(born, 0, 4)
+  return num(on, 5, 2) * 100 + num(on, 8, 2) < num(born, 5, 2) * 100 + num(born, 8, 2)
+    ? age - 1
+    : age
+}
+
+function num(s: string, at: number, len: number): number {
+  let n = 0
+  for (let i = at; i < at + len; i++) n = n * 10 + s.charCodeAt(i) - 48
+  return n
 }
 
 /**

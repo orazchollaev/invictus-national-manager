@@ -9,6 +9,7 @@ import type { World } from "../world/world"
 import type { CareerReview, CareerSnapshot, ReviewVerdict } from "../world/types"
 import { leagueGroup, ORDER, outcomeFor, playedIn, reached } from "./progress"
 import { compText, msg, stageText, type Msg } from "../text"
+import { SUPPORT_TUNING } from "./support"
 
 /** Kinds of competition that get a review. */
 export const REVIEWED = new Set(["qualifier", "continental", "world-cup", "nations-league"])
@@ -42,6 +43,7 @@ export function snapshotOf(world: World, nationId: string | null): CareerSnapsho
   const c = world.state.career
   return {
     confidence: Math.round(c.confidence),
+    support: Math.round(c.support ?? SUPPORT_TUNING.start),
     reputation: Math.round(c.reputation),
     youth: nationId ? (world.state.nations[nationId]?.youthLevel ?? 0) : 0,
   }

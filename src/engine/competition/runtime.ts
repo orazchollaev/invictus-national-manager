@@ -152,7 +152,9 @@ export interface CompetitionDef {
 export function createInstance(
   def: CompetitionDef,
   year: number,
-  ctx: CompContext
+  ctx: CompContext,
+  /** Set before the plan is read: an invitational tournament's hosts and teams. */
+  extra: Partial<Pick<CompetitionInstance, "hosts" | "invitational">> = {}
 ): CompetitionInstance {
   const inst: CompetitionInstance = {
     id: `${def.id}-${year}`,
@@ -169,6 +171,7 @@ export function createInstance(
     end: "",
     stages: [],
     outcome: {},
+    ...extra,
   }
   const plans = def.plan(inst, ctx)
   inst.stages = plans.map((p) => ({
@@ -474,15 +477,57 @@ function progressGroups(stage: StageState, ctx: CompContext) {
   if (all.every((id) => ctx.fixture(id)?.result)) stage.status = "done"
 }
 
+/**
+ * A competition's plan, built once per day while none of its stages is being played: it is
+ * advanced several times a day (and after each of its matches), and rebuilding its
+ * schedule each time was a tenth of the day loop. A draw or a finished stage changes
+ * the key, so the plan is rebuilt whenever it could differ.
+ */
+const planCache = new WeakMap<
+  CompetitionInstance,
+  {
+    key: string
+    plans: StagePlan[]
+    /** Nothing drawn yet: the first draw date, before which there is nothing to do. */
+    idleUntil?: ISODate
+  }
+>()
+
+function plansFor(inst: CompetitionInstance, def: CompetitionDef, ctx: CompContext) {
+  let key = ctx.date + "|"
+  for (const s of inst.stages) key += s.status[0]
+  const hit = planCache.get(inst)
+  // While a stage is being played its results change during the day, and what the
+  // next stage takes from them (seeds, who went through) must be read afresh.
+  if (hit && hit.key === key && !inst.stages.some((s) => s.status === "active")) return hit.plans
+  const plans = def.plan(inst, ctx)
+  const idleUntil =
+    inst.status === "upcoming" && plans.length
+      ? plans.reduce((min, p) => (p.drawDate < min ? p.drawDate : min), plans[0].drawDate)
+      : undefined
+  planCache.set(inst, { key, plans, idleUntil })
+  return plans
+}
+
+/**
+ * An edition with nothing drawn and its first draw still to come has nothing to do
+ * today; skipping it spares building its plan every day for the months (or years)
+ * between its creation and its draw.
+ */
+function idle(inst: CompetitionInstance, ctx: CompContext): boolean {
+  const hit = planCache.get(inst)
+  return inst.status === "upcoming" && !!hit?.idleUntil && ctx.date < hit.idleUntil
+}
+
 /** Advance every competition to `ctx.date`: draws due, rounds completed, outcomes. */
 export function advanceCompetition(
   inst: CompetitionInstance,
   def: CompetitionDef,
   ctx: CompContext
 ): boolean {
-  if (inst.status === "done") return false
+  if (inst.status === "done" || idle(inst, ctx)) return false
   let changed = false
-  const plans = def.plan(inst, ctx)
+  const plans = plansFor(inst, def, ctx)
   // Saves from before a format change: add stages the definition now has.
   if (plans.some((p) => !inst.stages.some((s) => s.key === p.key))) {
     inst.stages = plans.map(
