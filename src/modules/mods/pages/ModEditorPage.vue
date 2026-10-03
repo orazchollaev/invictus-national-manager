@@ -102,10 +102,13 @@ onBeforeRouteLeave(async () => {
         size="sm"
         @update:model-value="(v) => (tab = v as Tab)"
       />
-      <OverviewPanel v-if="tab === 'overview'" @export="doExport" @start="start" />
-      <NationsPanel v-else-if="tab === 'nations'" />
-      <PlayersPanel v-else-if="tab === 'players'" />
-      <ClubsPanel v-else />
+      <!-- Kept alive: a panel built once (and its list, search and page) comes back at once. -->
+      <KeepAlive>
+        <OverviewPanel v-if="tab === 'overview'" @export="doExport" @start="start" />
+        <NationsPanel v-else-if="tab === 'nations'" />
+        <PlayersPanel v-else-if="tab === 'players'" />
+        <ClubsPanel v-else />
+      </KeepAlive>
     </template>
   </PageShell>
 </template>

@@ -136,6 +136,13 @@ export function rowFromEdit(p: PlayerEdit): PlayerRow {
   return row
 }
 
+/** Lower case without accents, for searching names. */
+export const fold = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+
 /** Age in whole years on a date. */
 export function ageOn(born: string, date: string): number {
   const [by, bm, bd] = born.split("-").map(Number)

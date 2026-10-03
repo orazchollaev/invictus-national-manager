@@ -6,7 +6,7 @@ import { AppButton, AppPagination, AppSearchInput, AppSelect } from "@/component
 import { POSITIONS } from "@/engine/types"
 import { START_DATE } from "@/data/start"
 import { useModsStore } from "@/modules/mods/store"
-import { ageOn, editFromRow, type PlayerEdit } from "@/modules/mods/utils/format"
+import { ageOn, editFromRow, fold, type PlayerEdit } from "@/modules/mods/utils/format"
 import PlayerSheet from "./PlayerSheet.vue"
 
 const PAGE_SIZE = 50
@@ -21,33 +21,24 @@ const pos = ref(ALL)
 const page = ref(1)
 const editing = ref<PlayerEdit | null>(null)
 
-const nationOptions = store.derive(
-  (m) => [
-    { value: ALL, label: t("mods.player.allNations") },
-    ...[...m.nations]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((n) => ({ value: n.id, label: n.name })),
-  ],
-  []
-)
+const nationOptions = computed(() => [
+  { value: ALL, label: t("mods.player.allNations") },
+  ...store.nationOptions,
+])
 const posOptions = computed(() => [
   { value: ALL, label: t("mods.player.allPositions") },
   ...POSITIONS.map((p) => ({ value: p, label: p })),
 ])
-const clubNames = store.derive((m) => new Map(m.clubs.map((c) => [c[0], c[1]])), new Map())
 
-const fold = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
-
+// The list is already ordered best first, and each player carries his folded name.
 const filtered = computed(() => {
   const q = fold(query.value.trim())
-  return store.allPlayers
-    .filter(
-      ({ nationId, row }) =>
-        (nation.value === ALL || nationId === nation.value) &&
-        (pos.value === ALL || row[4] === pos.value) &&
-        (!q || fold(`${row[1]} ${row[2]}`).includes(q))
-    )
-    .sort((a, b) => b.row[7] - a.row[7])
+  return store.allPlayers.filter(
+    ({ nationId, row, key }) =>
+      (nation.value === ALL || nationId === nation.value) &&
+      (pos.value === ALL || row[4] === pos.value) &&
+      (!q || key.includes(q))
+  )
 })
 
 const shown = computed(() =>
@@ -90,7 +81,7 @@ function add() {
           <span class="row-title">{{ row[1] }} {{ row[2] }}</span>
           <span class="row-sub">
             {{ nationId }} · {{ t("mods.player.age", { n: ageOn(row[3], START_DATE) }) }} ·
-            {{ clubNames.get(row[10]) ?? row[10] }}
+            {{ store.clubNames.get(row[10]) ?? row[10] }}
           </span>
         </span>
         <span class="row-sub">{{ row[8] }}</span>

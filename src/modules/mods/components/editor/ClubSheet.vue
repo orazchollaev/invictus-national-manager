@@ -18,13 +18,6 @@ const draft = reactive<ClubEdit>(structuredClone(toRaw(props.club)))
 const isNew = computed(() => !store.mod?.clubs.some((c) => c[0] === props.club.id))
 const players = computed(() => store.clubCounts.get(props.club.id) ?? 0)
 
-const nationOptions = store.derive(
-  (m) =>
-    [...m.nations]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((n) => ({ value: n.id, label: n.name })),
-  []
-)
 const TIERS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }))
 
 function save() {
@@ -56,7 +49,7 @@ async function remove() {
         <input v-model="draft.name" class="input" maxlength="40" autocomplete="off" />
       </AppField>
       <AppField :label="t('mods.club.nation')" layout="stack">
-        <AppSelect v-model="draft.nationId" :options="nationOptions" searchable />
+        <AppSelect v-model="draft.nationId" :options="store.nationOptions" searchable />
       </AppField>
       <AppField :label="t('mods.club.tier')" :hint="t('mods.club.tierHint')" layout="stack">
         <AppButtonGroup

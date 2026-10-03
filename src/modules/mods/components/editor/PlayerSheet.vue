@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, toRaw } from "vue"
+import { computed, onBeforeUnmount, reactive, ref, toRaw } from "vue"
 import { useI18n } from "vue-i18n"
 import { Trash2 } from "@lucide/vue"
 import {
@@ -25,15 +25,16 @@ const store = useModsStore()
 const sheet = ref<InstanceType<typeof AppSheet> | null>(null)
 
 const draft = reactive<PlayerEdit>(structuredClone(toRaw(props.player)))
-const isNew = computed(() => !store.allPlayers.some(({ row }) => row[0] === props.player.id))
+// Only his own nation's rows can hold him: a scan of one squad, not of every player.
+const isNew = !store.mod?.players[props.player.nationId]?.some((r) => r[0] === props.player.id)
 
-const nationOptions = store.derive(
-  (m) =>
-    [...m.nations]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((n) => ({ value: n.id, label: n.name })),
-  []
-)
+/**
+ * The face editor draws a face as soon as it appears, which would land in the same
+ * frames as the sheet sliding in. It comes a moment later, below the fold anyway.
+ */
+const faceReady = ref(false)
+const faceTimer = setTimeout(() => (faceReady.value = true), 260)
+onBeforeUnmount(() => clearTimeout(faceTimer))
 /** The league the club plays in, picked first so the club list stays short. */
 const clubNation = ref(store.mod?.clubs.find((c) => c[0] === draft.clubId)?.[2] ?? draft.nationId)
 const clubOptions = computed(() =>
@@ -119,13 +120,13 @@ async function remove() {
         <input v-model="draft.born" class="input" type="date" min="1960-01-01" max="2015-12-31" />
       </AppField>
       <AppField :label="t('mods.player.nation')" layout="stack">
-        <AppSelect v-model="draft.nationId" :options="nationOptions" searchable />
+        <AppSelect v-model="draft.nationId" :options="store.nationOptions" searchable />
       </AppField>
       <div class="grid2">
         <AppField :label="t('mods.club.nation')" layout="stack">
           <AppSelect
             :model-value="clubNation"
-            :options="nationOptions"
+            :options="store.nationOptions"
             searchable
             @update:model-value="pickLeague"
           />
@@ -175,7 +176,8 @@ async function remove() {
       </AppField>
 
       <h3 class="section">{{ t("mods.player.face") }}</h3>
-      <FaceEditor v-model="draft.face" :player="faceOwner" />
+      <FaceEditor v-if="faceReady" v-model="draft.face" :player="faceOwner" />
+      <div v-else class="face-wait" aria-hidden="true" />
 
       <AppButton v-if="!isNew" variant="danger" size="sm" class="delete" @click="remove">
         <Trash2 :size="14" />
@@ -198,6 +200,11 @@ async function remove() {
 <style scoped>
 .delete {
   align-self: flex-start;
+}
+
+/* Holds some of the face editor's place for the moment before it arrives. */
+.face-wait {
+  min-height: 240px;
 }
 </style>
 <style scoped src="./editor.css"></style>

@@ -6,6 +6,7 @@ import { START_DATE } from "@/data/start"
 import { loadMod, saveMod } from "./services/mods"
 import {
   editFromRow,
+  fold,
   rowFromEdit,
   type ClubEdit,
   type ModData,
@@ -182,13 +183,28 @@ export const useModsStore = defineStore(
       return true
     }
 
-    /** Every player with his nation, for the player list. */
+    /**
+     * Every player with his nation and his folded name, best first. Built once per
+     * change and shared, so opening the player list or typing in its search costs
+     * a filter, not a sort of sixteen thousand rows.
+     */
     const allPlayers = derive((m) => {
-      const out: { nationId: string; row: PlayerRow }[] = []
+      const out: { nationId: string; row: PlayerRow; key: string }[] = []
       for (const [nationId, rows] of Object.entries(m.players))
-        for (const row of rows) out.push({ nationId, row })
-      return out
+        for (const row of rows) out.push({ nationId, row, key: fold(`${row[1]} ${row[2]}`) })
+      return out.sort((a, b) => b.row[7] - a.row[7])
     }, [])
+
+    /** The nations by name, for the pickers. */
+    const nationOptions = derive(
+      (m) =>
+        [...m.nations]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((n) => ({ value: n.id, label: n.name })),
+      []
+    )
+
+    const clubNames = derive((m) => new Map(m.clubs.map((c) => [c[0], c[1]])), new Map<string, string>())
 
     return {
       mod,
@@ -209,6 +225,8 @@ export const useModsStore = defineStore(
       deleteClub,
       clubCounts,
       allPlayers,
+      nationOptions,
+      clubNames,
     }
   },
   {

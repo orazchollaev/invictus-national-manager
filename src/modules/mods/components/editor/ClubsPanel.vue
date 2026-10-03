@@ -4,7 +4,7 @@ import { useI18n } from "vue-i18n"
 import { Plus } from "@lucide/vue"
 import { AppButton, AppSearchInput, AppSelect } from "@/components/ui"
 import { useModsStore } from "@/modules/mods/store"
-import type { ClubEdit } from "@/modules/mods/utils/format"
+import { fold, type ClubEdit } from "@/modules/mods/utils/format"
 import ClubSheet from "./ClubSheet.vue"
 
 const { t } = useI18n()
@@ -14,23 +14,19 @@ const query = ref("")
 const nation = ref(store.mod?.nations[0]?.id ?? "ESP")
 const editing = ref<ClubEdit | null>(null)
 
-const nationOptions = store.derive(
-  (m) =>
-    [...m.nations]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((n) => ({ value: n.id, label: n.name })),
-  []
-)
+/** A search across every club can match hundreds; the list shows the first of them. */
+const LIMIT = 100
 
 // A fresh array each time: the clubs are edited in place, and a computed that
 // returns the same array would not tell the list anything changed.
 const list = store.derive((m) => [...m.clubs], [])
-const shown = computed(() => {
-  const q = query.value.trim().toLowerCase()
+const matches = computed(() => {
+  const q = fold(query.value.trim())
   return list.value
-    .filter((c) => (q ? c[1].toLowerCase().includes(q) : c[2] === nation.value))
+    .filter((c) => (q ? fold(c[1]).includes(q) : c[2] === nation.value))
     .sort((a, b) => a[3] - b[3] || a[1].localeCompare(b[1]))
 })
+const shown = computed(() => matches.value.slice(0, LIMIT))
 
 function open(c: (typeof list.value)[number]) {
   editing.value = { id: c[0], name: c[1], nationId: c[2], tier: c[3] }
@@ -42,9 +38,9 @@ function open(c: (typeof list.value)[number]) {
     <AppSearchInput v-model="query" :placeholder="t('mods.search')" />
     <div class="toolbar">
       <div v-if="!query" class="grow">
-        <AppSelect v-model="nation" :options="nationOptions" searchable />
+        <AppSelect v-model="nation" :options="store.nationOptions" searchable />
       </div>
-      <span v-else class="count grow">{{ shown.length }}</span>
+      <span v-else class="count grow">{{ matches.length }}</span>
       <AppButton size="sm" variant="filled" @click="editing = store.newClub(nation)">
         <Plus :size="14" />
         {{ t("mods.club.add") }}
