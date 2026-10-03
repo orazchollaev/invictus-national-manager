@@ -238,7 +238,7 @@ async function remove(m: ModMeta) {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
-  padding: var(--sp-4);
+  padding: var(--sp-4) var(--sp-4) calc(var(--sp-4) + var(--safe-bottom));
 }
 
 .input {
