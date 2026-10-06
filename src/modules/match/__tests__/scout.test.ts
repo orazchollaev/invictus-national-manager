@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { createSSRApp, h } from "vue"
+import { createPinia } from "pinia"
 import { renderToString } from "vue/server-renderer"
 import { createMemoryHistory, createRouter } from "vue-router"
 import i18n from "@/i18n"
@@ -76,7 +77,8 @@ async function render(report: ScoutReport, assisted = false, players = new Map()
         assisted,
       }),
   })
-  app.use(router).use(i18n)
+  // Faces ask the world store for a player's edits.
+  app.use(createPinia()).use(router).use(i18n)
   await router.push("/")
   await router.isReady()
   return renderToString(app)
