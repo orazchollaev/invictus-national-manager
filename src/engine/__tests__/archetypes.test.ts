@@ -205,7 +205,8 @@ describe("archetypes in the match engine", () => {
     )
     const home = sum(reports.map((r) => r.result.home))
     const away = sum(reports.map((r) => r.result.away))
-    expect(Math.abs(home - away) / (home + away)).toBeLessThan(0.15)
+    // Made-to-order types lean harder on their key attributes than a drawn one does.
+    expect(Math.abs(home - away) / (home + away)).toBeLessThan(0.2)
   })
 })
 

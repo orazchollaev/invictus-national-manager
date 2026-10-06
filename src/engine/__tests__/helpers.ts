@@ -3,9 +3,17 @@ import { FORMATIONS } from "../match/formations"
 import type { Formation, MatchReport, Tactics, TeamSheet } from "../match/types"
 import { createMatch, playMatch, type MatchState } from "../match/engine"
 import { ARCHETYPES, archetypeOf, archetypesFor, type Archetype } from "../players/archetypes"
-import { deriveAttrs, expected, fitTo, type Attr } from "../players/attributes"
+import { attrKeys, expected, fitTo, type Attr, type Attrs } from "../players/attributes"
 import type { Role } from "../match/roles"
 
+/** Attributes with no style at all: exactly what his position and overall predict. */
+export function plainAttrs(pos: Position, ca: number): Attrs {
+  const raw: Attrs = {}
+  for (const key of attrKeys(pos)) raw[key] = expected(pos, key, ca)
+  return fitTo(raw, pos, ca)
+}
+
+/** A player with a plain style, so a side of them plays as an average side of that level. */
 export function makePlayer(
   id: string,
   pos: Position,
@@ -13,6 +21,7 @@ export function makePlayer(
   extra: Partial<Player> = {}
 ): Player {
   return {
+    attrs: plainAttrs(pos, ca),
     id,
     nationId: "TST",
     first: "Test",
@@ -90,8 +99,7 @@ export function playerWith(prefix: string, pos: Position, want: Archetype, ca = 
   const id = `${prefix}0`
   const p = makePlayer(id, pos, ca, { clubId: id })
   // Every other attribute gives a little back, so he still adds up to `ca`.
-  const raw = deriveAttrs(p)
-  for (const key of Object.keys(raw) as Attr[]) raw[key] = expected(pos, key, ca)
+  const raw = plainAttrs(pos, ca)
   for (const [key, w] of Object.entries(ARCHETYPES[want].keys) as [Attr, number][])
     raw[key] = (raw[key] ?? ca) + 14 * w
   p.attrs = fitTo(raw, pos, ca)

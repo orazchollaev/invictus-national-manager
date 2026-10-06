@@ -137,11 +137,12 @@ export function developSeason(
   if (a <= 21 && intlMinutes >= 270 && rng() < 0.05) p.pa = Math.min(96, p.pa + randInt(rng, 2, 5))
   if (a >= 21 && a <= 26 && rng() < 0.12)
     p.pa = Math.max(Math.round(p.ca), p.pa - randInt(rng, 2, 5))
+  // Attributes are drawn from the ability he starts the season with, before it changes.
+  ensureAttrs(p)
   const before = p.ca
   p.ca = Math.round(clamp(p.ca + delta, 15, 95) * 10) / 10
-  ensureAttrs(p)
   p.ca = distributeDelta(p, p.ca - before, age)
-  if (p.ca > p.pa) p.pa = Math.round(p.ca)
+  if (p.ca > p.pa) p.pa = Math.ceil(p.ca)
   return p.ca - before
 }
 

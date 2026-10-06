@@ -204,7 +204,7 @@ export function playerStyle(p: Styled): Modifiers {
         1.1
       ),
     ],
-    score: factor(0.5 * d("finishing") + 0.3 * d("shooting") + 0.2 * d("pace"), 0.012),
+    score: factor(0.5 * d("finishing") + 0.3 * d("shooting") + 0.2 * d("pace"), 0.02, 0.6, 1.6),
     assist: factor(0.5 * d("passing") + 0.5 * d("vision"), 0.015, 0.6, 1.6),
     header: factor(0.5 * d("heading") + 0.3 * d("jumping") + 0.2 * d("strength"), 0.015, 0.6, 1.6),
     tackle: factor(0.6 * d("tackling") + 0.2 * d("strength") + 0.2 * d("pace"), 0.015, 0.6, 1.6),

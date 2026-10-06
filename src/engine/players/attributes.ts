@@ -257,12 +257,33 @@ export function caFromAttrs(attrs: Attrs, pos: Position): number {
 
 const SPREAD = 10
 
+/**
+ * How far above or below his overall each attribute sits for a position: high where the
+ * position counts most. Centred so the weighted mean is zero, which is what makes `ca`
+ * the average of the attributes.
+ */
+const SHAPE: Record<Position, Weights> = (() => {
+  const out = {} as Record<Position, Weights>
+  for (const pos of Object.keys(POS_WEIGHTS) as Position[]) {
+    const w = POS_WEIGHTS[pos]
+    const keys = attrKeys(pos)
+    const total = keys.reduce((s, k) => s + w[k], 0)
+    const mean = total / keys.length
+    const raw = {} as Weights
+    let centre = 0
+    for (const k of keys) {
+      raw[k] = (w[k] / mean - 1) * SPREAD
+      centre += (raw[k] * w[k]) / total
+    }
+    for (const k of keys) raw[k] -= centre
+    out[pos] = raw
+  }
+  return out
+})()
+
 /** What an attribute is expected to be for a player of this position and overall. */
 export function expected(pos: Position, key: Attr, ca: number): number {
-  const w = POS_WEIGHTS[pos]
-  const keys = attrKeys(pos)
-  const mean = keys.reduce((s, k) => s + w[k], 0) / keys.length
-  return ca + (w[key] / mean - 1) * SPREAD
+  return ca + SHAPE[pos][key]
 }
 
 /**
@@ -286,8 +307,6 @@ const NOISE_SD = 4.5
 export function deriveAttrs(p: Pick<Player, "id" | "pos" | "ca">): Attrs {
   const rng = makeRng(deriveSeed(0, "attrs", p.id))
   const keys = attrKeys(p.pos)
-  const w = POS_WEIGHTS[p.pos]
-  const mean = keys.reduce((s, k) => s + w[k], 0) / keys.length
   const athletic = gauss(rng, 0, LATENT_SD)
   const technical = gauss(rng, 0, LATENT_SD)
   const raw: Attrs = {}
@@ -300,7 +319,7 @@ export function deriveAttrs(p: Pick<Player, "id" | "pos" | "ca">): Attrs {
           : ATTR_GROUP[key] === "technical"
             ? technical
             : 0
-    raw[key] = p.ca + (w[key] / mean - 1) * SPREAD + latent + gauss(rng, 0, NOISE_SD)
+    raw[key] = expected(p.pos, key, p.ca) + latent + gauss(rng, 0, NOISE_SD)
   }
   return fitTo(raw, p.pos, p.ca)
 }
