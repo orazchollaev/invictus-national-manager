@@ -157,7 +157,8 @@ export default {
       nationality: "Nationality",
       avatar: "Your face",
       jobSecurity: "Turn off sacking",
-      jobSecurityHint: "When on, no federation will ever sack you and your contract never runs out.",
+      jobSecurityHint:
+        "When on, no federation will ever sack you and your contract never runs out.",
       searchNations: "Search nations",
       takeJob: "Take a job",
       yourReputation: "Your reputation",
@@ -972,6 +973,10 @@ export default {
     plainRole: "The plain version of the position.",
     tactics: {
       title: "Tactics",
+      setupTitle: "Set up your team",
+      setupNote:
+        "Choose a formation, pick your starting eleven and set how they play before your first match.",
+      chooseFormation: "Choose a formation",
       subtitle: "Your eleven and how they play",
       assistantNote:
         "Your assistant picks the eleven for each match. Turn this off in Settings to choose it yourself.",
@@ -1121,6 +1126,9 @@ export default {
       matchDay:
         "Match day is {date}. Keep the calendar moving until then — you can set up your team and tactics now.",
       notReady: "Your starting eleven is not ready",
+      setupTitle: "Your team is not set up yet",
+      setupText: "Choose your formation, starting eleven and tactics before kick-off.",
+      setup: "Set up the team",
       tactics: "Tactics",
       instant: "Instant",
       kickOff: "Kick off",

@@ -31,6 +31,7 @@ import { matchAbility, positionFit, positionGroup } from "@/engine/players/abili
 import type { Role } from "@/engine/match/roles"
 import type { Formation, Level, Mentality, Tactics } from "@/engine/match/types"
 import type { Player, PositionGroup } from "@/engine/types"
+import type { UserTeam } from "@/engine/world/types"
 import { showAlert, showConfirm } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
 import { spiritLabel, spiritOf } from "@/engine/players/bonds"
@@ -55,22 +56,22 @@ const squad = world.derive((w) => {
 const byId = computed(() => new Map(squad.value.map((p) => [p.id, p])))
 const player = (id: string) => byId.value.get(id) ?? world.world?.state.players[id]
 
-function initial() {
-  const w = world.world!
-  const ut = w.state.userTeam
-  if (ut) return JSON.parse(JSON.stringify(ut)) as NonNullable<typeof ut>
-  const sheet = aiTeamSheet(w.state.career.nationId!, squad.value, world.date)
+/** No eleven saved yet: the first visit is the set-up, starting from a blank sheet. */
+const setup = !world.world?.state.userTeam
+
+function initial(): UserTeam {
+  const ut = world.world!.state.userTeam
+  if (ut) return JSON.parse(JSON.stringify(ut)) as UserTeam
   return {
-    tactics: sheet.tactics,
-    xi: sheet.xi,
-    bench: sheet.bench,
-    captainId: sheet.captainId,
-    penaltyTakerId: sheet.penaltyTakerId,
-    setPieceTakerId: sheet.setPieceTakerId,
+    tactics: { formation: "4-4-2", mentality: 0, pressing: 1, tempo: 1, line: 1, width: 1 },
+    xi: [],
+    bench: [],
   }
 }
 
 const team = ref(initial())
+/** On the set-up the formation is the user's first choice; the pitch waits for it. */
+const formationChosen = ref(!setup)
 const selectedSlot = ref<number | null>(null)
 
 /** Leaving with edits that were never saved would play the old eleven; ask first. */
@@ -89,6 +90,7 @@ const slots = computed(() => positions.value.map((_, i) => team.value.xi[i]?.pla
 const inXI = computed(() => new Set(slots.value.filter(Boolean) as string[]))
 
 function setFormation(f: Formation) {
+  formationChosen.value = true
   team.value.tactics.formation = f
   team.value.xi = carryFormation(team.value.xi, FORMATIONS[f])
 }
@@ -166,13 +168,16 @@ function setRole(role: Role | undefined) {
 
 function auto() {
   const w = world.world!
+  // Before a formation is chosen the staff pick the one that suits the squad.
+  const { formation: _formation, ...instructions } = team.value.tactics
   const sheet = aiTeamSheet(
     w.state.career.nationId!,
     squad.value,
     world.date,
-    team.value.tactics,
-    team.value.tactics.formation
+    formationChosen.value ? team.value.tactics : instructions
   )
+  team.value.tactics.formation = sheet.tactics.formation
+  formationChosen.value = true
   team.value.xi = sheet.xi
   team.value.captainId = sheet.captainId
   team.value.penaltyTakerId = sheet.penaltyTakerId
@@ -212,6 +217,7 @@ const tempo = computed({
 })
 
 async function save() {
+  if (!formationChosen.value) return showAlert(t("squad.tactics.chooseFormation"))
   const xi = FORMATIONS[team.value.tactics.formation]
     .map((pos, i) => ({ playerId: slots.value[i] ?? "", pos, role: team.value.xi[i]?.role }))
     .filter((s) => s.playerId)
@@ -230,9 +236,16 @@ async function save() {
 </script>
 
 <template>
-  <PageShell :title="t('squad.tactics.title')" :subtitle="t('squad.tactics.subtitle')" back>
+  <PageShell
+    :title="t(setup ? 'squad.tactics.setupTitle' : 'squad.tactics.title')"
+    :subtitle="t('squad.tactics.subtitle')"
+    back
+  >
     <p v-if="settings.assistantPicks" class="assistant-note">
       {{ t("squad.tactics.assistantNote") }}
+    </p>
+    <p v-else-if="setup" class="assistant-note">
+      {{ t("squad.tactics.setupNote") }}
     </p>
     <template #actions>
       <AppButton variant="tonal" @click="auto">
@@ -242,12 +255,14 @@ async function save() {
     </template>
 
     <AppSelect
-      :model-value="team.tactics.formation"
+      :model-value="formationChosen ? team.tactics.formation : ''"
       :options="FORMATION_LIST.map((f) => ({ value: f, label: f }))"
+      :placeholder="t('squad.tactics.chooseFormation')"
       @update:model-value="(v) => setFormation(v as Formation)"
     />
 
     <PitchView
+      v-if="formationChosen"
       :formation="team.tactics.formation"
       :slots="slots"
       :player="player"

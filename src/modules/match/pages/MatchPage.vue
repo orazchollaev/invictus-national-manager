@@ -107,6 +107,9 @@ const problems = world.derive(
   (w) => (fixture.value && !settings.assistantPicks ? w.lineupProblems(fixture.value) : []),
   [] as Msg[]
 )
+/** No eleven saved yet: the user sets up his team and tactics before the first match. */
+const needsSetup = world.derive((w) => !settings.assistantPicks && !w.state.userTeam, false)
+const blocked = computed(() => needsSetup.value || problems.value.length > 0)
 
 // ── Live state ──────────────────────────────────────────────────────────────
 
@@ -135,6 +138,10 @@ async function kickOff(): Promise<boolean> {
   const w = world.world
   const f = fixture.value
   if (!w || !f || !mine.value || !due.value) return false
+  if (needsSetup.value) {
+    router.push("/squad/tactics")
+    return false
+  }
   if (problems.value.length) {
     const fix = await showConfirm(
       t("match.page.ready", { problems: problems.value.map((p) => resolveText(p)).join("; ") }),
@@ -455,6 +462,16 @@ const pitchSlots = computed(() => {
         {{ t("match.page.matchDay", { date: formatDate(fixture.date) }) }}
       </span>
     </div>
+    <div v-else-if="needsSetup" class="notice notice--bad">
+      <TriangleAlert :size="20" class="notice-icon" />
+      <div>
+        <strong>{{ t("match.page.setupTitle") }}</strong>
+        <p class="setup-text">{{ t("match.page.setupText") }}</p>
+        <AppButton variant="filled" size="sm" @click="router.push('/squad/tactics')">
+          {{ t("match.page.setup") }}
+        </AppButton>
+      </div>
+    </div>
     <div v-else-if="problems.length" class="notice notice--bad">
       <TriangleAlert :size="20" class="notice-icon" />
       <div>
@@ -471,11 +488,11 @@ const pitchSlots = computed(() => {
         {{ t("match.page.tactics") }}
       </AppButton>
       <template v-if="due">
-        <AppButton variant="outlined" :disabled="problems.length > 0" @click="quickResult">
+        <AppButton variant="outlined" :disabled="blocked" @click="quickResult">
           <SkipForward :size="16" />
           {{ t("match.page.instant") }}
         </AppButton>
-        <AppButton variant="filled" :disabled="problems.length > 0" @click="kickOff">
+        <AppButton variant="filled" :disabled="blocked" @click="kickOff">
           <Play :size="16" />
           {{ t("match.page.kickOff") }}
         </AppButton>
@@ -674,6 +691,10 @@ const pitchSlots = computed(() => {
 .problems {
   margin: var(--sp-1) 0 0;
   padding-inline-start: var(--sp-4);
+}
+
+.setup-text {
+  margin: var(--sp-1) 0 var(--sp-2);
 }
 
 .live {

@@ -977,6 +977,10 @@ const pt: typeof en = {
     plainRole: "A versão simples da posição.",
     tactics: {
       title: "Tática",
+      setupTitle: "Monte seu time",
+      setupNote:
+        "Escolha um esquema, defina seus onze titulares e como eles jogam antes da primeira partida.",
+      chooseFormation: "Escolha um esquema",
       subtitle: "Seus onze e como jogam",
       assistantNote:
         "Seu auxiliar escolhe os onze de cada partida. Desative isso em Configurações para escolher você mesmo.",
@@ -1126,6 +1130,9 @@ const pt: typeof en = {
       matchDay:
         "O dia do jogo é {date}. Mantenha o calendário andando até lá — você já pode preparar seu time e sua tática.",
       notReady: "Seu time titular não está pronto",
+      setupTitle: "Seu time ainda não foi montado",
+      setupText: "Escolha o esquema, os onze titulares e a tática antes do pontapé inicial.",
+      setup: "Montar o time",
       tactics: "Tática",
       instant: "Instantâneo",
       kickOff: "Começar",
