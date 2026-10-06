@@ -3,6 +3,7 @@
  * the only layer every other one depends on; modules re-export what they need.
  */
 import type { Text } from "./text"
+import type { Attrs } from "./players/attributes"
 
 /** Calendar date as `YYYY-MM-DD`. Lexical order is chronological order. */
 export type ISODate = string
@@ -53,6 +54,8 @@ export interface PlayerSeason {
   clubId: string
   caps: number
   goals: number
+  /** His attributes at the start of the season, for the card's change arrows. */
+  attrs?: Attrs
 }
 
 /**
@@ -93,6 +96,8 @@ export interface Player {
   ca: number
   /** Potential ability, 1–99. Development pulls `ca` toward it. */
   pa: number
+  /** What `ca` is made of. Drawn from his id when missing (old saves, bundled data). */
+  attrs?: Attrs
   pers: Personality
   /** Features of his face a mod set by hand; the rest is drawn from his id. */
   face?: FaceEdit

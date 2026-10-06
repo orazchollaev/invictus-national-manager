@@ -348,7 +348,25 @@ function midfield(state: MatchState, out: MatchEvent[], s: Side): boolean {
 
 /** A counter-attacking side's forwards against the defence they are running at. */
 function paceAgainst(state: MatchState, s: Side): number {
-  return 1 + 0.4 * Math.tanh((unitsOf(state, s).att - unitsOf(state, other(s)).def) / 20)
+  const strength = 1 + 0.4 * Math.tanh((unitsOf(state, s).att - unitsOf(state, other(s)).def) / 20)
+  return strength * speedEdge(sideOf(state, s), sideOf(state, other(s)))
+}
+
+/** The runners' legs against the back line's: quick forwards beat a slow defence. */
+function speedEdge(runners: LiveSide, backs: LiveSide): number {
+  const mean = (side: LiveSide, weight: (p: LivePlayer) => number) => {
+    let sum = 0
+    let total = 0
+    for (const p of side.outfield) {
+      const w = weight(p)
+      sum += w * p.mod.speed
+      total += w
+    }
+    return total ? sum / total : 1
+  }
+  const run = mean(runners, (p) => SCORER_WEIGHT[p.slot] + 0.1)
+  const back = mean(backs, (p) => DEFENDER_WEIGHT[p.slot] + 0.1)
+  return clamp(run / back, 0.8, 1.25)
 }
 
 /** A defender (or anyone in the way) wins the ball for `s`. */

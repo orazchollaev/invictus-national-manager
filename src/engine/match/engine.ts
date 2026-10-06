@@ -21,7 +21,8 @@
 import type { ISODate, Player, Position } from "../types"
 import { clamp, makeRng, type Rng } from "../rng"
 import { ageOn, matchAbility } from "../players/ability"
-import { ARCHETYPES, TIRES_EARLY_AGE, archetypeOf } from "../players/archetypes"
+import { TIRES_EARLY_AGE, archetypeOf, playerStyle } from "../players/archetypes"
+import { ensureAttrs } from "../players/attributes"
 import { BOND_POINTS, bondBetween } from "../players/bonds"
 import type { Role } from "./roles"
 import type { MatchEvent, MatchReport, Side, TeamSheet } from "./types"
@@ -73,14 +74,17 @@ function livePlayer(
   minute: number,
   role?: Role
 ): LivePlayer {
+  ensureAttrs(p)
   const arch = archetypeOf(p)
+  const style = playerStyle(p)
   const live: LivePlayer = {
     id: p.id,
     natural: p.pos,
     alt: p.alt,
     arch,
+    style,
     role: null,
-    mod: ARCHETYPES[arch],
+    mod: style,
     suited: false,
     bond: 0,
     slot,
@@ -347,7 +351,8 @@ function prepare(state: MatchState, s: Side, out: MatchEvent[], extra: boolean) 
     (1 + 0.1 * (side.tactics.tempo - 1)) *
     (extra ? EXTRA_TIME_DRAIN : 1)
   for (const p of side.pitch) {
-    const own = drain * (p.age >= TIRES_EARLY_AGE ? 1.12 : 1) * (p.slot === "GK" ? 0.3 : 1)
+    const own =
+      drain * p.style.drain * (p.age >= TIRES_EARLY_AGE ? 1.12 : 1) * (p.slot === "GK" ? 0.3 : 1)
     p.stamina = Math.max(0, p.stamina - own)
   }
 }

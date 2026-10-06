@@ -13,6 +13,7 @@ import {
 } from "@/engine/types"
 import type { ClubRow, PlayerRow } from "@/engine/world/create"
 import { sanitizeFaceEdit } from "@/lib/faces"
+import { attrsFromCsv, attrsToCsv, caFromAttrs, type Attrs } from "@/engine/players/attributes"
 
 export const MOD_FORMAT = "invictus-mod"
 export const MOD_VERSION = 1
@@ -66,6 +67,8 @@ export interface PlayerEdit {
   clubId: string
   /** Face features set in the editor; the rest is drawn from the id. */
   face?: FaceEdit
+  /** Attributes set by hand; without them they are drawn from `ca` and the id. */
+  attrs?: Attrs
 }
 
 export interface ClubEdit {
@@ -91,7 +94,7 @@ export function newModId(): string {
 }
 
 export function editFromRow(nationId: string, row: PlayerRow): PlayerEdit {
-  const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId, face] = row
+  const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId, face, attrs] = row
   return {
     id,
     nationId,
@@ -106,6 +109,7 @@ export function editFromRow(nationId: string, row: PlayerRow): PlayerEdit {
     pers: pers.split(",").map(Number),
     clubId,
     face,
+    attrs: attrsFromCsv(attrs, pos),
   }
 }
 
@@ -113,7 +117,9 @@ const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, Number.isFinite(v) ? v : lo))
 
 export function rowFromEdit(p: PlayerEdit): PlayerRow {
-  const ca = Math.round(clamp(p.ca, 1, 99) * 10) / 10
+  // Hand-set attributes are what his overall is made of.
+  const attrs = p.attrs && attrsFromCsv(attrsToCsv(p.attrs, p.pos), p.pos)
+  const ca = attrs ? caFromAttrs(attrs, p.pos) : Math.round(clamp(p.ca, 1, 99) * 10) / 10
   // A player known by one name keeps it as his surname, where every list reads it.
   const first = p.first.trim()
   const last = p.last.trim()
@@ -130,18 +136,15 @@ export function rowFromEdit(p: PlayerEdit): PlayerRow {
     PERSONALITY.map((_, i) => Math.round(clamp(p.pers[i] ?? 10, 1, 20))).join(","),
     p.clubId,
   ]
-  // Rows keep their old eleven columns unless a face was edited.
+  // Rows keep their old eleven columns unless a face or attributes were edited.
   const face = sanitizeFaceEdit(p.face)
-  if (Object.keys(face).length) row.push(face)
+  if (Object.keys(face).length || attrs) row.push(face)
+  if (attrs) row.push(attrsToCsv(attrs, p.pos))
   return row
 }
 
 /** Lower case without accents, for searching names. */
-export const fold = (s: string) =>
-  s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+export const fold = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
 
 /** Age in whole years on a date. */
 export function ageOn(born: string, date: string): number {
@@ -241,6 +244,7 @@ export function normalizeMod(raw: unknown, base: NationDef[]): ModData {
           pers: isStr(pers) ? pers.split(",").map(Number) : [],
           clubId: isStr(clubId) && clubIds.has(clubId) ? clubId : clubOf(nationId),
           face: r[11],
+          attrs: attrsFromCsv(r[12], pos),
         })
       )
     }

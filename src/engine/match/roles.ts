@@ -5,13 +5,7 @@
  * and a slot with no role is the plain version of the position.
  */
 import type { Position } from "../types"
-import {
-  ARCHETYPES,
-  NEUTRAL,
-  type Archetype,
-  type ArchetypeDef,
-  type Modifiers,
-} from "../players/archetypes"
+import { NEUTRAL, type Archetype, type Modifiers } from "../players/archetypes"
 
 export type Role =
   | "stopper"
@@ -171,9 +165,8 @@ const product = (
   b: [number, number, number]
 ): [number, number, number] => [a[0] * b[0], a[1] * b[1], a[2] * b[2]]
 
-/** What a player does in a match: his archetype's modifiers with his role's on top. */
-export function combineStyle(arch: Archetype, r: Role | null | undefined): Modifiers {
-  const a: ArchetypeDef = ARCHETYPES[arch]
+/** What a player does in a match: his own style (from his attributes) with his role's on top. */
+export function combineStyle(a: Modifiers, r: Role | null | undefined): Modifiers {
   if (!r) return a
   const d = ROLES[r]
   return {
@@ -185,5 +178,7 @@ export function combineStyle(arch: Archetype, r: Role | null | undefined): Modif
     foul: a.foul * d.foul,
     finish: a.finish + d.finish,
     keeper: a.keeper + d.keeper,
+    speed: a.speed * d.speed,
+    drain: a.drain * d.drain,
   }
 }

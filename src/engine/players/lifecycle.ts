@@ -13,6 +13,7 @@ import { addDays } from "../calendar/dates"
 import { msg, type Msg } from "../text"
 import { NAME_ALIASES, NAME_POOLS } from "@/data/names"
 import { ageOn } from "./ability"
+import { deriveAttrs, distributeDelta, ensureAttrs } from "./attributes"
 import { findClub, roleAt, type ClubIndex } from "./clubs"
 import { nationTop, peakAt } from "./quality"
 
@@ -138,6 +139,8 @@ export function developSeason(
     p.pa = Math.max(Math.round(p.ca), p.pa - randInt(rng, 2, 5))
   const before = p.ca
   p.ca = Math.round(clamp(p.ca + delta, 15, 95) * 10) / 10
+  ensureAttrs(p)
+  p.ca = distributeDelta(p, p.ca - before, age)
   if (p.ca > p.pa) p.pa = Math.round(p.ca)
   return p.ca - before
 }
@@ -310,6 +313,7 @@ export function newgen(
     foot: pos === "LB" || pos === "LW" ? (rng() < 0.75 ? "L" : "R") : rng() < 0.2 ? "L" : "R",
     ca,
     pa,
+    attrs: deriveAttrs({ id, pos, ca }),
     pers: {
       professionalism: trait(rng),
       ambition: trait(rng),

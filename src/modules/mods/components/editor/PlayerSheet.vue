@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, toRaw } from "vue"
+import { computed, onBeforeUnmount, reactive, ref, toRaw, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { Trash2 } from "@lucide/vue"
 import {
@@ -11,6 +11,13 @@ import {
   AppSheet,
 } from "@/components/ui"
 import { POSITIONS, type Position } from "@/engine/types"
+import {
+  attrKeys,
+  caFromAttrs,
+  deriveAttrs,
+  type Attr,
+  type Attrs,
+} from "@/engine/players/attributes"
 import { START_DATE } from "@/data/start"
 import { showConfirm } from "@/composables/useDialog"
 import FaceEditor from "./FaceEditor.vue"
@@ -72,6 +79,34 @@ function toggleAlt(p: Position) {
   if (i >= 0) draft.alt.splice(i, 1)
   else draft.alt.push(p)
 }
+
+const attrList = computed(() => attrKeys(draft.pos))
+/** What the grid shows: his own attributes, or the ones his ability would draw. */
+const shownAttrs = computed<Attrs>(
+  () => draft.attrs ?? deriveAttrs({ id: draft.id, pos: draft.pos, ca: draft.ca })
+)
+
+/** Editing one attribute makes them all his own, and his ability follows them. */
+function setAttr(key: Attr, value: number) {
+  const attrs = { ...shownAttrs.value, [key]: value }
+  draft.attrs = attrs
+  draft.ca = caFromAttrs(attrs, draft.pos)
+  if (draft.pa < draft.ca) draft.pa = Math.ceil(draft.ca)
+}
+
+function resetAttrs() {
+  draft.attrs = undefined
+}
+
+// A goalkeeper has other attributes than an outfield player; otherwise ability follows the set.
+watch(
+  () => draft.pos,
+  (now, was) => {
+    if (!draft.attrs) return
+    if ((now === "GK") !== (was === "GK")) draft.attrs = undefined
+    else draft.ca = caFromAttrs(draft.attrs, now)
+  }
+)
 
 const valid = computed(
   () => draft.first.trim().length + draft.last.trim().length > 0 && age.value !== null
@@ -163,12 +198,30 @@ async function remove() {
         </div>
       </AppField>
 
-      <AppField :label="t('mods.player.ca')">
-        <AppNumberInput v-model="draft.ca" :min="1" :max="99" editable />
+      <AppField
+        :label="t('mods.player.ca')"
+        :hint="draft.attrs ? t('mods.player.caFromAttrs') : undefined"
+      >
+        <AppNumberInput v-model="draft.ca" :min="1" :max="99" :disabled="!!draft.attrs" editable />
       </AppField>
       <AppField :label="t('mods.player.pa')">
         <AppNumberInput v-model="draft.pa" :min="1" :max="99" editable />
       </AppField>
+
+      <h3 class="section">{{ t("mods.player.attributes") }}</h3>
+      <AppField v-for="key in attrList" :key="key" :label="t(`squad.player.attr.${key}`)">
+        <AppNumberInput
+          :model-value="Math.round(shownAttrs[key] ?? 1)"
+          :min="1"
+          :max="99"
+          size="sm"
+          editable
+          @update:model-value="(v) => setAttr(key, v)"
+        />
+      </AppField>
+      <AppButton v-if="draft.attrs" variant="tonal" size="sm" class="delete" @click="resetAttrs">
+        {{ t("mods.player.attributesReset") }}
+      </AppButton>
 
       <h3 class="section">{{ t("mods.player.personality") }}</h3>
       <AppField v-for="(key, i) in PERSONALITY" :key="key" :label="t(`mods.player.pers.${key}`)">

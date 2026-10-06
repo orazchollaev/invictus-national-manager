@@ -3,6 +3,7 @@ import { deriveSeed, makeRng } from "../rng"
 import { addDays } from "../calendar/dates"
 import { windowsForYear } from "../calendar/windows"
 import { roleAt } from "../players/clubs"
+import { attrsFromCsv, deriveAttrs } from "../players/attributes"
 import { initialNationState, World, type WorldStatics } from "./world"
 import type { WorldState } from "./types"
 import { makeOffers, openStartingJobs, refreshObjectives, setContract } from "../career/career"
@@ -24,6 +25,8 @@ export type PlayerRow = [
   string,
   /** Face features set by hand; rows without them (older mods, the bundled data) draw it from the id. */
   FaceEdit?,
+  /** Attributes in `attrKeys` order; rows without them draw theirs from `ca` and the id. */
+  string?,
 ]
 export type ClubRow = [string, string, string, number]
 
@@ -39,7 +42,7 @@ export function playersFromRows(
   const rng = makeRng(deriveSeed(seed, "hydrate"))
   const out: Player[] = []
   for (const [nationId, rows] of Object.entries(byNation)) {
-    for (const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId, face] of rows) {
+    for (const [id, first, last, born, pos, alt, foot, ca, pa, pers, clubId, face, attrs] of rows) {
       const [professionalism, ambition, temperament, consistency, bigMatch, injuryProne, loyalty] =
         pers.split(",").map(Number)
       const tier = clubs.get(clubId)?.tier ?? 5
@@ -55,6 +58,7 @@ export function playersFromRows(
         foot: foot as Player["foot"],
         ca,
         pa,
+        attrs: attrsFromCsv(attrs, pos) ?? deriveAttrs({ id, pos, ca }),
         pers: {
           professionalism,
           ambition,

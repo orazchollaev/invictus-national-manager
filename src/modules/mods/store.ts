@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { computed, markRaw, ref, shallowRef } from "vue"
 import type { NationDef } from "@/engine/types"
 import type { PlayerRow } from "@/engine/world/create"
+import { shiftAttrs } from "@/engine/players/attributes"
 import { START_DATE } from "@/data/start"
 import { loadMod, saveMod } from "./services/mods"
 import {
@@ -90,6 +91,7 @@ export const useModsStore = defineStore(
         const p = editFromRow(nationId, rows[i])
         p.ca += delta
         p.pa += delta
+        if (p.attrs) p.attrs = shiftAttrs(p.attrs, p.pos, delta)
         rows[i] = rowFromEdit(p)
       }
       changed()
@@ -204,7 +206,10 @@ export const useModsStore = defineStore(
       []
     )
 
-    const clubNames = derive((m) => new Map(m.clubs.map((c) => [c[0], c[1]])), new Map<string, string>())
+    const clubNames = derive(
+      (m) => new Map(m.clubs.map((c) => [c[0], c[1]])),
+      new Map<string, string>()
+    )
 
     return {
       mod,

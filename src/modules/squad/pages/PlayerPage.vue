@@ -17,6 +17,7 @@ import { relationsOf, signed } from "@/modules/squad/utils/chemistry"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PersonFace } from "@/modules/core/components/face"
+import { AttributesCard } from "@/modules/squad/components/attributes"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
 import {
@@ -38,7 +39,7 @@ const club = computed(() => (p.value ? world.world?.clubs.get(p.value.clubId) : 
 const potential = computed(() => (p.value ? potentialRange(p.value, world.date) : [0, 0]))
 const injured = computed(() => !!p.value?.injury && p.value.injury.until > world.date)
 
-const archId = computed(() => archetypeOf(p.value ?? { id: "", pos: "CM" }))
+const archId = computed(() => archetypeOf(p.value ?? { id: "", pos: "CM", ca: 50 }))
 const badges = computed(() => (p.value ? badgesOf(p.value, world.date) : []))
 
 /** His bonds with the rest of his nation's players. */
@@ -146,6 +147,8 @@ onBeforeUnmount(() => chart?.destroy())
         </li>
       </ul>
     </AppCard>
+
+    <AttributesCard :player="p" />
 
     <AppCard padding="md">
       <AppSectionHeader :title="t('squad.player.relationships')" />

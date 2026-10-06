@@ -25,9 +25,11 @@ export interface LivePlayer {
   natural: Position
   alt: Position[]
   arch: Archetype
+  /** What his attributes do in a match, before any role. */
+  style: Modifiers
   /** What the manager asks of his slot, if anything. */
   role: Role | null
-  /** Archetype and role together, worked out again whenever either changes. */
+  /** Style and role together, worked out again whenever either changes. */
   mod: Modifiers
   /** His role suits his archetype, so he plays above himself. */
   suited: boolean

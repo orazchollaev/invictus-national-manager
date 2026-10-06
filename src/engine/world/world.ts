@@ -89,6 +89,7 @@ import {
   newgen,
   retirementChance,
 } from "../players/lifecycle"
+import { ensureAttrs } from "../players/attributes"
 import type {
   FriendlyChoice,
   Interrupt,
@@ -164,6 +165,7 @@ export class World {
       ensureFederation(n)
       ensureStadiums(n, this.defs.get(n.id), state.date)
     }
+    for (const p of Object.values(state.players)) ensureAttrs(p)
     this.reindex()
     ensureCoaches(this)
     ensureCareer(this)
@@ -1279,6 +1281,7 @@ export class World {
           clubId: p.clubId,
           caps: p.caps,
           goals: p.goals,
+          ...(p.attrs ? { attrs: { ...p.attrs } } : {}),
         })
         if (p.history.length > 25) p.history.shift()
         const gained = developSeason(

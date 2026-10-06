@@ -1,16 +1,18 @@
 /**
- * What kind of player somebody is, beyond a number. Every player has one archetype for
- * his natural position, drawn from his id so it never changes and needs no saved state.
- * The match engine reads the same numbers the player card explains: nothing here is
- * decoration.
+ * What kind of player somebody is, beyond a number. His archetype is a label read off
+ * his attributes (the type of player he is strongest at being for his position), and
+ * his style, the small shifts in a match, comes from the same attributes: a quick winger
+ * breaks away more, a good header of the ball wins more corners. Nothing is stored.
  *
- * Every factor is 1 (or 0 for points) when the archetype changes nothing, so a squad of
- * mixed types plays like the old one and only lopsided squads feel different.
+ * Every factor is 1 (or 0 for points) when his attributes are what his position and
+ * overall predict, so a squad of mixed types plays like an average one and only
+ * lopsided squads feel different.
  */
 import { msg, type Msg } from "../text"
 import type { ISODate, Player, Position } from "../types"
-import { deriveSeed, makeRng, pickWeighted } from "../rng"
+import { clamp } from "../rng"
 import { ageOn } from "./ability"
+import { deviation, ensureAttrs, type Attr } from "./attributes"
 
 export type Archetype =
   | "shot-stopper"
@@ -49,12 +51,10 @@ export interface Modifiers {
   finish: number
   /** Shot-stopping relative to his all-round ability, in ability points (keepers). */
   keeper: number
-}
-
-export interface ArchetypeDef extends Modifiers {
-  positions: Position[]
-  /** Share of players of those positions who get it. */
-  weight: number
+  /** How well he gets away from, or stays with, a runner. */
+  speed: number
+  /** How fast he tires: below 1 he lasts longer. */
+  drain: number
 }
 
 export const NEUTRAL: Modifiers = {
@@ -66,81 +66,52 @@ export const NEUTRAL: Modifiers = {
   foul: 1,
   finish: 0,
   keeper: 0,
+  speed: 1,
+  drain: 1,
 }
 
-function def(positions: Position[], change: Partial<ArchetypeDef> = {}, weight = 1): ArchetypeDef {
-  return { ...NEUTRAL, positions, weight, ...change }
+export interface ArchetypeDef {
+  positions: Position[]
+  /** The attributes that make a player this type, with how much each counts. */
+  keys: Partial<Record<Attr, number>>
+  /** Points taken off his lean, so the all-rounder is only picked when nothing else stands out. */
+  handicap?: number
 }
 
 export const ARCHETYPES: Record<Archetype, ArchetypeDef> = {
-  "shot-stopper": def(["GK"], {
-    unit: [0.99, 1, 1],
-    keeper: 1.5,
-  }),
-  "sweeper-keeper": def(["GK"], { unit: [1.02, 1.01, 1], keeper: -1 }),
-  stopper: def(["CB"], {
-    unit: [1.04, 0.92, 0.9],
-    tackle: 1.25,
-    header: 1.15,
-    foul: 1.15,
-  }),
-  "ball-playing-defender": def(["CB"], {
-    unit: [0.97, 1.1, 1.1],
-    assist: 1.6,
-    header: 0.9,
-    tackle: 0.9,
-  }),
-  "defensive-full-back": def(["LB", "RB"], { unit: [1.04, 0.93, 0.87], tackle: 1.15, assist: 0.8 }),
-  "attacking-full-back": def(["LB", "RB"], { unit: [0.95, 1.06, 1.15], assist: 1.4, score: 1.3 }),
-  "ball-winner": def(["DM"], { unit: [1.05, 0.97, 0.8], tackle: 1.2, foul: 1.25 }),
-  "deep-playmaker": def(["DM"], {
-    unit: [0.93, 1.06, 1.2],
-    assist: 1.5,
-  }),
-  "box-to-box": def(["CM"], { unit: [1.04, 0.97, 1], score: 1.25, tackle: 1.1 }),
-  playmaker: def(["CM"], {
-    unit: [0.94, 1.06, 1],
-    assist: 1.5,
-  }),
-  creator: def(["AM"], {
-    unit: [1, 1.02, 0.98],
-    assist: 1.4,
-    score: 0.85,
-    finish: -0.5,
-  }),
-  "shadow-striker": def(["AM"], {
-    unit: [1, 0.98, 1.02],
-    score: 1.35,
-    assist: 0.8,
-    finish: 0.5,
-  }),
-  winger: def(["LW", "RW"], {
-    unit: [1, 1.02, 0.98],
-    assist: 1.35,
-    score: 0.85,
-    finish: -0.5,
-  }),
-  "inside-forward": def(["LW", "RW"], {
-    unit: [1, 0.98, 1.02],
-    score: 1.3,
-    assist: 0.9,
-    finish: 0.5,
-  }),
-  "target-man": def(["ST"], {
-    unit: [1, 1.15, 1],
-    header: 1.4,
-    assist: 1.2,
-    score: 0.95,
-    finish: -1.5,
-  }),
-  poacher: def(["ST"], {
-    unit: [1, 0.8, 1],
-    score: 1.3,
-    finish: 1.5,
-    header: 0.85,
-    assist: 0.6,
-  }),
-  "complete-forward": def(["ST"], { unit: [1, 1.1, 1.03], score: 1.1, assist: 1.1 }, 0.5),
+  "shot-stopper": { positions: ["GK"], keys: { reflexes: 1, oneOnOne: 0.8, positioning: 0.6 } },
+  "sweeper-keeper": { positions: ["GK"], keys: { distribution: 1, agility: 0.8, aerial: 0.4 } },
+  stopper: { positions: ["CB"], keys: { tackling: 1, strength: 0.7, heading: 0.7 } },
+  "ball-playing-defender": {
+    positions: ["CB"],
+    keys: { passing: 1, vision: 0.8, dribbling: 0.5 },
+  },
+  "defensive-full-back": {
+    positions: ["LB", "RB"],
+    keys: { tackling: 1, strength: 0.6, stamina: 0.5 },
+  },
+  "attacking-full-back": {
+    positions: ["LB", "RB"],
+    keys: { pace: 1, dribbling: 0.8, passing: 0.7, stamina: 0.4 },
+  },
+  "ball-winner": { positions: ["DM"], keys: { tackling: 1, strength: 0.7, stamina: 0.5 } },
+  "deep-playmaker": { positions: ["DM"], keys: { passing: 1, vision: 0.9 } },
+  "box-to-box": { positions: ["CM"], keys: { stamina: 1, tackling: 0.6, shooting: 0.6 } },
+  playmaker: { positions: ["CM"], keys: { passing: 1, vision: 0.9, dribbling: 0.5 } },
+  creator: { positions: ["AM"], keys: { passing: 1, vision: 0.9, dribbling: 0.7 } },
+  "shadow-striker": { positions: ["AM"], keys: { finishing: 1, shooting: 0.8, pace: 0.4 } },
+  winger: { positions: ["LW", "RW"], keys: { pace: 1, acceleration: 0.8, dribbling: 0.8 } },
+  "inside-forward": {
+    positions: ["LW", "RW"],
+    keys: { finishing: 1, shooting: 0.8, dribbling: 0.6 },
+  },
+  "target-man": { positions: ["ST"], keys: { heading: 1, strength: 0.8, jumping: 0.8 } },
+  poacher: { positions: ["ST"], keys: { finishing: 1, acceleration: 0.5, vision: 0.5 } },
+  "complete-forward": {
+    positions: ["ST"],
+    keys: { finishing: 0.4, passing: 0.4, dribbling: 0.4, pace: 0.3, strength: 0.3 },
+    handicap: 2,
+  },
 }
 
 const BY_POSITION: Record<Position, Archetype[]> = (() => {
@@ -155,10 +126,94 @@ export function archetypesFor(pos: Position): Archetype[] {
   return BY_POSITION[pos]
 }
 
-/** His archetype: fixed by his id and natural position, so it never changes. */
-export function archetypeOf(p: Pick<Player, "id" | "pos">): Archetype {
-  const rng = makeRng(deriveSeed(0, "archetype", p.id))
-  return pickWeighted(rng, BY_POSITION[p.pos], (a) => ARCHETYPES[a].weight)
+type Styled = Pick<Player, "id" | "pos" | "ca" | "attrs">
+
+/** His archetype: the type of player, for his natural position, his attributes lean towards. */
+export function archetypeOf(p: Styled): Archetype {
+  const candidates = BY_POSITION[p.pos]
+  const subject = p.attrs ? p : withAttrs(p)
+  let best = candidates[0]
+  let top = -Infinity
+  for (const id of candidates) {
+    const d = ARCHETYPES[id]
+    let sum = 0
+    let weight = 0
+    for (const [key, w] of Object.entries(d.keys) as [Attr, number][]) {
+      sum += deviation(subject, key) * w
+      weight += w
+    }
+    const score = sum / weight - (d.handicap ?? 0)
+    if (score > top) {
+      top = score
+      best = id
+    }
+  }
+  return best
+}
+
+function withAttrs(p: Styled): Styled {
+  const copy = { ...p } as Player
+  ensureAttrs(copy)
+  return copy
+}
+
+/** Scales a deviation (in attribute points) into a factor around 1. */
+function factor(points: number, per: number, lo = 0.7, hi = 1.4): number {
+  return clamp(1 + points * per, lo, hi)
+}
+
+/**
+ * What his attributes do in a match: how often he is the one who shoots, heads, tackles,
+ * how good a finisher or shot-stopper he is for his overall, how fast and how durable.
+ * Each is the gap between what he has and what his position and overall predict, so the
+ * average player changes nothing.
+ */
+export function playerStyle(p: Styled): Modifiers {
+  if (!p.attrs) return NEUTRAL
+  const d = (k: Attr) => deviation(p, k)
+  if (p.pos === "GK") {
+    return {
+      ...NEUTRAL,
+      unit: [
+        factor(d("aerial") * 0.5 + d("positioning") * 0.5, 0.003, 0.95, 1.05),
+        factor(d("distribution"), 0.004, 0.95, 1.06),
+        1,
+      ],
+      keeper:
+        0.2 *
+        (0.35 * d("reflexes") +
+          0.25 * d("oneOnOne") +
+          0.25 * d("positioning") +
+          0.15 * d("agility")),
+      speed: factor(d("agility"), 0.01, 0.85, 1.15),
+    }
+  }
+  return {
+    unit: [
+      factor(
+        0.4 * d("tackling") + 0.2 * d("strength") + 0.2 * d("pace") + 0.2 * d("vision"),
+        0.004,
+        0.9,
+        1.1
+      ),
+      factor(0.4 * d("passing") + 0.3 * d("vision") + 0.3 * d("dribbling"), 0.004, 0.9, 1.1),
+      factor(
+        0.3 * d("finishing") + 0.2 * d("shooting") + 0.25 * d("dribbling") + 0.25 * d("pace"),
+        0.004,
+        0.9,
+        1.1
+      ),
+    ],
+    score: factor(0.5 * d("finishing") + 0.3 * d("shooting") + 0.2 * d("pace"), 0.012),
+    assist: factor(0.5 * d("passing") + 0.5 * d("vision"), 0.015, 0.6, 1.6),
+    header: factor(0.5 * d("heading") + 0.3 * d("jumping") + 0.2 * d("strength"), 0.015, 0.6, 1.6),
+    tackle: factor(0.6 * d("tackling") + 0.2 * d("strength") + 0.2 * d("pace"), 0.015, 0.6, 1.6),
+    foul: factor(0.5 * d("strength") - 0.5 * d("vision"), 0.01, 0.7, 1.4),
+    finish: 0.12 * (0.6 * d("finishing") + 0.4 * d("shooting")),
+    keeper: 0,
+    speed: factor(0.6 * d("pace") + 0.4 * d("acceleration"), 0.01, 0.8, 1.2),
+    drain: factor(-d("stamina"), 0.012, 0.75, 1.3),
+  }
 }
 
 // ── Badges ──────────────────────────────────────────────────────────────────

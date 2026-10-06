@@ -2,15 +2,18 @@ import { describe, expect, it } from "vitest"
 import { resolveText as say } from "@/i18n/text"
 import {
   ARCHETYPES,
+  NEUTRAL,
   TIRES_EARLY_AGE,
   archetypeOf,
   archetypesFor,
   badgesOf,
+  playerStyle,
   type Archetype,
 } from "../players/archetypes"
+import { deriveAttrs } from "../players/attributes"
 import { POSITIONS, type Player, type Position } from "../types"
 import { teamUnits } from "../match/engine"
-import { makePlayer, playMany, sideOf as side, stateOf } from "./helpers"
+import { makePlayer, playMany, playerWith, sideOf as side, stateOf } from "./helpers"
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
 const first = (pos: Position) => archetypesFor(pos)[0]
@@ -28,43 +31,68 @@ describe("archetypes", () => {
   it("gives a player the same archetype every time, always one of his position", () => {
     for (const pos of POSITIONS)
       for (let n = 0; n < 50; n++) {
-        const a = archetypeOf({ id: `p${n}`, pos })
-        expect(a).toBe(archetypeOf({ id: `p${n}`, pos }))
+        const p = { id: `p${n}`, pos, ca: 65 }
+        const a = archetypeOf(p)
+        expect(a).toBe(archetypeOf(p))
         expect(archetypesFor(pos)).toContain(a)
       }
   })
 
-  it("does not depend on ability, form or age", () => {
+  it("does not depend on form or age", () => {
     const young = makePlayer("x1", "ST", 50, { born: "2008-01-01", form: -5 })
-    const old = { ...young, ca: 90, born: "1990-01-01", form: 5 }
+    const old = { ...young, born: "1990-01-01", form: 5 }
     expect(archetypeOf(young)).toBe(archetypeOf(old))
   })
 
-  it("uses every archetype across a big pool, the rare one least", () => {
+  it("follows his attributes", () => {
+    for (const id of Object.keys(ARCHETYPES) as Archetype[]) {
+      const pos = ARCHETYPES[id].positions[0]
+      expect(archetypeOf(playerWith("a", pos, id))).toBe(id)
+    }
+  })
+
+  it("is drawn across a big pool, every type at least once", () => {
     const counts = new Map<Archetype, number>()
     for (const pos of POSITIONS)
       for (let n = 0; n < 2000; n++) {
-        const a = archetypeOf({ id: `id${n}`, pos })
+        const a = archetypeOf({ id: `id${n}`, pos, ca: 70 })
         counts.set(a, (counts.get(a) ?? 0) + 1)
       }
     for (const id of Object.keys(ARCHETYPES) as Archetype[])
       expect(counts.get(id)).toBeGreaterThan(0)
-    expect(counts.get("complete-forward")!).toBeLessThan(counts.get("poacher")! * 0.7)
   })
 
-  it("keeps every effect within a band, so no type is a cheat", () => {
-    for (const d of Object.values(ARCHETYPES)) {
-      for (const u of d.unit) {
-        expect(u).toBeGreaterThanOrEqual(0.75)
-        expect(u).toBeLessThanOrEqual(1.25)
+  it("keeps every effect within a band and the average player neutral", () => {
+    let score = 0
+    let finish = 0
+    let n = 0
+    for (const pos of POSITIONS)
+      for (let i = 0; i < 300; i++) {
+        const p = { id: `s${i}`, pos, ca: 40 + (i % 50), attrs: undefined as Player["attrs"] }
+        p.attrs = deriveAttrs(p)
+        const s = playerStyle(p)
+        for (const u of s.unit) {
+          expect(u).toBeGreaterThanOrEqual(0.9)
+          expect(u).toBeLessThanOrEqual(1.1)
+        }
+        for (const f of [s.score, s.header, s.tackle, s.foul, s.assist]) {
+          expect(f).toBeGreaterThanOrEqual(0.6)
+          expect(f).toBeLessThanOrEqual(1.6)
+        }
+        expect(s.speed).toBeGreaterThanOrEqual(0.8)
+        expect(s.speed).toBeLessThanOrEqual(1.2)
+        if (pos !== "GK") {
+          score += s.score
+          finish += s.finish
+          n++
+        }
       }
-      for (const f of [d.score, d.header, d.tackle, d.foul]) {
-        expect(f).toBeGreaterThanOrEqual(0.5)
-        expect(f).toBeLessThanOrEqual(1.5)
-      }
-      expect(Math.abs(d.finish)).toBeLessThanOrEqual(2)
-      expect(Math.abs(d.keeper)).toBeLessThanOrEqual(2)
-    }
+    expect(Math.abs(score / n - 1)).toBeLessThan(0.03)
+    expect(Math.abs(finish / n)).toBeLessThan(0.3)
+  })
+
+  it("gives a player with no attributes the plain style", () => {
+    expect(playerStyle({ id: "n", pos: "ST", ca: 70 })).toEqual(NEUTRAL)
   })
 })
 

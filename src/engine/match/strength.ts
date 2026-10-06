@@ -140,7 +140,7 @@ export const FINISH_BONUS: Record<Position, number> = {
 export function assign(p: LivePlayer, slot: Position, role: Role | null | undefined) {
   p.slot = slot
   p.role = validRole(role, slot) ? role : null
-  p.mod = combineStyle(p.arch, p.role)
+  p.mod = combineStyle(p.style, p.role)
   p.suited = suitsRole(p.arch, p.role)
 }
 

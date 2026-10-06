@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import nations from "@/data/nations.json"
 import type { NationDef } from "@/engine/types"
+import { attrsToCsv, deriveAttrs } from "@/engine/players/attributes"
 import { playersFromRows, type PlayerRow } from "@/engine/world/create"
 import {
   MOD_FORMAT,
@@ -88,6 +89,25 @@ describe("player rows", () => {
     const p = editFromRow("ESP", row)
     p.face = { hair: "no-such-hair", skin: "red", fatness: 7, nose: "female1", mouth: "smile" }
     expect(rowFromEdit(p)[11]).toEqual({ fatness: 1, mouth: "smile" })
+  })
+
+  it("carry attributes set by hand as a thirteenth column, and his ability follows them", () => {
+    const p = editFromRow("ESP", row)
+    expect(p.attrs).toBeUndefined()
+    p.attrs = deriveAttrs({ id: p.id, pos: p.pos, ca: 60 })
+    const r = rowFromEdit(p)
+    expect(r).toHaveLength(13)
+    expect(r[12]).toBe(attrsToCsv(p.attrs, p.pos))
+    expect(Math.abs((r[7] as number) - 60)).toBeLessThan(0.6)
+    expect(editFromRow("ESP", r).attrs).toEqual(p.attrs)
+  })
+
+  it("ignore attributes that do not fit the position", () => {
+    const r = [...row, {}, "50,50,50"] as unknown as PlayerRow
+    expect(editFromRow("ESP", r).attrs).toBeUndefined()
+    expect(playersFromRows({ ESP: [r] }, new Map(), 1)[0].attrs).toEqual(
+      deriveAttrs({ id: "esp0", pos: "RW", ca: 94.1 })
+    )
   })
 
   it("reach the players of a new world", () => {

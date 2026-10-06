@@ -9,7 +9,7 @@ import {
   validRole,
   type Role,
 } from "../match/roles"
-import { ARCHETYPES, archetypesFor, type Archetype } from "../players/archetypes"
+import { ARCHETYPES, NEUTRAL, archetypesFor, type Archetype } from "../players/archetypes"
 import { POSITIONS, type Position } from "../types"
 import { changeFormation, substitute, teamUnits } from "../match/engine"
 import { playMany, sideOf, stateOf } from "./helpers"
@@ -75,12 +75,18 @@ describe("roles", () => {
     expect(suitsRole("poacher", null)).toBe(false)
   })
 
-  it("combines an archetype with a role, and leaves it alone with none", () => {
-    expect(combineStyle("poacher", null)).toBe(ARCHETYPES.poacher)
-    const m = combineStyle("poacher", "poacher")
-    expect(m.score).toBeCloseTo(ARCHETYPES.poacher.score * ROLES.poacher.score)
-    expect(m.unit[1]).toBeCloseTo(ARCHETYPES.poacher.unit[1] * ROLES.poacher.unit[1])
-    expect(m.finish).toBeCloseTo(ARCHETYPES.poacher.finish + ROLES.poacher.finish)
+  it("combines a player's style with a role, and leaves it alone with none", () => {
+    const own = {
+      ...NEUTRAL,
+      score: 1.1,
+      finish: 1,
+      unit: [1, 0.95, 1] as [number, number, number],
+    }
+    expect(combineStyle(own, null)).toBe(own)
+    const m = combineStyle(own, "poacher")
+    expect(m.score).toBeCloseTo(own.score * ROLES.poacher.score)
+    expect(m.unit[1]).toBeCloseTo(own.unit[1] * ROLES.poacher.unit[1])
+    expect(m.finish).toBeCloseTo(own.finish + ROLES.poacher.finish)
   })
 })
 

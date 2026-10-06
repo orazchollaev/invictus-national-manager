@@ -2,7 +2,8 @@ import type { Player, Position } from "../types"
 import { FORMATIONS } from "../match/formations"
 import type { Formation, MatchReport, Tactics, TeamSheet } from "../match/types"
 import { createMatch, playMatch, type MatchState } from "../match/engine"
-import { archetypeOf, archetypesFor, type Archetype } from "../players/archetypes"
+import { ARCHETYPES, archetypeOf, archetypesFor, type Archetype } from "../players/archetypes"
+import { deriveAttrs, expected, fitTo, type Attr } from "../players/attributes"
 import type { Role } from "../match/roles"
 
 export function makePlayer(
@@ -84,13 +85,18 @@ export function makeTeam(prefix: string, ca: number, formation: Formation = "4-2
 
 // ── Sides built from archetypes and roles ───────────────────────────────────
 
-/** A player of `pos` whose id draws `want`, found by trying ids. */
+/** A player of `pos` whose attributes make him `want`: its key attributes pushed well above his position's. */
 export function playerWith(prefix: string, pos: Position, want: Archetype, ca = 70): Player {
-  for (let n = 0; n < 5000; n++) {
-    const id = `${prefix}${n}`
-    if (archetypeOf({ id, pos }) === want) return makePlayer(id, pos, ca, { clubId: id })
-  }
-  throw new Error(`no id draws ${want}`)
+  const id = `${prefix}0`
+  const p = makePlayer(id, pos, ca, { clubId: id })
+  // Every other attribute gives a little back, so he still adds up to `ca`.
+  const raw = deriveAttrs(p)
+  for (const key of Object.keys(raw) as Attr[]) raw[key] = expected(pos, key, ca)
+  for (const [key, w] of Object.entries(ARCHETYPES[want].keys) as [Attr, number][])
+    raw[key] = (raw[key] ?? ca) + 14 * w
+  p.attrs = fitTo(raw, pos, ca)
+  if (archetypeOf(p) !== want) throw new Error(`attributes do not make a ${want}`)
+  return p
 }
 
 export interface TestSide {
