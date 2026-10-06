@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.0.5](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.4...v0.0.5) (2026-10-06)
+
+### 🚀 New Features
+
+- add invitational tournaments, fans' support, rivalries and a faster day loop ([ff6100b](https://github.com/orazchollaev/invictus-national-manager/commit/ff6100b36845e5c3f76942dfbcdb030578918e4a))
+- **career:** add job security option and manager face to new game ([906826b](https://github.com/orazchollaev/invictus-national-manager/commit/906826bd5c0763e17f167dbbf17130cd09f55a90))
+- **coaches:** add coach ecosystem with sackings, vacancies and retirements ([68e653a](https://github.com/orazchollaev/invictus-national-manager/commit/68e653a795a8aac09ddba5962a70aa74f34f8047))
+- **coaches:** add coach profile and coaches list pages ([3fae19e](https://github.com/orazchollaev/invictus-national-manager/commit/3fae19e3a7421d444cbc72d30ea87b5640328b81))
+- **competitions:** add FIFA ASEAN Cup and Challenge Cup ([168d852](https://github.com/orazchollaev/invictus-national-manager/commit/168d852d22a8ed7856335228b3f2cb37e9792365))
+- **competitions:** animate the draw with a pots screen, one-by-one mode and faster auto ([6b07f4f](https://github.com/orazchollaev/invictus-national-manager/commit/6b07f4fc561f1b2be3a35891f54a9f30bd949aea))
+- **faces:** generate seeded facesjs faces by nationality ([1968586](https://github.com/orazchollaev/invictus-national-manager/commit/19685865631ca2d206a62b93c4afbd9bf8e91c80))
+- **match:** possession-phase match engine with shot types and game state ([bcdf584](https://github.com/orazchollaev/invictus-national-manager/commit/bcdf584b41fcb1feb81a4257caef619e8a1a53a4))
+- **mods:** edit a player's face feature by feature in the mod editor ([c515571](https://github.com/orazchollaev/invictus-national-manager/commit/c5155718364fe2db86daeb6d8724b5328e3fd183))
+- **players:** detailed 1-99 attributes that drive the match engine and development ([23dc08a](https://github.com/orazchollaev/invictus-national-manager/commit/23dc08a36025676f00b1e9cdf90b5abda8877ae6))
+- **squad:** require team setup before the first match ([8f90474](https://github.com/orazchollaev/invictus-national-manager/commit/8f90474eadfde7b1d36a6a720841b9688e46b4e7))
+- **squad:** show player faces in lists and on the pitch ([b9fd8e9](https://github.com/orazchollaev/invictus-national-manager/commit/b9fd8e9d24604400290798b27070addbe4804f3a))
+
+### 🐛 Bug Fixes
+
+- **career:** start a career with no final warning set; fix stale tests ([c3dbde7](https://github.com/orazchollaev/invictus-national-manager/commit/c3dbde794a7f997adf5fe78011b6caa5f98006b3))
+- **competitions:** skip friendlies between nations league finals semis and final ([b106701](https://github.com/orazchollaev/invictus-national-manager/commit/b10670132cd7c99c878e828772cf865724a472e2))
+- **mods:** keep new mod sheet above the android navigation bar ([c8772d1](https://github.com/orazchollaev/invictus-national-manager/commit/c8772d11642fdf97f9266eaa7b15388f1e7e5b7a))
+- **names:** use real Turkmen names for Turkmenistan ([ee62f87](https://github.com/orazchollaev/invictus-national-manager/commit/ee62f87a85622e10c983f9f66b446e95e6f23067))
+- **players:** centre attribute shapes and develop from the starting ability ([23d6b08](https://github.com/orazchollaev/invictus-national-manager/commit/23d6b08ff39387683b151bd579165c0bed5de4ab))
+- show one-name players whole and warn before leaving unsaved tactics ([b69eb0c](https://github.com/orazchollaev/invictus-national-manager/commit/b69eb0cacc12bf280553e7465ca62e1c2dba3cb4))
+
+### ✅ Tests
+
+- fix longrun.test env ([81963a8](https://github.com/orazchollaev/invictus-national-manager/commit/81963a8e0ff5363a25da2dbf3daac37717630f28))
+- **match:** give the scout report render a pinia ([7789d26](https://github.com/orazchollaev/invictus-national-manager/commit/7789d26a844867b1b183033eaf849d1409e63808))
+
 ## [0.0.4](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.3...v0.0.4) (2026-10-02)
 
 ### 🚀 New Features
