@@ -138,6 +138,7 @@ export function createWorld(
       jobSecurity: opts.jobSecurity || undefined,
       nationId: opts.nationId,
       confidence: 60,
+      ultimatum: null,
       // A manager trusted with a big nation starts with a name to match; one out
       // of work starts with the name he chose.
       reputation: opts.nationId

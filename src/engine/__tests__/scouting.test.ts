@@ -17,7 +17,7 @@ import {
 } from "../match/scouting"
 import type { Formation, Level, Tactics } from "../match/types"
 import { archetypesFor } from "../players/archetypes"
-import { sideOf } from "./helpers"
+import { plainAttrs, sideOf } from "./helpers"
 
 const tactics = (formation: Formation = "4-2-3-1", extra: Partial<Tactics> = {}): Tactics => ({
   formation,
@@ -63,7 +63,11 @@ describe("keyPlayers", () => {
 
   it("names the best player, the goal threat, the creator and the weak link", () => {
     const { side, byId, at, lookup } = squad()
-    const set = (i: number, ca: number) => (byId.get(side.sheet.xi[i].playerId)!.ca = ca)
+    const set = (i: number, ca: number) => {
+      const p = byId.get(side.sheet.xi[i].playerId)!
+      p.ca = ca
+      p.attrs = plainAttrs(p.pos, ca)
+    }
     set(at("CB"), 88) // best player
     set(at("ST"), 80) // threat
     set(at("AM"), 79) // creator

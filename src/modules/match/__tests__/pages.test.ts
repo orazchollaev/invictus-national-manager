@@ -69,6 +69,9 @@ it("renders every main page after a real match", { timeout: 120000 }, async () =
       fixtureId = f.id
     }
   }
+  // The tactics page asks for a team to be set up until the manager has saved one.
+  const played = w.userSheet(w.state.fixtures[fixtureId])
+  w.state.userTeam = { tactics: played.tactics, xi: played.xi, bench: played.bench }
   const errors: string[] = []
   const pageHtml: Record<string, string> = {}
   for (const [path, loader] of Object.entries(pages)) {
