@@ -12,7 +12,7 @@ import { squadStrength } from "../ai/squad"
 const env =
   (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {}
 
-describe.runIf(true)("twenty seasons", () => {
+describe.runIf(env.LONGRUN)("twenty seasons", () => {
   it("keeps pools, ages and national strength stable", { timeout: 600000 }, () => {
     const statics = { nations: nations as NationDef[], clubs: clubsFromRows(clubRows as ClubRow[]) }
     const w = createWorld(
