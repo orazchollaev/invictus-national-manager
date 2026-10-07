@@ -32,7 +32,11 @@ function commit() {
 
 <template>
   <div class="panel">
-    <AppCard padding="md" class="info">
+    <AppCard v-if="store.live" padding="md" class="info">
+      <p class="hint">{{ t("mods.counts", counts) }}</p>
+      <p class="hint">{{ t("editor.rules") }}</p>
+    </AppCard>
+    <AppCard v-else padding="md" class="info">
       <AppField :label="t('mods.name')" layout="stack">
         <input v-model="name" class="input" maxlength="40" autocomplete="off" @change="commit" />
       </AppField>
@@ -41,11 +45,11 @@ function commit() {
       </AppField>
       <p class="hint">{{ t("mods.counts", counts) }}</p>
     </AppCard>
-    <AppButton variant="tonal" block @click="emit('export')">
+    <AppButton v-if="!store.live" variant="tonal" block @click="emit('export')">
       <Download :size="16" />
       {{ t("mods.export") }}
     </AppButton>
-    <AppButton variant="filled" block @click="emit('start')">
+    <AppButton v-if="!store.live" variant="filled" block @click="emit('start')">
       <Play :size="16" />
       {{ t("mods.startCareer") }}
     </AppButton>

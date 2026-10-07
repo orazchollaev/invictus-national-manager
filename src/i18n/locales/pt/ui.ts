@@ -281,6 +281,8 @@ const pt: typeof en = {
       invitationalHint: "Organize o seu ou responda a um convite",
       settings: "Configurações",
       settingsHint: "Tema, velocidade da partida",
+      editor: "Editor de jogo salvo",
+      editorHint: "Edite jogadores, seleções e clubes desta carreira",
       leaveConfirm: "Sair sem salvar? O progresso desde o último save será perdido.",
       exit: "Sair",
       saveGame: "Salvar jogo",
@@ -733,6 +735,15 @@ const pt: typeof en = {
       bid: "Candidatar-se a sede",
       bidHint: "Vale quatro vezes na escolha das sedes, cerca de seis anos antes",
     },
+  },
+  editor: {
+    title: "Editor de jogo salvo",
+    modName: "Editado",
+    noGame: "Nenhuma carreira aberta.",
+    blocked: "Resolva primeiro o que o jogo está esperando.",
+    blockedHint: "Há uma partida, sorteio, convocação ou outra decisão pendente.",
+    rules:
+      "As mudanças valem só para esta carreira. Nada pode ser apagado, e ids, ligas, seleções e competições continuam como estão.",
   },
   mods: {
     title: "Mods",

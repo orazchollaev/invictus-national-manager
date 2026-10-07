@@ -49,7 +49,10 @@ async function remove() {
         <input v-model="draft.name" class="input" maxlength="40" autocomplete="off" />
       </AppField>
       <AppField :label="t('mods.club.nation')" layout="stack">
-        <AppSelect v-model="draft.nationId" :options="store.nationOptions" searchable />
+        <span v-if="store.live && !isNew" class="fixed">
+          {{ store.nationOptions.find((n) => n.value === draft.nationId)?.label }}
+        </span>
+        <AppSelect v-else v-model="draft.nationId" :options="store.nationOptions" searchable />
       </AppField>
       <AppField :label="t('mods.club.tier')" :hint="t('mods.club.tierHint')" layout="stack">
         <AppButtonGroup
@@ -59,7 +62,13 @@ async function remove() {
           @update:model-value="(v) => (draft.tier = Number(v))"
         />
       </AppField>
-      <AppButton v-if="!isNew" variant="danger" size="sm" class="delete" @click="remove">
+      <AppButton
+        v-if="!isNew && !store.live"
+        variant="danger"
+        size="sm"
+        class="delete"
+        @click="remove"
+      >
         <Trash2 :size="14" />
         {{ t("common.delete") }}
       </AppButton>
@@ -80,6 +89,10 @@ async function remove() {
 <style scoped>
 .delete {
   align-self: flex-start;
+}
+
+.fixed {
+  color: var(--text-muted);
 }
 </style>
 <style scoped src="./editor.css"></style>

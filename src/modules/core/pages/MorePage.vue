@@ -9,6 +9,7 @@ import {
   LogOut,
   ListOrdered,
   Medal,
+  Pencil,
   Save,
   Settings,
   Trophy,
@@ -61,6 +62,12 @@ const items = [
     hint: t("core.more.invitationalHint"),
   },
   { to: "/honours", icon: Medal, label: t("core.more.honours"), hint: t("core.more.honoursHint") },
+  {
+    to: "/editor",
+    icon: Pencil,
+    label: t("core.more.editor"),
+    hint: t("core.more.editorHint"),
+  },
   {
     to: "/settings",
     icon: Settings,

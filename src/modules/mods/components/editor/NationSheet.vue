@@ -79,6 +79,12 @@ function save() {
   const def: NationDef = structuredClone(toRaw(draft))
   def.name = def.name.trim() || props.nation.name
   def.points = Math.round(Math.max(0, Math.min(3000, Number(def.points) || 0)) * 100) / 100
+  if (store.live) {
+    store.saveNation(def)
+    store.shiftSquad(def.id, shift.value)
+    sheet.value?.close()
+    return
+  }
   def.grounds = def
     .grounds!.map((g) => ({
       city: g.city.trim(),
@@ -149,7 +155,7 @@ function save() {
             max="3000"
           />
         </AppField>
-        <AppField :label="t('mods.nation.confed')" layout="stack">
+        <AppField v-if="!store.live" :label="t('mods.nation.confed')" layout="stack">
           <AppSelect v-model="draft.confed" :options="CONFED_OPTIONS" />
         </AppField>
       </div>
@@ -162,12 +168,14 @@ function save() {
         <AppNumberInput v-model="draft.youthLevel" :min="1" :max="100" editable />
       </AppField>
 
-      <AppField :label="t('mods.nation.status')" layout="stack">
-        <AppSelect v-model="status" :options="STATUS" />
-      </AppField>
-      <AppField :label="t('mods.nation.banned')">
-        <AppToggle v-model="banned" :aria-label="t('mods.nation.banned')" />
-      </AppField>
+      <template v-if="!store.live">
+        <AppField :label="t('mods.nation.status')" layout="stack">
+          <AppSelect v-model="status" :options="STATUS" />
+        </AppField>
+        <AppField :label="t('mods.nation.banned')">
+          <AppToggle v-model="banned" :aria-label="t('mods.nation.banned')" />
+        </AppField>
+      </template>
 
       <h3 class="section">{{ t("mods.nation.squad") }}</h3>
       <p class="hint">{{ t("mods.nation.squadHint", { avg: average }) }}</p>
@@ -183,73 +191,75 @@ function save() {
         <AppButton size="sm" variant="tonal" @click="shift += 5">+5</AppButton>
       </div>
 
-      <h3 class="section">{{ t("mods.nation.grounds") }}</h3>
-      <div v-for="(g, i) in draft.grounds" :key="i" class="ground">
-        <input
-          v-model="g.name"
-          class="input ground-name"
-          :placeholder="t('mods.nation.stadium')"
-          :aria-label="t('mods.nation.stadium')"
-          maxlength="60"
-        />
-        <input
-          v-model="g.city"
-          class="input"
-          :placeholder="t('mods.nation.city')"
-          :aria-label="t('mods.nation.city')"
-          maxlength="40"
-        />
-        <input
-          v-model.number="g.capacity"
-          class="input"
-          type="number"
-          inputmode="numeric"
-          min="500"
-          max="200000"
-          step="500"
-          :aria-label="t('mods.nation.capacity')"
-        />
-        <AppButton
-          size="sm"
-          variant="text"
-          icon-only
-          :aria-label="t('common.delete')"
-          @click="draft.grounds!.splice(i, 1)"
-        >
-          <Trash2 :size="14" />
-        </AppButton>
-      </div>
-      <AppButton size="sm" variant="outlined" @click="addGround">
-        <Plus :size="14" />
-        {{ t("mods.nation.addGround") }}
-      </AppButton>
-
-      <h3 class="section">{{ t("mods.nation.cities") }}</h3>
-      <p class="hint">{{ t("mods.nation.citiesHint") }}</p>
-      <div class="chips">
-        <span v-for="(c, i) in draft.cities" :key="c" class="chip">
-          {{ c }}
-          <button
-            class="chip-x"
+      <template v-if="!store.live">
+        <h3 class="section">{{ t("mods.nation.grounds") }}</h3>
+        <div v-for="(g, i) in draft.grounds" :key="i" class="ground">
+          <input
+            v-model="g.name"
+            class="input ground-name"
+            :placeholder="t('mods.nation.stadium')"
+            :aria-label="t('mods.nation.stadium')"
+            maxlength="60"
+          />
+          <input
+            v-model="g.city"
+            class="input"
+            :placeholder="t('mods.nation.city')"
+            :aria-label="t('mods.nation.city')"
+            maxlength="40"
+          />
+          <input
+            v-model.number="g.capacity"
+            class="input"
+            type="number"
+            inputmode="numeric"
+            min="500"
+            max="200000"
+            step="500"
+            :aria-label="t('mods.nation.capacity')"
+          />
+          <AppButton
+            size="sm"
+            variant="text"
+            icon-only
             :aria-label="t('common.delete')"
-            @click="draft.cities!.splice(i, 1)"
+            @click="draft.grounds!.splice(i, 1)"
           >
-            <X :size="12" />
-          </button>
-        </span>
-      </div>
-      <div class="add-city">
-        <input
-          v-model="newCity"
-          class="input"
-          maxlength="40"
-          :placeholder="t('mods.nation.cityPlaceholder')"
-          @keydown.enter="addCity"
-        />
-        <AppButton size="sm" variant="outlined" @click="addCity">
-          {{ t("mods.nation.addCity") }}
+            <Trash2 :size="14" />
+          </AppButton>
+        </div>
+        <AppButton size="sm" variant="outlined" @click="addGround">
+          <Plus :size="14" />
+          {{ t("mods.nation.addGround") }}
         </AppButton>
-      </div>
+
+        <h3 class="section">{{ t("mods.nation.cities") }}</h3>
+        <p class="hint">{{ t("mods.nation.citiesHint") }}</p>
+        <div class="chips">
+          <span v-for="(c, i) in draft.cities" :key="c" class="chip">
+            {{ c }}
+            <button
+              class="chip-x"
+              :aria-label="t('common.delete')"
+              @click="draft.cities!.splice(i, 1)"
+            >
+              <X :size="12" />
+            </button>
+          </span>
+        </div>
+        <div class="add-city">
+          <input
+            v-model="newCity"
+            class="input"
+            maxlength="40"
+            :placeholder="t('mods.nation.cityPlaceholder')"
+            @keydown.enter="addCity"
+          />
+          <AppButton size="sm" variant="outlined" @click="addCity">
+            {{ t("mods.nation.addCity") }}
+          </AppButton>
+        </div>
+      </template>
     </div>
     <template #footer>
       <div class="sheet-actions">

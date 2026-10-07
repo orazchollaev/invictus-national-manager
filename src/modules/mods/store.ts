@@ -4,8 +4,11 @@ import type { NationDef } from "@/engine/types"
 import type { PlayerRow } from "@/engine/world/create"
 import { shiftAttrs } from "@/engine/players/attributes"
 import { START_DATE } from "@/data/start"
+import type { EditData } from "@/engine/world/edit"
 import { loadMod, saveMod } from "./services/mods"
 import {
+  MOD_FORMAT,
+  MOD_VERSION,
   editFromRow,
   fold,
   rowFromEdit,
@@ -13,6 +16,9 @@ import {
   type ModData,
   type PlayerEdit,
 } from "./utils/format"
+
+/** Id of the dataset the save editor opens: a copy of the running game, not a stored mod. */
+const LIVE_ID = "live-save"
 
 const uid = (prefix: string) =>
   `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`
@@ -28,6 +34,10 @@ export const useModsStore = defineStore(
     const mod = shallowRef<ModData | null>(null)
     const rev = ref(0)
     const dirty = ref(false)
+    /** The game date: ages are counted on it. */
+    const today = ref(START_DATE)
+    /** The open dataset is a running game: nothing is deleted, ids and leagues stay. */
+    const live = computed(() => mod.value?.id === LIVE_ID)
 
     function changed() {
       rev.value++
@@ -47,9 +57,28 @@ export const useModsStore = defineStore(
       const m = await loadMod(id)
       if (!m) return false
       mod.value = markRaw(m)
+      today.value = START_DATE
       dirty.value = false
       rev.value++
       return true
+    }
+
+    /** Open a copy of the running game for the save editor. */
+    function openLive(data: EditData, date: string) {
+      const copy: ModData = {
+        format: MOD_FORMAT,
+        version: MOD_VERSION,
+        id: LIVE_ID,
+        name: "",
+        author: "",
+        createdAt: 0,
+        updatedAt: 0,
+        ...data,
+      }
+      mod.value = markRaw(copy)
+      today.value = date
+      dirty.value = false
+      rev.value++
     }
 
     function close() {
@@ -109,7 +138,7 @@ export const useModsStore = defineStore(
         nationId,
         first: "",
         last: "",
-        born: `${Number(START_DATE.slice(0, 4)) - 22}-01-01`,
+        born: `${Number(today.value.slice(0, 4)) - 22}-01-01`,
         pos: "CM",
         alt: [],
         foot: "R",
@@ -141,7 +170,7 @@ export const useModsStore = defineStore(
 
     function deletePlayer(id: string) {
       const m = mod.value
-      if (!m) return
+      if (!m || live.value) return
       for (const rows of Object.values(m.players)) {
         const i = rows.findIndex((r) => r[0] === id)
         if (i >= 0) {
@@ -179,7 +208,8 @@ export const useModsStore = defineStore(
     /** A club with players cannot go: they would have nowhere to play. */
     function deleteClub(id: string): boolean {
       const m = mod.value
-      if (!m || (clubCounts.value.get(id) ?? 0) > 0 || m.clubs.length <= 1) return false
+      if (!m || live.value || (clubCounts.value.get(id) ?? 0) > 0 || m.clubs.length <= 1)
+        return false
       m.clubs = m.clubs.filter((c) => c[0] !== id)
       changed()
       return true
@@ -215,8 +245,11 @@ export const useModsStore = defineStore(
       mod,
       rev,
       dirty,
+      today,
+      live,
       derive,
       open,
+      openLive,
       close,
       save,
       setInfo,

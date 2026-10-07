@@ -28,6 +28,7 @@ const router = createRouter({
     { path: "/saves", redirect: "/load" },
     { path: "/new", component: () => import("../modules/career/pages/NewGamePage.vue") },
     { path: "/mods", component: () => import("../modules/mods/pages/ModsPage.vue") },
+    { path: "/editor", component: () => import("../modules/mods/pages/SaveEditorPage.vue") },
     { path: "/mods/:id", component: () => import("../modules/mods/pages/ModEditorPage.vue") },
     { path: "/home", component: () => import("../modules/core/pages/HomePage.vue") },
     { path: "/career", component: () => import("../modules/career/pages/CareerPage.vue") },

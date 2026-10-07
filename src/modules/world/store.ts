@@ -1,6 +1,7 @@
 import { defineStore } from "pinia"
 import { markRaw, ref, shallowRef, computed } from "vue"
 import { World } from "@/engine/world/world"
+import { applyEdits, type EditData } from "@/engine/world/edit"
 import { createWorld } from "@/engine/world/create"
 import type { Interrupt, UserTeam, WorldState } from "@/engine/world/types"
 import type { HostLevel } from "@/engine/world/stadiums"
@@ -242,6 +243,28 @@ export const useWorldStore = defineStore(
       touch()
     }
 
+    /**
+     * Write the save editor's changes into the running game and save. Nations and clubs
+     * live in the bundled data, so the first edit to them gives the slot a copy of its own.
+     */
+    async function applyEditorChanges(data: EditData) {
+      const w = world.value
+      if (!w || slot.value === null) return
+      const { statics: changed } = applyEdits(w, data)
+      if (changed) {
+        const from: SlotStatics = {
+          modName: mod.value?.modName ?? i18n.global.t("editor.modName"),
+          nations: [...w.defs.values()],
+          clubs: [...w.clubs.values()],
+        }
+        await setSlotStatics(slot.value, from)
+        mod.value = from
+        setActiveNations(from.nations)
+      }
+      touch()
+      await save()
+    }
+
     /** Leave to the menu without writing anything. */
     function discard() {
       world.value = null
@@ -434,6 +457,7 @@ export const useWorldStore = defineStore(
       assistantCallup,
       finishDraw,
       discard,
+      applyEditorChanges,
       proceed,
       confirmCallup,
       setUserTeam,

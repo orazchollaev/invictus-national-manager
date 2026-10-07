@@ -4,7 +4,6 @@ import { useI18n } from "vue-i18n"
 import { Plus } from "@lucide/vue"
 import { AppButton, AppPagination, AppSearchInput, AppSelect } from "@/components/ui"
 import { POSITIONS } from "@/engine/types"
-import { START_DATE } from "@/data/start"
 import { useModsStore } from "@/modules/mods/store"
 import { ageOn, editFromRow, fold, type PlayerEdit } from "@/modules/mods/utils/format"
 import PlayerSheet from "./PlayerSheet.vue"
@@ -80,7 +79,7 @@ function add() {
         <span class="row-main">
           <span class="row-title">{{ row[1] }} {{ row[2] }}</span>
           <span class="row-sub">
-            {{ nationId }} · {{ t("mods.player.age", { n: ageOn(row[3], START_DATE) }) }} ·
+            {{ nationId }} · {{ t("mods.player.age", { n: ageOn(row[3], store.today) }) }} ·
             {{ store.clubNames.get(row[10]) ?? row[10] }}
           </span>
         </span>

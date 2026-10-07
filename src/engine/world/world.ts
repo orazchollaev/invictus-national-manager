@@ -174,6 +174,15 @@ export class World {
 
   // ── Indexes ───────────────────────────────────────────────────────────────
 
+  /** Rebuild what is derived from clubs and players after the save editor changed them. */
+  refreshAfterEdit() {
+    this.clubIndex.clear()
+    for (const [nationId, tiers] of indexClubs(this.clubs.values()))
+      this.clubIndex.set(nationId, tiers)
+    this.strengthCache.clear()
+    this.reindex()
+  }
+
   reindex() {
     this.byDate.clear()
     this.busyIndex.clear()

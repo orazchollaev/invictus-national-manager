@@ -18,7 +18,7 @@ import {
   type Attr,
   type Attrs,
 } from "@/engine/players/attributes"
-import { START_DATE } from "@/data/start"
+import { EDIT_MAX_AGE, EDIT_MIN_AGE } from "@/engine/world/edit"
 import { showConfirm } from "@/composables/useDialog"
 import FaceEditor from "./FaceEditor.vue"
 import { useModsStore } from "@/modules/mods/store"
@@ -64,7 +64,7 @@ const FOOT = computed(() => [
 ])
 
 const age = computed(() =>
-  /^\d{4}-\d{2}-\d{2}$/.test(draft.born) ? ageOn(draft.born, START_DATE) : null
+  /^\d{4}-\d{2}-\d{2}$/.test(draft.born) ? ageOn(draft.born, store.today) : null
 )
 
 /** Who the face is drawn for: his id, surname and nation decide what it starts as. */
@@ -94,6 +94,13 @@ function setAttr(key: Attr, value: number) {
   if (draft.pa < draft.ca) draft.pa = Math.ceil(draft.ca)
 }
 
+/** In a running game his own attributes stay editable, so ability set by hand redraws them. */
+function setAbility(v: number) {
+  draft.ca = v
+  draft.attrs = undefined
+  if (draft.pa < v) draft.pa = Math.ceil(v)
+}
+
 function resetAttrs() {
   draft.attrs = undefined
 }
@@ -109,7 +116,10 @@ watch(
 )
 
 const valid = computed(
-  () => draft.first.trim().length + draft.last.trim().length > 0 && age.value !== null
+  () =>
+    draft.first.trim().length + draft.last.trim().length > 0 &&
+    age.value !== null &&
+    (!store.live || (age.value >= EDIT_MIN_AGE && age.value <= EDIT_MAX_AGE))
 )
 
 function save() {
@@ -155,7 +165,10 @@ async function remove() {
         <input v-model="draft.born" class="input" type="date" min="1960-01-01" max="2015-12-31" />
       </AppField>
       <AppField :label="t('mods.player.nation')" layout="stack">
-        <AppSelect v-model="draft.nationId" :options="store.nationOptions" searchable />
+        <span v-if="store.live && !isNew" class="fixed">
+          {{ store.nationOptions.find((n) => n.value === draft.nationId)?.label }}
+        </span>
+        <AppSelect v-else v-model="draft.nationId" :options="store.nationOptions" searchable />
       </AppField>
       <div class="grid2">
         <AppField :label="t('mods.club.nation')" layout="stack">
@@ -202,7 +215,22 @@ async function remove() {
         :label="t('mods.player.ca')"
         :hint="draft.attrs ? t('mods.player.caFromAttrs') : undefined"
       >
-        <AppNumberInput v-model="draft.ca" :min="1" :max="99" :disabled="!!draft.attrs" editable />
+        <AppNumberInput
+          v-if="store.live"
+          :model-value="draft.ca"
+          :min="1"
+          :max="99"
+          editable
+          @update:model-value="setAbility"
+        />
+        <AppNumberInput
+          v-else
+          v-model="draft.ca"
+          :min="1"
+          :max="99"
+          :disabled="!!draft.attrs"
+          editable
+        />
       </AppField>
       <AppField :label="t('mods.player.pa')">
         <AppNumberInput v-model="draft.pa" :min="1" :max="99" editable />
@@ -232,7 +260,13 @@ async function remove() {
       <FaceEditor v-if="faceReady" v-model="draft.face" :player="faceOwner" />
       <div v-else class="face-wait" aria-hidden="true" />
 
-      <AppButton v-if="!isNew" variant="danger" size="sm" class="delete" @click="remove">
+      <AppButton
+        v-if="!isNew && !store.live"
+        variant="danger"
+        size="sm"
+        class="delete"
+        @click="remove"
+      >
         <Trash2 :size="14" />
         {{ t("common.delete") }}
       </AppButton>
@@ -253,6 +287,10 @@ async function remove() {
 <style scoped>
 .delete {
   align-self: flex-start;
+}
+
+.fixed {
+  color: var(--text-muted);
 }
 
 /* Holds some of the face editor's place for the moment before it arrives. */

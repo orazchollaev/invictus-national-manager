@@ -278,6 +278,8 @@ export default {
       invitationalHint: "Host your own, or answer an invitation",
       settings: "Settings",
       settingsHint: "Theme, match speed",
+      editor: "Save editor",
+      editorHint: "Edit players, nations and clubs in this career",
       leaveConfirm: "Leave without saving? Progress since the last save is lost.",
       exit: "Exit",
       saveGame: "Save game",
@@ -729,6 +731,15 @@ export default {
       bid: "Bid to host",
       bidHint: "Counts four times over when hosts are chosen, about six years ahead",
     },
+  },
+  editor: {
+    title: "Save editor",
+    modName: "Edited",
+    noGame: "No career is open.",
+    blocked: "Finish what the game is waiting for first.",
+    blockedHint: "A match, draw, call-up or other decision is pending.",
+    rules:
+      "Changes apply only to this career. Nothing can be deleted, and ids, leagues, nations and competitions stay as they are.",
   },
   mods: {
     title: "Mods",
