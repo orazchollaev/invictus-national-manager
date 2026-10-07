@@ -125,6 +125,7 @@ import { crowdBoost, supportOf } from "../career/support"
 import { rivalry } from "./rivals"
 import { recordCleanSheets, recordMatch, recordRanks } from "./records"
 import { expireInvite, maybeInvite, seenInvite } from "./invitational"
+import { pruneOldFixtures } from "./prune"
 
 export interface WorldStatics {
   nations: NationDef[]
@@ -150,6 +151,8 @@ export class World {
   readonly clubs = new Map<string, Club>()
   readonly clubIndex: ClubIndex
   private byDate = new Map<ISODate, string[]>()
+  /** Every fixture of each nation, in the order they were made. */
+  private byNation = new Map<string, Set<string>>()
   private busyIndex = new Set<string>()
   private poolIndex = new Map<string, string[]>()
   private strengthCache = new Map<string, number>()
@@ -167,6 +170,8 @@ export class World {
     }
     for (const p of Object.values(state.players)) ensureAttrs(p)
     this.reindex()
+    // A long-running save is trimmed on load, not only as time passes.
+    pruneOldFixtures(this)
     ensureCoaches(this)
     ensureCareer(this)
     this.settleHeldFriendlies()
@@ -185,6 +190,7 @@ export class World {
 
   reindex() {
     this.byDate.clear()
+    this.byNation.clear()
     this.busyIndex.clear()
     for (const f of Object.values(this.state.fixtures)) this.indexFixture(f)
     this.poolIndex.clear()
@@ -198,6 +204,11 @@ export class World {
     else this.byDate.set(f.date, [f.id])
     this.busyIndex.add(`${f.home}|${f.date}`)
     this.busyIndex.add(`${f.away}|${f.date}`)
+    for (const team of [f.home, f.away]) {
+      const set = this.byNation.get(team)
+      if (set) set.add(f.id)
+      else this.byNation.set(team, new Set([f.id]))
+    }
   }
 
   private addToPool(p: Player) {
@@ -238,9 +249,11 @@ export class World {
   }
 
   fixturesOf(nationId: string, from?: ISODate, to?: ISODate): Fixture[] {
-    return Object.values(this.state.fixtures)
+    return [...(this.byNation.get(nationId) ?? [])]
+      .map((id) => this.state.fixtures[id])
       .filter(
         (f) =>
+          f &&
           (f.home === nationId || f.away === nationId) &&
           (!from || f.date >= from) &&
           (!to || f.date <= to)
@@ -621,7 +634,10 @@ export class World {
     expireInvite(this)
     checkContract(this)
     fillVacancies(this)
-    if (m === 1 && d === 1) this.yearTurn()
+    if (m === 1 && d === 1) {
+      this.yearTurn()
+      pruneOldFixtures(this)
+    }
     if (m === 7 && d === 1) this.seasonRollover()
     if (new Date(date + "T00:00:00Z").getUTCDay() === 1) this.clubWeek()
     this.planFriendlies()
@@ -1691,8 +1707,9 @@ export class World {
       fx.home = swap(fx.home)!
       fx.away = swap(fx.away)!
     }
-    if (!used) return
+    // Fixtures were rewritten whether or not a group was: the indexes follow them.
     this.reindex()
+    if (!used) return
     const me = this.userNation
     for (const [ph, team] of map) {
       this.news(

@@ -285,7 +285,12 @@ function advance(tie: Tie) {
         <AppSectionHeader v-if="r.ties.length" :title="$stage(r.name)" />
         <div v-if="r.ties.length" class="fixtures">
           <template v-for="tie in r.ties" :key="tie.id">
-            <FixtureRow v-for="id in tie.fixtures" :key="id" :fixture="fx(id)!" show-date />
+            <FixtureRow
+              v-for="f in groupFixtures(tie.fixtures)"
+              :key="f.id"
+              :fixture="f"
+              show-date
+            />
             <div v-if="advance(tie)" class="advance">
               <NationFlag :id="advance(tie)!.team" :size="16" name="short" />
               {{ t("competitions.detail.advance") }}
@@ -302,9 +307,9 @@ function advance(tie: Tie) {
         <AppSectionHeader :title="t('competitions.detail.thirdPlace')" />
         <div class="fixtures">
           <FixtureRow
-            v-for="id in stage.thirdPlace.fixtures"
-            :key="id"
-            :fixture="fx(id)!"
+            v-for="f in groupFixtures(stage.thirdPlace.fixtures)"
+            :key="f.id"
+            :fixture="f"
             show-date
           />
         </div>
