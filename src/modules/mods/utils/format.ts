@@ -13,6 +13,8 @@ import {
 } from "@/engine/types"
 import type { ClubRow, PlayerRow } from "@/engine/world/create"
 import { sanitizeFaceEdit } from "@/lib/faces"
+import { flagUrl } from "@/lib/flags"
+import { NAME_ALIASES, NAME_POOLS } from "@/data/names"
 import { attrsFromCsv, attrsToCsv, caFromAttrs, type Attrs } from "@/engine/players/attributes"
 
 export const MOD_FORMAT = "invictus-mod"
@@ -165,11 +167,105 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/
 
 export class ModError extends Error {}
 
+/** Players a nation a mod adds needs to field a squad. */
+export const MIN_SQUAD = 20
+
+const NATION_ID = /^[A-Z]{3}$/
+
+/** Naming cultures a nation's players can be drawn from, for pickers. */
+export const CULTURES = [
+  ...new Set([...Object.keys(NAME_POOLS), ...Object.keys(NAME_ALIASES)]),
+].sort()
+
+/** Regional federations the game has competitions for. */
+export function subFedsOf(base: NationDef[]): string[] {
+  return [...new Set(base.flatMap((n) => n.subFeds))].sort()
+}
+
+/** The bundled nation ids: a mod cannot remove these, only the ones it added. */
+export const isAdded = (id: string, base: NationDef[]) => !base.some((n) => n.id === id)
+
+const validCentre = (c: unknown): c is [number, number] =>
+  Array.isArray(c) &&
+  c.length === 2 &&
+  isNum(c[0]) &&
+  isNum(c[1]) &&
+  Math.abs(c[0]) <= 90 &&
+  Math.abs(c[1]) <= 180
+
+export type NationProblem =
+  | "id"
+  | "taken"
+  | "name"
+  | "flag"
+  | "confed"
+  | "subFeds"
+  | "points"
+  | "youth"
+  | "centre"
+  | "cultures"
+
 /**
- * Check and tidy a mod read from a file. The nations are those of the game: a
- * nation the game does not know is dropped (no competition would have it), one the
- * file lacks comes from the bundled data. Clubs and players are kept where they make
- * sense; a player at a club that does not exist moves to one in his country.
+ * Why a nation a mod adds cannot be used, or null when it can. `taken` holds the ids
+ * of every other nation of the mod. The coordinates are required: tournaments choose
+ * co-hosts by distance, and a nation without a place on the map would never be one.
+ */
+export function nationProblem(
+  n: Partial<NationDef>,
+  base: NationDef[],
+  taken: ReadonlySet<string>
+): NationProblem | null {
+  if (!isStr(n.id) || !NATION_ID.test(n.id)) return "id"
+  if (taken.has(n.id)) return "taken"
+  if (!isStr(n.name) || !n.name.trim()) return "name"
+  if (!isStr(n.flag) || !flagUrl(n.flag)) return "flag"
+  if (!CONFEDS.includes(n.confed as Confed)) return "confed"
+  const feds = subFedsOf(base)
+  if (!Array.isArray(n.subFeds) || !n.subFeds.every((f) => feds.includes(f))) return "subFeds"
+  if (!isNum(n.points) || n.points < 0 || n.points > 3000) return "points"
+  if (!isNum(n.youthLevel) || n.youthLevel < 1 || n.youthLevel > 100) return "youth"
+  if (!validCentre(n.centre)) return "centre"
+  if (
+    !Array.isArray(n.cultures) ||
+    !n.cultures.length ||
+    !n.cultures.every(
+      (c) => Array.isArray(c) && isStr(c[0]) && CULTURES.includes(c[0]) && isNum(c[1]) && c[1] > 0
+    )
+  )
+    return "cultures"
+  return null
+}
+
+/** A nation a mod adds, with only the fields the game reads. Call after `nationProblem`. */
+function tidyAdded(n: NationDef): NationDef {
+  return {
+    id: n.id,
+    name: n.name.trim().slice(0, 40),
+    flag: n.flag,
+    confed: n.confed,
+    subFeds: [...new Set(n.subFeds)],
+    color: isStr(n.color) && /^#[0-9a-fA-F]{6}$/.test(n.color) ? n.color : "#888888",
+    youthLevel: clamp(n.youthLevel, 1, 100),
+    points: clamp(n.points, 0, 3000),
+    banned: n.banned ? true : undefined,
+    nonFifa: n.nonFifa === "confederation" || n.nonFifa === "regional" ? n.nonFifa : undefined,
+    cultures: n.cultures.map(([c, w]) => [c, w] as [string, number]),
+    grounds: Array.isArray(n.grounds)
+      ? n.grounds
+          .filter((g) => g && isStr(g.city) && isStr(g.name) && isNum(g.capacity))
+          .map((g) => ({ city: g.city, name: g.name, capacity: clamp(g.capacity, 500, 200000) }))
+      : undefined,
+    cities: Array.isArray(n.cities) ? n.cities.filter(isStr) : undefined,
+    centre: [n.centre![0], n.centre![1]],
+  }
+}
+
+/**
+ * Check and tidy a mod read from a file. The bundled nations are all there: one the
+ * file lacks comes from the bundled data. A nation the game does not ship is kept
+ * when it is complete (valid, with a club and a squad) and dropped otherwise, with its
+ * clubs and players. Clubs and players are kept where they make sense; a player at a
+ * club that does not exist moves to one in his country.
  */
 export function normalizeMod(raw: unknown, base: NationDef[]): ModData {
   const m = raw as Partial<ModData> | null
@@ -199,8 +295,17 @@ export function normalizeMod(raw: unknown, base: NationDef[]): ModData {
             .map((g) => ({ city: g.city, name: g.name, capacity: clamp(g.capacity, 500, 200000) }))
         : undefined,
       cities: Array.isArray(n.cities) ? n.cities.filter(isStr) : undefined,
+      centre: validCentre(n.centre) ? [n.centre[0], n.centre[1]] : b.centre,
     }
   })
+  const baseIds = new Set(nations.map((n) => n.id))
+  const addedIds = new Set<string>()
+  for (const n of m.nations) {
+    if (!n || !isStr(n.id) || baseIds.has(n.id)) continue
+    if (nationProblem(n, base, new Set([...baseIds, ...addedIds]))) continue
+    addedIds.add(n.id)
+    nations.push(tidyAdded(n))
+  }
   const known = new Set(nations.map((n) => n.id))
 
   const clubIds = new Set<string>()
@@ -249,6 +354,20 @@ export function normalizeMod(raw: unknown, base: NationDef[]): ModData {
       )
     }
     players[nationId] = out
+  }
+
+  // A nation added without a club or a squad could not play: it goes, with what it owns.
+  const incomplete = [...addedIds].filter(
+    (id) => !clubs.some((c) => c[2] === id) || (players[id]?.length ?? 0) < MIN_SQUAD
+  )
+  if (incomplete.length) {
+    const gone = new Set(incomplete)
+    const goneClubs = new Set(clubs.filter((c) => gone.has(c[2])).map((c) => c[0]))
+    for (const id of gone) delete players[id]
+    nations.splice(0, nations.length, ...nations.filter((n) => !gone.has(n.id)))
+    clubs.splice(0, clubs.length, ...clubs.filter((c) => !gone.has(c[2])))
+    for (const [nationId, rows] of Object.entries(players))
+      for (const r of rows) if (goneClubs.has(r[10])) r[10] = clubOf(nationId)
   }
 
   const now = Date.now()

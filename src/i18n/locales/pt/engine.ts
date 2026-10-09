@@ -360,6 +360,7 @@ const engine: typeof en = {
     "league-phase": "Fase de liga",
     qualifying: "Eliminatórias",
     "preliminary-round": "Fase preliminar",
+    preliminaryN: "Fase preliminar {n}",
     prelims: "Preliminares",
     "first-round": "Primeira fase",
     "second-round": "Segunda fase",

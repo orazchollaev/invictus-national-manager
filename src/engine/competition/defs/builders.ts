@@ -4,6 +4,8 @@
  * round, groups, optional play-offs).
  */
 import type { Confed, ISODate } from "@/engine/types"
+import { addDays, daysBetween } from "@/engine/calendar/dates"
+import { windowBack } from "@/engine/calendar/windows"
 import type { CompContext, CompetitionDef, StagePlan } from "../runtime"
 import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, CompetitionKind, CompetitionOutcome, Importance } from "../types"
@@ -201,6 +203,29 @@ export interface QualifierOptions {
   qualify?(inst: CompetitionInstance, ctx: CompContext): CompetitionOutcome
 }
 
+/** The most preliminary rounds there are; a field still too large plays on in larger groups. */
+export const MAX_PRELIM_ROUNDS = 3
+
+/** The first preliminary round is "prelim", the others "prelim2", "prelim3". */
+export const prelimKey = (k: number) => (k ? `prelim${k + 1}` : "prelim")
+export const isPrelim = (key: string) => /^prelim\d*$/.test(key)
+
+/**
+ * Ties in each preliminary round that bring `n` teams down to `capacity`. A tie takes
+ * two teams and leaves one, so a round cuts at most half the field: a larger field
+ * needs another round, played in an earlier window.
+ */
+export function prelimRounds(n: number, capacity: number): number[] {
+  const ties: number[] = []
+  let left = n
+  while (left > capacity && left >= 2 && ties.length < MAX_PRELIM_ROUNDS) {
+    const t = Math.min(left - capacity, Math.floor(left / 2))
+    ties.push(t)
+    left -= t
+  }
+  return ties
+}
+
 export function qualifierDef(o: QualifierOptions): CompetitionDef {
   const importance = o.importance ?? "qualifier"
   const tiebreak = o.tiebreak ?? "gd"
@@ -216,31 +241,53 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
       const plans: StagePlan[] = []
       const groupCount = o.groups(inst, ctx)
       const fixed = o.fixedGroups?.(inst.year)
-      // How many of the lowest ranked must be knocked out first for the groups to fit.
-      const prelimTies = (c: CompContext) => {
-        if (fixed) return 0
-        const n = o.entrants(inst, c).length
-        return Math.max(0, n - groupCount * o.groupSize)
-      }
+      const capacity = groupCount * o.groupSize
       // Decided once, when the edition is created, so the stage list never shifts.
-      const usePrelim =
-        !!o.prelimDates &&
-        (inst.stages.length ? inst.stages.some((s) => s.key === "prelim") : prelimTies(ctx) > 0)
-      if (usePrelim) {
+      const rounds = o.prelimDates
+        ? inst.stages.length
+          ? inst.stages.filter((s) => isPrelim(s.key)).length
+          : fixed
+            ? 0
+            : prelimRounds(o.entrants(inst, ctx).length, capacity).length
+        : 0
+      /** Who is still in after the first `upTo` preliminary rounds, best ranked first. */
+      const alive = (c: CompContext, i: CompetitionInstance, upTo: number) => {
+        let list = o.entrants(i, c)
+        for (let k = 0; k < upTo; k++) {
+          // Read from each round's draw, not from the ranking, which has moved since:
+          // a team must neither play twice in a round nor be left out.
+          const stageKey = prelimKey(k)
+          const played = new Set(
+            (i.stages.find((s) => s.key === stageKey)?.rounds?.[0]?.ties ?? []).flatMap((t) => [
+              t.home,
+              t.away,
+            ])
+          )
+          list = [
+            ...list.filter((t) => !played.has(t)),
+            ...knockoutResult(i, stageKey).finalWinners,
+          ]
+        }
+        return list
+      }
+      for (let k = 0; k < rounds; k++) {
+        const base = o.prelimDates!(inst.year)
+        const back = rounds - 1 - k
+        // The last round is where the definition puts it; earlier ones, windows before.
+        const dates = back ? windowBack(base[0], back).slots.slice(0, base.length) : base
+        const gap = daysBetween(o.prelimDrawDate!(inst.year), base[0])
+        const name = k ? `Preliminary round ${k + 1}` : "Preliminary round"
         plans.push({
-          key: "prelim",
-          name: "Preliminary round",
-          drawDate: o.prelimDrawDate!(inst.year),
+          key: prelimKey(k),
+          name,
+          drawDate: back ? addDays(dates[0], -gap) : o.prelimDrawDate!(inst.year),
           importance,
           entrants: (c, i) => {
-            const all = o.entrants(i, c)
-            return all.slice(all.length - 2 * prelimTies(c))
+            const pool = alive(c, i, k)
+            const ties = prelimRounds(o.entrants(i, c).length, capacity)[k] ?? 0
+            return pool.slice(pool.length - 2 * ties)
           },
-          knockout: {
-            rounds: [{ name: "Preliminary round", dates: o.prelimDates!(inst.year) }],
-            pairing: "pots",
-            venue: "home-away",
-          },
+          knockout: { rounds: [{ name, dates }], pairing: "pots", venue: "home-away" },
         })
       }
       plans.push({
@@ -248,21 +295,10 @@ export function qualifierDef(o: QualifierOptions): CompetitionDef {
         name: groupCount > 1 ? "Group stage" : "Qualifying",
         drawDate: o.groupDrawDate(inst.year),
         importance,
-        entrants: (c, i) => {
-          const all = o.entrants(i, c)
-          if (!usePrelim) return all
-          // Everyone the preliminary round did not involve — read from its draw, not
-          // from the ranking, which has moved since: a team must neither play twice
-          // nor be left out.
-          const played = new Set(
-            (i.stages.find((s) => s.key === "prelim")?.rounds?.[0]?.ties ?? []).flatMap((t) => [
-              t.home,
-              t.away,
-            ])
-          )
-          const winners = knockoutResult(i, "prelim").finalWinners
-          return [...all.filter((t) => !played.has(t)), ...winners]
-        },
+        // Waits for every preliminary round, so the ones who went through a bye still
+        // read as having gone on.
+        ...(rounds > 1 ? { after: Array.from({ length: rounds }, (_, k) => prelimKey(k)) } : {}),
+        entrants: (c, i) => alive(c, i, rounds),
         groups: {
           count: groupCount,
           legs: o.groupLegs ?? 2,

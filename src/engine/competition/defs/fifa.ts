@@ -61,6 +61,30 @@ function directPlaces(year: number, confed: Confed, ctx: CompContext) {
   return Math.max(0, WC_PLACES[confed] - hostsIn(year, confed, ctx).length)
 }
 
+/**
+ * Confederations still playing their World Cup qualifying. Their teams may yet earn a
+ * place, so none of them can be handed one as "the best team still out": a place
+ * given that way and then won on the pitch would put a team in the finals twice.
+ * UEFA is left out because its unsettled places are drawn as placeholders.
+ */
+function stillQualifying(year: number, ctx: CompContext): Set<Confed> {
+  const ids: [string, Confed][] = [
+    ["caf", "CAF"],
+    ["afc", "AFC"],
+    ["concacaf", "CONCACAF"],
+    ["conmebol", "CONMEBOL"],
+    ["ofc", "OFC"],
+  ]
+  return new Set(
+    ids
+      .filter(([id]) => {
+        const q = ctx.instance(`wcq-${id}-${year}`)
+        return q && q.status !== "done"
+      })
+      .map(([, confed]) => confed)
+  )
+}
+
 function confedEntrants(confed: Confed) {
   return (inst: CompetitionInstance, ctx: CompContext) => {
     const hosts = worldCupHosts(inst.year, ctx)
@@ -109,7 +133,13 @@ export const worldCup: CompetitionDef = finalsDef({
     const rest = list
       .filter((t) => !inst.hosts.includes(t))
       .sort((a, b) => ctx.points(b) - ctx.points(a))
-    return fillFromRanking(ctx, [...hosts, ...rest], 48, (t) => ctx.fifa(t))
+    const open = stillQualifying(inst.year, ctx)
+    return fillFromRanking(
+      ctx,
+      [...hosts, ...rest],
+      48,
+      (t) => ctx.fifa(t) && !open.has(ctx.confedOf(t))
+    )
   },
 })
 
@@ -475,6 +505,10 @@ export const wcqConmebol: CompetitionDef = qualifierDef({
   entrants: confedEntrants("CONMEBOL"),
   groups: () => 1,
   groupSize: 10,
+  // Only played when more than ten nations enter (a bigger confederation): the lowest
+  // ranked meet in June, before the league's September start.
+  prelimDates: (y) => slots(y - 3, ["jun"]),
+  prelimDrawDate: (y) => iso(y - 3, 3, 1),
   groupDrawDate: (y) => iso(y - 3, 7, 30),
   groupDates: (y) => [
     ...slots(y - 3, ["sep", "nov"]),
@@ -558,12 +592,17 @@ export const wcqInterconf: CompetitionDef = {
           // confederation fills (CONCACAF sends one team from 2030) goes to the best
           // ranked team still out.
           const ranked = [...new Set(list)].sort((a, b) => c.points(b) - c.points(a))
+          const open = stillQualifying(inst.year, c)
           return fillFromRanking(
             c,
             ranked,
             6,
             (t) =>
-              c.fifa(t) && c.confedOf(t) !== "UEFA" && !inst.hosts.includes(t) && !qualified.has(t)
+              c.fifa(t) &&
+              c.confedOf(t) !== "UEFA" &&
+              !open.has(c.confedOf(t)) &&
+              !inst.hosts.includes(t) &&
+              !qualified.has(t)
           )
         },
         knockout: {

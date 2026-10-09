@@ -163,7 +163,11 @@ describe("tournament integrity", { timeout: 600000 }, () => {
           .find((p) => p.key === s.key)
         if (plan?.groups?.venue === "neutral") continue
         for (const g of s.groups ?? []) {
-          const list = g.fixtures.map((id) => fixtures[id]).sort(byDate)
+          // Matches of tournaments over four years ago have been pruned (world/prune.ts).
+          const list = g.fixtures
+            .map((id) => fixtures[id])
+            .filter(Boolean)
+            .sort(byDate)
           for (const team of g.teams) {
             let prev = ""
             let run = 0

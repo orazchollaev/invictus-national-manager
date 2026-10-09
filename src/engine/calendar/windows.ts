@@ -120,3 +120,15 @@ export function nextWindow(date: ISODate): MatchWindow {
   }
   throw new Error(`No window after ${date}`)
 }
+
+/**
+ * The window `back` windows before the one a date falls in (or, between windows, the
+ * one it follows): where earlier rounds of a competition are scheduled.
+ */
+export function windowBack(date: ISODate, back: number): MatchWindow {
+  const year = Number(date.slice(0, 4))
+  const all = [year - 2, year - 1, year, year + 1].flatMap(windowsForYear)
+  let at = all.findIndex((w) => date <= w.end)
+  if (at < 0) at = all.length - 1
+  return all[Math.max(0, at - back)]
+}

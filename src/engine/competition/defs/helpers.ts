@@ -6,7 +6,7 @@ import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
 import type { Tiebreak } from "../tables"
 import type { HostLevel } from "@/engine/world/stadiums"
-import { CENTRES, NEIGHBOURS } from "@/data/geo"
+import { NEIGHBOURS } from "@/data/geo"
 import { AWARDED_HOSTS } from "@/data/start"
 
 export function everyNYears(first: number, n: number) {
@@ -147,9 +147,9 @@ export function finalsOutcome(
 }
 
 /** Kilometres between two nations' centres. */
-export function distanceKm(a: string, b: string): number {
-  const pa = CENTRES[a]
-  const pb = CENTRES[b]
+export function distanceKm(ctx: CompContext, a: string, b: string): number {
+  const pa = ctx.centre(a)
+  const pb = ctx.centre(b)
   if (!pa || !pb) return Infinity
   const rad = Math.PI / 180
   const dLat = (pb[0] - pa[0]) * rad
@@ -161,8 +161,8 @@ export function distanceKm(a: string, b: string): number {
 }
 
 /** Close enough to share a tournament: a border or short sea crossing, or centres within 700 km. */
-export function nearby(a: string, b: string): boolean {
-  return !!NEIGHBOURS.get(a)?.has(b) || distanceKm(a, b) <= 700
+export function nearby(ctx: CompContext, a: string, b: string): boolean {
+  return !!NEIGHBOURS.get(a)?.has(b) || distanceKm(ctx, a, b) <= 700
 }
 
 /** An edition id: the definition and the year ("euro-2032"). */
@@ -238,12 +238,12 @@ export function pickHosts(
   if (count === 1 && out.length && level !== "regional") {
     const most = level === "world-cup" ? 3 : 2
     const confed = ctx.confedOf(out[0])
-    const gap = (t: string) => Math.min(...out.map((h) => distanceKm(h, t)))
+    const gap = (t: string) => Math.min(...out.map((h) => distanceKm(ctx, h, t)))
     while (out.length < most && ctx.readiness(out, level) < 1) {
       const able = candidates.filter(
         (t) => !out.includes(t) && ctx.confedOf(t) === confed && ready(t) > 0.2
       )
-      let partners = able.filter((t) => out.some((h) => nearby(h, t)))
+      let partners = able.filter((t) => out.some((h) => nearby(ctx, h, t)))
       // No neighbour can help: the closest within a short flight.
       if (!partners.length)
         partners = able

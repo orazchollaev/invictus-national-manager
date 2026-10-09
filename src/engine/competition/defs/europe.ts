@@ -24,7 +24,7 @@ import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance } from "../types"
 import { finalsDef, pathOrder, qualifierDef } from "./builders"
 import { everyNYears, pickHosts } from "./helpers"
-import { leagueRanking, nationsLeagueDef } from "./nationsLeague"
+import { leagueRanking, leagueShape, nationsLeagueDef } from "./nationsLeague"
 import { byEdition, europeanQualifiersDef } from "./uefaQualifiers"
 
 const euroYears = everyNYears(2028, 4)
@@ -177,7 +177,7 @@ export const uefaNationsLeague: CompetitionDef = nationsLeagueDef({
   confed: "UEFA",
   name: (y) => `UEFA Nations League ${y}–${String(y + 1).slice(2)}`,
   editions: everyNYears(2026, 2),
-  tiers: (y) =>
+  tiers: (y, members) =>
     y === 2026
       ? [
           { letter: "A", size: 16, groups: 4 },
@@ -185,11 +185,8 @@ export const uefaNationsLeague: CompetitionDef = nationsLeagueDef({
           { letter: "C", size: 16, groups: 4 },
           { letter: "D", size: 6, groups: 2 },
         ]
-      : [
-          { letter: "A", size: 18, groups: 3 },
-          { letter: "B", size: 18, groups: 3 },
-          { letter: "C", size: 18, groups: 3 },
-        ],
+      : // Three leagues of 18 for the 54 nations of the format; more or fewer, more leagues.
+        leagueShape(members),
   leagueDates: (y) => slots(y, ["sep", "nov"]),
   leagueDrawDate: (y) => iso(y, 2, 12),
   finalsDates: (y) => {

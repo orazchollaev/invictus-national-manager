@@ -7,7 +7,7 @@ import type { Confed, ISODate } from "../types"
 import type { HostLevel } from "../world/stadiums"
 import { addDays } from "../calendar/dates"
 import { makeRng, deriveSeed, shuffle } from "../rng"
-import { drawGroups, roundRobin, seedBracket, bracketOrder } from "./draw"
+import { drawGroups, fitRounds, seedBracket, bracketOrder } from "./draw"
 import { isPlaceholder } from "./placeholders"
 import { groupText, msg, stageText, type Msg } from "../text"
 import { groupStandings, type Tiebreak } from "./tables"
@@ -29,6 +29,8 @@ export interface CompContext {
   /** Every confederation a team is or — for a place still to be decided — may turn out to be. */
   confedsOf(team: string): Confed[]
   subFeds(team: string): string[]
+  /** Centre of a nation as [latitude, longitude], or undefined when none is known. */
+  centre(team: string): [number, number] | undefined
   points(team: string): number
   /** Nations allowed to enter competitions (not suspended), best ranked first. */
   ranked(filter?: (team: string) => boolean): string[]
@@ -269,7 +271,7 @@ function drawGroupStage(
     const ids: string[] = []
     const own = gp.schedule?.(list, name)
     const dates = own?.dates ?? gp.dates
-    ;(own?.rounds ?? roundRobin(list, gp.legs)).forEach((pairs, r) => {
+    ;(own?.rounds ?? fitRounds(list, gp.legs, dates.length)).forEach((pairs, r) => {
       for (const [h, a] of pairs) {
         const v = venueFor(inst, h, a, gp.venue)
         const day = addDays(roundDate(dates, r), offset(gi, teams.length, own ? 1 : gp.spread))

@@ -361,6 +361,7 @@ const engine = {
     "league-phase": "League phase",
     qualifying: "Qualifying",
     "preliminary-round": "Preliminary round",
+    preliminaryN: "Preliminary round {n}",
     prelims: "Prelims",
     "first-round": "First round",
     "second-round": "Second round",

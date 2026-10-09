@@ -31,7 +31,7 @@ import { addDays, iso } from "@/engine/calendar/dates"
 import { slots, window } from "@/engine/calendar/windows"
 import { deriveSeed, makeRng, pick } from "@/engine/rng"
 import { AWARDED_HOSTS, CONCACAF_NATIONS_LEAGUE_2026 } from "@/data/start"
-import { drawGroups, roundRobin } from "../draw"
+import { drawGroups, fitRounds, roundRobin } from "../draw"
 import type { CompContext, CompetitionDef, KnockoutPlan, StagePlan } from "../runtime"
 import { finishers, knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
@@ -152,7 +152,8 @@ function schedule(year: number) {
       const rounds = roundRobin(teams, 1)
       return { rounds, dates: spaced(addDays(window(year, "sep").start, 3), rounds.length, 3) }
     }
-    return { rounds: roundRobin(teams, 2), dates: leagueDates(year, letter) }
+    const dates = leagueDates(year, letter)
+    return { rounds: fitRounds(teams, 2, dates.length), dates }
   }
 }
 

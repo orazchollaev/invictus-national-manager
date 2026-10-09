@@ -17,6 +17,8 @@ function stageName(name: string): string {
   if (te(key)) return t(key)
   const round = /^Round of (\d+)$/.exec(name)
   if (round) return t("stage.roundOf", { n: round[1] })
+  const prelim = /^Preliminary round (\d+)$/.exec(name)
+  if (prelim) return t("stage.preliminaryN", { n: prelim[1] })
   const league = /^League (\w+)$/.exec(name)
   if (league) return t("stage.leagueN", { x: league[1] })
   const group = /^Group (\w+)$/.exec(name)

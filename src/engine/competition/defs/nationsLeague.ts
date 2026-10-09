@@ -24,7 +24,7 @@
  */
 import type { Confed, ISODate } from "@/engine/types"
 import { deriveSeed, makeRng } from "@/engine/rng"
-import { drawGroups, roundRobin, seedBracket, sixMatchRounds } from "../draw"
+import { drawGroups, fitRounds, seedBracket, sixMatchRounds } from "../draw"
 import type { CompContext, CompetitionDef, StagePlan } from "../runtime"
 import { knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
@@ -41,8 +41,11 @@ export interface NationsLeagueOptions {
   confed: Confed
   name(year: number): string
   editions(from: number, to: number): number[]
-  /** League letters and their sizes, top first; the last takes everyone left. */
-  tiers(year: number): Tier[]
+  /**
+   * League letters and their sizes, top first, for a confederation of `members`
+   * nations; the last takes everyone left.
+   */
+  tiers(year: number, members: number): Tier[]
   leagueDates(year: number): ISODate[]
   leagueDrawDate(year: number): ISODate
   /** March: quarter-final legs (and play-offs). */
@@ -56,6 +59,64 @@ export interface NationsLeagueOptions {
 
 export const letterOf = (groupName: string) => groupName.replace(/\d+$/, "")
 
+/** Groups of this many teams play their league phase in the six match days there are. */
+const GROUP_SIZES = [6, 4, 3]
+/** A full league: three groups of six. */
+const LEAGUE_SIZE = 18
+
+/**
+ * Leagues for `members` nations whose groups all fit the league phase's six match
+ * days (a group of six plays the six-match pattern, a group of three or four a double
+ * round robin) and whose groups never differ by more than a team within a league:
+ * full leagues of three groups of six, then — for the nations left over — one or two
+ * smaller leagues of groups of six, four or three. It is exactly three leagues of 18
+ * for the 54 nations the format was made for.
+ */
+export function leagueShape(members: number): Tier[] {
+  let full = Math.floor(members / LEAGUE_SIZE)
+  let rest = members - full * LEAGUE_SIZE
+  // 1, 2 or 5 nations cannot make groups of three or four: borrow a full league.
+  if ([1, 2, 5].includes(rest) && full > 0) {
+    full--
+    rest += LEAGUE_SIZE
+  }
+  const small: { size: number; groups: number }[] = []
+  if (rest > 0) {
+    const one = GROUP_SIZES.find((s) => rest % s === 0)
+    if (one) small.push({ size: one, groups: rest / one })
+    else {
+      // Two leagues, the larger groups first: as many of them as leave a whole number
+      // of the smaller.
+      search: for (const [a, b] of [
+        [6, 4],
+        [6, 3],
+        [4, 3],
+      ]) {
+        for (let n = Math.floor(rest / a); n >= 1; n--) {
+          const left = rest - n * a
+          if (left > 0 && left % b === 0) {
+            small.push({ size: a, groups: n }, { size: b, groups: left / b })
+            break search
+          }
+        }
+      }
+      // A confederation too small for any of this plays in one league of one group.
+      if (!small.length) small.push({ size: rest, groups: 1 })
+    }
+  }
+  const leagues = [...Array.from({ length: full }, () => ({ size: 6, groups: 3 })), ...small]
+  return leagues.map((l, i) => ({
+    letter: String.fromCharCode(65 + i),
+    size: l.size * l.groups,
+    groups: l.groups,
+  }))
+}
+
+/** The leagues of an edition, for the number of nations the confederation has now. */
+function tiersOf(o: NationsLeagueOptions, year: number, ctx: CompContext): Tier[] {
+  return o.tiers(year, ctx.ranked((t) => ctx.confedOf(t) === o.confed).length)
+}
+
 /** The 2026–27 edition: four leagues, rebalanced to three leagues of 18. */
 export const isTransitionEdition = (year: number) => year === 2026
 
@@ -65,7 +126,7 @@ function prevYear(o: NationsLeagueOptions, year: number): number {
 }
 
 function tierComposition(o: NationsLeagueOptions, inst: CompetitionInstance, ctx: CompContext) {
-  const tiers = o.tiers(inst.year)
+  const tiers = tiersOf(o, inst.year, ctx)
   const members = ctx.ranked((t) => ctx.confedOf(t) === o.confed)
   const previous = ctx.instance(`${o.id}-${prevYear(o, inst.year)}`)
   const out: Record<string, string[]> = {}
@@ -101,7 +162,7 @@ function groupsFor(o: NationsLeagueOptions, inst: CompetitionInstance, ctx: Comp
   const names: string[] = []
   const groups: string[][] = []
   const tiers = fixed ? null : tierComposition(o, inst, ctx)
-  for (const t of o.tiers(inst.year)) {
+  for (const t of tiersOf(o, inst.year, ctx)) {
     const list = fixed
       ? (fixed[t.letter] ?? [])
       : drawGroups(
@@ -212,7 +273,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
     plan(inst, ctx) {
       const { semi, final } = o.finalsDates(inst.year)
       const spring = o.springDates(inst.year)
-      const tiers = o.tiers(inst.year)
+      const tiers = tiersOf(o, inst.year, ctx)
       const top = tiers[0].letter
       const letters = tiers.map((x) => x.letter)
       const plans: StagePlan[] = [
@@ -235,7 +296,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
             },
             // Groups of six play the six-match pattern; the rest a double round robin.
             schedule: (list) => ({
-              rounds: sixMatchRounds(list) ?? roundRobin(list, 2),
+              rounds: sixMatchRounds(list) ?? fitRounds(list, 2, o.leagueDates(inst.year).length),
               dates: o.leagueDates(inst.year),
             }),
             venue: "home-away",
@@ -301,7 +362,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
     finalize(inst, ctx) {
       const ko = knockoutResult(inst, "finals")
       const t = tablesByLetter(inst, ctx)
-      const letters = o.tiers(inst.year).map((x) => x.letter)
+      const letters = tiersOf(o, inst.year, ctx).map((x) => x.letter)
       const tiers: Record<string, string[]> = {}
       for (const l of letters) tiers[l] = (t[l] ?? []).flatMap((tb) => tb.map((r) => r.team))
       const leagueOf = (team: string) => letters.find((l) => tiers[l].includes(team))

@@ -19,7 +19,7 @@
  */
 import type { ISODate } from "@/engine/types"
 import { deriveSeed, makeRng } from "@/engine/rng"
-import { drawGroups, roundRobin, sixMatchRounds } from "../draw"
+import { drawGroups, fitRounds, sixMatchRounds } from "../draw"
 import type { CompContext, CompetitionDef, GroupPlan } from "../runtime"
 import { knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
@@ -97,7 +97,7 @@ export function europeanQualifiersDef(o: EuropeanQualifiersOptions): Competition
     },
     names: key === "l1" ? ["1A", "1B", "1C"] : ["2A", "2B", "2C"],
     schedule: (list) => ({
-      rounds: sixMatchRounds(list) ?? roundRobin(list, 1),
+      rounds: sixMatchRounds(list) ?? fitRounds(list, 1, o.groupDates(year).length),
       dates: o.groupDates(year),
     }),
     venue: "home-away",

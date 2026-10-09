@@ -13,10 +13,11 @@ import {
 } from "@/components/ui"
 import { CONFEDS, type NationDef } from "@/engine/types"
 import { flagCodes, flagUrl } from "@/lib/flags"
+import { NATION_DEFS } from "@/modules/world/services/statics"
 import { useModsStore } from "@/modules/mods/store"
-import { rankings } from "@/modules/mods/utils/format"
+import { CULTURES, isAdded, nationProblem, rankings } from "@/modules/mods/utils/format"
 
-const props = defineProps<{ nation: NationDef }>()
+const props = defineProps<{ nation: NationDef; isNew?: boolean }>()
 const emit = defineEmits<{ close: [] }>()
 
 const { t } = useI18n()
@@ -26,12 +27,46 @@ const sheet = ref<InstanceType<typeof AppSheet> | null>(null)
 const draft = reactive<NationDef>(structuredClone(toRaw(props.nation)))
 draft.grounds ??= []
 draft.cities ??= []
+/** A nation this mod added: its code, place, naming and federations are the mod's to set. */
+const added = computed(() => !store.live && (props.isNew || isAdded(draft.id, NATION_DEFS)))
+const lat = ref<number | null>(draft.centre?.[0] ?? null)
+const lon = ref<number | null>(draft.centre?.[1] ?? null)
+const problem = ref("")
+const confirmDelete = ref(false)
 /** Ability points to add to every player when saved. */
 const shift = ref(0)
 const newCity = ref("")
 
 const FLAGS = flagCodes().map((c) => ({ value: c, label: c }))
 const CONFED_OPTIONS = CONFEDS.map((c) => ({ value: c, label: c }))
+const CULTURE_OPTIONS = CULTURES.map((c) => ({ value: c, label: c.replace(/-/g, " ") }))
+
+/** The regional federations the game has for the confederation picked. */
+const fedOptions = computed(() => [
+  ...new Set(NATION_DEFS.filter((n) => n.confed === draft.confed).flatMap((n) => n.subFeds)),
+])
+
+function toggleFed(fed: string) {
+  const i = draft.subFeds.indexOf(fed)
+  if (i >= 0) draft.subFeds.splice(i, 1)
+  else draft.subFeds.push(fed)
+}
+
+function addCulture() {
+  const used = new Set(draft.cultures.map(([c]) => c))
+  draft.cultures.push([CULTURES.find((c) => !used.has(c)) ?? CULTURES[0], 10])
+}
+
+function setCulture(i: number, value: string) {
+  draft.cultures[i] = [value, draft.cultures[i][1]]
+}
+
+function upper() {
+  draft.id = draft.id
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, 3)
+}
 
 const status = computed<string>({
   get: () => draft.nonFifa ?? "fifa",
@@ -75,9 +110,37 @@ function addCity() {
   newCity.value = ""
 }
 
+/** Check a nation the mod adds; true when it can be kept. */
+function accept(def: NationDef): boolean {
+  def.centre = lat.value === null || lon.value === null ? undefined : [lat.value, lon.value]
+  // Every other nation of the mod holds its code; this one's own code is free to keep.
+  const others = new Set((store.mod?.nations ?? []).map((n) => n.id))
+  if (!props.isNew) others.delete(props.nation.id)
+  const found = nationProblem(def, NATION_DEFS, others)
+  problem.value = found ? t(`mods.nation.problem.${found}`) : ""
+  return !found
+}
+
+function remove() {
+  if (store.deleteNation(draft.id)) sheet.value?.close()
+}
+
 function save() {
   const def: NationDef = structuredClone(toRaw(draft))
   def.name = def.name.trim() || props.nation.name
+  if (added.value) {
+    def.name = draft.name.trim()
+    if (!accept(def)) return
+    if (props.isNew) {
+      const found = store.addNation(def)
+      if (found) {
+        problem.value = t(`mods.nation.problem.${found}`)
+        return
+      }
+      sheet.value?.close()
+      return
+    }
+  }
   def.points = Math.round(Math.max(0, Math.min(3000, Number(def.points) || 0)) * 100) / 100
   if (store.live) {
     store.saveNation(def)
@@ -102,14 +165,29 @@ function save() {
 <template>
   <AppSheet
     ref="sheet"
-    :title="nation.name"
-    :subtitle="nation.id"
+    :title="isNew ? t('mods.nation.new') : nation.name"
+    :subtitle="isNew ? '' : nation.id"
     max-height="90dvh"
     max-height-mobile="92dvh"
     :dismiss-on-outside-click="false"
     @close="emit('close')"
   >
     <div class="form">
+      <AppField
+        v-if="isNew"
+        :label="t('mods.nation.id')"
+        :hint="t('mods.nation.idHint')"
+        layout="stack"
+      >
+        <input
+          v-model="draft.id"
+          class="input"
+          maxlength="3"
+          autocomplete="off"
+          autocapitalize="characters"
+          @input="upper"
+        />
+      </AppField>
       <div class="grid2">
         <AppField :label="t('mods.nation.name')" layout="stack">
           <input v-model="draft.name" class="input" maxlength="40" autocomplete="off" />
@@ -177,19 +255,102 @@ function save() {
         </AppField>
       </template>
 
-      <h3 class="section">{{ t("mods.nation.squad") }}</h3>
-      <p class="hint">{{ t("mods.nation.squadHint", { avg: average }) }}</p>
-      <div class="shift">
-        <AppButton size="sm" variant="tonal" @click="shift -= 5">−5</AppButton>
-        <AppButton size="sm" variant="tonal" icon-only aria-label="-1" @click="shift -= 1">
-          <Minus :size="14" />
-        </AppButton>
-        <span class="shift-value">{{ shift > 0 ? `+${shift}` : shift }}</span>
-        <AppButton size="sm" variant="tonal" icon-only aria-label="+1" @click="shift += 1">
+      <template v-if="added">
+        <h3 class="section">{{ t("mods.nation.centre") }}</h3>
+        <p class="hint">{{ t("mods.nation.centreHint") }}</p>
+        <div class="grid2">
+          <AppField :label="t('mods.nation.latitude')" layout="stack">
+            <input
+              v-model.number="lat"
+              class="input"
+              type="number"
+              inputmode="decimal"
+              step="0.1"
+              min="-90"
+              max="90"
+            />
+          </AppField>
+          <AppField :label="t('mods.nation.longitude')" layout="stack">
+            <input
+              v-model.number="lon"
+              class="input"
+              type="number"
+              inputmode="decimal"
+              step="0.1"
+              min="-180"
+              max="180"
+            />
+          </AppField>
+        </div>
+
+        <template v-if="fedOptions.length">
+          <h3 class="section">{{ t("mods.nation.subFeds") }}</h3>
+          <div class="chips">
+            <button
+              v-for="fed in fedOptions"
+              :key="fed"
+              type="button"
+              class="chip fed"
+              :class="{ 'chip--on': draft.subFeds.includes(fed) }"
+              :aria-pressed="draft.subFeds.includes(fed)"
+              @click="toggleFed(fed)"
+            >
+              {{ fed }}
+            </button>
+          </div>
+        </template>
+
+        <h3 class="section">{{ t("mods.nation.cultures") }}</h3>
+        <p class="hint">{{ t("mods.nation.culturesHint") }}</p>
+        <div v-for="(c, i) in draft.cultures" :key="i" class="culture">
+          <AppSelect
+            :model-value="c[0]"
+            :options="CULTURE_OPTIONS"
+            searchable
+            @update:model-value="(v) => setCulture(i, String(v))"
+          />
+          <input
+            v-model.number="c[1]"
+            class="input"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            max="100"
+            :aria-label="t('mods.nation.cultures')"
+          />
+          <AppButton
+            size="sm"
+            variant="text"
+            icon-only
+            :aria-label="t('common.delete')"
+            :disabled="draft.cultures.length < 2"
+            @click="draft.cultures.splice(i, 1)"
+          >
+            <Trash2 :size="14" />
+          </AppButton>
+        </div>
+        <AppButton size="sm" variant="outlined" @click="addCulture">
           <Plus :size="14" />
+          {{ t("mods.nation.addCulture") }}
         </AppButton>
-        <AppButton size="sm" variant="tonal" @click="shift += 5">+5</AppButton>
-      </div>
+      </template>
+
+      <p v-if="isNew" class="hint">{{ t("mods.nation.newHint") }}</p>
+      <template v-else>
+        <h3 class="section">{{ t("mods.nation.squad") }}</h3>
+        <p class="hint">{{ t("mods.nation.squadHint", { avg: average }) }}</p>
+        <div class="shift">
+          <AppButton size="sm" variant="tonal" @click="shift -= 5">−5</AppButton>
+          <AppButton size="sm" variant="tonal" icon-only aria-label="-1" @click="shift -= 1">
+            <Minus :size="14" />
+          </AppButton>
+          <span class="shift-value">{{ shift > 0 ? `+${shift}` : shift }}</span>
+          <AppButton size="sm" variant="tonal" icon-only aria-label="+1" @click="shift += 1">
+            <Plus :size="14" />
+          </AppButton>
+          <AppButton size="sm" variant="tonal" @click="shift += 5">+5</AppButton>
+        </div>
+      </template>
 
       <template v-if="!store.live">
         <h3 class="section">{{ t("mods.nation.grounds") }}</h3>
@@ -260,6 +421,27 @@ function save() {
           </AppButton>
         </div>
       </template>
+
+      <template v-if="added && !isNew">
+        <h3 class="section">{{ t("mods.nation.delete") }}</h3>
+        <p class="hint">{{ t("mods.nation.deleteHint") }}</p>
+        <AppButton v-if="!confirmDelete" size="sm" variant="outlined" @click="confirmDelete = true">
+          <Trash2 :size="14" />
+          {{ t("mods.nation.delete") }}
+        </AppButton>
+        <template v-else>
+          <p class="hint">{{ t("mods.nation.deleteConfirm", { name: nation.name }) }}</p>
+          <div class="sheet-actions">
+            <AppButton variant="tonal" block @click="confirmDelete = false">
+              {{ t("common.cancel") }}
+            </AppButton>
+            <AppButton variant="filled" block @click="remove">
+              {{ t("mods.nation.delete") }}
+            </AppButton>
+          </div>
+        </template>
+      </template>
+      <p v-if="problem" class="problem" role="alert">{{ problem }}</p>
     </div>
     <template #footer>
       <div class="sheet-actions">
@@ -314,6 +496,23 @@ function save() {
   border: none;
   background: none;
   color: var(--text-muted);
+}
+
+.culture {
+  display: grid;
+  grid-template-columns: 1fr 72px auto;
+  gap: var(--sp-1);
+  align-items: center;
+}
+
+.fed {
+  cursor: pointer;
+}
+
+.problem {
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--fs-sm);
 }
 
 .add-city {

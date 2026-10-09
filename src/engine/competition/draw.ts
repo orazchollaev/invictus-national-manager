@@ -1,6 +1,19 @@
 import { shuffle, type Rng } from "../rng"
 
 /**
+ * A group's round robin that fits `maxRounds` match days: as asked while it does,
+ * otherwise single-legged, and if even that is too long, the first `maxRounds` rounds
+ * (every team still plays each round it is not resting). A group larger than its
+ * competition was made for plays fewer matches rather than past its dates.
+ */
+export function fitRounds(teams: string[], legs: 1 | 2, maxRounds: number): [string, string][][] {
+  const fit = Math.max(1, maxRounds)
+  let rounds = roundRobin(teams, legs)
+  if (rounds.length > fit && legs === 2) rounds = roundRobin(teams, 1)
+  return rounds.length > fit ? rounds.slice(0, fit) : rounds
+}
+
+/**
  * Round-robin rounds by the circle method. With an odd count one team rests each
  * round — never the first team in the first round, so a host always opens. Venues
  * follow the position a team holds in the circle, so each team alternates home and

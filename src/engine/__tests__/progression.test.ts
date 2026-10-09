@@ -216,6 +216,8 @@ describe("a broken promise", () => {
       id: "fake:1",
       compId: "fake-2027",
     }
+    // Fixtures are looked up through the per-nation index, which a hand-added one skips.
+    w.reindex()
     c.objectives = [
       {
         id: "fake-2027:qualify",

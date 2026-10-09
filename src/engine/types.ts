@@ -158,4 +158,9 @@ export interface NationDef {
   grounds?: { city: string; name: string; capacity: number }[]
   /** Towns where new grounds can go, set by a mod (else the bundled CITIES). */
   cities?: string[]
+  /**
+   * Centre as [latitude, longitude], set by a mod for a nation the game does not
+   * ship; without it the bundled table (src/data/geo.ts) is used. Co-hosts are chosen by it.
+   */
+  centre?: [number, number]
 }

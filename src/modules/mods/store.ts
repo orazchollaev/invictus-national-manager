@@ -5,17 +5,22 @@ import type { PlayerRow } from "@/engine/world/create"
 import { shiftAttrs } from "@/engine/players/attributes"
 import { START_DATE } from "@/data/start"
 import type { EditData } from "@/engine/world/edit"
+import { NATION_DEFS } from "@/modules/world/services/statics"
 import { loadMod, saveMod } from "./services/mods"
 import {
   MOD_FORMAT,
   MOD_VERSION,
   editFromRow,
   fold,
+  isAdded,
+  nationProblem,
   rowFromEdit,
+  type NationProblem,
   type ClubEdit,
   type ModData,
   type PlayerEdit,
 } from "./utils/format"
+import { startingClubs, startingSquad } from "./utils/newNation"
 
 /** Id of the dataset the save editor opens: a copy of the running game, not a stored mod. */
 const LIVE_ID = "live-save"
@@ -110,6 +115,45 @@ export const useModsStore = defineStore(
       const i = m.nations.findIndex((n) => n.id === def.id)
       if (i >= 0) m.nations[i] = def
       changed()
+    }
+
+    /**
+     * Add a nation the game does not ship, with two clubs and a squad drawn from its
+     * naming cultures. Returns what is wrong with it, or null when it was added.
+     */
+    function addNation(def: NationDef): NationProblem | null {
+      const m = mod.value
+      if (!m || live.value) return "id"
+      const problem = nationProblem(def, NATION_DEFS, new Set(m.nations.map((n) => n.id)))
+      if (problem) return problem
+      const nation = structuredClone(def)
+      nation.name = nation.name.trim()
+      const clubs = startingClubs(nation)
+      m.nations.push(nation)
+      m.clubs.push(...clubs)
+      m.players[nation.id] = startingSquad(nation, clubs, today.value)
+      changed()
+      return null
+    }
+
+    /** Remove a nation the mod added, with its clubs and players; the game's own stay. */
+    function deleteNation(id: string): boolean {
+      const m = mod.value
+      if (!m || live.value || !isAdded(id, NATION_DEFS) || !m.nations.some((n) => n.id === id))
+        return false
+      const goneClubs = new Set(m.clubs.filter((c) => c[2] === id).map((c) => c[0]))
+      m.nations = m.nations.filter((n) => n.id !== id)
+      m.clubs = m.clubs.filter((c) => c[2] !== id)
+      delete m.players[id]
+      // Players of other nations who were on its books go back to a club at home.
+      for (const [nationId, rows] of Object.entries(m.players))
+        for (const r of rows)
+          if (goneClubs.has(r[10]))
+            r[10] =
+              m.clubs.filter((c) => c[2] === nationId).sort((a, b) => a[3] - b[3])[0]?.[0] ??
+              m.clubs[0][0]
+      changed()
+      return true
     }
 
     /** Raise or lower every player of a nation, current ability and potential alike. */
@@ -254,6 +298,8 @@ export const useModsStore = defineStore(
       save,
       setInfo,
       saveNation,
+      addNation,
+      deleteNation,
       shiftSquad,
       newPlayer,
       savePlayer,

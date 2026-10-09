@@ -16,6 +16,7 @@ import {
   type Msg,
   type Text,
 } from "../text"
+import { CENTRES } from "@/data/geo"
 import type { Club, Confed, ISODate, NationDef, Player } from "../types"
 import type { CompContext } from "../competition/runtime"
 import { advanceCompetition, createInstance } from "../competition/runtime"
@@ -293,6 +294,7 @@ export class World {
       confedsOf: (t) =>
         isPlaceholder(t) ? this.placeholderConfeds(t) : [this.def(t)?.confed ?? "UEFA"],
       subFeds: (t) => this.def(t)?.subFeds ?? [],
+      centre: (t) => this.def(t)?.centre ?? CENTRES[t],
       points: (t) => s.nations[t]?.points ?? 0,
       ranked: (filter) =>
         Object.values(s.nations)
