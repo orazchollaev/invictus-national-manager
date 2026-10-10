@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n"
-import { AppButtonGroup, AppCard, AppField, AppToggle } from "@/components/ui"
+import { AppButtonGroup, AppCard, AppField, AppSelect, AppToggle } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { LOCALES, type Locale } from "@/i18n"
+import { flagUrl } from "@/lib/flags"
 import {
   useSettingsStore,
   type AdvanceStep,
@@ -20,12 +21,24 @@ const settings = useSettingsStore()
   <PageShell back :title="t('nav.settings')">
     <AppCard padding="md" class="group">
       <AppField :label="t('settings.language')" layout="stack">
-        <AppButtonGroup
+        <AppSelect
           :model-value="settings.locale"
-          block
           :options="LOCALES"
           @update:model-value="(v) => (settings.locale = v as Locale)"
-        />
+        >
+          <template #value="{ option }">
+            <span v-if="option" class="lang-row">
+              <img :src="flagUrl(option.flag)" alt="" class="lang-flag" />
+              {{ option.label }}
+            </span>
+          </template>
+          <template #option="{ option }">
+            <span class="lang-row">
+              <img :src="flagUrl(option.flag)" alt="" class="lang-flag" />
+              {{ option.label }}
+            </span>
+          </template>
+        </AppSelect>
       </AppField>
       <AppField :label="t('settings.theme')" layout="stack">
         <AppButtonGroup
@@ -116,6 +129,17 @@ const settings = useSettingsStore()
 </template>
 
 <style scoped>
+.lang-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.lang-flag {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 .group :deep(.card-body) {
   display: flex;
   flex-direction: column;

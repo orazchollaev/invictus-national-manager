@@ -5,6 +5,7 @@ import ui from "./ui"
 
 const pt: LocaleModule = {
   name: "Português",
+  flag: "pt",
   messages: { ...ui, ...engine },
   commentary,
 }

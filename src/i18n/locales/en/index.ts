@@ -4,6 +4,7 @@ import ui from "./ui"
 
 const en: LocaleModule = {
   name: "English",
+  flag: "gb",
   messages: { ...ui, ...engine },
 }
 

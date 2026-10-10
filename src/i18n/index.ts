@@ -14,8 +14,8 @@ for (const [path, mod] of Object.entries(found)) modules[path.split("/")[2]] = m
 export type Locale = string
 export const DEFAULT_LOCALE: Locale = "en"
 
-export const LOCALES: { value: Locale; label: string }[] = Object.entries(modules)
-  .map(([value, m]) => ({ value, label: m.name }))
+export const LOCALES: { value: Locale; label: string; flag: string }[] = Object.entries(modules)
+  .map(([value, m]) => ({ value, label: m.name, flag: m.flag }))
   .sort((a, b) =>
     a.value === DEFAULT_LOCALE
       ? -1
