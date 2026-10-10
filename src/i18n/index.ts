@@ -24,6 +24,25 @@ export const LOCALES: { value: Locale; label: string; flag: string }[] = Object.
         : a.label.localeCompare(b.label)
   )
 
+/** Our `in` is Hindi, not the legacy Indonesian code, so `hi` maps onto it. */
+const DEVICE_ALIASES: Record<string, Locale> = { hi: "in" }
+
+/**
+ * The phone's language if we ship it, else English. Used as the default before the
+ * player has chosen anything, so a first launch opens in their own language.
+ */
+export function detectLocale(): Locale {
+  const tags = typeof navigator === "undefined" ? [] : (navigator.languages ?? [navigator.language])
+  for (const tag of tags) {
+    if (!tag) continue
+    if (modules[tag]) return tag
+    const base = tag.split("-")[0]
+    const alias = DEVICE_ALIASES[base] ?? base
+    if (modules[alias]) return alias
+  }
+  return DEFAULT_LOCALE
+}
+
 export const i18n = createI18n({
   legacy: false,
   locale: DEFAULT_LOCALE,

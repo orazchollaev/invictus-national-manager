@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 import { ref, watch } from "vue"
-import { setLocale, type Locale } from "@/i18n"
+import { detectLocale, setLocale, type Locale } from "@/i18n"
 
 export type Theme = "light" | "dark"
 /** Platform look: shape, elevation, type scale and neutrals — never the accent. */
@@ -14,7 +14,8 @@ export type AutoSave = "always" | "weekly" | "monthly" | "off"
 
 export const useSettingsStore = defineStore("settings", () => {
   const theme = ref<Theme>("dark")
-  const locale = ref<Locale>("en")
+  // Phone language on first launch; a saved choice replaces it when settings hydrate.
+  const locale = ref<Locale>(detectLocale())
   const designLanguage = ref<DesignLanguage>("ios")
   const liveMatchSpeed = ref<LiveMatchSpeed>(2)
   const advanceStep = ref<AdvanceStep>(1)
@@ -61,7 +62,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
   function resetAll() {
     theme.value = "dark"
-    locale.value = "en"
+    locale.value = detectLocale()
     designLanguage.value = "ios"
     liveMatchSpeed.value = 2
     advanceStep.value = 1
