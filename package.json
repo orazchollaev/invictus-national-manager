@@ -2,7 +2,7 @@
   "name": "invictus-national-manager",
   "description": "Invictus - National Manager: manage a national team through qualifiers, continental cups and the World Cup",
   "private": true,
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "scripts": {
     "dev": "vite",

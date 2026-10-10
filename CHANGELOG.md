@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.0.6](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.5...v0.0.6) (2026-10-10)
+
+### 🚀 New Features
+
+- **editor:** in-game save editor for players, nations and clubs ([62c7e67](https://github.com/orazchollaev/invictus-national-manager/commit/62c7e67546c7c802d932b9721d2eb44fb9fd2ce8))
+- **i18n:** add Hindi, Vietnamese, Korean, Polish ([0bb8620](https://github.com/orazchollaev/invictus-national-manager/commit/0bb86206ee4fb3d7ac80aeab03055949668fc2f1))
+- **i18n:** add Japanese, German, French, Italian, Arabic ([e79dd3d](https://github.com/orazchollaev/invictus-national-manager/commit/e79dd3d538170e759a3b68d46a5ce705911a7a2d))
+- **i18n:** add Thai, Persian, Uzbek, Dutch ([1c72af0](https://github.com/orazchollaev/invictus-national-manager/commit/1c72af08bfca4447b4dbbe3b90cd7fd3249fd831))
+- **i18n:** add Turkish, Russian, Spanish, Brazilian Portuguese, Indonesian ([bb63519](https://github.com/orazchollaev/invictus-national-manager/commit/bb63519660259ccba90e11e97d5f3a0059820c36))
+- **i18n:** default to device language on first launch ([e135e2f](https://github.com/orazchollaev/invictus-national-manager/commit/e135e2f8d6716e68695f58e91b9152f655815a17))
+- **i18n:** flag in locale modules and a flag dropdown language picker ([3306b8d](https://github.com/orazchollaev/invictus-national-manager/commit/3306b8d3af37d7445b09a358daa2a576f8935b89))
+- **mods:** add nations in the mod editor and make formats stretch to any team count ([d86cfac](https://github.com/orazchollaev/invictus-national-manager/commit/d86cfac95cd441ad0e7b7fbeef0776133e693607))
+
+### 🔧 Maintenance
+
+- bump gradle version ([55194cf](https://github.com/orazchollaev/invictus-national-manager/commit/55194cf2f6f95e50cf9449be531a608ccb104cc0))
+- bump gradle version ([b9103d9](https://github.com/orazchollaev/invictus-national-manager/commit/b9103d97f14e0a72170650777f23afd869845952))
+
 ## [0.0.5](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.4...v0.0.5) (2026-10-06)
 
 ### 🚀 New Features
