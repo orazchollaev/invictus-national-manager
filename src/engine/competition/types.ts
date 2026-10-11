@@ -91,6 +91,8 @@ export interface StageState {
   groups?: GroupTable[]
   rounds?: KnockoutRound[]
   thirdPlace?: Tie
+  /** A knockout whose ties were drawn (not set by the bracket): the only kind with a draw to watch. */
+  drawn?: boolean
 }
 
 export interface CompetitionOutcome {

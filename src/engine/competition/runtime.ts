@@ -354,6 +354,7 @@ function drawKnockoutStage(
     }
   }
 
+  stage.drawn = kp.pairing === "pots" || kp.pairing === "draw"
   stage.rounds = kp.rounds.map((r) => ({ name: r.name, dates: r.dates, ties: [] }))
   stage.rounds[0].ties = pairs.map(([a, b], i) =>
     makeTie(inst, stage, plan, ctx, 0, i, pairs.length, a, b)

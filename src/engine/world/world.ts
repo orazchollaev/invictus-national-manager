@@ -1583,7 +1583,8 @@ export class World {
     // An invitational's final, set by the group tables, is no draw to watch.
     const settled = inst.kind === "invitational" && inst.stages[0]?.key !== stageKey
     // The user gets to watch his own draws.
-    if (!settled && ((group && (stage.groups?.length ?? 0) > 1) || tie))
+    // A knockout set by the bracket (World Cup, Asian Cup…) has no draw either.
+    if (!settled && ((group && (stage.groups?.length ?? 0) > 1) || (tie && stage.drawn)))
       this.state.pendingDraw = { compId, stageKey }
     if (group) {
       const others = group.teams.filter((t) => t !== me).map((t) => nationText(t))

@@ -215,7 +215,9 @@ function advance(tie: Tie) {
       v-if="
         stage &&
         stage.status !== 'waiting' &&
-        (stage.groups?.length ?? 0) + (stage.rounds?.[0]?.ties.length ?? 0) > 1
+        (stage.groups
+          ? stage.groups.length > 1
+          : stage.drawn && (stage.rounds?.[0]?.ties.length ?? 0) > 1)
       "
       variant="tonal"
       @click="router.push(`/draw/${inst.id}/${stage.key}`)"

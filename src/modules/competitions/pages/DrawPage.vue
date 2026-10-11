@@ -140,6 +140,11 @@ const currentPot = computed(
 const pots = computed(() => {
   const out: { n: number; teams: string[] }[] = []
   for (const st of steps.value) (out[st.pot] ??= { n: st.pot, teams: [] }).teams.push(st.team)
+  // Hosts first, then strongest to weakest by FIFA points.
+  const hosts = inst.value?.hosts ?? []
+  const points = (id: string) => world.world?.nation(id).points ?? 0
+  const rank = (id: string) => (hosts.includes(id) ? 1e9 + points(id) : points(id))
+  for (const pot of out) pot.teams.sort((a, b) => rank(b) - rank(a))
   return out
 })
 /** The team on the ball: a cycling one while it tumbles, else the one just drawn. */
