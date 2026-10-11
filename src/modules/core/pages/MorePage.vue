@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
 import {
@@ -24,56 +25,27 @@ const { t } = useI18n()
 const router = useRouter()
 const world = useWorldStore()
 
-const items = [
-  {
-    to: "/career",
-    icon: Briefcase,
-    label: t("core.more.career"),
-    hint: t("core.more.careerHint"),
-  },
-  {
-    to: "/coaches",
-    icon: Users,
-    label: t("core.more.coaches"),
-    hint: t("core.more.coachesHint"),
-  },
-  {
-    to: "/stadiums",
-    icon: Landmark,
-    label: t("core.more.stadiums"),
-    hint: t("core.more.stadiumsHint"),
-  },
-  {
-    to: "/rankings",
-    icon: ListOrdered,
-    label: t("core.more.ranking"),
-    hint: t("core.more.rankingHint"),
-  },
-  {
-    to: "/calendar",
-    icon: CalendarDays,
-    label: t("core.more.calendar"),
-    hint: t("core.more.calendarHint"),
-  },
-  {
-    to: "/invitational",
-    icon: Trophy,
-    label: t("core.more.invitational"),
-    hint: t("core.more.invitationalHint"),
-  },
-  { to: "/honours", icon: Medal, label: t("core.more.honours"), hint: t("core.more.honoursHint") },
-  {
-    to: "/editor",
-    icon: Pencil,
-    label: t("core.more.editor"),
-    hint: t("core.more.editorHint"),
-  },
-  {
-    to: "/settings",
-    icon: Settings,
-    label: t("core.more.settings"),
-    hint: t("core.more.settingsHint"),
-  },
+const link = (to: string, icon: Component, key: string) => ({
+  to,
+  icon,
+  label: t(`core.more.${key}`),
+  hint: t(`core.more.${key}Hint`),
+})
+
+/** Grouped by what the player is after; each group is its own card. */
+const groups = [
+  // My team.
+  [link("/career", Briefcase, "career"), link("/coaches", Users, "coaches")],
+  // The world around it.
+  [
+    link("/rankings", ListOrdered, "ranking"),
+    link("/calendar", CalendarDays, "calendar"),
+    link("/honours", Medal, "honours"),
+    link("/stadiums", Landmark, "stadiums"),
+    link("/invitational", Trophy, "invitational"),
+  ],
+  // The app.
+  [link("/editor", Pencil, "editor"), link("/settings", Settings, "settings")],
 ]
 
 async function exitWithoutSaving() {
@@ -95,26 +67,21 @@ async function saveAndExit() {
 
 <template>
   <PageShell :title="t('core.more.title')">
-    <AppCard padding="none" class="menu">
-      <RouterLink v-for="i in items" :key="i.to" :to="i.to" class="item">
+    <AppCard v-for="(group, gi) in groups" :key="gi" padding="none" class="menu">
+      <RouterLink v-for="i in group" :key="i.to" :to="i.to" class="item">
         <component :is="i.icon" :size="20" class="icon" />
         <span class="text">
           <span class="label">{{ i.label }}</span>
           <span class="hint">{{ i.hint }}</span>
         </span>
       </RouterLink>
+    </AppCard>
+    <AppCard padding="none" class="menu">
       <button class="item" @click="world.save()">
         <Save :size="20" class="icon" />
         <span class="text">
           <span class="label">{{ t("core.more.saveGame") }}</span>
           <span class="hint">{{ t("core.more.saveGameHint") }}</span>
-        </span>
-      </button>
-      <button class="item" @click="exitWithoutSaving">
-        <LogOut :size="20" class="icon" />
-        <span class="text">
-          <span class="label">{{ t("core.more.exitNoSave") }}</span>
-          <span class="hint">{{ t("core.more.exitNoSaveHint") }}</span>
         </span>
       </button>
       <button class="item" @click="saveAndExit">
@@ -124,6 +91,13 @@ async function saveAndExit() {
           <span class="hint">{{ t("core.more.saveExitHint") }}</span>
         </span>
       </button>
+      <button class="item danger" @click="exitWithoutSaving">
+        <LogOut :size="20" class="icon" />
+        <span class="text">
+          <span class="label">{{ t("core.more.exitNoSave") }}</span>
+          <span class="hint">{{ t("core.more.exitNoSaveHint") }}</span>
+        </span>
+      </button>
     </AppCard>
   </PageShell>
 </template>
@@ -131,6 +105,19 @@ async function saveAndExit() {
 <style scoped>
 .menu {
   overflow: hidden;
+}
+
+.menu + .menu {
+  margin-top: var(--sp-3);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item.danger .icon,
+.item.danger .label {
+  color: var(--danger);
 }
 
 .item {
