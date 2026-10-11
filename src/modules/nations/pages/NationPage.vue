@@ -48,6 +48,16 @@ const coach = world.derive((w) => {
   return c ? { link: `/coach/${c.id}`, name: n.coach, coach: { ...c }, manager: null } : null
 }, null)
 const rank = world.derive((w) => w.fifaRank(id.value), 0)
+/** Points as shown in the subtitle: the total, and the change since the last monthly snapshot. */
+const pointsText = computed(() => {
+  const n = nation.value
+  if (!n) return ""
+  const gain = n.points - (n.pointsHistory.at(-1)?.[1] ?? n.points)
+  const sign = gain > 0 ? "+" : ""
+  return Math.abs(gain) < 0.05
+    ? n.points.toFixed(0)
+    : `${n.points.toFixed(0)} (${sign}${gain.toFixed(1)})`
+})
 const tab = ref("overview")
 
 const squad = world.derive((w) => {
@@ -112,9 +122,7 @@ const record = computed(() => {
     :subtitle="
       t('nation.subtitle', {
         confed: def.confed,
-        detail: rank
-          ? t('nation.ranked', { rank, points: nation.points.toFixed(0) })
-          : t('nation.notFifa'),
+        detail: rank ? t('nation.ranked', { rank, points: pointsText }) : t('nation.notFifa'),
       })
     "
   >
