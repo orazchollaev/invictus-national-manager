@@ -6,6 +6,7 @@ import { AppButton } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { deleteSlot, listSlots, SLOT_COUNT, type SlotMeta } from "@/modules/world/services/saves"
 import { useWorldStore } from "@/modules/world/store"
+import { flagUrl } from "@/lib/flags"
 import { nationName } from "@/i18n/text"
 import { formatDate } from "@/i18n/dates"
 import { showConfirm } from "@/composables/useDialog"
@@ -27,7 +28,8 @@ async function refresh() {
 
 onMounted(refresh)
 
-const nationLabel = (id: string | null) => (id ? nationName(id) : t("career.slots.unemployed"))
+const nationLabel = (meta: SlotMeta) =>
+  meta.nation?.name ?? (meta.nationId ? nationName(meta.nationId) : t("career.slots.unemployed"))
 
 async function choose(n: number) {
   const meta = slots.value[n - 1]
@@ -60,11 +62,19 @@ async function remove(n: number) {
       <button class="slot-main" :disabled="mode === 'load' && !meta" @click="choose(i + 1)">
         <span class="slot-num">{{ i + 1 }}</span>
         <template v-if="meta">
-          <NationFlag :id="meta.nationId" :size="36" />
+          <img
+            v-if="meta.nation && flagUrl(meta.nation.flag)"
+            :src="flagUrl(meta.nation.flag)"
+            :width="36"
+            :height="36"
+            alt=""
+            class="slot-flag"
+          />
+          <NationFlag v-else :id="meta.nationId" :size="36" />
           <span class="slot-text">
             <span class="slot-title">{{ meta.managerName }}</span>
             <span class="slot-sub">
-              {{ nationLabel(meta.nationId) }} · {{ formatDate(meta.date) }}
+              {{ nationLabel(meta) }} ·{{ formatDate(meta.date) }}
               <template v-if="meta.modName">· {{ meta.modName }}</template>
             </span>
           </span>
@@ -93,6 +103,11 @@ async function remove(n: number) {
 </template>
 
 <style scoped>
+.slot-flag {
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
 .slots {
   display: flex;
   flex-direction: column;

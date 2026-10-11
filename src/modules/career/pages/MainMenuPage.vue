@@ -8,6 +8,7 @@ import { NationFlag } from "@/modules/nations/components/badge"
 import { activeSlot, listSlots, type SlotMeta } from "@/modules/world/services/saves"
 import { useWorldStore } from "@/modules/world/store"
 import { nationDef } from "@/modules/world/services/statics"
+import { flagUrl } from "@/lib/flags"
 import { formatDate } from "@/i18n/dates"
 
 const { t } = useI18n()
@@ -48,9 +49,21 @@ async function resume() {
         <span class="item-text">
           <span class="item-label">{{ t("career.menu.continue") }}</span>
           <span class="item-hint">
-            <NationFlag v-if="lastNation" :id="lastNation.id" :size="16" />
+            <img
+              v-if="last.nation && flagUrl(last.nation.flag)"
+              :src="flagUrl(last.nation.flag)"
+              :width="16"
+              :height="16"
+              alt=""
+              class="menu-flag"
+            />
+            <NationFlag v-else-if="lastNation" :id="lastNation.id" :size="16" />
             {{ last.managerName }} ·
-            {{ lastNation ? $nation(lastNation.id) : t("career.menu.unemployed") }} ·
+            {{
+              last.nation?.name ??
+              (lastNation ? $nation(lastNation.id) : t("career.menu.unemployed"))
+            }}
+            ·
             {{ formatDate(last.date) }}
           </span>
         </span>
@@ -88,6 +101,11 @@ async function resume() {
 </template>
 
 <style scoped>
+.menu-flag {
+  vertical-align: middle;
+  border-radius: 50%;
+}
+
 .menu {
   position: relative;
   min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));

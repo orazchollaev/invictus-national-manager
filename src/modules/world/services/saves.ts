@@ -17,6 +17,11 @@ export interface SlotMeta {
   version: number
   /** The mod the career was started from, if any. */
   modName?: string
+  /**
+   * The managed nation's name and flag, kept for a career on a mod: the menus run on
+   * the bundled dataset, which does not know a nation the mod added.
+   */
+  nation?: { name: string; flag: string }
 }
 
 const dataKey = (n: number) => `ntm:slot:${n}`
@@ -26,14 +31,30 @@ const ACTIVE_KEY = "ntm:active"
 
 export async function listSlots(): Promise<(SlotMeta | null)[]> {
   const out: (SlotMeta | null)[] = []
-  for (let n = 1; n <= SLOT_COUNT; n++)
-    out.push(((await get(metaKey(n))) as SlotMeta | undefined) ?? null)
+  for (let n = 1; n <= SLOT_COUNT; n++) {
+    const meta = ((await get(metaKey(n))) as SlotMeta | undefined) ?? null
+    // A save from before the nation was kept in the meta: read it from the mod once.
+    if (meta?.modName && meta.nationId && !meta.nation) {
+      const def = (await loadSlotStatics(n))?.nations.find((d) => d.id === meta.nationId)
+      if (def) {
+        meta.nation = { name: def.name, flag: def.flag }
+        await set(metaKey(n), meta)
+      }
+    }
+    out.push(meta)
+  }
   return out
 }
 
-export async function saveSlot(n: number, state: WorldState, modName?: string): Promise<void> {
+export async function saveSlot(
+  n: number,
+  state: WorldState,
+  modName?: string,
+  nation?: { name: string; flag: string }
+): Promise<void> {
   const meta: SlotMeta = {
     ...(modName ? { modName } : {}),
+    ...(modName && nation ? { nation } : {}),
     slot: n,
     managerName: state.career.managerName,
     nationId: state.career.nationId,

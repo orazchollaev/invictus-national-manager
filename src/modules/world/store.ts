@@ -26,7 +26,7 @@ import {
   setSlotStatics,
   type SlotStatics,
 } from "./services/saves"
-import { setActiveNations, startingPlayers, statics } from "./services/statics"
+import { nationDef, setActiveNations, startingPlayers, statics } from "./services/statics"
 import { loadMod } from "@/modules/mods/services/mods"
 import { clubsFromRows } from "@/engine/world/create"
 import { useSettingsStore } from "@/modules/settings/store"
@@ -148,7 +148,13 @@ export const useWorldStore = defineStore(
 
     async function save() {
       if (!world.value || slot.value === null) return
-      await saveSlot(slot.value, world.value.state, mod.value?.modName)
+      const def = nationDef(world.value.state.career.nationId)
+      await saveSlot(
+        slot.value,
+        world.value.state,
+        mod.value?.modName,
+        def && { name: def.name, flag: def.flag }
+      )
       savedOn = world.value.state.date
     }
 
