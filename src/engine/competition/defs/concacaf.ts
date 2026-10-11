@@ -336,6 +336,7 @@ export const concacafNationsLeague: CompetitionDef = {
         knockout: {
           rounds: [{ name: "Quarter-finals", dates: [nov1, nov2] }],
           pairing: "ordered",
+          draw: true,
           venue: "home-away",
         },
       },
@@ -349,6 +350,7 @@ export const concacafNationsLeague: CompetitionDef = {
         knockout: {
           rounds: [{ name: "Play-In", dates: [nov1, nov2] }],
           pairing: "ordered",
+          draw: true,
           venue: "home-away",
         },
       },

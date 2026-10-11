@@ -101,6 +101,11 @@ export interface KnockoutPlan {
    * draw: random; ordered: as listed, an empty name (BYE) giving the other a bye.
    */
   pairing: "bracket" | "seeded" | "pots" | "draw" | "ordered"
+  /**
+   * Show the user a draw ceremony for this stage. Always so for pots and draw; set it on
+   * an ordered stage whose ties are drawn in real life (play-offs, Nations League).
+   */
+  draw?: boolean
   thirdPlace?: ISODate
   venue: "home-away" | "neutral"
 }
@@ -354,7 +359,7 @@ function drawKnockoutStage(
     }
   }
 
-  stage.drawn = kp.pairing === "pots" || kp.pairing === "draw"
+  stage.drawn = kp.draw || kp.pairing === "pots" || kp.pairing === "draw"
   stage.rounds = kp.rounds.map((r) => ({ name: r.name, dates: r.dates, ties: [] }))
   stage.rounds[0].ties = pairs.map(([a, b], i) =>
     makeTie(inst, stage, plan, ctx, 0, i, pairs.length, a, b)

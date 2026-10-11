@@ -313,6 +313,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
           knockout: {
             rounds: [{ name: "Quarter-finals", dates: spring }],
             pairing: "ordered",
+            draw: true,
             venue: "home-away",
           },
         },
@@ -326,6 +327,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
           knockout: {
             rounds: [{ name: "Play-offs", dates: spring }],
             pairing: "ordered",
+            draw: true,
             venue: "home-away",
           },
         },
@@ -343,6 +345,7 @@ export function nationsLeagueDef(o: NationsLeagueOptions): CompetitionDef {
             { name: "Final", dates: [final] },
           ],
           pairing: "ordered",
+          draw: true,
           thirdPlace: final,
           venue: "neutral",
         },

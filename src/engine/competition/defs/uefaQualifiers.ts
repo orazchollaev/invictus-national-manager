@@ -185,6 +185,7 @@ export function europeanQualifiersDef(o: EuropeanQualifiersOptions): Competition
           knockout: {
             rounds: [{ name: "Play-offs", dates: o.playoffDates(y) }],
             pairing: "ordered",
+            draw: true,
             venue: "home-away",
           },
         },
