@@ -1268,7 +1268,7 @@ export class World {
 
   private monthEnd() {
     for (const n of Object.values(this.state.nations)) {
-      n.pointsHistory.push([this.state.date, Math.round(n.points)])
+      n.pointsHistory.push([this.state.date, Math.round(n.points * 100) / 100])
       if (n.pointsHistory.length > 240) n.pointsHistory.shift()
     }
     recordRanks(

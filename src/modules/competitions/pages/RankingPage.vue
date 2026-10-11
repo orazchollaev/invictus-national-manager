@@ -24,6 +24,7 @@ const rows = world.derive((w) => {
     rank: i + 1,
     points: n.points,
     move: (prevRank.get(n.id) ?? i) - i,
+    gain: n.points - (n.pointsHistory.at(-1)?.[1] ?? n.points),
     confed: w.def(n.id).confed,
   }))
 }, [])
@@ -62,6 +63,9 @@ const shown = computed(() =>
           {{ r.move > 0 ? `▲${r.move}` : r.move < 0 ? `▼${-r.move}` : "" }}
         </span>
         <span class="team"><NationFlag :id="r.id" :size="22" name /></span>
+        <span class="gain" :class="{ up: r.gain >= 0.005, down: r.gain <= -0.005 }">
+          {{ Math.abs(r.gain) < 0.005 ? "" : `${r.gain > 0 ? "+" : ""}${r.gain.toFixed(2)}` }}
+        </span>
         <span class="pts">{{ r.points.toFixed(2) }}</span>
       </RouterLink>
     </div>
@@ -106,6 +110,19 @@ const shown = computed(() =>
 }
 
 .move.down {
+  color: var(--danger);
+}
+
+.gain {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.gain.up {
+  color: var(--success);
+}
+
+.gain.down {
   color: var(--danger);
 }
 
