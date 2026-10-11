@@ -19,7 +19,7 @@
  */
 import type { ISODate } from "@/engine/types"
 import { deriveSeed, makeRng } from "@/engine/rng"
-import { drawGroups, fitRounds, sixMatchRounds } from "../draw"
+import { drawGroups, roundRobin, sixMatchRounds } from "../draw"
 import type { CompContext, CompetitionDef, GroupPlan } from "../runtime"
 import { knockoutResult, standingsOf } from "../runtime"
 import type { CompetitionInstance, Standing } from "../types"
@@ -28,6 +28,11 @@ import { leagueRanking } from "./nationsLeague"
 
 const LEAGUE_ONE = 36
 const GROUPS = 3
+/** Most teams in a League 2 group: six rounds is all the windows hold. */
+const MAX_GROUP = 6
+
+/** League 2 keeps three groups, and gains more when teams added by a mod would not fit six a group. */
+const groupsOfTwo = (teams: number) => Math.max(GROUPS, Math.ceil(teams / MAX_GROUP))
 
 export interface EuropeanQualifiersOptions {
   id: string
@@ -83,7 +88,9 @@ export function europeanQualifiersDef(o: EuropeanQualifiersOptions): Competition
   }
 
   const groups = (key: "l1" | "l2", year: number, ctx: CompContext): GroupPlan => ({
-    count: GROUPS,
+    get count() {
+      return key === "l1" ? GROUPS : groupsOfTwo(leagues(year, ctx).two.length)
+    },
     legs: 1,
     dates: o.groupDates(year),
     get fixed() {
@@ -91,13 +98,21 @@ export function europeanQualifiersDef(o: EuropeanQualifiersOptions): Competition
       // Pot by pot, so each group lists its teams by pot.
       return drawGroups(
         key === "l1" ? l.one : l.two,
-        GROUPS,
+        key === "l1" ? GROUPS : groupsOfTwo(l.two.length),
         makeRng(deriveSeed(ctx.seed, "draw", `${o.id}-${year}`, key))
       )
     },
-    names: key === "l1" ? ["1A", "1B", "1C"] : ["2A", "2B", "2C"],
+    get names() {
+      const n = key === "l1" ? GROUPS : groupsOfTwo(leagues(year, ctx).two.length)
+      return Array.from(
+        { length: n },
+        (_, i) => `${key === "l1" ? 1 : 2}${String.fromCharCode(65 + i)}`
+      )
+    },
+    // A group that is not six or twelve (a mod adds teams) plays a full single round
+    // robin, which fits the dates because League 2 never has a group above six.
     schedule: (list) => ({
-      rounds: sixMatchRounds(list) ?? fitRounds(list, 1, o.groupDates(year).length),
+      rounds: sixMatchRounds(list) ?? roundRobin(list, 1),
       dates: o.groupDates(year),
     }),
     venue: "home-away",
