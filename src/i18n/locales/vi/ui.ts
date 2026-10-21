@@ -541,6 +541,12 @@ const vi: typeof en = {
     pauseOnKey: "Tạm dừng khi có bàn thắng và thẻ đỏ",
     fullCommentary: "Bình luận đầy đủ",
     fullCommentaryHint: "Cả các tình huống phạm lỗi, phạt góc và việt vị",
+    about: "Giới thiệu",
+    aboutBy: "bởi",
+    openSource: "Open source",
+    creditFaces: "Player faces",
+    disclaimer:
+      "Unofficial fan-made simulator. Not affiliated with, endorsed by, or connected to FIFA, any confederation, federation, club or competition referenced in the app.",
   },
   coaches: {
     title: "Huấn luyện viên",

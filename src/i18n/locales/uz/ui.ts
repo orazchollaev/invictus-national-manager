@@ -541,6 +541,12 @@ const uz: typeof en = {
     pauseOnKey: "Gol va qizil kartochkada pauza qilish",
     fullCommentary: "To'liq sharh",
     fullCommentaryHint: "Qoidabuzarliklar, burchak to'plari va ofsaydlar ham",
+    about: "Ilova haqida",
+    aboutBy: "muallif",
+    openSource: "Open source",
+    creditFaces: "Player faces",
+    disclaimer:
+      "Unofficial fan-made simulator. Not affiliated with, endorsed by, or connected to FIFA, any confederation, federation, club or competition referenced in the app.",
   },
   coaches: {
     title: "Murabbiylar",

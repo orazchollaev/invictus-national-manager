@@ -540,6 +540,12 @@ const fa: typeof en = {
     pauseOnKey: "توقف در گل و کارت قرمز",
     fullCommentary: "گزارش کامل",
     fullCommentaryHint: "خطاها، کرنرها و آفسایدها هم گزارش شوند",
+    about: "درباره",
+    aboutBy: "توسط",
+    openSource: "Open source",
+    creditFaces: "Player faces",
+    disclaimer:
+      "Unofficial fan-made simulator. Not affiliated with, endorsed by, or connected to FIFA, any confederation, federation, club or competition referenced in the app.",
   },
   coaches: {
     title: "مربیان",

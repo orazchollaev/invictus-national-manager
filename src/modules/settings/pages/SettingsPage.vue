@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { AppButtonGroup, AppCard, AppField, AppSelect, AppToggle } from "@/components/ui"
+import { AppButton, AppButtonGroup, AppCard, AppField, AppSelect, AppToggle } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
+import { SettingsAboutModal } from "@/modules/settings/components"
 import { LOCALES, type Locale } from "@/i18n"
 import { flagUrl } from "@/lib/flags"
 import {
@@ -15,6 +17,7 @@ import {
 
 const { t } = useI18n()
 const settings = useSettingsStore()
+const aboutOpen = ref(false)
 </script>
 
 <template>
@@ -125,6 +128,12 @@ const settings = useSettingsStore()
         />
       </AppField>
     </AppCard>
+
+    <AppButton variant="text" size="sm" @click="aboutOpen = true">
+      {{ t("settings.about") }}
+    </AppButton>
+
+    <SettingsAboutModal v-if="aboutOpen" @close="aboutOpen = false" />
   </PageShell>
 </template>
 

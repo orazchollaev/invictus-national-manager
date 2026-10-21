@@ -539,6 +539,12 @@ const tr: typeof en = {
     pauseOnKey: "Gol ve kırmızı kartlarda duraklat",
     fullCommentary: "Tam anlatım",
     fullCommentaryHint: "Fauller, kornerler ve ofsaytlar da",
+    about: "Hakkında",
+    aboutBy: "tarafından",
+    openSource: "Açık kaynak",
+    creditFaces: "Oyuncu yüzleri",
+    disclaimer:
+      "Resmî olmayan, hayran yapımı bir simülatör. FIFA, herhangi bir konfederasyon, federasyon, kulüp veya uygulamada adı geçen organizasyonla bağlantılı değildir ve onlar tarafından onaylanmamıştır.",
   },
   coaches: {
     title: "Teknik direktörler",

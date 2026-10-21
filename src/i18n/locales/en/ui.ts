@@ -536,6 +536,12 @@ export default {
     pauseOnKey: "Pause on goals and red cards",
     fullCommentary: "Full commentary",
     fullCommentaryHint: "Fouls, corners and offsides as well",
+    about: "About",
+    aboutBy: "by",
+    openSource: "Open source",
+    creditFaces: "Player faces",
+    disclaimer:
+      "Unofficial fan-made simulator. Not affiliated with, endorsed by, or connected to FIFA, any confederation, federation, club or competition referenced in the app.",
   },
   coaches: {
     title: "Coaches",

@@ -538,6 +538,12 @@ const ko: typeof en = {
     pauseOnKey: "골과 퇴장 시 일시정지",
     fullCommentary: "전체 중계",
     fullCommentaryHint: "파울, 코너킥, 오프사이드도 포함",
+    about: "정보",
+    aboutBy: "제작",
+    openSource: "Open source",
+    creditFaces: "Player faces",
+    disclaimer:
+      "Unofficial fan-made simulator. Not affiliated with, endorsed by, or connected to FIFA, any confederation, federation, club or competition referenced in the app.",
   },
   coaches: {
     title: "감독",

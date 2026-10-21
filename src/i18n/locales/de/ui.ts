@@ -542,6 +542,12 @@ const de: typeof en = {
     pauseOnKey: "Bei Toren und Roten Karten pausieren",
     fullCommentary: "Volle Kommentierung",
     fullCommentaryHint: "Auch Fouls, Ecken und Abseits",
+    about: "Über",
+    aboutBy: "von",
+    openSource: "Open source",
+    creditFaces: "Player faces",
+    disclaimer:
+      "Unofficial fan-made simulator. Not affiliated with, endorsed by, or connected to FIFA, any confederation, federation, club or competition referenced in the app.",
   },
   coaches: {
     title: "Trainer",

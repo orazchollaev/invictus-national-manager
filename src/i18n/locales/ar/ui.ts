@@ -537,6 +537,12 @@ const ar: typeof en = {
     pauseOnKey: "إيقاف مؤقت عند الأهداف والبطاقات الحمراء",
     fullCommentary: "تعليق كامل",
     fullCommentaryHint: "مع الأخطاء والركنيات والتسللات أيضًا",
+    about: "حول",
+    aboutBy: "بواسطة",
+    openSource: "Open source",
+    creditFaces: "Player faces",
+    disclaimer:
+      "Unofficial fan-made simulator. Not affiliated with, endorsed by, or connected to FIFA, any confederation, federation, club or competition referenced in the app.",
   },
   coaches: {
     title: "المدربون",
