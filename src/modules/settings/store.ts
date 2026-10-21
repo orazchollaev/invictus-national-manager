@@ -3,8 +3,6 @@ import { ref, watch } from "vue"
 import { detectLocale, setLocale, type Locale } from "@/i18n"
 
 export type Theme = "light" | "dark"
-/** Platform look: shape, elevation, type scale and neutrals — never the accent. */
-export type DesignLanguage = "ios" | "android"
 /** Game minutes per real second is 2 at 1x, so a match runs about 45 seconds. */
 export type LiveMatchSpeed = 1 | 2 | 4
 /** How far one press of Continue goes: days, or up to the next match. */
@@ -16,7 +14,6 @@ export const useSettingsStore = defineStore("settings", () => {
   const theme = ref<Theme>("dark")
   // Phone language on first launch; a saved choice replaces it when settings hydrate.
   const locale = ref<Locale>(detectLocale())
-  const designLanguage = ref<DesignLanguage>("ios")
   const liveMatchSpeed = ref<LiveMatchSpeed>(2)
   const advanceStep = ref<AdvanceStep>(1)
   const autoSave = ref<AutoSave>("always")
@@ -52,18 +49,9 @@ export const useSettingsStore = defineStore("settings", () => {
     { immediate: true }
   )
 
-  watch(
-    designLanguage,
-    (val) => {
-      if (typeof document !== "undefined") document.documentElement.setAttribute("data-design", val)
-    },
-    { immediate: true }
-  )
-
   function resetAll() {
     theme.value = "dark"
     locale.value = detectLocale()
-    designLanguage.value = "ios"
     liveMatchSpeed.value = 2
     advanceStep.value = 1
     autoSave.value = "always"
@@ -78,7 +66,6 @@ export const useSettingsStore = defineStore("settings", () => {
   return {
     theme,
     locale,
-    designLanguage,
     liveMatchSpeed,
     advanceStep,
     autoSave,

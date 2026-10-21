@@ -121,6 +121,7 @@ function onOpenChange(open: boolean) {
 <style scoped>
 .asel-trigger {
   display: flex;
+  min-height: var(--control-h);
   align-items: center;
   width: 100%;
   gap: var(--sp-2);
@@ -144,6 +145,7 @@ function onOpenChange(open: boolean) {
 }
 
 .asel-trigger--sm {
+  min-height: 0;
   padding: var(--sp-1-5) var(--sp-2);
   font-size: var(--fs-sm);
 }
@@ -173,16 +175,6 @@ function onOpenChange(open: boolean) {
 }
 [data-design="ios"] .asel-icon {
   color: color-mix(in srgb, var(--text-muted) 70%, transparent);
-}
-
-[data-design="android"] .asel-trigger {
-  border-color: var(--border);
-  background: transparent;
-}
-[data-design="android"] .asel-trigger:focus-visible {
-  box-shadow:
-    inset 0 0 0 1px var(--accent),
-    var(--focus-ring);
 }
 </style>
 
@@ -287,8 +279,7 @@ function onOpenChange(open: boolean) {
 [data-design="ios"] .asel-content {
   border-color: transparent;
   border-radius: 14px;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: saturate(180%) blur(24px);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
   box-shadow: var(--elev-3);
 }
 [data-design="ios"] .asel-item {
@@ -304,27 +295,6 @@ function onOpenChange(open: boolean) {
   font-size: var(--fs-xs);
 }
 
-/* M3: an elevated tonal menu, square-ish rows, no outline. */
-[data-design="android"] .asel-content {
-  border-color: transparent;
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  box-shadow: var(--elev-2);
-  padding: var(--sp-1) 0;
-}
-[data-design="android"] .asel-item {
-  border-radius: 0;
-  padding: var(--sp-3) var(--sp-4);
-  font-size: var(--fs-base);
-  font-weight: 400;
-}
-[data-design="android"] .asel-item[data-state="checked"] {
-  background: var(--fill-2);
-}
-[data-design="android"] .asel-content--sm .asel-item {
-  padding: var(--sp-1) var(--sp-2);
-  font-size: var(--fs-xs);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .asel-content[data-state="open"],

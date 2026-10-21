@@ -223,33 +223,6 @@ function onPointerDown() {
   opacity: 0.55;
 }
 
-/* Material 3: every button is a capsule, and pressing paints a state
-   layer instead of squashing the button. */
-[data-design="android"] .btn {
-  border-radius: var(--radius-pill);
-  font-weight: 500;
-}
-[data-design="android"] .btn--md:not(.btn--icon) {
-  padding: 10px var(--sp-5);
-}
-[data-design="android"] .btn--sm:not(.btn--icon) {
-  padding: var(--sp-2) var(--sp-4);
-}
-[data-design="android"] .btn--tonal {
-  border-color: transparent;
-  background: var(--fill-3);
-}
-[data-design="android"] .btn--filled {
-  box-shadow: none;
-}
-[data-design="android"] .btn--filled:hover:not(:disabled) {
-  transform: none;
-}
-[data-design="android"] .btn:active:not(:disabled),
-[data-design="android"] .btn--filled:active:not(:disabled) {
-  transform: none;
-  box-shadow: inset 0 0 0 999px color-mix(in srgb, currentColor 12%, transparent);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .btn,

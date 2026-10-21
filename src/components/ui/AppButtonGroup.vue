@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Component } from "vue"
+import { onMounted, onBeforeUnmount, ref, type Component } from "vue"
 
 withDefaults(
   defineProps<{
@@ -12,10 +12,43 @@ withDefaults(
 )
 
 defineEmits<{ "update:modelValue": [value: string] }>()
+
+// A strip wider than its box scrolls sideways; fade the edge that still has
+// content so the scroll is visible.
+const root = ref<HTMLElement | null>(null)
+const fadeStart = ref(false)
+const fadeEnd = ref(false)
+
+function measure() {
+  const el = root.value
+  if (!el) return
+  const max = el.scrollWidth - el.clientWidth
+  const x = Math.abs(el.scrollLeft)
+  fadeStart.value = x > 1
+  fadeEnd.value = max - x > 1
+}
+
+let ro: ResizeObserver | undefined
+onMounted(() => {
+  measure()
+  if (typeof ResizeObserver !== "undefined" && root.value) {
+    ro = new ResizeObserver(measure)
+    ro.observe(root.value)
+  }
+})
+onBeforeUnmount(() => ro?.disconnect())
 </script>
 
 <template>
-  <div class="btn-group" :class="[`btn-group--${size}`, { 'btn-group--block': block }]">
+  <div
+    ref="root"
+    class="btn-group"
+    :class="[
+      `btn-group--${size}`,
+      { 'btn-group--block': block, 'fade-start': fadeStart, 'fade-end': fadeEnd },
+    ]"
+    @scroll.passive="measure"
+  >
     <button
       v-for="opt in options"
       :key="opt.value"
@@ -45,10 +78,12 @@ defineEmits<{ "update:modelValue": [value: string] }>()
 .btn-group--block {
   display: flex;
   width: 100%;
+  min-height: var(--control-h);
 }
-.btn-group--block button {
+.btn-group.btn-group--block button {
   flex: 1;
   justify-content: center;
+  height: auto;
 }
 
 .btn-group button {
@@ -150,33 +185,39 @@ defineEmits<{ "update:modelValue": [value: string] }>()
   box-shadow: var(--shadow-sm);
 }
 
-/* M3: an outlined segmented button — one shared outline, the selected
-   segment filled with the accent's container tone. */
-[data-design="android"] .btn-group {
-  gap: 0;
-  padding: 0;
-  border-color: var(--border);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  overflow: hidden;
-}
-[data-design="android"] .btn-group button {
-  border-radius: 0;
-  padding-block: var(--sp-2);
-}
-[data-design="android"] .btn-group button + button {
-  border-left: 1px solid var(--border);
-}
-[data-design="android"] .btn-group button.active,
-[data-design="android"] .btn-group button.active:hover {
-  background: var(--fill-3);
-  color: var(--accent);
-  box-shadow: none;
-}
-
+/* A long strip of options scrolls sideways instead of wrapping onto a second
+   row, which broke the pill; a block group fills the row and shares it. */
 @media (max-width: 600px) {
-  .btn-group {
-    flex-wrap: wrap;
+  .btn-group:not(.btn-group--block) {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .btn-group:not(.btn-group--block)::-webkit-scrollbar {
+    display: none;
+  }
+  .btn-group:not(.btn-group--block) button {
+    flex-shrink: 0;
+  }
+  .btn-group.fade-end {
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  }
+  .btn-group.fade-start {
+    mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent);
+  }
+  .btn-group.fade-start.fade-end {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 32px,
+      #000 calc(100% - 32px),
+      transparent
+    );
+  }
+  .btn-group.btn-group--block button {
+    min-width: 0;
+    padding-inline: var(--sp-1);
   }
 }
 

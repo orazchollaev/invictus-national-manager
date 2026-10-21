@@ -59,18 +59,13 @@ defineEmits<{ "update:modelValue": [value: string] }>()
 /* ── Design languages ────────────────────────────────────────────
    The tab items themselves (.phase-tab) are restyled in
    assets/style/design.css; this is only the strip they sit in.
-   iOS: a segmented-control track. M3: an underline rail. */
+   iOS: a segmented-control track. */
 [data-design="ios"] .tabs {
   gap: 2px;
   padding: 2px;
   border-bottom: none;
   border-radius: var(--radius-pill);
   background: var(--fill-1);
-}
-
-[data-design="android"] .tabs {
-  background: transparent;
-  border-bottom-color: var(--border-light);
 }
 
 @media (max-width: 600px) {

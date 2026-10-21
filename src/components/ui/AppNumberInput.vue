@@ -213,22 +213,6 @@ function onInputFocus(e: FocusEvent) {
   font-weight: 500;
 }
 
-/* M3: capsule outline, circular tonal buttons at each end. */
-[data-design="android"] .num {
-  border-radius: var(--radius-pill);
-  border-color: var(--border);
-}
-[data-design="android"] .num-btn {
-  background: var(--fill-1);
-  color: var(--accent);
-}
-[data-design="android"] .num-btn:first-child,
-[data-design="android"] .num-btn:last-child {
-  border-color: transparent;
-}
-[data-design="android"] .num-value {
-  font-weight: 500;
-}
 
 .num-btn {
   width: 28px;

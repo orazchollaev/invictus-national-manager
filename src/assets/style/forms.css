@@ -242,34 +242,6 @@
   transform: none;
 }
 
-/* M3: the handle is a short vertical bar, not a knob, and the track is
-   split into an active and an inactive half with rounded ends. */
-[data-design="android"] .power-slider::-webkit-slider-runnable-track {
-  height: 16px;
-}
-[data-design="android"] .power-slider::-moz-range-track {
-  height: 16px;
-}
-[data-design="android"] .power-slider::-webkit-slider-thumb {
-  width: 4px;
-  height: 28px;
-  margin-top: -6px;
-  border: none;
-  border-radius: 2px;
-  background: var(--power-color);
-  box-shadow: none;
-}
-[data-design="android"] .power-slider::-moz-range-thumb {
-  width: 4px;
-  height: 28px;
-  border: none;
-  border-radius: 2px;
-  background: var(--power-color);
-  box-shadow: none;
-}
-[data-design="android"] .power-slider:active::-webkit-slider-thumb {
-  transform: scaleY(1.1);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .power-slider::-webkit-slider-thumb {

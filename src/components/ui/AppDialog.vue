@@ -83,7 +83,6 @@ watch(
   inset: 0;
   z-index: 9000;
   background: var(--scrim);
-  backdrop-filter: blur(2px);
 }
 
 .dialog-card {
@@ -160,8 +159,7 @@ watch(
   border: none;
   border-radius: 14px;
   text-align: center;
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
-  backdrop-filter: saturate(180%) blur(24px);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
 }
 [data-design="ios"] .dialog-msg {
   font-size: 13px;
@@ -196,38 +194,6 @@ watch(
   filter: none;
 }
 
-/* M3 dialogs are large-cornered tonal sheets whose actions are text
-   buttons sitting bottom-right. */
-[data-design="android"] .dialog-card {
-  border: none;
-  border-radius: 28px;
-  padding: 24px;
-  background: var(--surface-2);
-}
-[data-design="android"] .dialog-msg {
-  font-size: var(--fs-base);
-  margin-bottom: 24px;
-}
-[data-design="android"] .dialog-actions {
-  gap: var(--sp-2);
-}
-[data-design="android"] .dialog-actions > button {
-  border: none;
-  border-radius: var(--radius-pill);
-  padding: 10px var(--sp-3);
-  min-width: 72px;
-  background: none;
-  background-image: none;
-  font-weight: 500;
-  color: var(--accent);
-}
-[data-design="android"] .dialog-confirm.danger-solid {
-  color: var(--danger);
-}
-[data-design="android"] .dialog-actions > button:hover {
-  background: var(--bg-hover);
-  filter: none;
-}
 
 /* ── Transitions ─────────────────────────────────────────── */
 @keyframes dialog-fade-in {

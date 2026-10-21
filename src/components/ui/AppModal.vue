@@ -240,8 +240,7 @@ defineExpose({ close })
   border-left: none;
 }
 [data-design="ios"] .drawer-header {
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: saturate(180%) blur(24px);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
   border-bottom: 0.5px solid var(--border);
   padding: var(--sp-3) var(--sp-4);
 }
@@ -260,23 +259,6 @@ defineExpose({ close })
   border-top: 0.5px solid var(--border);
 }
 
-/* M3: a tonal top app bar — title on the left, no rule under it. */
-[data-design="android"] .drawer-header {
-  background: var(--surface-2);
-  border-bottom: none;
-  padding: var(--sp-3) var(--sp-4);
-}
-[data-design="android"] .drawer-title {
-  font-size: var(--fs-lg);
-  font-weight: 500;
-}
-[data-design="android"] .drawer-close {
-  border-radius: var(--radius-pill);
-}
-[data-design="android"] .drawer-footer {
-  background: transparent;
-  border-top: none;
-}
 
 @media (max-width: 600px) {
   .drawer {

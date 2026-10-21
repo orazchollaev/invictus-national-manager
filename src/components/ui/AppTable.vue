@@ -114,32 +114,6 @@ withDefaults(
   background: var(--surface);
 }
 
-/* M3 keeps the rows open and marks structure with tone instead of rules:
-   a tinted header, no separators, and a tonal row under the pointer. */
-[data-design="android"] .table :deep(th) {
-  text-transform: none;
-  letter-spacing: 0.01em;
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--text);
-  background: var(--surface-2);
-  padding-block: var(--sp-3);
-  border-bottom-color: transparent;
-}
-[data-design="android"] .table--sticky :deep(thead th) {
-  background: var(--surface-2);
-}
-[data-design="android"] .table :deep(td) {
-  padding-block: 14px;
-  border-bottom-color: color-mix(in srgb, var(--border-light) 60%, transparent);
-}
-[data-design="android"] .table :deep(tbody tr:hover),
-[data-design="android"] .table :deep(tbody tr:active) {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-}
-[data-design="android"] .table--dense :deep(td) {
-  padding-block: var(--sp-3);
-}
 
 /* Flush: no ruled lines anywhere, whichever platform theme is active —
    wins over the design-language border rules above since it's declared

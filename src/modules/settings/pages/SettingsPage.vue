@@ -10,7 +10,6 @@ import {
   useSettingsStore,
   type AdvanceStep,
   type AutoSave,
-  type DesignLanguage,
   type LiveMatchSpeed,
   type Theme,
 } from "@/modules/settings/store"
@@ -52,17 +51,6 @@ const aboutOpen = ref(false)
             { value: 'light', label: t('settings.light') },
           ]"
           @update:model-value="(v) => (settings.theme = v as Theme)"
-        />
-      </AppField>
-      <AppField :label="t('settings.look')" layout="stack">
-        <AppButtonGroup
-          :model-value="settings.designLanguage"
-          block
-          :options="[
-            { value: 'ios', label: t('settings.rounded') },
-            { value: 'android', label: t('settings.material') },
-          ]"
-          @update:model-value="(v) => (settings.designLanguage = v as DesignLanguage)"
         />
       </AppField>
     </AppCard>

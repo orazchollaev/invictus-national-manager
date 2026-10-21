@@ -60,17 +60,6 @@ defineProps<{
   letter-spacing: 0.04em;
 }
 
-/* M3: a title in sentence case, in the text colour, no strip. */
-[data-design="android"] .section-header {
-  background: transparent;
-}
-[data-design="android"] .section-header-title {
-  font-size: var(--fs-base);
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--text);
-}
 
 @media (max-width: 600px) {
   .section-header {

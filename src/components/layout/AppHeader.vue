@@ -34,8 +34,7 @@ const date = computed(() => (world.date ? formatDate(world.date) : ""))
 
 <style scoped>
 .site-header {
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(20px);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   border-bottom: 1px solid var(--border-light);
   position: sticky;
   top: 0;

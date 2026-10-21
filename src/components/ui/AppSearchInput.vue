@@ -79,8 +79,7 @@ const model = defineModel<string>({ required: true })
 }
 
 /* ── Design languages ────────────────────────────────────────────
-   Both platforms use a borderless, filled search field; iOS keeps it a
-   soft grey capsule, M3 a tonal one that follows the accent. */
+   A borderless, filled search field kept as a soft grey capsule. */
 [data-design="ios"] .search-field-input {
   border-color: transparent;
   border-radius: var(--radius-pill);
@@ -89,15 +88,5 @@ const model = defineModel<string>({ required: true })
 [data-design="ios"] .search-field-input:focus {
   border-color: transparent;
   background: color-mix(in srgb, var(--text) 10%, transparent);
-}
-
-[data-design="android"] .search-field-input {
-  border-color: transparent;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
-}
-[data-design="android"] .search-field-input:focus {
-  border-color: transparent;
-  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
 }
 </style>

@@ -125,16 +125,4 @@ withDefaults(
   background: color-mix(in srgb, var(--text) 8%, transparent);
 }
 
-/* M3 chips are outlined with an 8px corner, not a capsule. */
-[data-design="android"] .chip {
-  border-radius: 8px;
-  font-weight: 500;
-}
-[data-design="android"] .chip--neutral {
-  background: transparent;
-  border-color: var(--border);
-}
-[data-design="android"] .chip--solid {
-  border-radius: 8px;
-}
 </style>

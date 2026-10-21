@@ -144,15 +144,6 @@ withDefaults(
   background: var(--bg-hover);
 }
 
-/* M3 keeps the card as a real elevated surface. */
-[data-design="android"] .card--interactive:hover {
-  transform: none;
-  box-shadow: var(--elev-1);
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
-}
-[data-design="android"] .card--interactive:active {
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
-}
 
 @media (prefers-reduced-motion: reduce) {
   .card--interactive,
