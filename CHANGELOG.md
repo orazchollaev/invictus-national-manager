@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.0.7](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.6...v0.0.7) (2026-10-21)
+
+### 🚀 New Features
+
+- **draw:** knockout draws only for drawn stages, pots sorted by strength ([272de82](https://github.com/orazchollaev/invictus-national-manager/commit/272de821060cfd360ba8b5f84af06cd2b2352819))
+- **nations:** show monthly points change in nation subtitle ([2065823](https://github.com/orazchollaev/invictus-national-manager/commit/2065823f773af800cbbb51681a92b8c3359ec62a))
+- **ranking:** show monthly FIFA points gain ([281808b](https://github.com/orazchollaev/invictus-national-manager/commit/281808bc1aba1bf5d23ddb3d1afdf70e48a66f9e))
+
+### 🐛 Bug Fixes
+
+- **draw:** show draws for play-offs and Nations League knockouts ([243eb0f](https://github.com/orazchollaev/invictus-national-manager/commit/243eb0f152d832474ceb7f94ed571c5451f78336))
+- **qualifiers:** split League 2 into groups of at most six ([7558a42](https://github.com/orazchollaev/invictus-national-manager/commit/7558a4244c5be8fb18b95041f2c0e4eb9f4003f7))
+- **saves:** show a mod nation in the save list and main menu ([c015697](https://github.com/orazchollaev/invictus-national-manager/commit/c0156973a9350499e8aaa0b61793d471025b30bd))
+
+### ♻️ Refactoring
+
+- **more:** group menu into cards, mark exit without saving as danger ([ae90138](https://github.com/orazchollaev/invictus-national-manager/commit/ae9013859f498d1f0d4d64c72b65787a693f5e31))
+
 ## [0.0.6](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.5...v0.0.6) (2026-10-10)
 
 ### 🚀 New Features
