@@ -5,6 +5,7 @@ import { createPersistedStatePlugin } from "pinia-plugin-persistedstate-2"
 import router from "./router"
 import App from "./App.vue"
 import i18n from "./i18n"
+import { initPush } from "./composables/usePush"
 import { idbStorage } from "./lib/idbStorage"
 import { useSettingsStore } from "./modules/settings/store"
 
@@ -38,6 +39,8 @@ async function bootstrap() {
   } catch {}
 
   app.mount("#app")
+
+  void initPush()
 }
 
 void bootstrap()
