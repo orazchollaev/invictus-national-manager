@@ -316,6 +316,56 @@ export interface CareerState {
   unbeaten?: number
   /** Tournament levels the federation bids to host (the user's nation). */
   bids?: ("world-cup" | "continental" | "regional")[]
+  /** Tournaments (competition ids) the press has already been called for. */
+  pressed?: string[]
+}
+
+export type PressTopic =
+  "goal" | "federation" | "leftOut" | "star" | "newcomer" | "opponent" | "fans" | "form"
+
+/** How an answer is put: warmly and boldly, carefully, or bluntly. */
+export type PressTone = "bold" | "calm" | "blunt"
+
+/** A journalist of a nation's press corps, with a name and a face of their own. */
+export interface Reporter {
+  id: string
+  first: string
+  last: string
+  nationId: string
+  /** Key the face is drawn from. */
+  face: string
+  outlet: Text
+}
+
+export interface PressAnswer {
+  tone: PressTone
+  /** What it did to the federation's confidence and the fans' support. */
+  board: number
+  fans: number
+  /** What it did to the morale of the player the question was about. */
+  morale?: number
+  reaction: Text
+}
+
+export interface PressQuestion {
+  topic: PressTopic
+  reporter: Reporter
+  /** The player the question is about. */
+  playerId?: string
+  /** The opponent, for a question about the first match. */
+  opp?: string
+  /** For the question about form: a good run (true) or a bad one. */
+  good?: boolean
+  answer?: PressAnswer
+}
+
+/** A press conference after the squad for a tournament is named. */
+export interface PressConference {
+  /** The tournament (competition instance id). */
+  compId: string
+  nationId: string
+  date: ISODate
+  questions: PressQuestion[]
 }
 
 /** Where the loop stopped and why: the UI's cue to take over. */
@@ -344,6 +394,8 @@ export type Interrupt =
   | { kind: "invite" }
   /** The year's youngsters have come through. */
   | { kind: "intake" }
+  /** The press waits for the manager before a tournament. */
+  | { kind: "press" }
   | { kind: "news"; count: number }
   | { kind: "none" }
 
@@ -381,6 +433,8 @@ export interface WorldState {
   pendingUltimatum?: boolean
   /** The user's new youngsters, not yet shown. */
   pendingIntake?: { year: number; ids: string[] } | null
+  /** A press conference before a tournament, waiting for the manager. */
+  pendingPress?: PressConference | null
   /** An invitation to another federation's tournament, waiting for an answer. */
   invite?: TournamentInvite | null
   /**

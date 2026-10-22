@@ -114,6 +114,7 @@ import {
   youthObjective,
 } from "../career/career"
 import { checkMilestones } from "../career/milestones"
+import { arrangePress, assistantPress, dropStalePress } from "../career/press"
 import {
   coachesMonthly,
   coachesSeason,
@@ -553,6 +554,8 @@ export class World {
     if (s.pendingUltimatum) return { kind: "ultimatum" }
     if (s.pendingOffer) return { kind: "offer", nationId: s.pendingOffer }
     if (s.pendingHosting) return { kind: "hosting", compId: s.pendingHosting }
+    dropStalePress(this)
+    if (s.pendingPress) return { kind: "press" }
     const board = s.career.objectives.find((o) => o.agreed === false)
     if (board) return { kind: "board", objectiveId: board.id }
     if (s.pendingIntake) return { kind: "intake" }
@@ -590,6 +593,9 @@ export class World {
         return true
       case "intake":
         this.clearIntake()
+        return true
+      case "press":
+        assistantPress(this)
         return true
       case "invite":
         seenInvite(this)
@@ -901,7 +907,10 @@ export class World {
       if (p) p.morale = Math.max(0, p.morale - 6)
     }
     this.strengthCache.delete(nationId)
-    if (nationId === this.userNation) this.state.pendingCallup = null
+    if (nationId === this.userNation) {
+      this.state.pendingCallup = null
+      arrangePress(this, key)
+    }
   }
 
   private squadFor(nationId: string, f: Fixture): Player[] {

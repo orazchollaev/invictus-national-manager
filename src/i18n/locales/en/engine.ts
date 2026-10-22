@@ -821,6 +821,87 @@ const engine = {
     on: "on",
     off: "off",
   },
+  press: {
+    outlet: {
+      daily: "{nation} Daily",
+      sport: "{nation} Sport",
+      tv: "{nation} TV",
+      radio: "Radio {nation}",
+    },
+    q: {
+      goal: "What are you aiming for in this tournament, and is it realistic?",
+      federation:
+        "How would you describe your relationship with the federation? Do you have all the backing you need?",
+      leftOut: "{name} is not in your squad. Why leave him out?",
+      star: "{name} is the player everyone is talking about. Is the team built around him?",
+      newcomer: "{name} has never played for the national team. Why bring him to a tournament?",
+      opponent: "You open against {opp}. What do you expect from that match?",
+      fans: "The fans are hoping for a lot. What do you say to them?",
+      formGood: "The team is in great form. Can you keep it going?",
+      formBad: "Results have not been good lately. Are you feeling the pressure?",
+    },
+    a: {
+      goal: {
+        bold: "We are here to win it. Nothing less.",
+        calm: "One match at a time. We will see where it takes us.",
+        blunt: "Let's be honest: reaching the knockout rounds would already be a success.",
+      },
+      federation: {
+        bold: "They have given us everything we asked for. We are one team.",
+        calm: "Those conversations stay in the building.",
+        blunt: "I would like more: better preparation, a better schedule, more support.",
+      },
+      leftOut: {
+        bold: "He is close and the door stays open. His time will come.",
+        calm: "It was a sporting decision: form and the balance of the squad.",
+        blunt: "It is my decision and I will not discuss it any further.",
+      },
+      star: {
+        bold: "He is world class, and yes, we will build around him.",
+        calm: "He is one of twenty-six. The team is what matters.",
+        blunt: "He has to prove it on the pitch, like everyone else.",
+      },
+      newcomer: {
+        bold: "He is the future of this team, and he will get his chance.",
+        calm: "He earned his place in training and at his club.",
+        blunt: "He is here for depth. Do not read too much into it.",
+      },
+      opponent: {
+        bold: "We will beat them. I expect us to take control from the start.",
+        calm: "A serious opponent. We respect them and will prepare well.",
+        blunt: "They are not at our level, and they will find that out.",
+      },
+      fans: {
+        bold: "I promise you a night to remember.",
+        calm: "We need you behind us. Together we are stronger.",
+        blunt: "Judge us on results, not on words.",
+      },
+      formGood: {
+        bold: "Yes. We will carry this momentum all the way.",
+        calm: "We stay humble and keep working.",
+        blunt: "A good run means nothing once the tournament starts.",
+      },
+      formBad: {
+        bold: "No pressure. We will turn it around, I am sure of it.",
+        calm: "Every coach goes through this. We keep working.",
+        blunt: "The criticism is fair and I take the responsibility.",
+      },
+    },
+    react: {
+      good0: "A murmur of approval runs through the room.",
+      good1: "Several reporters are already typing.",
+      flat0: "A polite nod, and the reporters move on.",
+      flat1: "Nothing to write home about.",
+      bad0: "The room goes quiet. That will not go down well.",
+      bad1: "Pens scratch furiously. Tomorrow's headline writes itself.",
+    },
+    news: {
+      title: "Press conference: {comp}",
+      warm: "The press left with a good impression of the manager before the {comp}.",
+      mixed: "The press room was divided after the conference before the {comp}.",
+      cold: "The press did not enjoy the conference before the {comp}. Expect sharp headlines.",
+    },
+  },
 }
 
 export default engine

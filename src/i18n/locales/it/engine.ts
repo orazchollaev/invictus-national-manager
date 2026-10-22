@@ -823,6 +823,87 @@ const engine: typeof en = {
     on: "sì",
     off: "no",
   },
+  press: {
+    outlet: {
+      daily: "Il Quotidiano {nation}",
+      sport: "{nation} Sport",
+      tv: "TV {nation}",
+      radio: "Radio {nation}",
+    },
+    q: {
+      goal: "Qual è il vostro obiettivo in questo torneo ed è realistico?",
+      federation:
+        "Come descriverebbe il rapporto con la federazione? Ha tutto il sostegno che le serve?",
+      leftOut: "{name} non è nella sua lista. Perché l'ha lasciato fuori?",
+      star: "Tutti parlano di {name}. La squadra è costruita attorno a lui?",
+      newcomer: "{name} non ha mai giocato in nazionale. Perché portarlo a un torneo?",
+      opponent: "Esordite contro {opp}. Cosa si aspetta da quella partita?",
+      fans: "I tifosi sperano molto. Cosa dice loro?",
+      formGood: "La squadra è in grande forma. Riuscirete a mantenerla?",
+      formBad: "I risultati non sono stati buoni ultimamente. Sente la pressione?",
+    },
+    a: {
+      goal: {
+        bold: "Siamo qui per vincerlo. Niente di meno.",
+        calm: "Una partita alla volta. Vedremo dove ci porterà.",
+        blunt: "Siamo onesti: arrivare alla fase a eliminazione sarebbe già un successo.",
+      },
+      federation: {
+        bold: "Ci hanno dato tutto quello che chiedevamo. Siamo una squadra sola.",
+        calm: "Quelle conversazioni restano tra queste mura.",
+        blunt: "Vorrei di più: una preparazione migliore, un calendario migliore, più sostegno.",
+      },
+      leftOut: {
+        bold: "È vicino e la porta resta aperta. Il suo momento arriverà.",
+        calm: "È stata una scelta sportiva: la forma e l'equilibrio del gruppo.",
+        blunt: "La decisione è mia e non ne parlerò oltre.",
+      },
+      star: {
+        bold: "È un giocatore di livello mondiale e sì, costruiremo la squadra attorno a lui.",
+        calm: "È uno dei ventisei. Conta la squadra.",
+        blunt: "Deve dimostrarlo in campo, come tutti.",
+      },
+      newcomer: {
+        bold: "È il futuro di questa squadra e avrà la sua occasione.",
+        calm: "Si è meritato il posto negli allenamenti e nel suo club.",
+        blunt: "È qui per dare profondità alla rosa. Non fateci troppo caso.",
+      },
+      opponent: {
+        bold: "Li batteremo. Mi aspetto che controlliamo la partita fin dall'inizio.",
+        calm: "Un avversario serio. Lo rispettiamo e ci prepareremo bene.",
+        blunt: "Non sono al nostro livello e se ne accorgeranno.",
+      },
+      fans: {
+        bold: "Vi prometto una notte indimenticabile.",
+        calm: "Abbiamo bisogno di voi dietro di noi. Insieme siamo più forti.",
+        blunt: "Giudicateci dai risultati, non dalle parole.",
+      },
+      formGood: {
+        bold: "Sì. Porteremo questo slancio fino in fondo.",
+        calm: "Restiamo umili e continuiamo a lavorare.",
+        blunt: "Una buona serie non significa nulla quando inizia il torneo.",
+      },
+      formBad: {
+        bold: "Nessuna pressione. Ribalteremo la situazione, ne sono certo.",
+        calm: "Ogni allenatore ci passa. Continuiamo a lavorare.",
+        blunt: "La critica è giusta e mi prendo la responsabilità.",
+      },
+    },
+    react: {
+      good0: "Un mormorio di approvazione attraversa la sala.",
+      good1: "Diversi giornalisti stanno già scrivendo.",
+      flat0: "Un cenno educato e i giornalisti passano oltre.",
+      flat1: "Niente di cui fare un titolo.",
+      bad0: "La sala cade nel silenzio. Non sarà ben accolto.",
+      bad1: "Le penne corrono. Il titolo di domani si scrive da solo.",
+    },
+    news: {
+      title: "Conferenza stampa: {comp}",
+      warm: "La stampa è uscita con una buona impressione del ct prima della {comp}.",
+      mixed: "La sala stampa era divisa dopo la conferenza che precede la {comp}.",
+      cold: "La stampa non ha gradito la conferenza che precede la {comp}. Aspettatevi titoli duri.",
+    },
+  },
 }
 
 export default engine

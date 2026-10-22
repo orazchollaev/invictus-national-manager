@@ -14,7 +14,7 @@ import { NAME_ALIASES, NAME_POOLS } from "@/data/names"
 import { CULTURE_LOOKS, NATION_LOOKS, TELLING_LOOKS, type Look } from "@/data/looks"
 import { deriveSeed, makeRng, pick, pickWeighted, type Rng } from "@/engine/rng"
 
-export type FaceRole = "player" | "coach"
+export type FaceRole = "player" | "coach" | "reporter"
 
 export interface FaceSubject {
   /** Stable key: a player's id, or a coach's face key. */
@@ -486,7 +486,8 @@ function applyEdit(face: FaceConfig, e: FaceEdit): FaceConfig {
   if (e.hair) {
     f.hair.id = e.hair
     // The hair behind the head follows the style, as when it is drawn.
-    f.hairBg.id = e.hair === "longHair" ? "longHair" : e.hair.startsWith("shaggy") ? "shaggy" : "none"
+    f.hairBg.id =
+      e.hair === "longHair" ? "longHair" : e.hair.startsWith("shaggy") ? "shaggy" : "none"
   }
   for (const k of FACE_FEATURES) if (k !== "hair" && e[k]) f[k].id = e[k]
   if (e.fatness !== undefined) f.fatness = e.fatness
@@ -515,18 +516,23 @@ function drawFace(s: FaceSubject): FaceConfig {
 
   // The age layer.
   const coach = s.role === "coach"
+  // A journalist: a grown man or woman in a dark jacket, a pair of glasses now and then.
+  const reporter = s.role === "reporter"
   const a = makeRng(deriveSeed(0, `face-${s.role}`, s.key))
   const hair = pick(a, coach ? style.old : style.young)
   const grey = coach && style !== STYLES.african ? a() < 0.6 : coach && a() < 0.45
   const color = s.color && /^#[0-9a-f]{6}$/i.test(s.color) ? s.color : "#3a6ea5"
   return {
     fatness: round2(coach ? 0.25 + build * 0.6 : build * 0.35),
-    teamColors: coach ? ["#2b2f36", color, "#ffffff"] : [color, "#ffffff", shade(color, 0.6)],
+    teamColors:
+      coach || reporter
+        ? ["#2b2f36", reporter ? "#6b7686" : color, "#ffffff"]
+        : [color, "#ffffff", shade(color, 0.6)],
     hairBg: {
       id: hair === "longHair" ? "longHair" : hair.startsWith("shaggy") ? "shaggy" : "none",
     },
     body: { id: body, color: skin, size: round2(between(b, [0.96, 1.04])) },
-    jersey: { id: coach ? "baseball" : "football" },
+    jersey: { id: coach || reporter ? "baseball" : "football" },
     ear: { id: ear, size: earSize },
     head: {
       id: head,
@@ -565,7 +571,7 @@ function drawFace(s: FaceSubject): FaceConfig {
     hair: { id: hair, color: grey ? pick(a, GREYS) : naturalHair, flip: a() < 0.5 },
     mouth: { id: pick(a, coach ? OLD_MOUTHS : YOUNG_MOUTHS), flip: mouthFlip },
     nose: { id: nose, flip: noseFlip, size: noseSize },
-    glasses: { id: coach && a() < 0.22 ? "glasses2-black" : "none" },
+    glasses: { id: (coach || reporter) && a() < 0.22 ? "glasses2-black" : "none" },
     accessories: { id: !coach && a() < 0.05 ? "headband" : "none" },
   }
 }

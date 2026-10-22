@@ -821,6 +821,87 @@ const engine: typeof en = {
     on: "açık",
     off: "kapalı",
   },
+  press: {
+    outlet: {
+      daily: "{nation} Gazetesi",
+      sport: "{nation} Spor",
+      tv: "{nation} TV",
+      radio: "{nation} Radyosu",
+    },
+    q: {
+      goal: "Bu turnuvada hedefiniz ne ve bu hedef gerçekçi mi?",
+      federation:
+        "Federasyonla ilişkinizi nasıl tarif edersiniz? İhtiyacınız olan desteği görüyor musunuz?",
+      leftOut: "{name} kadronuzda yok. Neden onu dışarıda bıraktınız?",
+      star: "Herkes {name} hakkında konuşuyor. Takım onun etrafında mı kuruluyor?",
+      newcomer: "{name} daha önce milli formayı hiç giymedi. Neden onu turnuvaya getirdiniz?",
+      opponent: "İlk maçta {opp} ile karşılaşıyorsunuz. Bu maçtan ne bekliyorsunuz?",
+      fans: "Taraftarın beklentisi çok yüksek. Onlara ne söylersiniz?",
+      formGood: "Takım harika bir formda. Bunu sürdürebilecek misiniz?",
+      formBad: "Son dönemde sonuçlar iyi değil. Baskıyı hissediyor musunuz?",
+    },
+    a: {
+      goal: {
+        bold: "Buraya kupayı kazanmaya geldik. Daha azı olmaz.",
+        calm: "Maç maç gideceğiz. Bakalım bizi nereye götürecek.",
+        blunt: "Dürüst olalım: eleme turlarına çıkmak bile başarı sayılır.",
+      },
+      federation: {
+        bold: "İstediğimiz her şeyi verdiler. Tek bir takımız.",
+        calm: "Bu konuşmalar bu binanın içinde kalır.",
+        blunt: "Daha fazlasını isterdim: daha iyi hazırlık, daha iyi bir program, daha çok destek.",
+      },
+      leftOut: {
+        bold: "Çok yakın ve kapı açık. Onun da zamanı gelecek.",
+        calm: "Sportif bir karardı: form durumu ve kadronun dengesi.",
+        blunt: "Bu benim kararım ve üzerinde daha fazla konuşmayacağım.",
+      },
+      star: {
+        bold: "Dünya klasmanında bir oyuncu ve evet, takımı onun etrafında kuracağız.",
+        calm: "Yirmi altı oyuncudan biri. Önemli olan takım.",
+        blunt: "Herkes gibi o da sahada kanıtlamak zorunda.",
+      },
+      newcomer: {
+        bold: "Bu takımın geleceği ve şansını bulacak.",
+        calm: "Yerini antrenmanda ve kulübünde hak etti.",
+        blunt: "Kadro derinliği için burada. Fazla anlam yüklemeyin.",
+      },
+      opponent: {
+        bold: "Onları yeneceğiz. Maça başından itibaren hâkim olmayı bekliyorum.",
+        calm: "Ciddi bir rakip. Saygı duyuyoruz ve iyi hazırlanacağız.",
+        blunt: "Bizim seviyemizde değiller ve bunu görecekler.",
+      },
+      fans: {
+        bold: "Size unutulmaz bir gece sözü veriyorum.",
+        calm: "Arkamızda sizlere ihtiyacımız var. Birlikte daha güçlüyüz.",
+        blunt: "Bizi sözlerle değil, sonuçlarla değerlendirin.",
+      },
+      formGood: {
+        bold: "Evet. Bu ivmeyi sonuna kadar taşıyacağız.",
+        calm: "Alçakgönüllü kalıp çalışmaya devam edeceğiz.",
+        blunt: "Turnuva başladığında iyi bir seri hiçbir şey ifade etmez.",
+      },
+      formBad: {
+        bold: "Baskı yok. Bunu çevireceğiz, buna eminim.",
+        calm: "Her teknik adam bunu yaşar. Çalışmaya devam ediyoruz.",
+        blunt: "Eleştiri haklı ve sorumluluğu üstleniyorum.",
+      },
+    },
+    react: {
+      good0: "Salonda onaylayan bir mırıltı dolaşıyor.",
+      good1: "Birkaç muhabir şimdiden yazmaya başladı.",
+      flat0: "Kibar bir baş selamı, muhabirler diğer soruya geçiyor.",
+      flat1: "Manşet olacak bir şey yok.",
+      bad0: "Salon sessizliğe gömülüyor. Bu pek hoş karşılanmayacak.",
+      bad1: "Kalemler hızla çiziyor. Yarının manşeti belli oldu.",
+    },
+    news: {
+      title: "Basın toplantısı: {comp}",
+      warm: "Basın, {comp} öncesi teknik adamdan iyi bir izlenimle ayrıldı.",
+      mixed: "{comp} öncesi toplantının ardından basın salonu ikiye bölündü.",
+      cold: "Basın, {comp} öncesi toplantıdan hoşnut kalmadı. Sert manşetler bekleyin.",
+    },
+  },
 }
 
 export default engine

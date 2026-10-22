@@ -46,6 +46,7 @@ const popup = world.derive(
       w.state.pendingUltimatum ||
       w.state.pendingOffer ||
       w.state.pendingHosting ||
+      (!settings.assistantPress && w.state.pendingPress) ||
       (!settings.assistantBoard && w.state.career.objectives.some((o) => o.agreed === false)) ||
       (settings.showIntake && w.state.pendingIntake)
     ),

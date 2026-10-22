@@ -23,6 +23,8 @@ export const useSettingsStore = defineStore("settings", () => {
   const watchDraws = ref(true)
   /** Agree every objective as the board sets it, without a meeting. */
   const assistantBoard = ref(false)
+  /** The assistant takes the press conferences before tournaments. */
+  const assistantPress = ref(false)
   /** Stop on 1 January to show the year's youngsters. */
   const showIntake = ref(true)
   /** Stop the commentary on goals and red cards so they are not scrolled past. */
@@ -58,6 +60,7 @@ export const useSettingsStore = defineStore("settings", () => {
     assistantPicks.value = false
     watchDraws.value = true
     assistantBoard.value = false
+    assistantPress.value = false
     showIntake.value = true
     pauseOnKeyEvents.value = true
     verboseCommentary.value = true
@@ -72,6 +75,7 @@ export const useSettingsStore = defineStore("settings", () => {
     assistantPicks,
     watchDraws,
     assistantBoard,
+    assistantPress,
     showIntake,
     pauseOnKeyEvents,
     verboseCommentary,

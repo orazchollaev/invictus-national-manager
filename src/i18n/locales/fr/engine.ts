@@ -822,6 +822,89 @@ const engine: typeof en = {
     on: "activée",
     off: "désactivée",
   },
+  press: {
+    outlet: {
+      daily: "Le Quotidien {nation}",
+      sport: "{nation} Sport",
+      tv: "TV {nation}",
+      radio: "Radio {nation}",
+    },
+    q: {
+      goal: "Quel est votre objectif dans ce tournoi, et est-il réaliste ?",
+      federation:
+        "Comment décririez-vous vos relations avec la fédération ? Avez-vous tout le soutien dont vous avez besoin ?",
+      leftOut: "{name} n'est pas dans votre liste. Pourquoi l'avoir écarté ?",
+      star: "{name} est le joueur dont tout le monde parle. L'équipe est-elle construite autour de lui ?",
+      newcomer: "{name} n'a jamais joué en sélection. Pourquoi l'emmener dans un tournoi ?",
+      opponent: "Vous débutez face à {opp}. Qu'attendez-vous de ce match ?",
+      fans: "Les supporters attendent beaucoup. Que leur dites-vous ?",
+      formGood: "L'équipe est en grande forme. Pouvez-vous la maintenir ?",
+      formBad: "Les résultats ne sont pas bons ces derniers temps. Sentez-vous la pression ?",
+    },
+    a: {
+      goal: {
+        bold: "Nous sommes ici pour le gagner. Rien de moins.",
+        calm: "Un match à la fois. Nous verrons où cela nous mène.",
+        blunt:
+          "Soyons honnêtes : atteindre la phase à élimination directe serait déjà une réussite.",
+      },
+      federation: {
+        bold: "Ils nous ont donné tout ce que nous demandions. Nous ne formons qu'une équipe.",
+        calm: "Ces discussions restent entre ces murs.",
+        blunt:
+          "J'en voudrais plus : une meilleure préparation, un meilleur calendrier, plus de soutien.",
+      },
+      leftOut: {
+        bold: "Il est proche et la porte reste ouverte. Son heure viendra.",
+        calm: "C'est un choix sportif : la forme et l'équilibre du groupe.",
+        blunt: "C'est ma décision et je n'en dirai pas plus.",
+      },
+      star: {
+        bold: "C'est un joueur de classe mondiale, et oui, nous bâtirons l'équipe autour de lui.",
+        calm: "C'est l'un des vingt-six. Ce qui compte, c'est l'équipe.",
+        blunt: "Il doit le prouver sur le terrain, comme les autres.",
+      },
+      newcomer: {
+        bold: "C'est l'avenir de cette équipe, et il aura sa chance.",
+        calm: "Il a gagné sa place à l'entraînement et dans son club.",
+        blunt: "Il est là pour la profondeur du groupe. N'y voyez pas plus.",
+      },
+      opponent: {
+        bold: "Nous allons les battre. J'attends de nous que nous prenions le contrôle dès le début.",
+        calm: "Un adversaire sérieux. Nous le respectons et nous nous préparerons bien.",
+        blunt: "Ils ne sont pas à notre niveau, et ils vont s'en apercevoir.",
+      },
+      fans: {
+        bold: "Je vous promets une soirée inoubliable.",
+        calm: "Nous avons besoin de vous derrière nous. Ensemble, nous sommes plus forts.",
+        blunt: "Jugez-nous sur les résultats, pas sur les mots.",
+      },
+      formGood: {
+        bold: "Oui. Nous garderons cet élan jusqu'au bout.",
+        calm: "Nous restons humbles et nous continuons à travailler.",
+        blunt: "Une bonne série ne vaut rien quand le tournoi commence.",
+      },
+      formBad: {
+        bold: "Aucune pression. Nous allons redresser la barre, j'en suis sûr.",
+        calm: "Tous les entraîneurs passent par là. Nous continuons à travailler.",
+        blunt: "La critique est juste et j'en assume la responsabilité.",
+      },
+    },
+    react: {
+      good0: "Un murmure d'approbation traverse la salle.",
+      good1: "Plusieurs journalistes tapent déjà.",
+      flat0: "Un hochement de tête poli, et les journalistes passent à la suite.",
+      flat1: "Rien de bien notable à titrer.",
+      bad0: "Le silence s'installe dans la salle. Cela ne passera pas bien.",
+      bad1: "Les stylos s'agitent. Le titre de demain s'écrit tout seul.",
+    },
+    news: {
+      title: "Conférence de presse : {comp}",
+      warm: "La presse est repartie avec une bonne impression du sélectionneur avant la {comp}.",
+      mixed: "La salle de presse était partagée après la conférence précédant la {comp}.",
+      cold: "La presse n'a pas apprécié la conférence précédant la {comp}. Attendez-vous à des titres sévères.",
+    },
+  },
 }
 
 export default engine

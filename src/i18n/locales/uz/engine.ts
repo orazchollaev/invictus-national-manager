@@ -829,6 +829,88 @@ const engine: typeof en = {
     on: "yoq",
     off: "o'ch",
   },
+  press: {
+    outlet: {
+      daily: "{nation} kundalik gazetasi",
+      sport: "{nation} Sport",
+      tv: "{nation} TV",
+      radio: "{nation} radiosi",
+    },
+    q: {
+      goal: "Bu turnirdagi maqsadingiz nima va u real mi?",
+      federation:
+        "Federatsiya bilan munosabatlaringizni qanday ta'riflaysiz? Kerakli qo'llab-quvvatlashning barchasiga egamisiz?",
+      leftOut: "{name} safingizda yo'q. Nega uni chetda qoldirdingiz?",
+      star: "Hamma {name} haqida gapiryapti. Jamoa uning atrofida quriladimi?",
+      newcomer: "{name} hech qachon terma jamoada o'ynamagan. Nega uni turnirga olib keldingiz?",
+      opponent: "Siz {opp} bilan boshlaysiz. Bu o'yindan nimani kutasiz?",
+      fans: "Muxlislar katta umid qilmoqda. Ularga nima deysiz?",
+      formGood: "Jamoa a'lo darajada. Buni saqlab qola olasizmi?",
+      formBad: "So'nggi paytda natijalar yaxshi emas. Bosimni his qilyapsizmi?",
+    },
+    a: {
+      goal: {
+        bold: "Biz bu yerga g'alaba qozonish uchun keldik. Bundan kamiga rozi emasmiz.",
+        calm: "O'yinma-o'yin. Bu bizni qayerga olib borishini ko'ramiz.",
+        blunt: "Ochig'ini aytsam, pley-offga chiqishning o'zi muvaffaqiyat bo'ladi.",
+      },
+      federation: {
+        bold: "Ular biz so'ragan hamma narsani berishdi. Biz bitta jamoamiz.",
+        calm: "Bunday suhbatlar shu bino ichida qoladi.",
+        blunt:
+          "Men ko'proq istardim: yaxshiroq tayyorgarlik, yaxshiroq jadval, ko'proq qo'llab-quvvatlash.",
+      },
+      leftOut: {
+        bold: "U yaqin va eshik ochiq. Uning vaqti keladi.",
+        calm: "Bu sport qarori edi: form va safning muvozanati.",
+        blunt: "Bu mening qarorim va men bu haqda boshqa gapirmayman.",
+      },
+      star: {
+        bold: "U jahon darajasidagi futbolchi va ha, jamoani uning atrofida quramiz.",
+        calm: "U yigirma oltita futbolchidan biri. Muhimi jamoa.",
+        blunt: "U ham boshqalar kabi maydonda isbotlashi kerak.",
+      },
+      newcomer: {
+        bold: "U bu jamoaning kelajagi va o'z imkoniyatini oladi.",
+        calm: "U o'z o'rnini mashg'ulotlarda va klubida qozondi.",
+        blunt: "U safning chuqurligi uchun shu yerda. Bunga ortiqcha ma'no bermang.",
+      },
+      opponent: {
+        bold: "Biz ularni yutamiz. O'yinni boshidan nazorat qilamiz deb kutaman.",
+        calm: "Jiddiy raqib. Biz uni hurmat qilamiz va yaxshi tayyorlanamiz.",
+        blunt: "Ular bizning darajamizda emas va buni o'zlari tushunib yetishadi.",
+      },
+      fans: {
+        bold: "Sizga unutilmas oqshomni va'da qilaman.",
+        calm: "Bizga sizning yordamingiz kerak. Birgalikda biz kuchliroqmiz.",
+        blunt: "Bizni so'zlarga emas, natijalarga qarab baholang.",
+      },
+      formGood: {
+        bold: "Ha. Bu shijoatni oxirigacha olib boramiz.",
+        calm: "Kamtar bo'lib, ishlashda davom etamiz.",
+        blunt: "Turnir boshlangach, yaxshi seriya hech narsani anglatmaydi.",
+      },
+      formBad: {
+        bold: "Bosim yo'q. Buni o'nglaymiz, ishonchim komil.",
+        calm: "Har bir murabbiy bundan o'tadi. Ishlashda davom etamiz.",
+        blunt: "Tanqid o'rinli va mas'uliyatni o'z zimmamga olaman.",
+      },
+    },
+    react: {
+      good0: "Zalda ma'qullash shivirlari yangraydi.",
+      good1: "Bir nechta jurnalist allaqachon yozmoqda.",
+      flat0: "Muloyim bosh irg'ash, va jurnalistlar keyingisiga o'tadi.",
+      flat1: "Sarlavhaga arzigulik hech narsa yo'q.",
+      bad0: "Zal jim bo'lib qoladi. Bu yaxshi qabul qilinmaydi.",
+      bad1: "Qalamlar tez yuguradi. Ertangi sarlavha o'zi yozilib bo'ldi.",
+    },
+    news: {
+      title: "Matbuot anjumani: {comp}",
+      warm: "Matbuot {comp} oldidan murabbiy haqida yaxshi taassurot bilan ketdi.",
+      mixed: "{comp} oldidan anjumandan keyin matbuot xonasida fikrlar bo'linib ketdi.",
+      cold: "Matbuotga {comp} oldidan anjuman yoqmadi. Keskin sarlavhalarni kuting.",
+    },
+  },
 }
 
 export default engine

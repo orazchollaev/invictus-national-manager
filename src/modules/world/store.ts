@@ -3,12 +3,13 @@ import { markRaw, ref, shallowRef, computed } from "vue"
 import { World } from "@/engine/world/world"
 import { applyEdits, type EditData } from "@/engine/world/edit"
 import { createWorld } from "@/engine/world/create"
-import type { Interrupt, UserTeam, WorldState } from "@/engine/world/types"
+import type { Interrupt, PressTone, UserTeam, WorldState } from "@/engine/world/types"
 import type { HostLevel } from "@/engine/world/stadiums"
 import type { Fixture, InvitationalFormat } from "@/engine/competition/types"
 import type { MatchReport } from "@/engine/match/types"
 import { acceptOffer, declineOffer, resign, setAmbition } from "@/engine/career/career"
 import { pickSquad } from "@/engine/ai/squad"
+import { answerPress, assistantPress, finishPress } from "@/engine/career/press"
 import {
   acceptInvite,
   createInvitational,
@@ -193,6 +194,7 @@ export const useWorldStore = defineStore(
           } else if (
             (result.kind === "draw" && !settings.watchDraws) ||
             (result.kind === "board" && settings.assistantBoard) ||
+            (result.kind === "press" && settings.assistantPress) ||
             (result.kind === "intake" && !settings.showIntake)
           ) {
             w.settle(result)
@@ -214,11 +216,17 @@ export const useWorldStore = defineStore(
       return result
     }
 
+    /** With the assistant at the microphone, a conference just called is over at once. */
+    function attendPress(w: World) {
+      if (w.state.pendingPress && useSettingsStore().assistantPress) assistantPress(w)
+    }
+
     function confirmCallup(ids: string[]) {
       const w = world.value
       const pending = w?.state.pendingCallup
       if (!w || !pending || pending.kind !== "callup") return
       w.setSquad(pending.nationId, pending.squadFor, ids)
+      attendPress(w)
       interrupt.value = { kind: "none" }
       touch()
       void autoSave()
@@ -238,6 +246,7 @@ export const useWorldStore = defineStore(
         (p) => w.released(p, compId)
       )
       w.setSquad(pending.nationId, pending.squadFor, ids)
+      attendPress(w)
       interrupt.value = { kind: "none" }
       touch()
     }
@@ -371,6 +380,21 @@ export const useWorldStore = defineStore(
       settled("ultimatum")
     }
 
+    /** The manager answers a question of the press conference. */
+    function sayToPress(index: number, tone: PressTone) {
+      const w = world.value
+      const answer = w ? answerPress(w, index, tone) : null
+      touch()
+      return answer
+    }
+
+    /** The conference is over (questions left cost goodwill). */
+    function closePress() {
+      const w = world.value
+      if (w) finishPress(w)
+      settled("press")
+    }
+
     function seenIntake() {
       world.value?.clearIntake()
       settled("intake")
@@ -478,6 +502,8 @@ export const useWorldStore = defineStore(
       seenSacked,
       seenUltimatum,
       seenIntake,
+      sayToPress,
+      closePress,
       hostInvitational,
       answerInvite,
       seenInvitation,

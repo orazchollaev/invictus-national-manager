@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * News that stops the calendar and must be seen wherever the user is: a final
- * warning, a job offer, the nation being awarded a tournament, the board's new
+ * warning, a job offer, the nation being awarded a tournament, the press before a tournament, the board's new
  * objective, the year's youngsters, another federation's invitation. Held back during a live match, a draw, a
  * call-up and the full-screen career pages, which are finished first. Choices the
  * user handed to the assistant are not shown.
@@ -15,6 +15,7 @@ import HostingSheet from "./HostingSheet.vue"
 import IntakeSheet from "./IntakeSheet.vue"
 import InviteSheet from "./InviteSheet.vue"
 import JobOfferSheet from "./JobOfferSheet.vue"
+import PressConferenceSheet from "./PressConferenceSheet.vue"
 import UltimatumSheet from "./UltimatumSheet.vue"
 
 const route = useRoute()
@@ -41,6 +42,7 @@ const board = world.derive(
   (w) => w.state.career.objectives.find((o) => o.agreed === false)?.id ?? null,
   null
 )
+const press = world.derive((w) => !!w.state.pendingPress, false)
 const intake = world.derive((w) => !!w.state.pendingIntake, false)
 const invite = world.derive((w) => !!w.state.invite && !w.state.invite.seen, false)
 </script>
@@ -50,6 +52,7 @@ const invite = world.derive((w) => !!w.state.invite && !w.state.invite.seen, fal
     <UltimatumSheet v-if="ultimatum" key="ultimatum" />
     <JobOfferSheet v-else-if="offer" :key="`offer-${offer}`" :nation-id="offer" />
     <HostingSheet v-else-if="hosting" :key="`host-${hosting}`" :comp-id="hosting" />
+    <PressConferenceSheet v-else-if="press && !settings.assistantPress" key="press" />
     <BoardMeetingSheet
       v-else-if="board && !settings.assistantBoard"
       :key="`board-${board}`"

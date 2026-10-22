@@ -828,6 +828,87 @@ const engine: typeof en = {
     on: "aktif",
     off: "nonaktif",
   },
+  press: {
+    outlet: {
+      daily: "Harian {nation}",
+      sport: "{nation} Sport",
+      tv: "TV {nation}",
+      radio: "Radio {nation}",
+    },
+    q: {
+      goal: "Apa target Anda di turnamen ini, dan apakah itu realistis?",
+      federation:
+        "Bagaimana Anda menggambarkan hubungan dengan federasi? Apakah Anda mendapat semua dukungan yang dibutuhkan?",
+      leftOut: "{name} tidak ada di skuad Anda. Mengapa dia tidak dibawa?",
+      star: "Semua orang membicarakan {name}. Apakah tim dibangun di sekitarnya?",
+      newcomer: "{name} belum pernah membela timnas. Mengapa membawanya ke turnamen?",
+      opponent: "Anda membuka lawan {opp}. Apa harapan Anda dari laga itu?",
+      fans: "Para suporter berharap banyak. Apa yang Anda katakan kepada mereka?",
+      formGood: "Tim sedang dalam performa terbaik. Bisakah itu dipertahankan?",
+      formBad: "Hasil belakangan ini kurang baik. Apakah Anda merasakan tekanan?",
+    },
+    a: {
+      goal: {
+        bold: "Kami di sini untuk juara. Tidak kurang.",
+        calm: "Satu pertandingan demi satu pertandingan. Kita lihat ke mana ini membawa kami.",
+        blunt: "Jujur saja: lolos ke babak gugur saja sudah merupakan keberhasilan.",
+      },
+      federation: {
+        bold: "Mereka memberi semua yang kami minta. Kami satu tim.",
+        calm: "Pembicaraan itu tetap di dalam gedung ini.",
+        blunt: "Saya ingin lebih: persiapan lebih baik, jadwal lebih baik, dukungan lebih besar.",
+      },
+      leftOut: {
+        bold: "Dia sudah dekat dan pintu tetap terbuka. Waktunya akan tiba.",
+        calm: "Itu keputusan teknis: performa dan keseimbangan skuad.",
+        blunt: "Itu keputusan saya dan saya tidak akan membahasnya lebih jauh.",
+      },
+      star: {
+        bold: "Dia pemain kelas dunia, dan ya, kami akan membangun tim di sekitarnya.",
+        calm: "Dia salah satu dari dua puluh enam pemain. Yang penting adalah tim.",
+        blunt: "Dia harus membuktikannya di lapangan, seperti yang lain.",
+      },
+      newcomer: {
+        bold: "Dia masa depan tim ini, dan dia akan mendapat kesempatannya.",
+        calm: "Dia layak mendapat tempat lewat latihan dan klubnya.",
+        blunt: "Dia di sini untuk kedalaman skuad. Jangan terlalu berlebihan menafsirkannya.",
+      },
+      opponent: {
+        bold: "Kami akan mengalahkan mereka. Saya berharap kami menguasai laga sejak awal.",
+        calm: "Lawan yang serius. Kami menghormati mereka dan akan bersiap dengan baik.",
+        blunt: "Mereka tidak selevel dengan kami, dan mereka akan menyadarinya.",
+      },
+      fans: {
+        bold: "Saya janjikan malam yang tak terlupakan.",
+        calm: "Kami butuh dukungan Anda. Bersama kita lebih kuat.",
+        blunt: "Nilai kami dari hasil, bukan dari kata-kata.",
+      },
+      formGood: {
+        bold: "Ya. Kami akan membawa momentum ini sampai akhir.",
+        calm: "Kami tetap rendah hati dan terus bekerja.",
+        blunt: "Rentetan hasil bagus tidak berarti apa-apa saat turnamen dimulai.",
+      },
+      formBad: {
+        bold: "Tidak ada tekanan. Kami akan membalikkannya, saya yakin.",
+        calm: "Setiap pelatih pernah mengalaminya. Kami terus bekerja.",
+        blunt: "Kritik itu wajar dan saya bertanggung jawab.",
+      },
+    },
+    react: {
+      good0: "Gumaman setuju menjalar di ruangan.",
+      good1: "Beberapa wartawan sudah mengetik.",
+      flat0: "Anggukan sopan, lalu para wartawan beralih.",
+      flat1: "Tidak ada yang layak jadi berita.",
+      bad0: "Ruangan menjadi hening. Ini tidak akan diterima dengan baik.",
+      bad1: "Pena bergores cepat. Judul berita besok menulis dirinya sendiri.",
+    },
+    news: {
+      title: "Konferensi pers: {comp}",
+      warm: "Media pulang dengan kesan baik terhadap pelatih sebelum {comp}.",
+      mixed: "Ruang pers terbelah setelah konferensi sebelum {comp}.",
+      cold: "Media tidak menyukai konferensi sebelum {comp}. Bersiaplah untuk judul yang tajam.",
+    },
+  },
 }
 
 export default engine

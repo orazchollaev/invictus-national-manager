@@ -823,6 +823,89 @@ const engine: typeof en = {
     on: "an",
     off: "aus",
   },
+  press: {
+    outlet: {
+      daily: "{nation} Tagblatt",
+      sport: "{nation} Sport",
+      tv: "{nation} TV",
+      radio: "Radio {nation}",
+    },
+    q: {
+      goal: "Was ist Ihr Ziel bei diesem Turnier, und ist es realistisch?",
+      federation:
+        "Wie würden Sie Ihr Verhältnis zum Verband beschreiben? Haben Sie die Rückendeckung, die Sie brauchen?",
+      leftOut: "{name} steht nicht in Ihrem Kader. Warum haben Sie ihn draußen gelassen?",
+      star: "Über {name} spricht jeder. Wird das Team um ihn herum gebaut?",
+      newcomer:
+        "{name} hat noch nie für die Nationalmannschaft gespielt. Warum nehmen Sie ihn zum Turnier mit?",
+      opponent: "Sie eröffnen gegen {opp}. Was erwarten Sie von diesem Spiel?",
+      fans: "Die Fans erwarten viel. Was sagen Sie ihnen?",
+      formGood: "Die Mannschaft ist in glänzender Form. Können Sie das halten?",
+      formBad: "Die Ergebnisse waren zuletzt nicht gut. Spüren Sie den Druck?",
+    },
+    a: {
+      goal: {
+        bold: "Wir sind hier, um den Titel zu holen. Nichts weniger.",
+        calm: "Ein Spiel nach dem anderen. Mal sehen, wohin uns das trägt.",
+        blunt: "Seien wir ehrlich: Schon das Erreichen der K.-o.-Runde wäre ein Erfolg.",
+      },
+      federation: {
+        bold: "Sie haben uns alles gegeben, worum wir gebeten haben. Wir sind eine Mannschaft.",
+        calm: "Diese Gespräche bleiben im Haus.",
+        blunt:
+          "Ich wünschte mir mehr: bessere Vorbereitung, besseren Terminplan, mehr Unterstützung.",
+      },
+      leftOut: {
+        bold: "Er ist nah dran, und die Tür bleibt offen. Seine Zeit wird kommen.",
+        calm: "Das war eine sportliche Entscheidung: Form und Balance des Kaders.",
+        blunt: "Das ist meine Entscheidung, und ich werde sie nicht weiter kommentieren.",
+      },
+      star: {
+        bold: "Er ist Weltklasse, und ja, wir bauen um ihn herum.",
+        calm: "Er ist einer von sechsundzwanzig. Auf die Mannschaft kommt es an.",
+        blunt: "Er muss es auf dem Platz beweisen, wie alle anderen.",
+      },
+      newcomer: {
+        bold: "Er ist die Zukunft dieser Mannschaft und bekommt seine Chance.",
+        calm: "Er hat sich seinen Platz im Training und bei seinem Klub verdient.",
+        blunt: "Er ist für die Breite des Kaders hier. Lesen Sie nicht zu viel hinein.",
+      },
+      opponent: {
+        bold: "Wir werden sie schlagen. Ich erwarte, dass wir das Spiel von Anfang an kontrollieren.",
+        calm: "Ein ernst zu nehmender Gegner. Wir respektieren ihn und bereiten uns gut vor.",
+        blunt: "Sie sind nicht auf unserem Niveau, und das werden sie merken.",
+      },
+      fans: {
+        bold: "Ich verspreche Ihnen einen unvergesslichen Abend.",
+        calm: "Wir brauchen Sie hinter uns. Gemeinsam sind wir stärker.",
+        blunt: "Messen Sie uns an den Ergebnissen, nicht an Worten.",
+      },
+      formGood: {
+        bold: "Ja. Diesen Schwung nehmen wir bis zum Ende mit.",
+        calm: "Wir bleiben bescheiden und arbeiten weiter.",
+        blunt: "Eine gute Serie bedeutet nichts, sobald das Turnier beginnt.",
+      },
+      formBad: {
+        bold: "Kein Druck. Wir drehen das wieder, da bin ich sicher.",
+        calm: "Jeder Trainer erlebt das. Wir arbeiten weiter.",
+        blunt: "Die Kritik ist berechtigt, und ich übernehme die Verantwortung.",
+      },
+    },
+    react: {
+      good0: "Ein zustimmendes Raunen geht durch den Raum.",
+      good1: "Mehrere Reporter tippen schon.",
+      flat0: "Ein höfliches Nicken, und die Reporter gehen weiter.",
+      flat1: "Nichts, was eine Schlagzeile wert wäre.",
+      bad0: "Im Raum wird es still. Das kommt nicht gut an.",
+      bad1: "Die Stifte fliegen. Die Schlagzeile von morgen schreibt sich selbst.",
+    },
+    news: {
+      title: "Pressekonferenz: {comp}",
+      warm: "Die Presse verließ den Raum vor der {comp} mit einem guten Eindruck vom Trainer.",
+      mixed: "Der Presseraum war nach der Konferenz vor der {comp} gespalten.",
+      cold: "Der Presse gefiel die Konferenz vor der {comp} nicht. Erwarten Sie scharfe Schlagzeilen.",
+    },
+  },
 }
 
 export default engine

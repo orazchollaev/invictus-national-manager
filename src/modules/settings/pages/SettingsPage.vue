@@ -80,6 +80,9 @@ const aboutOpen = ref(false)
       <AppField :label="t('settings.assistantBoard')" :hint="t('settings.assistantBoardHint')">
         <AppToggle v-model="settings.assistantBoard" :aria-label="t('settings.assistantBoard')" />
       </AppField>
+      <AppField :label="t('settings.assistantPress')" :hint="t('settings.assistantPressHint')">
+        <AppToggle v-model="settings.assistantPress" :aria-label="t('settings.assistantPress')" />
+      </AppField>
       <AppField :label="t('settings.showIntake')" :hint="t('settings.showIntakeHint')">
         <AppToggle v-model="settings.showIntake" :aria-label="t('settings.showIntake')" />
       </AppField>

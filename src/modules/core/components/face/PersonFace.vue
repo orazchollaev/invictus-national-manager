@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import type { Player } from "@/engine/types"
-import type { Coach } from "@/engine/world/types"
+import type { Coach, Reporter } from "@/engine/world/types"
 import { faceSvg, type FaceSubject } from "@/lib/faces"
 import { nationDef } from "@/modules/world/services/statics"
 import { useWorldStore } from "@/modules/world/store"
@@ -10,6 +10,8 @@ const props = withDefaults(
   defineProps<{
     player?: Pick<Player, "id" | "last" | "nationId" | "face"> | null
     coach?: Pick<Coach, "face" | "last" | "nationality" | "nationId"> | null
+    /** A journalist of the press corps. */
+    reporter?: Pick<Reporter, "face" | "last" | "nationId"> | null
     /** The user: his name, nationality, the job he holds, the save's seed and the face he chose. */
     manager?: {
       name: string
@@ -25,7 +27,7 @@ const props = withDefaults(
     /** The head in a circle (tokens on the pitch). */
     round?: boolean
   }>(),
-  { player: null, coach: null, manager: null, size: 96, head: false, round: false }
+  { player: null, coach: null, reporter: null, manager: null, size: 96, head: false, round: false }
 )
 
 const world = useWorldStore()
@@ -45,6 +47,15 @@ function subject(): FaceSubject | null {
       color: def?.color,
     }
   }
+  const r = props.reporter
+  if (r)
+    return {
+      key: r.face,
+      last: r.last,
+      nationId: r.nationId,
+      cultures: nationDef(r.nationId)?.cultures ?? [],
+      role: "reporter",
+    }
   const c = props.coach
   const m = props.manager
   if (!c && !m) return null

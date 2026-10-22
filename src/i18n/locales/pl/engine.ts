@@ -825,6 +825,87 @@ const engine: typeof en = {
     on: "wł.",
     off: "wył.",
   },
+  press: {
+    outlet: {
+      daily: "Dziennik {nation}",
+      sport: "{nation} Sport",
+      tv: "TV {nation}",
+      radio: "Radio {nation}",
+    },
+    q: {
+      goal: "Jaki jest wasz cel na tym turnieju i czy jest realistyczny?",
+      federation:
+        "Jak określiłby Pan relacje z federacją? Ma Pan całe wsparcie, którego potrzebuje?",
+      leftOut: "{name} nie ma w Pana kadrze. Dlaczego go pominięto?",
+      star: "Wszyscy mówią o {name}. Czy drużyna jest zbudowana wokół niego?",
+      newcomer: "{name} nigdy nie grał w reprezentacji. Dlaczego zabiera go Pan na turniej?",
+      opponent: "Zaczynacie od meczu z {opp}. Czego Pan po nim oczekuje?",
+      fans: "Kibice liczą na wiele. Co im Pan powie?",
+      formGood: "Drużyna jest w świetnej formie. Czy uda się ją utrzymać?",
+      formBad: "Ostatnio wyniki nie były dobre. Czuje Pan presję?",
+    },
+    a: {
+      goal: {
+        bold: "Jesteśmy tu, żeby go wygrać. Nic mniej.",
+        calm: "Mecz po meczu. Zobaczymy, dokąd nas to zaprowadzi.",
+        blunt: "Bądźmy szczerzy: awans do fazy pucharowej byłby już sukcesem.",
+      },
+      federation: {
+        bold: "Dali nam wszystko, o co prosiliśmy. Jesteśmy jedną drużyną.",
+        calm: "Te rozmowy zostają w czterech ścianach.",
+        blunt: "Chciałbym więcej: lepszych przygotowań, lepszego terminarza, większego wsparcia.",
+      },
+      leftOut: {
+        bold: "Jest blisko, a drzwi pozostają otwarte. Jego czas nadejdzie.",
+        calm: "To była decyzja sportowa: forma i równowaga kadry.",
+        blunt: "To moja decyzja i nie będę jej dalej komentować.",
+      },
+      star: {
+        bold: "To klasa światowa i tak, zbudujemy drużynę wokół niego.",
+        calm: "Jest jednym z dwudziestu sześciu. Liczy się drużyna.",
+        blunt: "Musi to udowodnić na boisku, jak wszyscy.",
+      },
+      newcomer: {
+        bold: "To przyszłość tej drużyny i dostanie swoją szansę.",
+        calm: "Zasłużył na miejsce na treningach i w swoim klubie.",
+        blunt: "Jest tu dla szerokości kadry. Nie doszukujcie się w tym zbyt wiele.",
+      },
+      opponent: {
+        bold: "Pokonamy ich. Spodziewam się, że od początku przejmiemy kontrolę.",
+        calm: "Poważny rywal. Szanujemy go i dobrze się przygotujemy.",
+        blunt: "Nie są na naszym poziomie i sami się o tym przekonają.",
+      },
+      fans: {
+        bold: "Obiecuję Wam niezapomnianą noc.",
+        calm: "Potrzebujemy Was za naszymi plecami. Razem jesteśmy silniejsi.",
+        blunt: "Oceniajcie nas po wynikach, nie po słowach.",
+      },
+      formGood: {
+        bold: "Tak. Ten rozpęd zabierzemy ze sobą do końca.",
+        calm: "Zachowujemy pokorę i dalej pracujemy.",
+        blunt: "Dobra seria nic nie znaczy, gdy zaczyna się turniej.",
+      },
+      formBad: {
+        bold: "Bez presji. Odwrócimy to, jestem pewien.",
+        calm: "Każdy trener przez to przechodzi. Dalej pracujemy.",
+        blunt: "Krytyka jest słuszna i biorę odpowiedzialność na siebie.",
+      },
+    },
+    react: {
+      good0: "Po sali przechodzi pomruk aprobaty.",
+      good1: "Kilku dziennikarzy już pisze.",
+      flat0: "Uprzejme skinienie głową i dziennikarze przechodzą dalej.",
+      flat1: "Nic, co nadawałoby się na nagłówek.",
+      bad0: "W sali zapada cisza. To nie zostanie dobrze przyjęte.",
+      bad1: "Pióra skrzypią. Jutrzejszy nagłówek napisze się sam.",
+    },
+    news: {
+      title: "Konferencja prasowa: {comp}",
+      warm: "Prasa wyszła z dobrym wrażeniem o selekcjonerze przed turniejem {comp}.",
+      mixed: "Sala prasowa była podzielona po konferencji przed turniejem {comp}.",
+      cold: "Prasie nie spodobała się konferencja przed turniejem {comp}. Spodziewaj się ostrych nagłówków.",
+    },
+  },
 }
 
 export default engine

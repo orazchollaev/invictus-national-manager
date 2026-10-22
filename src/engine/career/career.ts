@@ -524,7 +524,7 @@ function evaluateDebuts(world: World, obj: BoardObjective): "met" | "failed" | "
   return world.state.date > (obj.until ?? world.state.date) ? "failed" : "open"
 }
 
-function nudgeConfidence(world: World, delta: number) {
+export function nudgeConfidence(world: World, delta: number) {
   const c = world.state.career
   c.confidence = Math.round(clamp(c.confidence + delta, 0, 100))
 }
@@ -869,7 +869,7 @@ function pressure(world: World) {
 /** The contract of a manager with job security: it never runs out. */
 export const JOB_FOR_LIFE = "2999-12-31"
 
-const LEAVE_NEWS ={ sacked: "sacked", expired: "notRenewed", resigned: "resigned" } as const
+const LEAVE_NEWS = { sacked: "sacked", expired: "notRenewed", resigned: "resigned" } as const
 const LEAVE_REPUTATION = { sacked: -8, expired: -2, resigned: -4 } as const
 
 /** Out of the job: sacked, the contract was not renewed, or the manager walked away. */

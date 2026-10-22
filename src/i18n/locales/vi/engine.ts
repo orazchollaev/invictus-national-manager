@@ -824,6 +824,87 @@ const engine: typeof en = {
     on: "bật",
     off: "tắt",
   },
+  press: {
+    outlet: {
+      daily: "Nhật báo {nation}",
+      sport: "{nation} Thể thao",
+      tv: "Truyền hình {nation}",
+      radio: "Đài {nation}",
+    },
+    q: {
+      goal: "Mục tiêu của ông ở giải này là gì, và nó có thực tế không?",
+      federation:
+        "Ông mô tả mối quan hệ với liên đoàn thế nào? Ông có đủ sự hậu thuẫn cần thiết không?",
+      leftOut: "{name} không có trong danh sách của ông. Vì sao ông loại anh ấy?",
+      star: "Ai cũng nói về {name}. Đội hình có được xây quanh anh ấy không?",
+      newcomer: "{name} chưa từng khoác áo đội tuyển. Vì sao ông đưa anh ấy đến giải?",
+      opponent: "Ông mở màn với {opp}. Ông kỳ vọng gì ở trận đó?",
+      fans: "Cổ động viên hy vọng rất nhiều. Ông nói gì với họ?",
+      formGood: "Đội đang có phong độ cao. Ông có giữ được nó không?",
+      formBad: "Kết quả gần đây không tốt. Ông có cảm thấy áp lực không?",
+    },
+    a: {
+      goal: {
+        bold: "Chúng tôi đến đây để vô địch. Không gì kém hơn.",
+        calm: "Từng trận một. Hãy xem nó đưa chúng tôi đến đâu.",
+        blunt: "Nói thật, chỉ cần vào vòng loại trực tiếp đã là thành công.",
+      },
+      federation: {
+        bold: "Họ đã cho chúng tôi mọi thứ chúng tôi yêu cầu. Chúng tôi là một đội.",
+        calm: "Những cuộc trò chuyện đó chỉ nằm trong tòa nhà này.",
+        blunt: "Tôi muốn nhiều hơn: chuẩn bị tốt hơn, lịch tốt hơn, hỗ trợ nhiều hơn.",
+      },
+      leftOut: {
+        bold: "Cậu ấy đang gần và cánh cửa vẫn mở. Thời của cậu ấy sẽ đến.",
+        calm: "Đó là quyết định chuyên môn: phong độ và sự cân bằng của đội hình.",
+        blunt: "Đó là quyết định của tôi và tôi sẽ không bàn thêm.",
+      },
+      star: {
+        bold: "Cậu ấy đẳng cấp thế giới, và vâng, chúng tôi sẽ xây đội hình quanh cậu ấy.",
+        calm: "Cậu ấy là một trong hai mươi sáu người. Tập thể mới là quan trọng.",
+        blunt: "Cậu ấy phải chứng minh trên sân như mọi người.",
+      },
+      newcomer: {
+        bold: "Cậu ấy là tương lai của đội này và sẽ có cơ hội.",
+        calm: "Cậu ấy giành chỗ đứng nhờ tập luyện và ở câu lạc bộ.",
+        blunt: "Cậu ấy ở đây để tăng độ dày đội hình. Đừng suy diễn quá nhiều.",
+      },
+      opponent: {
+        bold: "Chúng tôi sẽ thắng họ. Tôi kỳ vọng chúng tôi kiểm soát trận đấu ngay từ đầu.",
+        calm: "Một đối thủ nghiêm túc. Chúng tôi tôn trọng và sẽ chuẩn bị kỹ.",
+        blunt: "Họ không cùng đẳng cấp với chúng tôi, và họ sẽ nhận ra điều đó.",
+      },
+      fans: {
+        bold: "Tôi hứa với các bạn một đêm khó quên.",
+        calm: "Chúng tôi cần các bạn ở phía sau. Cùng nhau chúng ta mạnh hơn.",
+        blunt: "Hãy đánh giá chúng tôi qua kết quả, không phải lời nói.",
+      },
+      formGood: {
+        bold: "Vâng. Chúng tôi sẽ giữ đà này đến cùng.",
+        calm: "Chúng tôi vẫn khiêm tốn và tiếp tục làm việc.",
+        blunt: "Chuỗi trận tốt chẳng có ý nghĩa gì khi giải đấu bắt đầu.",
+      },
+      formBad: {
+        bold: "Không có áp lực. Chúng tôi sẽ xoay chuyển, tôi chắc chắn.",
+        calm: "Huấn luyện viên nào cũng trải qua điều này. Chúng tôi tiếp tục làm việc.",
+        blunt: "Lời chỉ trích là công bằng và tôi nhận trách nhiệm.",
+      },
+    },
+    react: {
+      good0: "Tiếng xì xào tán thành lan khắp phòng.",
+      good1: "Vài phóng viên đã bắt đầu gõ phím.",
+      flat0: "Một cái gật đầu lịch sự, rồi các phóng viên chuyển sang câu khác.",
+      flat1: "Không có gì đáng làm tít.",
+      bad0: "Cả phòng im lặng. Điều này sẽ không được đón nhận tốt.",
+      bad1: "Bút chạy loạt xoạt. Tít báo ngày mai tự viết xong.",
+    },
+    news: {
+      title: "Họp báo: {comp}",
+      warm: "Báo chí ra về với ấn tượng tốt về huấn luyện viên trước {comp}.",
+      mixed: "Phòng báo chí chia rẽ sau buổi họp báo trước {comp}.",
+      cold: "Báo chí không hài lòng với buổi họp báo trước {comp}. Hãy chuẩn bị cho những tít báo gay gắt.",
+    },
+  },
 }
 
 export default engine

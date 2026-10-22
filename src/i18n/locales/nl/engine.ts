@@ -821,6 +821,88 @@ const engine: typeof en = {
     on: "aan",
     off: "uit",
   },
+  press: {
+    outlet: {
+      daily: "{nation} Dagblad",
+      sport: "{nation} Sport",
+      tv: "{nation} TV",
+      radio: "Radio {nation}",
+    },
+    q: {
+      goal: "Wat is jullie doel op dit toernooi en is dat realistisch?",
+      federation:
+        "Hoe omschrijf je je verhouding met de bond? Heb je alle steun die je nodig hebt?",
+      leftOut: "{name} zit niet in je selectie. Waarom heb je hem thuisgelaten?",
+      star: "Iedereen praat over {name}. Wordt het team om hem heen gebouwd?",
+      newcomer:
+        "{name} heeft nog nooit voor het nationale team gespeeld. Waarom neem je hem mee naar een toernooi?",
+      opponent: "Jullie beginnen tegen {opp}. Wat verwacht je van die wedstrijd?",
+      fans: "De supporters verwachten veel. Wat zeg je tegen hen?",
+      formGood: "Het team is in topvorm. Kun je dat vasthouden?",
+      formBad: "De resultaten waren de laatste tijd niet goed. Voel je de druk?",
+    },
+    a: {
+      goal: {
+        bold: "We zijn hier om het te winnen. Niets minder.",
+        calm: "Wedstrijd voor wedstrijd. We zien wel waar het ons brengt.",
+        blunt: "Laten we eerlijk zijn: de knock-outfase halen zou al een succes zijn.",
+      },
+      federation: {
+        bold: "Ze hebben ons alles gegeven wat we vroegen. We zijn één team.",
+        calm: "Die gesprekken blijven binnenskamers.",
+        blunt: "Ik zou graag meer willen: betere voorbereiding, een beter schema, meer steun.",
+      },
+      leftOut: {
+        bold: "Hij zit er dichtbij en de deur blijft open. Zijn tijd komt.",
+        calm: "Het was een sportieve keuze: vorm en de balans van de selectie.",
+        blunt: "Het is mijn beslissing en daar ga ik verder niets over zeggen.",
+      },
+      star: {
+        bold: "Hij is wereldklasse en ja, we bouwen het team om hem heen.",
+        calm: "Hij is een van de zesentwintig. Het team telt.",
+        blunt: "Hij moet het op het veld laten zien, net als iedereen.",
+      },
+      newcomer: {
+        bold: "Hij is de toekomst van dit team en krijgt zijn kans.",
+        calm: "Hij heeft zijn plek verdiend op training en bij zijn club.",
+        blunt: "Hij is er voor de breedte van de selectie. Lees er niet te veel in.",
+      },
+      opponent: {
+        bold: "We gaan ze verslaan. Ik verwacht dat we de wedstrijd vanaf het begin controleren.",
+        calm: "Een serieuze tegenstander. We hebben respect en bereiden ons goed voor.",
+        blunt: "Ze zijn niet van ons niveau en dat gaan ze merken.",
+      },
+      fans: {
+        bold: "Ik beloof jullie een avond om nooit te vergeten.",
+        calm: "We hebben jullie nodig achter ons. Samen zijn we sterker.",
+        blunt: "Beoordeel ons op resultaten, niet op woorden.",
+      },
+      formGood: {
+        bold: "Ja. We nemen deze vaart mee tot het einde.",
+        calm: "We blijven bescheiden en blijven werken.",
+        blunt: "Een goede reeks betekent niets zodra het toernooi begint.",
+      },
+      formBad: {
+        bold: "Geen druk. We draaien dit om, daar ben ik zeker van.",
+        calm: "Elke trainer maakt dit mee. We blijven werken.",
+        blunt: "De kritiek is terecht en ik neem de verantwoordelijkheid.",
+      },
+    },
+    react: {
+      good0: "Een instemmend gemompel gaat door de zaal.",
+      good1: "Meerdere verslaggevers zijn al aan het typen.",
+      flat0: "Een beleefd knikje en de verslaggevers gaan verder.",
+      flat1: "Niets om een kop van te maken.",
+      bad0: "Het wordt stil in de zaal. Dit valt niet goed.",
+      bad1: "Pennen krassen driftig. De kop van morgen schrijft zichzelf.",
+    },
+    news: {
+      title: "Persconferentie: {comp}",
+      warm: "De pers vertrok met een goede indruk van de bondscoach voor het {comp}.",
+      mixed: "De perszaal was verdeeld na de persconferentie voor het {comp}.",
+      cold: "De pers vond de persconferentie voor het {comp} niet prettig. Verwacht scherpe koppen.",
+    },
+  },
 }
 
 export default engine

@@ -73,7 +73,7 @@ export function coachOf(world: World, nationId: string): Coach | undefined {
 }
 
 /** Where a nation stands among all nations: 0 (the best) to 1. */
-function standing(world: World, nationId: string): number {
+export function standing(world: World, nationId: string): number {
   const ranked = world.ctx().ranked()
   const i = ranked.indexOf(nationId)
   return i < 0 ? 1 : i / Math.max(1, ranked.length - 1)
