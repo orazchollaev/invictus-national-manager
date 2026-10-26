@@ -563,6 +563,7 @@ const hi: typeof en = {
     pauseOnKey: "गोल और रेड कार्ड पर रोकें",
     fullCommentary: "पूरी कमेंट्री",
     fullCommentaryHint: "फ़ाउल, कॉर्नर और ऑफ़साइड भी",
+    moreOptions: "और विकल्प",
     about: "के बारे में",
     aboutBy: "द्वारा",
     openSource: "Open source",

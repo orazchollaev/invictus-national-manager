@@ -560,6 +560,7 @@ const ar: typeof en = {
     pauseOnKey: "إيقاف مؤقت عند الأهداف والبطاقات الحمراء",
     fullCommentary: "تعليق كامل",
     fullCommentaryHint: "مع الأخطاء والركنيات والتسللات أيضًا",
+    moreOptions: "المزيد من الخيارات",
     about: "حول",
     aboutBy: "بواسطة",
     openSource: "Open source",

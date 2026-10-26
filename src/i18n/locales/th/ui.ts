@@ -560,6 +560,7 @@ const th: typeof en = {
     pauseOnKey: "หยุดเมื่อมีประตูและใบแดง",
     fullCommentary: "คอมเมนทารีเต็มรูปแบบ",
     fullCommentaryHint: "รวมฟาวล์ ลูกเตะมุม และล้ำหน้าด้วย",
+    moreOptions: "ตัวเลือกเพิ่มเติม",
     about: "เกี่ยวกับ",
     aboutBy: "โดย",
     openSource: "Open source",

@@ -71,24 +71,6 @@ const aboutOpen = ref(false)
           "
         />
       </AppField>
-      <AppField :label="t('settings.quietNotices')" :hint="t('settings.quietNoticesHint')">
-        <AppToggle v-model="settings.quietNotices" :aria-label="t('settings.quietNotices')" />
-      </AppField>
-      <AppField :label="t('settings.assistantPicks')" :hint="t('settings.assistantPicksHint')">
-        <AppToggle v-model="settings.assistantPicks" :aria-label="t('settings.assistantPicks')" />
-      </AppField>
-      <AppField :label="t('settings.watchDraws')" :hint="t('settings.watchDrawsHint')">
-        <AppToggle v-model="settings.watchDraws" :aria-label="t('settings.watchDraws')" />
-      </AppField>
-      <AppField :label="t('settings.assistantBoard')" :hint="t('settings.assistantBoardHint')">
-        <AppToggle v-model="settings.assistantBoard" :aria-label="t('settings.assistantBoard')" />
-      </AppField>
-      <AppField :label="t('settings.assistantPress')" :hint="t('settings.assistantPressHint')">
-        <AppToggle v-model="settings.assistantPress" :aria-label="t('settings.assistantPress')" />
-      </AppField>
-      <AppField :label="t('settings.showIntake')" :hint="t('settings.showIntakeHint')">
-        <AppToggle v-model="settings.showIntake" :aria-label="t('settings.showIntake')" />
-      </AppField>
       <AppField :label="t('settings.autosave')" layout="stack">
         <AppButtonGroup
           :model-value="settings.autoSave"
@@ -115,12 +97,48 @@ const aboutOpen = ref(false)
       <AppField :label="t('settings.pauseOnKey')">
         <AppToggle v-model="settings.pauseOnKeyEvents" :aria-label="t('settings.pauseOnKey')" />
       </AppField>
-      <AppField :label="t('settings.fullCommentary')" :hint="t('settings.fullCommentaryHint')">
-        <AppToggle
-          v-model="settings.verboseCommentary"
-          :aria-label="t('settings.fullCommentary')"
-        />
-      </AppField>
+    </AppCard>
+
+    <!-- Assistants and notices: sensible defaults, so they stay folded away. -->
+    <AppCard padding="md" class="group">
+      <details class="more">
+        <summary class="more-title">{{ t("settings.moreOptions") }}</summary>
+        <div class="more-body">
+          <AppField :label="t('settings.quietNotices')" :hint="t('settings.quietNoticesHint')">
+            <AppToggle v-model="settings.quietNotices" :aria-label="t('settings.quietNotices')" />
+          </AppField>
+          <AppField :label="t('settings.assistantPicks')" :hint="t('settings.assistantPicksHint')">
+            <AppToggle
+              v-model="settings.assistantPicks"
+              :aria-label="t('settings.assistantPicks')"
+            />
+          </AppField>
+          <AppField :label="t('settings.watchDraws')" :hint="t('settings.watchDrawsHint')">
+            <AppToggle v-model="settings.watchDraws" :aria-label="t('settings.watchDraws')" />
+          </AppField>
+          <AppField :label="t('settings.assistantBoard')" :hint="t('settings.assistantBoardHint')">
+            <AppToggle
+              v-model="settings.assistantBoard"
+              :aria-label="t('settings.assistantBoard')"
+            />
+          </AppField>
+          <AppField :label="t('settings.assistantPress')" :hint="t('settings.assistantPressHint')">
+            <AppToggle
+              v-model="settings.assistantPress"
+              :aria-label="t('settings.assistantPress')"
+            />
+          </AppField>
+          <AppField :label="t('settings.showIntake')" :hint="t('settings.showIntakeHint')">
+            <AppToggle v-model="settings.showIntake" :aria-label="t('settings.showIntake')" />
+          </AppField>
+          <AppField :label="t('settings.fullCommentary')" :hint="t('settings.fullCommentaryHint')">
+            <AppToggle
+              v-model="settings.verboseCommentary"
+              :aria-label="t('settings.fullCommentary')"
+            />
+          </AppField>
+        </div>
+      </details>
     </AppCard>
 
     <AppButton variant="text" size="sm" @click="aboutOpen = true">
@@ -147,5 +165,15 @@ const aboutOpen = ref(false)
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
+}
+.more-title {
+  cursor: pointer;
+  font-weight: 700;
+}
+.more-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
 }
 </style>

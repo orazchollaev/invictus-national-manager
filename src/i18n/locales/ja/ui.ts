@@ -559,6 +559,7 @@ const ja: typeof en = {
     pauseOnKey: "ゴールとレッドカードで一時停止",
     fullCommentary: "完全実況",
     fullCommentaryHint: "ファウル、コーナーキック、オフサイドも実況します",
+    moreOptions: "その他のオプション",
     about: "アプリについて",
     aboutBy: "開発:",
     openSource: "Open source",

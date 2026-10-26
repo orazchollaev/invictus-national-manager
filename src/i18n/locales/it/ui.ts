@@ -565,6 +565,7 @@ const it: typeof en = {
     pauseOnKey: "Pausa su gol ed espulsioni",
     fullCommentary: "Telecronaca completa",
     fullCommentaryHint: "Anche falli, calci d'angolo e fuorigioco",
+    moreOptions: "Altre opzioni",
     about: "Informazioni",
     aboutBy: "di",
     openSource: "Open source",

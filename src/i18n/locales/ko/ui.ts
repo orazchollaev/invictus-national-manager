@@ -560,6 +560,7 @@ const ko: typeof en = {
     pauseOnKey: "골과 퇴장 시 일시정지",
     fullCommentary: "전체 중계",
     fullCommentaryHint: "파울, 코너킥, 오프사이드도 포함",
+    moreOptions: "더 많은 옵션",
     about: "정보",
     aboutBy: "제작",
     openSource: "Open source",

@@ -564,6 +564,7 @@ const fa: typeof en = {
     pauseOnKey: "توقف در گل و کارت قرمز",
     fullCommentary: "گزارش کامل",
     fullCommentaryHint: "خطاها، کرنرها و آفسایدها هم گزارش شوند",
+    moreOptions: "گزینه‌های بیشتر",
     about: "درباره",
     aboutBy: "توسط",
     openSource: "Open source",

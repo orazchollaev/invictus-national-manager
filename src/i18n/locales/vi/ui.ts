@@ -565,6 +565,7 @@ const vi: typeof en = {
     pauseOnKey: "Tạm dừng khi có bàn thắng và thẻ đỏ",
     fullCommentary: "Bình luận đầy đủ",
     fullCommentaryHint: "Cả các tình huống phạm lỗi, phạt góc và việt vị",
+    moreOptions: "Tùy chọn khác",
     about: "Giới thiệu",
     aboutBy: "bởi",
     openSource: "Open source",

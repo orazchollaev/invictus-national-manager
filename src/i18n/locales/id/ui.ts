@@ -563,6 +563,7 @@ const id: typeof en = {
     pauseOnKey: "Jeda saat gol dan kartu merah",
     fullCommentary: "Komentar lengkap",
     fullCommentaryHint: "Termasuk pelanggaran, tendangan sudut, dan offside",
+    moreOptions: "Opsi lainnya",
     about: "Tentang",
     aboutBy: "oleh",
     openSource: "Open source",

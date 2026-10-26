@@ -565,6 +565,7 @@ const uz: typeof en = {
     pauseOnKey: "Gol va qizil kartochkada pauza qilish",
     fullCommentary: "To'liq sharh",
     fullCommentaryHint: "Qoidabuzarliklar, burchak to'plari va ofsaydlar ham",
+    moreOptions: "Boshqa sozlamalar",
     about: "Ilova haqida",
     aboutBy: "muallif",
     openSource: "Open source",

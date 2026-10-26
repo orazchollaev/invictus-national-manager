@@ -566,6 +566,7 @@ const pl: typeof en = {
     pauseOnKey: "Pauza przy golach i czerwonych kartkach",
     fullCommentary: "Pełny komentarz",
     fullCommentaryHint: "Także faule, rzuty rożne i spalone",
+    moreOptions: "Więcej opcji",
     about: "O aplikacji",
     aboutBy: "autor",
     openSource: "Open source",

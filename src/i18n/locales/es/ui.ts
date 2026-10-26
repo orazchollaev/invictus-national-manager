@@ -564,6 +564,7 @@ const es: typeof en = {
     pauseOnKey: "Pausar en goles y tarjetas rojas",
     fullCommentary: "Narración completa",
     fullCommentaryHint: "También faltas, córners y fuera de juego",
+    moreOptions: "Más opciones",
     about: "Acerca de",
     aboutBy: "por",
     openSource: "Open source",

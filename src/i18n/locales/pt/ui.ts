@@ -563,6 +563,7 @@ const pt: typeof en = {
     pauseOnKey: "Pausar em gols e cartões vermelhos",
     fullCommentary: "Narração completa",
     fullCommentaryHint: "Faltas, escanteios e impedimentos também",
+    moreOptions: "Mais opções",
     about: "Sobre",
     aboutBy: "por",
     openSource: "Open source",

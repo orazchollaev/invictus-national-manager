@@ -567,6 +567,7 @@ const fr: typeof en = {
     pauseOnKey: "Pause sur les buts et les cartons rouges",
     fullCommentary: "Commentaires complets",
     fullCommentaryHint: "Aussi les fautes, corners et hors-jeu",
+    moreOptions: "Plus d'options",
     about: "À propos",
     aboutBy: "par",
     openSource: "Open source",

@@ -563,6 +563,7 @@ const tr: typeof en = {
     pauseOnKey: "Gol ve kırmızı kartlarda duraklat",
     fullCommentary: "Tam anlatım",
     fullCommentaryHint: "Fauller, kornerler ve ofsaytlar da",
+    moreOptions: "Daha fazla seçenek",
     about: "Hakkında",
     aboutBy: "tarafından",
     openSource: "Açık kaynak",

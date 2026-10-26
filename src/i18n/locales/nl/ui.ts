@@ -565,6 +565,7 @@ const nl: typeof en = {
     pauseOnKey: "Pauzeer bij doelpunten en rode kaarten",
     fullCommentary: "Volledig commentaar",
     fullCommentaryHint: "Ook overtredingen, hoekschoppen en buitenspel",
+    moreOptions: "Meer opties",
     about: "Over",
     aboutBy: "door",
     openSource: "Open source",

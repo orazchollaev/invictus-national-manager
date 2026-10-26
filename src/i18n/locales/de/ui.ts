@@ -566,6 +566,7 @@ const de: typeof en = {
     pauseOnKey: "Bei Toren und Roten Karten pausieren",
     fullCommentary: "Volle Kommentierung",
     fullCommentaryHint: "Auch Fouls, Ecken und Abseits",
+    moreOptions: "Weitere Optionen",
     about: "Über",
     aboutBy: "von",
     openSource: "Open source",

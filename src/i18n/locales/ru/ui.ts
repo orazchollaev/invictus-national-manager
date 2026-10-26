@@ -563,6 +563,7 @@ const ru: typeof en = {
     pauseOnKey: "Пауза на голах и красных карточках",
     fullCommentary: "Полный комментарий",
     fullCommentaryHint: "Также фолы, угловые и офсайды",
+    moreOptions: "Больше параметров",
     about: "О программе",
     aboutBy: "от",
     openSource: "Open source",

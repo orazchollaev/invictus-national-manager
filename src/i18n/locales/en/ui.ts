@@ -560,6 +560,7 @@ export default {
     pauseOnKey: "Pause on goals and red cards",
     fullCommentary: "Full commentary",
     fullCommentaryHint: "Fouls, corners and offsides as well",
+    moreOptions: "More options",
     about: "About",
     aboutBy: "by",
     openSource: "Open source",
