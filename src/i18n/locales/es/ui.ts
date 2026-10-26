@@ -232,8 +232,6 @@ const es: typeof en = {
       squadDueHint: "{label} · primer partido {date}",
       drawReady: "El sorteo está listo",
       drawReadyHint: "{label} · velo para saber a quién nos enfrentamos",
-      inviteHint: "Ventana libre: organiza un torneo",
-      inviteHintBody: "No tenemos partido del {from} al {to}. Invita a tres o siete naciones.",
       inbox: "Bandeja de entrada",
       waiting: "Esperando tu respuesta",
       unread: "{n} sin leer",

@@ -16,12 +16,7 @@ import {
 } from "@lucide/vue"
 import { AppButton, AppSectionHeader } from "@/components/ui"
 import { PageShell, StickyCta } from "@/modules/core/components"
-import {
-  GroupSnapshot,
-  InvitationalHint,
-  MatchStrip,
-  NextMatchCard,
-} from "@/modules/core/components/home"
+import { GroupSnapshot, MatchStrip, NextMatchCard } from "@/modules/core/components/home"
 import { useNotices } from "@/modules/core/composables/useNotices"
 import { useWorldStore } from "@/modules/world/store"
 import { useSettingsStore } from "@/modules/settings/store"
@@ -84,9 +79,6 @@ const careerPage = world.derive(
         : null,
   null
 )
-
-/** One task at a time: a squad to name comes before a draw to watch. */
-const hasAlert = computed(() => pending.value?.kind === "callup" || !!drawReady.value)
 
 const drawLabel = computed(() => {
   const d = drawReady.value
@@ -183,6 +175,10 @@ const cta = computed(() => {
       <ChevronRight :size="18" class="muted" />
     </section>
 
+    <NextMatchCard v-if="me" />
+    <MatchStrip v-if="me" />
+    <GroupSnapshot v-if="me" />
+
     <section v-if="settings.quietNotices && notices.items.value.length" class="panel waiting">
       <AppSectionHeader :title="t('core.home.waiting')" />
       <button
@@ -197,11 +193,6 @@ const cta = computed(() => {
         <ChevronRight :size="18" class="muted" />
       </button>
     </section>
-
-    <NextMatchCard v-if="me" />
-    <MatchStrip v-if="me" />
-    <InvitationalHint v-if="me && !hasAlert" />
-    <GroupSnapshot v-if="me" />
 
     <section v-if="news.length" class="panel">
       <AppSectionHeader>

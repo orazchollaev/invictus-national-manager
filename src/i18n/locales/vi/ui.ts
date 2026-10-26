@@ -232,9 +232,6 @@ const vi: typeof en = {
       squadDueHint: "{label} · trận đầu tiên {date}",
       drawReady: "Lễ bốc thăm đã sẵn sàng",
       drawReadyHint: "{label} · xem để biết chúng ta gặp đối thủ nào",
-      inviteHint: "Có một khoảng trống: đăng cai một giải đấu",
-      inviteHintBody:
-        "Chúng ta không có trận nào từ {from} đến {to}. Hãy mời ba hoặc bảy quốc gia.",
       inbox: "Hộp thư",
       waiting: "Đang chờ bạn",
       unread: "{n} chưa đọc",

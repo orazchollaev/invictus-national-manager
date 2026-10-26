@@ -232,8 +232,6 @@ const id: typeof en = {
       squadDueHint: "{label} · laga pertama {date}",
       drawReady: "Undian sudah siap",
       drawReadyHint: "{label} · tonton untuk tahu siapa lawan kita",
-      inviteHint: "Jendela kosong: gelar sebuah turnamen",
-      inviteHintBody: "Kita tidak punya laga pada {from} – {to}. Undang tiga atau tujuh negara.",
       inbox: "Kotak masuk",
       waiting: "Menunggu Anda",
       unread: "{n} belum dibaca",

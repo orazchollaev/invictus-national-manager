@@ -229,8 +229,6 @@ const th: typeof en = {
       squadDueHint: "{label} · แมตช์แรก {date}",
       drawReady: "การจับสลากพร้อมแล้ว",
       drawReadyHint: "{label} · ชมเพื่อดูว่าเราจะเจอใคร",
-      inviteHint: "ช่วงว่าง: เป็นเจ้าภาพจัดทัวร์นาเมนต์",
-      inviteHintBody: "เราไม่มีแมตช์ในช่วง {from} – {to} เชิญสามหรือเจ็ดชาติมาร่วมได้",
       inbox: "กล่องข้อความ",
       waiting: "รอคุณอยู่",
       unread: "ยังไม่ได้อ่าน {n}",

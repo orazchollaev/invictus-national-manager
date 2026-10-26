@@ -233,8 +233,6 @@ const it: typeof en = {
       squadDueHint: "{label} · prima partita il {date}",
       drawReady: "Il sorteggio è pronto",
       drawReadyHint: "{label} · guardalo per scoprire chi affronteremo",
-      inviteHint: "Una finestra libera: organizza un torneo",
-      inviteHintBody: "Non abbiamo partite dal {from} al {to}. Invita tre o sette nazioni.",
       inbox: "Posta",
       waiting: "In attesa di te",
       unread: "{n} da leggere",

@@ -231,8 +231,6 @@ const tr: typeof en = {
       squadDueHint: "{label} · ilk maç {date}",
       drawReady: "Kura hazır",
       drawReadyHint: "{label} · kimle eşleştiğimizi görmek için izle",
-      inviteHint: "Boş bir takvim aralığı: turnuva düzenle",
-      inviteHintBody: "{from} – {to} arasında maçımız yok. Üç ya da yedi ülkeyi davet et.",
       inbox: "Gelen kutusu",
       waiting: "Seni bekleyenler",
       unread: "{n} okunmamış",

@@ -231,8 +231,6 @@ const ru: typeof en = {
       squadDueHint: "{label} · первый матч {date}",
       drawReady: "Жеребьёвка готова",
       drawReadyHint: "{label} · посмотрите, с кем нам играть",
-      inviteHint: "Свободное окно: проведите турнир",
-      inviteHintBody: "С {from} по {to} у нас нет матчей. Пригласите три или семь сборных.",
       inbox: "Входящие",
       waiting: "Ждёт вас",
       unread: "Непрочитанных: {n}",

@@ -232,8 +232,6 @@ const fa: typeof en = {
       squadDueHint: "{label} · اولین بازی {date}",
       drawReady: "قرعه‌کشی آماده است",
       drawReadyHint: "{label} · ببینید با چه کسی روبه‌رو می‌شویم",
-      inviteHint: "یک بازه آزاد: میزبان یک تورنمنت شوید",
-      inviteHintBody: "از {from} تا {to} بازی نداریم. سه یا هفت کشور را دعوت کنید.",
       inbox: "صندوق پیام",
       waiting: "منتظر شماست",
       unread: "{n} خوانده‌نشده",

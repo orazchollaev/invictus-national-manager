@@ -228,8 +228,6 @@ export default {
       squadDueHint: "{label} · first match {date}",
       drawReady: "The draw is ready",
       drawReadyHint: "{label} · watch it to see who we face",
-      inviteHint: "A free window: host a tournament",
-      inviteHintBody: "We have no match {from} – {to}. Invite three or seven nations.",
       inbox: "Inbox",
       waiting: "Waiting for you",
       unread: "{n} unread",

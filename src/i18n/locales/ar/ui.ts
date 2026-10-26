@@ -229,8 +229,6 @@ const ar: typeof en = {
       squadDueHint: "{label} · المباراة الأولى {date}",
       drawReady: "القرعة جاهزة",
       drawReadyHint: "{label} · شاهدها لتعرف من سنواجه",
-      inviteHint: "فترة فارغة: استضف بطولة",
-      inviteHintBody: "لا توجد لدينا مباراة من {from} إلى {to}. ادعُ ثلاثة أو سبعة منتخبات.",
       inbox: "البريد",
       waiting: "بانتظارك",
       unread: "{n} غير مقروءة",

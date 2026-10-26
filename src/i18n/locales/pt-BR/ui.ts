@@ -231,8 +231,6 @@ const ptBR: typeof en = {
       squadDueHint: "{label} · primeira partida {date}",
       drawReady: "O sorteio está pronto",
       drawReadyHint: "{label} · assista para ver quem enfrentaremos",
-      inviteHint: "Data FIFA livre: organize um torneio",
-      inviteHintBody: "Não temos jogos de {from} a {to}. Convide três ou sete seleções.",
       inbox: "Caixa de entrada",
       waiting: "Esperando por você",
       unread: "{n} não lidas",

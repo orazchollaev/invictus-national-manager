@@ -234,8 +234,6 @@ const fr: typeof en = {
       squadDueHint: "{label} · premier match le {date}",
       drawReady: "Le tirage est prêt",
       drawReadyHint: "{label} · regardez-le pour savoir qui nous affrontons",
-      inviteHint: "Une fenêtre libre : organisez un tournoi",
-      inviteHintBody: "Nous n'avons aucun match du {from} au {to}. Invitez trois ou sept nations.",
       inbox: "Messages",
       waiting: "En attente",
       unread: "{n} non lus",

@@ -1,4 +1,3 @@
 export { default as GroupSnapshot } from "./GroupSnapshot.vue"
 export { default as NextMatchCard } from "./NextMatchCard.vue"
 export { default as MatchStrip } from "./MatchStrip.vue"
-export { default as InvitationalHint } from "./InvitationalHint.vue"

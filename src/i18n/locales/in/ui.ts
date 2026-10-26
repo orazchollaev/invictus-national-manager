@@ -231,8 +231,6 @@ const hi: typeof en = {
       squadDueHint: "{label} · पहला मैच {date}",
       drawReady: "ड्रॉ तैयार है",
       drawReadyHint: "{label} · देखें कि हमारा सामना किससे होगा",
-      inviteHint: "खाली समय: टूर्नामेंट की मेज़बानी करें",
-      inviteHintBody: "{from} – {to} के बीच हमारा कोई मैच नहीं है। तीन या सात देशों को बुलाएँ।",
       inbox: "इनबॉक्स",
       waiting: "आपका इंतज़ार",
       unread: "{n} अपठित",

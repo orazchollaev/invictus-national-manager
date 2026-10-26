@@ -230,8 +230,6 @@ const ko: typeof en = {
       squadDueHint: "{label} · 첫 경기 {date}",
       drawReady: "추첨 준비 완료",
       drawReadyHint: "{label} · 추첨을 보고 상대를 확인하세요",
-      inviteHint: "비어 있는 일정: 대회를 개최하세요",
-      inviteHintBody: "{from} – {to}에는 경기가 없습니다. 3개국 또는 7개국을 초청하세요.",
       inbox: "받은 편지함",
       waiting: "대기 중",
       unread: "읽지 않음 {n}",

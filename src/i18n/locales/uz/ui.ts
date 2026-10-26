@@ -232,9 +232,6 @@ const uz: typeof en = {
       squadDueHint: "{label} · birinchi o'yin {date}",
       drawReady: "Qur'a tayyor",
       drawReadyHint: "{label} · kim bilan o'ynashimizni bilish uchun ko'ring",
-      inviteHint: "Bo'sh oyna: turnir o'tkazing",
-      inviteHintBody:
-        "{from} – {to} oralig'ida o'yinimiz yo'q. Uch yoki yetti davlatni taklif qiling.",
       inbox: "Xabarlar",
       waiting: "Sizni kutmoqda",
       unread: "{n} ta o'qilmagan",

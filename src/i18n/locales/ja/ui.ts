@@ -229,8 +229,6 @@ const ja: typeof en = {
       squadDueHint: "{label} · 初戦 {date}",
       drawReady: "抽選の準備ができました",
       drawReadyHint: "{label} · 対戦相手を確認しましょう",
-      inviteHint: "空き期間: 大会を主催しよう",
-      inviteHintBody: "{from} – {to}は試合がありません。3か国または7か国を招待できます。",
       inbox: "受信箱",
       waiting: "対応待ち",
       unread: "未読{n}件",

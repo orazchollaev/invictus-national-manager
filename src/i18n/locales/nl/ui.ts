@@ -232,9 +232,6 @@ const nl: typeof en = {
       squadDueHint: "{label} · eerste wedstrijd {date}",
       drawReady: "De loting is klaar",
       drawReadyHint: "{label} · bekijk hem om te zien tegen wie we spelen",
-      inviteHint: "Een vrij venster: organiseer een toernooi",
-      inviteHintBody:
-        "We hebben geen wedstrijd van {from} tot {to}. Nodig drie of zeven landen uit.",
       inbox: "Inbox",
       waiting: "Wacht op jou",
       unread: "{n} ongelezen",

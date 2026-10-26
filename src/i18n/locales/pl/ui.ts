@@ -231,9 +231,6 @@ const pl: typeof en = {
       squadDueHint: "{label} · pierwszy mecz {date}",
       drawReady: "Losowanie jest gotowe",
       drawReadyHint: "{label} · obejrzyj je, by zobaczyć, z kim zagramy",
-      inviteHint: "Wolny termin: zorganizuj turniej",
-      inviteHintBody:
-        "Nie mamy meczu w terminie {from} – {to}. Zaproś trzy lub siedem reprezentacji.",
       inbox: "Skrzynka",
       waiting: "Czeka na ciebie",
       unread: "{n} nieprzeczytanych",
