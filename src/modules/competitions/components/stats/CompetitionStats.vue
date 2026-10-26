@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { AppEmptyState, AppSubTabBar } from "@/components/ui"
-import { resolveText } from "@/i18n/text"
+import { AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { msg } from "@/engine/text"
 import { positionGroup } from "@/engine/players/ability"
@@ -53,14 +52,8 @@ const lines = computed(() =>
 const show = (r: LeaderRow, stat: Stat) => (stat === "rating" ? r[stat].toFixed(1) : r[stat])
 const title = (kind: string) => msg(`award.${kind}`)
 
-/** One chart at a time: those with someone on them, and the team of the tournament. */
-const tabs = computed(() => [
-  ...charts.value.map((c) => c.kind),
-  ...(lines.value.length ? ["xi"] : []),
-])
-const picked = ref("")
-const tab = computed(() => (tabs.value.includes(picked.value) ? picked.value : tabs.value[0]))
-const chart = computed(() => charts.value.find((c) => c.kind === tab.value))
+/** The top of each chart: the full lists are ten deep, too long to scroll on a phone. */
+const SHOWN = 5
 </script>
 
 <template>
@@ -91,17 +84,11 @@ const chart = computed(() => charts.value.find((c) => c.kind === tab.value))
       </div>
     </RouterLink>
 
-    <AppSubTabBar
-      :model-value="tab"
-      :options="tabs.map((k) => ({ value: k, label: resolveText(title(k)) }))"
-      size="sm"
-      @update:model-value="(v) => (picked = v)"
-    />
-
-    <section v-if="chart" class="chart">
+    <section v-for="chart in charts" :key="chart.kind" class="chart">
+      <AppSectionHeader>{{ $tx(title(chart.kind)) }}</AppSectionHeader>
       <div class="list">
         <RouterLink
-          v-for="(r, i) in chart.rows"
+          v-for="(r, i) in chart.rows.slice(0, SHOWN)"
           :key="r.id"
           :to="`/player/${r.id}`"
           class="row"
@@ -116,7 +103,8 @@ const chart = computed(() => charts.value.find((c) => c.kind === tab.value))
       </div>
     </section>
 
-    <section v-else-if="tab === 'xi'" class="chart">
+    <section v-if="lines.length" class="chart">
+      <AppSectionHeader>{{ $tx(title("xi")) }}</AppSectionHeader>
       <div class="list">
         <template v-for="l in lines" :key="l.group">
           <div class="group">{{ t(`squad.pos.${l.group}`) }}</div>
