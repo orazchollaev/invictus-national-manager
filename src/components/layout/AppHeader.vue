@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { Settings } from "@lucide/vue"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
 import { flagUrl } from "@/lib/flags"
@@ -24,9 +23,6 @@ const date = computed(() => (world.date ? formatDate(world.date) : ""))
       </RouterLink>
       <div class="header-end">
         <span v-if="date" class="header-date">{{ date }}</span>
-        <RouterLink to="/settings" class="settings-btn" :aria-label="t('nav.settings')">
-          <Settings :size="18" />
-        </RouterLink>
       </div>
     </div>
   </header>
@@ -89,20 +85,5 @@ const date = computed(() => (world.date ? formatDate(world.date) : ""))
   font-weight: 600;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
-}
-
-.settings-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius);
-  color: var(--text-muted);
-}
-
-.settings-btn:hover {
-  background: var(--bg);
-  color: var(--text);
 }
 </style>
