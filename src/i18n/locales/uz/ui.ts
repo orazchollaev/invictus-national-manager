@@ -86,6 +86,8 @@ const uz: typeof en = {
     trophyCabinet: "Kuboklar javoni",
     competitionReviews: "Musobaqa sharhlari",
     milestones: "Muhim lahzalar",
+    achievements: "Yutuqlar",
+    achievementsCount: "{total} tadan {done} tasi qo'lga kiritildi",
     record: "Natijalar",
     record_line: "{p} o'yin {w} g' {d} d {l} m",
     left: {

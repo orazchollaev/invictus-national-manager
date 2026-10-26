@@ -28,7 +28,7 @@ import {
   shiftObjective,
   youthObjective,
 } from "../career/career"
-import { award, checkMilestones } from "../career/milestones"
+import { achievementList, award, checkMilestones } from "../career/milestones"
 
 const statics = () => ({
   nations: nations as NationDef[],
@@ -661,6 +661,28 @@ describe("milestones", () => {
     const ids = w.state.career.milestones!.map((m) => m.id)
     expect(ids.filter((id) => id === "first-win")).toHaveLength(1)
     expect(ids).toContain("matches-25")
+  })
+
+  it("count wins, goals and clean sheets across the career", () => {
+    const w = newWorld("TUR")
+    w.state.career.tally = { gf: 99, ga: 10, clean: 9 }
+    afterUserResult(w, fixture(w, "SMR", "qualifier", 6, 0))
+    const ids = w.state.career.milestones!.map((m) => m.id)
+    expect(w.state.career.tally).toEqual({ gf: 105, ga: 10, clean: 10 })
+    expect(ids).toEqual(expect.arrayContaining(["goals-100", "clean-10", "rout"]))
+    expect(ids).not.toContain("goals-250")
+  })
+
+  it("list every achievement, earned or not, with progress", () => {
+    const w = newWorld("TUR")
+    w.state.career.history[0].played = 40
+    checkMilestones(w)
+    const list = achievementList(w)
+    const hundred = list.find((a) => a.id === "matches-100")!
+    expect(hundred).toMatchObject({ done: false, progress: 40, target: 100 })
+    expect(list.find((a) => a.id === "matches-25")!.done).toBe(true)
+    expect(list.find((a) => a.id === "matches-1000")).toBeTruthy()
+    expect(new Set(list.map((a) => a.id)).size).toBe(list.length)
   })
 
   it("puts surprising results in the news", () => {

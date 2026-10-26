@@ -86,6 +86,8 @@ const pl: typeof en = {
     trophyCabinet: "Gablota z trofeami",
     competitionReviews: "Podsumowania rozgrywek",
     milestones: "Kamienie milowe",
+    achievements: "Osiągnięcia",
+    achievementsCount: "{done} z {total} zdobytych",
     record: "Bilans",
     record_line: "{p}M {w}Z {d}R {l}P",
     left: {

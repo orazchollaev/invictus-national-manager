@@ -84,6 +84,8 @@ export default {
     trophyCabinet: "Trophy cabinet",
     competitionReviews: "Competition reviews",
     milestones: "Milestones",
+    achievements: "Achievements",
+    achievementsCount: "{done} of {total} earned",
     record: "Record",
     record_line: "{p}P {w}W {d}D {l}L",
     left: {

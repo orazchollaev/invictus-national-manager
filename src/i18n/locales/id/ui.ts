@@ -86,6 +86,8 @@ const id: typeof en = {
     trophyCabinet: "Lemari trofi",
     competitionReviews: "Ulasan kompetisi",
     milestones: "Tonggak sejarah",
+    achievements: "Pencapaian",
+    achievementsCount: "{done} dari {total} diraih",
     record: "Rekor",
     record_line: "{p}M {w}Me {d}S {l}K",
     left: {

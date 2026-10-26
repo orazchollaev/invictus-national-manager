@@ -86,6 +86,8 @@ const ru: typeof en = {
     trophyCabinet: "Зал трофеев",
     competitionReviews: "Итоги турниров",
     milestones: "Вехи",
+    achievements: "Достижения",
+    achievementsCount: "Получено {done} из {total}",
     record: "Результаты",
     record_line: "И{p} В{w} Н{d} П{l}",
     left: {

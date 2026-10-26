@@ -86,6 +86,8 @@ const th: typeof en = {
     trophyCabinet: "ตู้โชว์ถ้วยรางวัล",
     competitionReviews: "สรุปการแข่งขัน",
     milestones: "หมุดหมายสำคัญ",
+    achievements: "ความสำเร็จ",
+    achievementsCount: "ได้รับ {done} จาก {total}",
     record: "สถิติ",
     record_line: "{p} นัด ชนะ {w} เสมอ {d} แพ้ {l}",
     left: {

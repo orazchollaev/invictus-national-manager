@@ -86,6 +86,8 @@ const nl: typeof en = {
     trophyCabinet: "Prijzenkast",
     competitionReviews: "Toernooiterugblikken",
     milestones: "Mijlpalen",
+    achievements: "Prestaties",
+    achievementsCount: "{done} van {total} behaald",
     record: "Balans",
     record_line: "{p}G {w}W {d}G {l}V",
     left: {

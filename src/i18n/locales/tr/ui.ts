@@ -86,6 +86,8 @@ const tr: typeof en = {
     trophyCabinet: "Kupa dolabı",
     competitionReviews: "Turnuva değerlendirmeleri",
     milestones: "Önemli anlar",
+    achievements: "Başarımlar",
+    achievementsCount: "{done} / {total} kazanıldı",
     record: "Karne",
     record_line: "{p}O {w}G {d}B {l}M",
     left: {

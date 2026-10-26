@@ -650,6 +650,16 @@ export function afterUserResult(world: World, f: Fixture) {
   const lost = actual < 0.5 || (gf === ga && actual === 0.5 && !!f.result.pens)
   if (competitive) career.unbeaten = lost ? 0 : (career.unbeaten ?? 0) + 1
   resultNews(world, f, me, opp, gf, ga, actual - expected)
+  const tally = (career.tally ??= { gf: 0, ga: 0, clean: 0 })
+  tally.gf += gf
+  tally.ga += ga
+  if (ga === 0) tally.clean++
+  if (gf - ga >= 5) award(world, "rout", msg("ms.rout"))
+  const ht = f.result.ht
+  if (gf > ga && ht && (home ? ht[0] < ht[1] : ht[1] < ht[0]))
+    award(world, "comeback", msg("ms.comeback"))
+  if (f.result.pens && f.result.w === (home ? "home" : "away"))
+    award(world, "shootout", msg("ms.shootout"))
 
   // A final warning counts down over competitive matches.
   const u = career.ultimatum
@@ -722,6 +732,7 @@ export function playerMoments(world: World, f: Fixture, report: MatchReport) {
     const p = world.state.players[line.playerId]
     if (!p) continue
     if (isDebut(p, f.date)) debuts.push(p)
+    if (line.goals >= 3) award(world, "hat-trick", msg("ms.hatTrick"))
     const caps = p.caps + 1
     if (caps === 50 || caps === 100 || caps === 150)
       world.news(

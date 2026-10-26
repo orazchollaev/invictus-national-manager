@@ -86,6 +86,8 @@ const hi: typeof en = {
     trophyCabinet: "ट्रॉफ़ी कैबिनेट",
     competitionReviews: "प्रतियोगिता समीक्षाएँ",
     milestones: "उपलब्धियाँ",
+    achievements: "उपलब्धियाँ",
+    achievementsCount: "{total} में से {done} प्राप्त",
     record: "रिकॉर्ड",
     record_line: "{p}M {w}जी {d}ड्रॉ {l}ह",
     left: {

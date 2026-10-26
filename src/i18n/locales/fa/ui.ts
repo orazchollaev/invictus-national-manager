@@ -86,6 +86,8 @@ const fa: typeof en = {
     trophyCabinet: "کابینت جام‌ها",
     competitionReviews: "ارزیابی رقابت‌ها",
     milestones: "نقاط عطف",
+    achievements: "دستاوردها",
+    achievementsCount: "{done} از {total} به‌دست آمد",
     record: "کارنامه",
     record_line: "{p} بازی {w} برد {d} مساوی {l} باخت",
     left: {

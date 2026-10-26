@@ -85,6 +85,8 @@ const ja: typeof en = {
     trophyCabinet: "トロフィーキャビネット",
     competitionReviews: "大会レビュー",
     milestones: "マイルストーン",
+    achievements: "実績",
+    achievementsCount: "{total}件中{done}件を達成",
     record: "戦績",
     record_line: "{p}戦 {w}勝 {d}分 {l}敗",
     left: {

@@ -86,6 +86,8 @@ const it: typeof en = {
     trophyCabinet: "Bacheca dei trofei",
     competitionReviews: "Bilanci delle competizioni",
     milestones: "Traguardi",
+    achievements: "Traguardi",
+    achievementsCount: "{done} su {total} ottenuti",
     record: "Bilancio",
     record_line: "{p}G {w}V {d}N {l}P",
     left: {

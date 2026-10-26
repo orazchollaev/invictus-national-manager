@@ -314,6 +314,8 @@ export interface CareerState {
   youthDebuts?: number
   /** Competitive matches without defeat, running. */
   unbeaten?: number
+  /** Goals for and against and clean sheets over the whole career. */
+  tally?: { gf: number; ga: number; clean: number }
   /** Tournament levels the federation bids to host (the user's nation). */
   bids?: ("world-cup" | "continental" | "regional")[]
   /** Tournaments (competition ids) the press has already been called for. */

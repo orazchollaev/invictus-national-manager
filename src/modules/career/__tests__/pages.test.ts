@@ -100,7 +100,17 @@ describe("career pages", () => {
     expect(c.errors).toEqual([])
     expect(c.html).toContain("Trophy cabinet")
     expect(c.html).toContain("Final warning")
-    expect(c.html).toContain("Your first win")
+    expect(c.html).toContain("Achievements")
+
+    const a = await render(
+      w,
+      "/career/achievements",
+      "/career/achievements",
+      () => import("../pages/AchievementsPage.vue")
+    )
+    expect(a.errors).toEqual([])
+    expect(a.html).toContain("Your first win")
+    expect(a.html).toContain("1000 matches")
 
     const p = await render(
       w,

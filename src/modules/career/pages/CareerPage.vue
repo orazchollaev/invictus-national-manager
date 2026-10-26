@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, reactive } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
-import { Flag, Trophy } from "@lucide/vue"
+import { Trophy } from "@lucide/vue"
 import { AppButton, AppCard, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -23,12 +23,20 @@ const career = world.derive((w) => ({ ...w.state.career }), null)
 const objectives = computed(() => [...(career.value?.objectives ?? [])].reverse())
 const history = computed(() => [...(career.value?.history ?? [])].reverse())
 const trophies = computed(() =>
-  (career.value?.history ?? []).flatMap((h) =>
-    h.trophies.map((name) => ({ name, nationId: h.nationId }))
-  )
+  [...(career.value?.history ?? [])]
+    .reverse()
+    .flatMap((h) => [...h.trophies].reverse().map((name) => ({ name, nationId: h.nationId })))
 )
-const milestones = computed(() => [...(career.value?.milestones ?? [])].reverse())
+const milestones = computed(() => career.value?.milestones ?? [])
 const reviews = computed(() => [...(career.value?.reviews ?? [])].reverse())
+
+// Years of play pile these lists up, so each shows the latest few until asked for all.
+const LIMITS = { objectives: 4, trophies: 6, reviews: 3, record: 3 } as const
+const expanded = reactive({ objectives: false, trophies: false, reviews: false, record: false })
+function latest<T>(key: keyof typeof LIMITS, list: T[]): T[] {
+  return expanded[key] ? list : list.slice(0, LIMITS[key])
+}
+const more = (key: keyof typeof LIMITS, total: number) => !expanded[key] && total > LIMITS[key]
 
 async function accept(nationId: string) {
   const name = nationName(nationId)
@@ -82,6 +90,11 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
       />
       {{ t("career.profile") }}
     </RouterLink>
+    <RouterLink v-if="career" to="/career/achievements" class="profile">
+      <Trophy :size="20" />
+      {{ t("career.achievements") }}
+      <span class="muted">{{ milestones.length }}</span>
+    </RouterLink>
     <AppCard v-if="career" padding="md" class="stats">
       <div class="stat">
         <span class="muted">{{ t("career.confidence") }}</span>
@@ -125,24 +138,40 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
     </template>
 
     <AppSectionHeader id="objectives" :title="t('career.objectives')" />
-    <ObjectiveList :objectives="objectives" />
+    <ObjectiveList :objectives="latest('objectives', objectives)" />
+    <AppButton
+      v-if="more('objectives', objectives.length)"
+      variant="text"
+      block
+      @click="expanded.objectives = true"
+    >
+      {{ t("core.home.all") }} ({{ objectives.length }})
+    </AppButton>
 
     <template v-if="trophies.length">
       <AppSectionHeader :title="t('career.trophyCabinet')" />
       <div class="cabinet">
-        <div v-for="(tr, i) in trophies" :key="i" class="trophy">
+        <div v-for="(tr, i) in latest('trophies', trophies)" :key="i" class="trophy">
           <Trophy :size="28" class="trophy-icon" />
           <span class="trophy-name">{{ $tx(tr.name) }}</span>
           <NationFlag :id="tr.nationId" :size="16" />
         </div>
       </div>
+      <AppButton
+        v-if="more('trophies', trophies.length)"
+        variant="text"
+        block
+        @click="expanded.trophies = true"
+      >
+        {{ t("core.home.all") }} ({{ trophies.length }})
+      </AppButton>
     </template>
 
     <template v-if="reviews.length">
       <AppSectionHeader :title="t('career.competitionReviews')" />
       <div class="list">
         <RouterLink
-          v-for="r in reviews"
+          v-for="r in latest('reviews', reviews)"
           :key="r.id"
           :to="`/career/review/${r.id}`"
           class="row link"
@@ -155,22 +184,19 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
           <StatPill :value="t(verdictKey(r.verdict))" :tone="verdictTone(r.verdict)" />
         </RouterLink>
       </div>
-    </template>
-
-    <template v-if="milestones.length">
-      <AppSectionHeader :title="t('career.milestones')" />
-      <div class="list">
-        <div v-for="m in milestones" :key="m.id" class="row">
-          <Flag :size="16" class="milestone-icon" />
-          <span class="row-text">{{ $tx(m.text) }}</span>
-          <span class="muted">{{ m.date.slice(0, 4) }}</span>
-        </div>
-      </div>
+      <AppButton
+        v-if="more('reviews', reviews.length)"
+        variant="text"
+        block
+        @click="expanded.reviews = true"
+      >
+        {{ t("core.home.all") }} ({{ reviews.length }})
+      </AppButton>
     </template>
 
     <AppSectionHeader :title="t('career.record')" />
     <div class="list">
-      <div v-for="(h, i) in history" :key="i" class="row">
+      <div v-for="(h, i) in latest('record', history)" :key="i" class="row">
         <NationFlag :id="h.nationId" :size="22" name />
         <StatPill v-if="h.left" :value="t(LEFT[h.left])" :tone="leftTone(h.left)" />
         <span class="muted">
@@ -179,6 +205,14 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
         <span class="muted">{{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}</span>
       </div>
     </div>
+    <AppButton
+      v-if="more('record', history.length)"
+      variant="text"
+      block
+      @click="expanded.record = true"
+    >
+      {{ t("core.home.all") }} ({{ history.length }})
+    </AppButton>
 
     <AppButton v-if="career?.nationId" variant="danger" block class="resign" @click="resign">
       {{ t("career.resign") }}
@@ -272,11 +306,6 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
   min-width: 0;
   display: flex;
   flex-direction: column;
-}
-
-.milestone-icon {
-  flex-shrink: 0;
-  color: var(--accent);
 }
 
 .resign {

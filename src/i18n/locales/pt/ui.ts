@@ -86,6 +86,8 @@ const pt: typeof en = {
     trophyCabinet: "Sala de troféus",
     competitionReviews: "Avaliações de competições",
     milestones: "Marcos",
+    achievements: "Conquistas",
+    achievementsCount: "{done} de {total} alcançadas",
     record: "Histórico",
     record_line: "{p}J {w}V {d}E {l}D",
     left: {

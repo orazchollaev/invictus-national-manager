@@ -86,6 +86,8 @@ const ko: typeof en = {
     trophyCabinet: "트로피 진열장",
     competitionReviews: "대회 리뷰",
     milestones: "이정표",
+    achievements: "업적",
+    achievementsCount: "{total}개 중 {done}개 달성",
     record: "전적",
     record_line: "{p}경기 {w}승 {d}무 {l}패",
     left: {

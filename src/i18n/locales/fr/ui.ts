@@ -86,6 +86,8 @@ const fr: typeof en = {
     trophyCabinet: "Salle des trophées",
     competitionReviews: "Bilans des compétitions",
     milestones: "Étapes marquantes",
+    achievements: "Succès",
+    achievementsCount: "{done} sur {total} obtenus",
     record: "Bilan",
     record_line: "{p}J {w}V {d}N {l}D",
     left: {

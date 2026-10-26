@@ -86,6 +86,8 @@ const ar: typeof en = {
     trophyCabinet: "خزانة الكؤوس",
     competitionReviews: "مراجعات البطولات",
     milestones: "محطات بارزة",
+    achievements: "الإنجازات",
+    achievementsCount: "تم تحقيق {done} من {total}",
     record: "السجل",
     record_line: "{p} لعب {w} فوز {d} تعادل {l} خسارة",
     left: {

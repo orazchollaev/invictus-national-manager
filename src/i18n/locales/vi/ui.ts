@@ -86,6 +86,8 @@ const vi: typeof en = {
     trophyCabinet: "Tủ cúp",
     competitionReviews: "Tổng kết giải đấu",
     milestones: "Cột mốc",
+    achievements: "Thành tích",
+    achievementsCount: "Đã đạt {done}/{total}",
     record: "Thành tích",
     record_line: "{p} trận {w} thắng {d} hòa {l} thua",
     left: {
