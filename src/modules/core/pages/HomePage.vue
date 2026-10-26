@@ -176,8 +176,13 @@ const cta = computed(() => {
     </section>
 
     <NextMatchCard v-if="me" />
-    <MatchStrip v-if="me" />
-    <GroupSnapshot v-if="me" />
+    <details v-if="me" class="overview">
+      <summary class="overview-title">{{ t("core.home.overview") }}</summary>
+      <div class="overview-body">
+        <MatchStrip />
+        <GroupSnapshot />
+      </div>
+    </details>
 
     <section v-if="settings.quietNotices && notices.items.value.length" class="panel waiting">
       <AppSectionHeader :title="t('core.home.waiting')" />
@@ -308,6 +313,20 @@ const cta = computed(() => {
   flex: 1;
   min-width: 0;
   font-weight: 600;
+}
+
+.overview-title {
+  cursor: pointer;
+  padding: var(--sp-2) 0;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.overview-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
 }
 
 .news {
