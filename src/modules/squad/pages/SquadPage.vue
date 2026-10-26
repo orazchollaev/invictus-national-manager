@@ -104,17 +104,13 @@ const list = computed(() => {
         size="sm"
       />
       <div class="filters">
-        <AppSubTabBar
-          :model-value="group"
-          :options="[
-            { value: 'all', label: t('common.all') },
-            { value: 'GK', label: t('squad.pos.GK') },
-            { value: 'DEF', label: t('squad.pos.DEF') },
-            { value: 'MID', label: t('squad.pos.MID') },
-            { value: 'FWD', label: t('squad.pos.FWD') },
-          ]"
-          @update:model-value="(v) => (group = v)"
-        />
+        <select v-model="group" class="sort">
+          <option value="all">{{ t("common.all") }}</option>
+          <option value="GK">{{ t("squad.pos.GK") }}</option>
+          <option value="DEF">{{ t("squad.pos.DEF") }}</option>
+          <option value="MID">{{ t("squad.pos.MID") }}</option>
+          <option value="FWD">{{ t("squad.pos.FWD") }}</option>
+        </select>
         <select v-model="sort" class="sort">
           <option value="position">{{ t("squad.sort.position") }}</option>
           <option value="ability">{{ t("squad.sort.ability") }}</option>
@@ -140,9 +136,7 @@ const list = computed(() => {
 <style scoped>
 .filters {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: var(--sp-2);
 }
 
