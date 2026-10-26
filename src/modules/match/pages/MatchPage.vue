@@ -49,6 +49,7 @@ import { surname } from "@/engine/players/ability"
 import type { Msg } from "@/engine/text"
 import { laneCounts } from "@/engine/match/lanes"
 import { FORMATIONS } from "@/engine/match/formations"
+import { dotsFor, shotMarks } from "@/modules/match/utils/shape"
 import { formatDate } from "@/i18n/dates"
 import { resultLetter } from "@/modules/core/utils/format"
 import { useHaptic } from "@/composables/useHaptic"
@@ -342,14 +343,49 @@ const SHOUTS = new Set<MatchEventKind>([
 const GOAL_KINDS = new Set<MatchEventKind>(["goal", "pen-goal", "own-goal"])
 
 /** A pop on the ball for the latest event, if it was a shot or a goal. */
-const flash = computed<{ key: number; kind: "goal" | "shot"; label?: string } | null>(() => {
+const flash = computed<{
+  key: number
+  kind: "goal" | "shot"
+  side?: Side
+  label?: string
+  xg?: number
+} | null>(() => {
   const evs = match.value?.events
   const last = evs?.[evs.length - 1]
   if (!evs || !last) return null
-  if (GOAL_KINDS.has(last.kind)) return { key: evs.length, kind: "goal" }
+  const side = last.side ?? undefined
+  if (GOAL_KINDS.has(last.kind)) return { key: evs.length, kind: "goal", side }
   return SHOUTS.has(last.kind)
-    ? { key: evs.length, kind: "shot", label: t(`match.shout.${last.kind}`) }
+    ? { key: evs.length, kind: "shot", side, label: t(`match.shout.${last.kind}`), xg: last.xg }
     : null
+})
+
+/** Both elevens in their places on the pitch, and every shot taken so far. */
+const pitchDots = computed(() => {
+  const m = match.value
+  return m
+    ? {
+        home: dotsFor(m.home.tactics.formation, m.home.pitch),
+        away: dotsFor(m.away.tactics.formation, m.away.pitch),
+      }
+    : undefined
+})
+const shots = computed(() => shotMarks(match.value?.events ?? []))
+
+/** The player the latest shot, goal or chance is about, and who laid it on. */
+const spotlight = computed(() => {
+  const evs = match.value?.events
+  const last = evs?.[evs.length - 1]
+  if (!evs || !last?.side || !last.playerId || last.kind === "own-goal") return null
+  if (!GOAL_KINDS.has(last.kind) && !SHOUTS.has(last.kind)) return null
+  return {
+    key: evs.length,
+    index: evs.length - 1,
+    side: last.side,
+    id: last.playerId,
+    name: names.player(last.playerId),
+    assistId: last.kind === "goal" ? last.otherId : undefined,
+  }
 })
 
 /** The strip across the pitch when the latest event is a goal. */
@@ -553,6 +589,11 @@ const pitchSlots = computed(() => {
         :away-color="colors[1]"
         :flash="flash"
         :banner="banner"
+        :dots="pitchDots"
+        :shots="shots"
+        :spotlight="spotlight"
+        :mine="mine"
+        :name-of="names.player"
       />
       <PressureBar
         :home="fixture.home"
