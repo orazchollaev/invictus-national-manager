@@ -233,6 +233,7 @@ const id: typeof en = {
       inviteHint: "Jendela kosong: gelar sebuah turnamen",
       inviteHintBody: "Kita tidak punya laga pada {from} – {to}. Undang tiga atau tujuh negara.",
       inbox: "Kotak masuk",
+      waiting: "Menunggu Anda",
       unread: "{n} belum dibaca",
       all: "Semua",
     },
@@ -541,6 +542,9 @@ const id: typeof en = {
     assistantPressHint: "Dia menjawab wartawan dengan hati-hati untuk Anda",
     showIntake: "Tampilkan penerimaan pemain muda",
     showIntakeHint: "Berhenti pada 1 Januari untuk generasi baru",
+    quietNotices: "Pemberitahuan tenang",
+    quietNoticesHint:
+      "Tawaran, target, pers, dan berita menunggu di layar utama alih-alih menghentikan permainan",
     autosave: "Simpan otomatis",
     always: "Selalu",
     weekly: "Mingguan",

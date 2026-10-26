@@ -39,6 +39,17 @@ const DAY_DELAY_MS = 25
 
 const nextFrame = () => new Promise<void>((resolve) => setTimeout(resolve, 0))
 
+/**
+ * Quiet notices never reach `proceed` as an interrupt, so what the user handed to
+ * the assistant is closed here instead, before it can reach the home screen.
+ */
+function settleForAssistant(w: World, settings: ReturnType<typeof useSettingsStore>) {
+  if (settings.assistantPress && w.state.pendingPress) assistantPress(w)
+  if (settings.assistantBoard)
+    for (const o of w.state.career.objectives) if (o.agreed === false) setAmbition(w, o.id, 0)
+  if (!settings.showIntake && w.state.pendingIntake) w.clearIntake()
+}
+
 export const useWorldStore = defineStore(
   "world",
   () => {
@@ -186,7 +197,8 @@ export const useWorldStore = defineStore(
       try {
         const settings = useSettingsStore()
         for (let i = 0; i < days; i++) {
-          result = w.advance(1)
+          result = w.advance(1, settings.quietNotices)
+          if (settings.quietNotices) settleForAssistant(w, settings)
           // The assistant names the squad; unwatched draws just pass.
           if (result.kind === "callup" && settings.assistantPicks) {
             assistantCallup()

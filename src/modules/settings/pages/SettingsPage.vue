@@ -71,6 +71,9 @@ const aboutOpen = ref(false)
           "
         />
       </AppField>
+      <AppField :label="t('settings.quietNotices')" :hint="t('settings.quietNoticesHint')">
+        <AppToggle v-model="settings.quietNotices" :aria-label="t('settings.quietNotices')" />
+      </AppField>
       <AppField :label="t('settings.assistantPicks')" :hint="t('settings.assistantPicksHint')">
         <AppToggle v-model="settings.assistantPicks" :aria-label="t('settings.assistantPicks')" />
       </AppField>

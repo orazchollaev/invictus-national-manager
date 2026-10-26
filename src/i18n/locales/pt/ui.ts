@@ -232,6 +232,7 @@ const pt: typeof en = {
       inviteHint: "Data FIFA livre: organize um torneio",
       inviteHintBody: "Não temos jogos de {from} a {to}. Convide três ou sete seleções.",
       inbox: "Caixa de entrada",
+      waiting: "À sua espera",
       unread: "{n} não lidas",
       all: "Todas",
     },
@@ -541,6 +542,9 @@ const pt: typeof en = {
     assistantPressHint: "Responde com cautela aos jornalistas por si",
     showIntake: "Mostrar a safra da base",
     showIntakeHint: "Parar em 1º de janeiro para a nova geração",
+    quietNotices: "Avisos discretos",
+    quietNoticesHint:
+      "Propostas, objetivos, imprensa e notícias esperam no ecrã inicial em vez de parar o jogo",
     autosave: "Salvamento automático",
     always: "Sempre",
     weekly: "Semanal",

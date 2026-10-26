@@ -233,6 +233,7 @@ const fa: typeof en = {
       inviteHint: "یک بازه آزاد: میزبان یک تورنمنت شوید",
       inviteHintBody: "از {from} تا {to} بازی نداریم. سه یا هفت کشور را دعوت کنید.",
       inbox: "صندوق پیام",
+      waiting: "منتظر شماست",
       unread: "{n} خوانده‌نشده",
       all: "همه",
     },
@@ -542,6 +543,9 @@ const fa: typeof en = {
     assistantPressHint: "او به جای شما با احتیاط به خبرنگاران پاسخ می‌دهد",
     showIntake: "نمایش جوانان جدید",
     showIntakeHint: "برای نسل جدید در اول ژانویه توقف کن",
+    quietNotices: "اعلان‌های آرام",
+    quietNoticesHint:
+      "پیشنهادها، اهداف، مطبوعات و اخبار به جای توقف بازی در صفحهٔ اصلی منتظر می‌مانند",
     autosave: "ذخیره خودکار",
     always: "همیشه",
     weekly: "هفتگی",

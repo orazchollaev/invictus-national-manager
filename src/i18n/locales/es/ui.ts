@@ -233,6 +233,7 @@ const es: typeof en = {
       inviteHint: "Ventana libre: organiza un torneo",
       inviteHintBody: "No tenemos partido del {from} al {to}. Invita a tres o siete naciones.",
       inbox: "Bandeja de entrada",
+      waiting: "Esperando tu respuesta",
       unread: "{n} sin leer",
       all: "Todos",
     },
@@ -542,6 +543,9 @@ const es: typeof en = {
     assistantPressHint: "Responde con prudencia a los periodistas por ti",
     showIntake: "Mostrar la cantera",
     showIntakeHint: "Detenerse el 1 de enero para la nueva generación",
+    quietNotices: "Avisos discretos",
+    quietNoticesHint:
+      "Ofertas, objetivos, prensa y noticias esperan en la pantalla de inicio en vez de detener el juego",
     autosave: "Autoguardado",
     always: "Siempre",
     weekly: "Semanal",

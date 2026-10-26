@@ -234,6 +234,7 @@ const uz: typeof en = {
       inviteHintBody:
         "{from} – {to} oralig'ida o'yinimiz yo'q. Uch yoki yetti davlatni taklif qiling.",
       inbox: "Xabarlar",
+      waiting: "Sizni kutmoqda",
       unread: "{n} ta o'qilmagan",
       all: "Hammasi",
     },
@@ -543,6 +544,9 @@ const uz: typeof en = {
     assistantPressHint: "U jurnalistlarga siz o'rningizga ehtiyotkorlik bilan javob beradi",
     showIntake: "Yoshlar oqimini ko'rsatish",
     showIntakeHint: "Yangi avlod uchun 1-yanvarda to'xtash",
+    quietNotices: "Sokin xabarlar",
+    quietNoticesHint:
+      "Takliflar, maqsadlar, matbuot va yangiliklar o'yinni to'xtatmay, bosh ekranda kutadi",
     autosave: "Avtosaqlash",
     always: "Doim",
     weekly: "Haftalik",

@@ -234,6 +234,7 @@ const nl: typeof en = {
       inviteHintBody:
         "We hebben geen wedstrijd van {from} tot {to}. Nodig drie of zeven landen uit.",
       inbox: "Inbox",
+      waiting: "Wacht op jou",
       unread: "{n} ongelezen",
       all: "Alle",
     },
@@ -543,6 +544,9 @@ const nl: typeof en = {
     assistantPressHint: "Hij beantwoordt de vragen van journalisten voorzichtig voor jou",
     showIntake: "Toon de jeugdlichting",
     showIntakeHint: "Stop op 1 januari voor de nieuwe generatie",
+    quietNotices: "Rustige meldingen",
+    quietNoticesHint:
+      "Aanbiedingen, doelen, pers en nieuws wachten op het startscherm in plaats van het spel te stoppen",
     autosave: "Automatisch opslaan",
     always: "Altijd",
     weekly: "Wekelijks",

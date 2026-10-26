@@ -523,14 +523,14 @@ export class World {
    * Run days until the user is needed or `maxDays` pass. The user's own fixtures
    * and call-ups stop the loop; everything else plays itself.
    */
-  advance(maxDays = 60): Interrupt {
-    const waiting = this.pendingInterrupt()
+  advance(maxDays = 60, quiet = false): Interrupt {
+    const waiting = this.pendingInterrupt(quiet)
     if (waiting) return waiting
     for (let i = 0; i < maxDays; i++) {
       const due = this.userMatchDue()
       if (due) return { kind: "match", fixtureId: due.id }
       this.nextDay()
-      const next = this.pendingInterrupt()
+      const next = this.pendingInterrupt(quiet)
       if (next) return next
       const match = this.userMatchDue()
       if (match) return { kind: "match", fixtureId: match.id }
@@ -543,18 +543,22 @@ export class World {
   /**
    * What the user must see or decide before the calendar moves on, most pressing
    * first: his squad, his draw, the end of a competition or of his job, a warning,
-   * then news and choices.
+   * then news and choices. `quiet` leaves the news and the choices that can wait
+   * (an offer while in work, hosting, the press, the board, the youngsters, an
+   * invitation) where they are, for the user to open when he likes.
    */
-  pendingInterrupt(): Interrupt | null {
+  pendingInterrupt(quiet = false): Interrupt | null {
     const s = this.state
     if (s.pendingCallup) return s.pendingCallup
     if (s.pendingDraw) return { kind: "draw", ...s.pendingDraw }
     if (s.pendingReview) return { kind: "review", id: s.pendingReview }
     if (s.pendingSacked) return { kind: "sacked" }
     if (s.pendingUltimatum) return { kind: "ultimatum" }
-    if (s.pendingOffer) return { kind: "offer", nationId: s.pendingOffer }
-    if (s.pendingHosting) return { kind: "hosting", compId: s.pendingHosting }
+    if (s.pendingOffer && !(quiet && s.career.nationId))
+      return { kind: "offer", nationId: s.pendingOffer }
     dropStalePress(this)
+    if (quiet) return null
+    if (s.pendingHosting) return { kind: "hosting", compId: s.pendingHosting }
     if (s.pendingPress) return { kind: "press" }
     const board = s.career.objectives.find((o) => o.agreed === false)
     if (board) return { kind: "board", objectiveId: board.id }

@@ -234,6 +234,7 @@ const vi: typeof en = {
       inviteHintBody:
         "Chúng ta không có trận nào từ {from} đến {to}. Hãy mời ba hoặc bảy quốc gia.",
       inbox: "Hộp thư",
+      waiting: "Đang chờ bạn",
       unread: "{n} chưa đọc",
       all: "Tất cả",
     },
@@ -543,6 +544,9 @@ const vi: typeof en = {
     assistantPressHint: "Anh ấy trả lời phóng viên cẩn trọng thay bạn",
     showIntake: "Hiện lứa cầu thủ trẻ mới",
     showIntakeHint: "Dừng vào ngày 1 tháng 1 để đón thế hệ mới",
+    quietNotices: "Thông báo lặng",
+    quietNoticesHint:
+      "Đề nghị, mục tiêu, báo chí và tin tức chờ ở màn hình chính thay vì dừng trò chơi",
     autosave: "Tự động lưu",
     always: "Luôn luôn",
     weekly: "Hằng tuần",

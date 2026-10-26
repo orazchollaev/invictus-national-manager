@@ -232,6 +232,7 @@ const tr: typeof en = {
       inviteHint: "Boş bir takvim aralığı: turnuva düzenle",
       inviteHintBody: "{from} – {to} arasında maçımız yok. Üç ya da yedi ülkeyi davet et.",
       inbox: "Gelen kutusu",
+      waiting: "Seni bekleyenler",
       unread: "{n} okunmamış",
       all: "Tümü",
     },
@@ -541,6 +542,9 @@ const tr: typeof en = {
     assistantPressHint: "Gazetecilere senin yerine temkinli cevap verir",
     showIntake: "Altyapı kadrosunu göster",
     showIntakeHint: "Yeni nesil için 1 Ocak'ta dur",
+    quietNotices: "Sessiz bildirimler",
+    quietNoticesHint:
+      "Teklifler, hedefler, basın ve haberler oyunu durdurmak yerine ana ekranda bekler",
     autosave: "Otomatik kayıt",
     always: "Her zaman",
     weekly: "Haftalık",

@@ -2,7 +2,18 @@
 import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
-import { Briefcase, ChevronRight, Landmark, Play, Shuffle, Users } from "@lucide/vue"
+import {
+  Briefcase,
+  ChevronRight,
+  Landmark,
+  Mic,
+  Play,
+  Shuffle,
+  Sprout,
+  Target,
+  Trophy,
+  Users,
+} from "@lucide/vue"
 import { AppButton, AppSectionHeader } from "@/components/ui"
 import { PageShell, StickyCta } from "@/modules/core/components"
 import {
@@ -12,6 +23,7 @@ import {
   NextMatchCard,
   QuickActions,
 } from "@/modules/core/components/home"
+import { useNotices } from "@/modules/core/composables/useNotices"
 import { useWorldStore } from "@/modules/world/store"
 import { useSettingsStore } from "@/modules/settings/store"
 import { formatDate, formatShort } from "@/i18n/dates"
@@ -44,14 +56,25 @@ const popup = world.derive(
   (w) =>
     !!(
       w.state.pendingUltimatum ||
-      w.state.pendingOffer ||
-      w.state.pendingHosting ||
-      (!settings.assistantPress && w.state.pendingPress) ||
-      (!settings.assistantBoard && w.state.career.objectives.some((o) => o.agreed === false)) ||
-      (settings.showIntake && w.state.pendingIntake)
+      (w.state.pendingOffer && !(settings.quietNotices && w.state.career.nationId)) ||
+      (!settings.quietNotices &&
+        (w.state.pendingHosting ||
+          (!settings.assistantPress && w.state.pendingPress) ||
+          (!settings.assistantBoard && w.state.career.objectives.some((o) => o.agreed === false)) ||
+          (settings.showIntake && w.state.pendingIntake)))
     ),
   false
 )
+/** News and choices that can wait, opened one by one (see useNotices). */
+const notices = useNotices()
+const NOTICE_ICONS = {
+  offer: Briefcase,
+  hosting: Landmark,
+  press: Mic,
+  board: Target,
+  intake: Sprout,
+  invite: Trophy,
+} as const
 /** A review or a lost job waiting on its own page. */
 const careerPage = world.derive(
   (w) =>
@@ -158,6 +181,21 @@ const cta = computed(() => {
       <ChevronRight :size="18" class="muted" />
     </section>
 
+    <section v-if="settings.quietNotices && notices.items.value.length" class="panel waiting">
+      <AppSectionHeader :title="t('core.home.waiting')" />
+      <button
+        v-for="n in notices.items.value"
+        :key="n.key"
+        type="button"
+        class="waiting-row"
+        @click="notices.open(n)"
+      >
+        <component :is="NOTICE_ICONS[n.kind]" :size="18" class="waiting-icon" />
+        <span class="waiting-title">{{ t(n.title) }}</span>
+        <ChevronRight :size="18" class="muted" />
+      </button>
+    </section>
+
     <NextMatchCard v-if="me" />
     <MatchStrip v-if="me" />
     <InvitationalHint v-if="me" />
@@ -252,6 +290,32 @@ const cta = computed(() => {
 .alert-text {
   flex: 1;
   min-width: 0;
+}
+
+.waiting-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-3) 0;
+  border: 0;
+  border-top: 1px solid var(--border-light);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.waiting-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.waiting-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
 }
 
 .news {

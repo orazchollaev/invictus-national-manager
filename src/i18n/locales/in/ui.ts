@@ -232,6 +232,7 @@ const hi: typeof en = {
       inviteHint: "खाली समय: टूर्नामेंट की मेज़बानी करें",
       inviteHintBody: "{from} – {to} के बीच हमारा कोई मैच नहीं है। तीन या सात देशों को बुलाएँ।",
       inbox: "इनबॉक्स",
+      waiting: "आपका इंतज़ार",
       unread: "{n} अपठित",
       all: "सभी",
     },
@@ -541,6 +542,9 @@ const hi: typeof en = {
     assistantPressHint: "वह आपकी जगह पत्रकारों को सावधानी से जवाब देता है",
     showIntake: "युवा खिलाड़ियों की खेप दिखाएँ",
     showIntakeHint: "नई पीढ़ी के लिए 1 जनवरी को रुकें",
+    quietNotices: "शांत सूचनाएँ",
+    quietNoticesHint:
+      "ऑफ़र, लक्ष्य, प्रेस और ख़बरें खेल रोकने के बजाय होम स्क्रीन पर इंतज़ार करती हैं",
     autosave: "ऑटोसेव",
     always: "हमेशा",
     weekly: "साप्ताहिक",

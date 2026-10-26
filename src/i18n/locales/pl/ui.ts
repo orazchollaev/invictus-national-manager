@@ -233,6 +233,7 @@ const pl: typeof en = {
       inviteHintBody:
         "Nie mamy meczu w terminie {from} – {to}. Zaproś trzy lub siedem reprezentacji.",
       inbox: "Skrzynka",
+      waiting: "Czeka na ciebie",
       unread: "{n} nieprzeczytanych",
       all: "Wszystkie",
     },
@@ -544,6 +545,9 @@ const pl: typeof en = {
     assistantPressHint: "Odpowiada ostrożnie na pytania dziennikarzy za Ciebie",
     showIntake: "Pokazuj nabór młodzieży",
     showIntakeHint: "Zatrzymuj się 1 stycznia na nowe pokolenie",
+    quietNotices: "Ciche powiadomienia",
+    quietNoticesHint:
+      "Oferty, cele, prasa i wiadomości czekają na ekranie głównym zamiast zatrzymywać grę",
     autosave: "Autozapis",
     always: "Zawsze",
     weekly: "Co tydzień",

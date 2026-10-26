@@ -27,6 +27,8 @@ export const useSettingsStore = defineStore("settings", () => {
   const assistantPress = ref(false)
   /** Stop on 1 January to show the year's youngsters. */
   const showIntake = ref(true)
+  /** News and optional choices wait on the home screen instead of stopping the calendar. */
+  const quietNotices = ref(true)
   /** Stop the commentary on goals and red cards so they are not scrolled past. */
   const pauseOnKeyEvents = ref(true)
   /** Show the minor commentary lines (fouls, corners, offsides) in the feed. */
@@ -62,6 +64,7 @@ export const useSettingsStore = defineStore("settings", () => {
     assistantBoard.value = false
     assistantPress.value = false
     showIntake.value = true
+    quietNotices.value = true
     pauseOnKeyEvents.value = true
     verboseCommentary.value = true
   }
@@ -77,6 +80,7 @@ export const useSettingsStore = defineStore("settings", () => {
     assistantBoard,
     assistantPress,
     showIntake,
+    quietNotices,
     pauseOnKeyEvents,
     verboseCommentary,
     resetAll,

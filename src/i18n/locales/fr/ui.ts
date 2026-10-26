@@ -235,6 +235,7 @@ const fr: typeof en = {
       inviteHint: "Une fenêtre libre : organisez un tournoi",
       inviteHintBody: "Nous n'avons aucun match du {from} au {to}. Invitez trois ou sept nations.",
       inbox: "Messages",
+      waiting: "En attente",
       unread: "{n} non lus",
       all: "Tous",
     },
@@ -545,6 +546,9 @@ const fr: typeof en = {
     assistantPressHint: "Il répond prudemment aux journalistes à votre place",
     showIntake: "Afficher la promotion des jeunes",
     showIntakeHint: "S'arrêter le 1er janvier pour la nouvelle génération",
+    quietNotices: "Notifications discrètes",
+    quietNoticesHint:
+      "Offres, objectifs, presse et nouvelles attendent sur l'accueil au lieu d'arrêter le jeu",
     autosave: "Sauvegarde auto",
     always: "Toujours",
     weekly: "Chaque semaine",

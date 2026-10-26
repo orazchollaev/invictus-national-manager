@@ -234,6 +234,7 @@ const de: typeof en = {
       inviteHintBody:
         "Wir haben vom {from} bis {to} kein Spiel. Lade drei oder sieben Nationen ein.",
       inbox: "Posteingang",
+      waiting: "Wartet auf dich",
       unread: "{n} ungelesen",
       all: "Alle",
     },
@@ -544,6 +545,9 @@ const de: typeof en = {
     assistantPressHint: "Er beantwortet die Fragen der Journalisten vorsichtig für Sie",
     showIntake: "Nachwuchsjahrgang anzeigen",
     showIntakeHint: "Am 1. Januar für die neue Generation anhalten",
+    quietNotices: "Ruhige Hinweise",
+    quietNoticesHint:
+      "Angebote, Ziele, Presse und Nachrichten warten auf dem Startbildschirm, statt das Spiel anzuhalten",
     autosave: "Autospeichern",
     always: "Immer",
     weekly: "Wöchentlich",

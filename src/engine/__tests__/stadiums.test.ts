@@ -208,6 +208,16 @@ describe("hosting", () => {
     w.clearHosting()
     expect(w.advance(1).kind).not.toBe("hosting")
   })
+
+  it("lets the calendar run past the news when notices are quiet", () => {
+    const w = newWorld("ESP")
+    expect(w.state.pendingHosting).toBeTruthy()
+    const date = w.state.date
+    expect(w.advance(1, true).kind).not.toBe("hosting")
+    expect(w.state.date > date).toBe(true)
+    // Still waiting for the user to open it.
+    expect(w.state.pendingHosting).toBeTruthy()
+  })
 })
 
 describe("job offers", () => {

@@ -229,6 +229,7 @@ export default {
       inviteHint: "A free window: host a tournament",
       inviteHintBody: "We have no match {from} – {to}. Invite three or seven nations.",
       inbox: "Inbox",
+      waiting: "Waiting for you",
       unread: "{n} unread",
       all: "All",
     },
@@ -538,6 +539,9 @@ export default {
     assistantPressHint: "He answers the journalists carefully for you",
     showIntake: "Show the youth intake",
     showIntakeHint: "Stop on 1 January for the new generation",
+    quietNotices: "Quiet notices",
+    quietNoticesHint:
+      "Offers, objectives, press and news wait on the home screen instead of stopping the game",
     autosave: "Autosave",
     always: "Always",
     weekly: "Weekly",
