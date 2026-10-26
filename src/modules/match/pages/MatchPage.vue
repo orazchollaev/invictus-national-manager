@@ -372,7 +372,7 @@ const pitchDots = computed(() => {
 })
 const shots = computed(() => shotMarks(match.value?.events ?? []))
 
-/** The player the latest shot, goal or chance is about, and who laid it on. */
+/** The player the latest shot, goal or chance is about. */
 const spotlight = computed(() => {
   const evs = match.value?.events
   const last = evs?.[evs.length - 1]
@@ -384,7 +384,6 @@ const spotlight = computed(() => {
     side: last.side,
     id: last.playerId,
     name: names.player(last.playerId),
-    assistId: last.kind === "goal" ? last.otherId : undefined,
   }
 })
 

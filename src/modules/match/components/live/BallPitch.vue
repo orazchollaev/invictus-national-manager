@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { Tag } from "@lucide/vue"
 import type { Lane, MatchEventKind, Side } from "@/engine/match/types"
@@ -27,14 +27,13 @@ const props = defineProps<{
   dots?: Record<Side, Dot[]>
   /** Every shot so far, where it was taken. */
   shots?: ShotMark[]
-  /** Who the latest event is about: his dot is lit and named, and the move is drawn. */
+  /** Who the latest event is about: his dot is lit and named. */
   spotlight?: {
     key: number
     index: number
     side: Side
     id: string
     name: string
-    assistId?: string
   } | null
   /** The side whose players are bigger on the pitch and can be named. */
   mine?: Side | null
@@ -43,9 +42,9 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-/** Home attacks to the right, away to the left; a lane is the attacker's own left or right. */
+/** Home attacks to the right, away to the left; the ball is in its own third, midfield or the final third. */
 const x = computed(() => {
-  const reach = 50 + props.ball.depth * 10
+  const reach = { 1: 30, 2: 52, 3: 78 }[props.ball.depth]
   return props.ball.side === "home" ? reach : 100 - reach
 })
 const y = computed(() => {
@@ -89,23 +88,9 @@ const dotOf = (id: string | undefined, side: Side) =>
 const spotDot = computed(() =>
   props.spotlight ? dotOf(props.spotlight.id, props.spotlight.side) : undefined
 )
-const assistDot = computed(() =>
-  props.spotlight ? dotOf(props.spotlight.assistId, props.spotlight.side) : undefined
-)
-const spotMark = computed(() => props.shots?.find((m) => m.key === props.spotlight?.index))
 
 /** Names on the pitch are the user's own players, and only when asked for. */
 const showNames = ref(false)
-
-/** The last places the ball was, drawn as a thin dotted line behind it. */
-const TRAIL = 3
-const trail = ref<{ x: number; y: number }[]>([])
-watch([x, y], (_now, [ox, oy]) => {
-  trail.value = [{ x: ox, y: oy }, ...trail.value].slice(0, TRAIL)
-})
-const path = computed(() =>
-  [{ x: x.value, y: y.value }, ...trail.value].map((p) => `${p.x},${p.y}`).join(" ")
-)
 
 const MARK: Partial<Record<MatchEventKind, string>> = {
   goal: "goal",
@@ -115,8 +100,8 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   "shot-wide": "wide",
   "big-chance-missed": "wide",
   "pen-miss": "wide",
-  "shot-blocked": "blocked",
-  woodwork: "post",
+  "shot-blocked": "wide",
+  woodwork: "saved",
 }
 </script>
 
@@ -134,44 +119,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
         <rect x="171" y="26" width="28" height="48" />
         <rect x="1" y="39" width="10" height="22" />
         <rect x="189" y="39" width="10" height="22" />
-      </svg>
-
-      <svg
-        v-if="trail.length"
-        class="trail"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <polyline :points="path" :style="{ stroke: team }" />
-      </svg>
-
-      <!-- The latest move: who set it up, who took it, and where it ended up. -->
-      <svg
-        v-if="spotlight && spotDot"
-        :key="spotlight.key"
-        class="moves"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        :style="{ '--c': colorOf(spotlight.side) }"
-      >
-        <line
-          v-if="assistDot"
-          class="move move--pass"
-          :x1="assistDot.x"
-          :y1="assistDot.y"
-          :x2="spotDot.x"
-          :y2="spotDot.y"
-        />
-        <line
-          v-if="spotMark"
-          class="move move--shot"
-          :x1="spotDot.x"
-          :y1="spotDot.y"
-          :x2="spotMark.x"
-          :y2="spotMark.y"
-        />
       </svg>
 
       <!-- Shots are squares and diamonds, players are circles, so the two never read alike. -->
@@ -307,9 +254,7 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   right: 0;
 }
 
-.lines,
-.moves,
-.trail {
+.lines {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -323,35 +268,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
 
 .lines * {
   vector-effect: non-scaling-stroke;
-}
-
-.moves {
-  stroke: none;
-}
-
-.trail polyline {
-  stroke-width: 2;
-  stroke-dasharray: 2 5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.7;
-  vector-effect: non-scaling-stroke;
-}
-
-.move {
-  stroke: var(--c);
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-  animation: draw 3s var(--ease) both;
-}
-
-.move--pass {
-  stroke-width: 2;
-}
-
-.move--shot {
-  stroke-width: 1.5;
-  stroke-dasharray: 4 4;
 }
 
 /* A player is a small disc in his nation's colour; the user's own are a touch larger. */
@@ -464,18 +380,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   background: var(--gold);
   border-width: 2px;
   transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.mark--blocked {
-  background: none;
-  border: 2px solid var(--c);
-}
-
-.mark--post {
-  width: 13px;
-  height: 5px;
-  background: var(--pitch-ink);
-  border: none;
 }
 
 /* A miss is a cross. */
@@ -745,19 +649,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   }
 }
 
-@keyframes draw {
-  0% {
-    opacity: 0;
-  }
-  15%,
-  70% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
 @keyframes who {
   0% {
     opacity: 0;
@@ -822,7 +713,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   .banner,
   .dot--lit,
   .mark--latest,
-  .move,
   .who {
     animation: none;
   }
