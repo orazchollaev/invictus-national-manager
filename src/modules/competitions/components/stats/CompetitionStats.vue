@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -54,6 +54,15 @@ const title = (kind: string) => msg(`award.${kind}`)
 
 /** The top of each chart: the full lists are ten deep, too long to scroll on a phone. */
 const SHOWN = 5
+/** The charts opened to their full length. */
+const opened = ref(new Set<string>())
+const rowsOf = (chart: { kind: string; rows: LeaderRow[] }) =>
+  opened.value.has(chart.kind) ? chart.rows : chart.rows.slice(0, SHOWN)
+function toggle(kind: string) {
+  const next = new Set(opened.value)
+  if (!next.delete(kind)) next.add(kind)
+  opened.value = next
+}
 </script>
 
 <template>
@@ -88,7 +97,7 @@ const SHOWN = 5
       <AppSectionHeader>{{ $tx(title(chart.kind)) }}</AppSectionHeader>
       <div class="list">
         <RouterLink
-          v-for="(r, i) in chart.rows.slice(0, SHOWN)"
+          v-for="(r, i) in rowsOf(chart)"
           :key="r.id"
           :to="`/player/${r.id}`"
           class="row"
@@ -101,6 +110,16 @@ const SHOWN = 5
           <strong class="main">{{ show(r, chart.main) }}</strong>
         </RouterLink>
       </div>
+      <button
+        v-if="chart.rows.length > SHOWN"
+        type="button"
+        class="more"
+        @click="toggle(chart.kind)"
+      >
+        {{
+          t(opened.has(chart.kind) ? "competitions.stats.showLess" : "competitions.stats.showAll")
+        }}
+      </button>
     </section>
 
     <section v-if="lines.length" class="chart">
@@ -224,6 +243,16 @@ const SHOWN = 5
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+.more {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: var(--sp-1) 0;
 }
 
 .note {
