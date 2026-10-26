@@ -255,13 +255,6 @@ export default {
       neutral: "N",
       friendly: "FRI",
     },
-    quick: {
-      federation: "Federation",
-      squad: "Squad",
-      tactics: "Tactics",
-      calendar: "Calendar",
-      ranking: "Ranking",
-    },
     group: "Group {name}",
     more: {
       title: "More",

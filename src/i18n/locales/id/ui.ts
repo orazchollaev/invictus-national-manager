@@ -259,13 +259,6 @@ const id: typeof en = {
       neutral: "N",
       friendly: "PER",
     },
-    quick: {
-      federation: "Federasi",
-      squad: "Skuad",
-      tactics: "Taktik",
-      calendar: "Kalender",
-      ranking: "Peringkat",
-    },
     group: "Grup {name}",
     more: {
       title: "Lainnya",

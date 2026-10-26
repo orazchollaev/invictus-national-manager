@@ -258,13 +258,6 @@ const tr: typeof en = {
       neutral: "T",
       friendly: "HZR",
     },
-    quick: {
-      federation: "Federasyon",
-      squad: "Kadro",
-      tactics: "Taktik",
-      calendar: "Takvim",
-      ranking: "Sıralama",
-    },
     group: "{name} Grubu",
     more: {
       title: "Daha fazla",

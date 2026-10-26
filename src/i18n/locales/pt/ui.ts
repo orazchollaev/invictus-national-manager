@@ -258,13 +258,6 @@ const pt: typeof en = {
       neutral: "N",
       friendly: "AMI",
     },
-    quick: {
-      federation: "Federação",
-      squad: "Elenco",
-      tactics: "Tática",
-      calendar: "Calendário",
-      ranking: "Ranking",
-    },
     group: "Grupo {name}",
     more: {
       title: "Mais",

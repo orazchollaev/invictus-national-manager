@@ -259,13 +259,6 @@ const pl: typeof en = {
       neutral: "N",
       friendly: "TOW",
     },
-    quick: {
-      federation: "Federacja",
-      squad: "Kadra",
-      tactics: "Taktyka",
-      calendar: "Kalendarz",
-      ranking: "Ranking",
-    },
     group: "Grupa {name}",
     more: {
       title: "Więcej",

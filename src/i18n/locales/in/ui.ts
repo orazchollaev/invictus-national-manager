@@ -258,13 +258,6 @@ const hi: typeof en = {
       neutral: "त",
       friendly: "दो",
     },
-    quick: {
-      federation: "फ़ेडरेशन",
-      squad: "स्क्वाड",
-      tactics: "रणनीति",
-      calendar: "कैलेंडर",
-      ranking: "रैंकिंग",
-    },
     group: "ग्रुप {name}",
     more: {
       title: "और",

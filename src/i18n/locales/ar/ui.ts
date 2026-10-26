@@ -256,13 +256,6 @@ const ar: typeof en = {
       neutral: "م",
       friendly: "ود",
     },
-    quick: {
-      federation: "الاتحاد",
-      squad: "التشكيلة",
-      tactics: "الخطة",
-      calendar: "الروزنامة",
-      ranking: "التصنيف",
-    },
     group: "المجموعة {name}",
     more: {
       title: "المزيد",

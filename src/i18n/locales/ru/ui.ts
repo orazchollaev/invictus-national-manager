@@ -258,13 +258,6 @@ const ru: typeof en = {
       neutral: "Н",
       friendly: "ТМ",
     },
-    quick: {
-      federation: "Федерация",
-      squad: "Состав",
-      tactics: "Тактика",
-      calendar: "Календарь",
-      ranking: "Рейтинг",
-    },
     group: "Группа {name}",
     more: {
       title: "Ещё",

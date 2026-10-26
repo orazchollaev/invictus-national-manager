@@ -260,13 +260,6 @@ const uz: typeof en = {
       neutral: "N",
       friendly: "DO'S",
     },
-    quick: {
-      federation: "Federatsiya",
-      squad: "Tarkib",
-      tactics: "Taktika",
-      calendar: "Taqvim",
-      ranking: "Reyting",
-    },
     group: "{name}-guruh",
     more: {
       title: "Yana",

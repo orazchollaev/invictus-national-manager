@@ -259,13 +259,6 @@ const es: typeof en = {
       neutral: "N",
       friendly: "AMI",
     },
-    quick: {
-      federation: "Federación",
-      squad: "Plantilla",
-      tactics: "Tácticas",
-      calendar: "Calendario",
-      ranking: "Ranking",
-    },
     group: "Grupo {name}",
     more: {
       title: "Más",

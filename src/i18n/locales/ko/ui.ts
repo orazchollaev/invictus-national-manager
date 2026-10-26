@@ -257,13 +257,6 @@ const ko: typeof en = {
       neutral: "중립",
       friendly: "평가전",
     },
-    quick: {
-      federation: "협회",
-      squad: "스쿼드",
-      tactics: "전술",
-      calendar: "일정",
-      ranking: "랭킹",
-    },
     group: "{name}조",
     more: {
       title: "더보기",

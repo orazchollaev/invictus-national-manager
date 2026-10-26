@@ -21,7 +21,6 @@ import {
   InvitationalHint,
   MatchStrip,
   NextMatchCard,
-  QuickActions,
 } from "@/modules/core/components/home"
 import { useNotices } from "@/modules/core/composables/useNotices"
 import { useWorldStore } from "@/modules/world/store"
@@ -85,6 +84,9 @@ const careerPage = world.derive(
         : null,
   null
 )
+
+/** One task at a time: a squad to name comes before a draw to watch. */
+const hasAlert = computed(() => pending.value?.kind === "callup" || !!drawReady.value)
 
 const drawLabel = computed(() => {
   const d = drawReady.value
@@ -169,7 +171,7 @@ const cta = computed(() => {
     </section>
 
     <section
-      v-if="drawReady"
+      v-else-if="drawReady"
       class="panel alert draw"
       @click="router.push(`/draw/${drawReady.compId}/${drawReady.stageKey}`)"
     >
@@ -198,8 +200,7 @@ const cta = computed(() => {
 
     <NextMatchCard v-if="me" />
     <MatchStrip v-if="me" />
-    <InvitationalHint v-if="me" />
-    <QuickActions v-if="me" />
+    <InvitationalHint v-if="me && !hasAlert" />
     <GroupSnapshot v-if="me" />
 
     <section v-if="news.length" class="panel">

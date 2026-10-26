@@ -256,13 +256,6 @@ const ja: typeof en = {
       neutral: "N",
       friendly: "親善",
     },
-    quick: {
-      federation: "協会",
-      squad: "メンバー",
-      tactics: "戦術",
-      calendar: "日程",
-      ranking: "ランキング",
-    },
     group: "グループ{name}",
     more: {
       title: "その他",

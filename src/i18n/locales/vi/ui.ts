@@ -260,13 +260,6 @@ const vi: typeof en = {
       neutral: "TL",
       friendly: "GH",
     },
-    quick: {
-      federation: "Liên đoàn",
-      squad: "Đội hình",
-      tactics: "Chiến thuật",
-      calendar: "Lịch",
-      ranking: "Xếp hạng",
-    },
     group: "Bảng {name}",
     more: {
       title: "Thêm",

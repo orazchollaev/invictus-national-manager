@@ -260,13 +260,6 @@ const nl: typeof en = {
       neutral: "N",
       friendly: "OEF",
     },
-    quick: {
-      federation: "Bond",
-      squad: "Selectie",
-      tactics: "Tactiek",
-      calendar: "Kalender",
-      ranking: "Ranglijst",
-    },
     group: "Groep {name}",
     more: {
       title: "Meer",

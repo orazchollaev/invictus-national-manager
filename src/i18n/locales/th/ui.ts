@@ -256,13 +256,6 @@ const th: typeof en = {
       neutral: "กลาง",
       friendly: "มิตร",
     },
-    quick: {
-      federation: "สหพันธ์",
-      squad: "ทีม",
-      tactics: "แทคติก",
-      calendar: "ปฏิทิน",
-      ranking: "อันดับ",
-    },
     group: "กลุ่ม {name}",
     more: {
       title: "เพิ่มเติม",

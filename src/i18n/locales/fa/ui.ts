@@ -259,13 +259,6 @@ const fa: typeof en = {
       neutral: "ط",
       friendly: "دوس",
     },
-    quick: {
-      federation: "فدراسیون",
-      squad: "ترکیب تیم",
-      tactics: "تاکتیک",
-      calendar: "تقویم",
-      ranking: "رده‌بندی",
-    },
     group: "گروه {name}",
     more: {
       title: "بیشتر",
