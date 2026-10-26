@@ -1267,6 +1267,23 @@ const tr: typeof en = {
       etHalf: "Uzatma: devre arası",
       shootoutClock: "Penaltı atışları",
     },
+    pitch: {
+      build: "Oyun kurma",
+      mid: "Orta saha",
+      final: "Son üçte bir",
+      left: "Sol kanat",
+      centre: "Orta",
+      right: "Sağ kanat",
+      legend: {
+        player: "Oyuncu",
+        ball: "Top",
+        goal: "Gol",
+        shot: "İsabetli şut",
+        miss: "Kaçan",
+      },
+      xg: "xG {n}",
+      names: "Oyuncu isimleri",
+    },
     shout: {
       "shot-saved": "KURTARDI!",
       "shot-wide": "DIŞARIDA!",

@@ -1266,6 +1266,23 @@ const fa: typeof en = {
       etHalf: "وقت اضافه: پایان نیمه",
       shootoutClock: "ضربات پنالتی",
     },
+    pitch: {
+      build: "ساخت بازی",
+      mid: "میانه زمین",
+      final: "یک‌سوم پایانی",
+      left: "جناح چپ",
+      centre: "مرکز",
+      right: "جناح راست",
+      legend: {
+        player: "بازیکن",
+        ball: "توپ",
+        goal: "گل",
+        shot: "شوت در چارچوب",
+        miss: "خطا",
+      },
+      xg: "xG {n}",
+      names: "نام بازیکنان",
+    },
     shout: {
       "shot-saved": "مهار شد!",
       "shot-wide": "بیرون!",

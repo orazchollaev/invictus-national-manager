@@ -1261,6 +1261,23 @@ const ko: typeof en = {
       etHalf: "연장 전반 종료",
       shootoutClock: "승부차기",
     },
+    pitch: {
+      build: "빌드업",
+      mid: "중원",
+      final: "파이널 서드",
+      left: "왼쪽 측면",
+      centre: "중앙",
+      right: "오른쪽 측면",
+      legend: {
+        player: "선수",
+        ball: "공",
+        goal: "골",
+        shot: "유효 슈팅",
+        miss: "빗나감",
+      },
+      xg: "xG {n}",
+      names: "선수 이름",
+    },
     shout: {
       "shot-saved": "선방!",
       "shot-wide": "빗나갔습니다!",

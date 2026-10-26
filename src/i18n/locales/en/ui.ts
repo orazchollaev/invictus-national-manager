@@ -1261,6 +1261,23 @@ export default {
       etHalf: "Extra time: half-time",
       shootoutClock: "Penalty shootout",
     },
+    pitch: {
+      build: "Build-up",
+      mid: "Midfield",
+      final: "Final third",
+      left: "Left wing",
+      centre: "Centre",
+      right: "Right wing",
+      legend: {
+        player: "Player",
+        ball: "Ball",
+        goal: "Goal",
+        shot: "Shot on target",
+        miss: "Missed",
+      },
+      xg: "xG {n}",
+      names: "Player names",
+    },
     shout: {
       "shot-saved": "SAVED!",
       "shot-wide": "WIDE!",

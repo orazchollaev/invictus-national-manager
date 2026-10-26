@@ -1266,6 +1266,23 @@ const ru: typeof en = {
       etHalf: "Дополнительное время: перерыв",
       shootoutClock: "Серия пенальти",
     },
+    pitch: {
+      build: "Розыгрыш",
+      mid: "Центр поля",
+      final: "Последняя треть",
+      left: "Левый фланг",
+      centre: "Центр",
+      right: "Правый фланг",
+      legend: {
+        player: "Игрок",
+        ball: "Мяч",
+        goal: "Гол",
+        shot: "Удар в створ",
+        miss: "Мимо",
+      },
+      xg: "xG {n}",
+      names: "Имена игроков",
+    },
     shout: {
       "shot-saved": "СЕЙВ!",
       "shot-wide": "МИМО!",

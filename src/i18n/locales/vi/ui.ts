@@ -1268,6 +1268,23 @@ const vi: typeof en = {
       etHalf: "Hiệp phụ: nghỉ giữa hiệp",
       shootoutClock: "Loạt sút luân lưu",
     },
+    pitch: {
+      build: "Triển khai bóng",
+      mid: "Tuyến giữa",
+      final: "Phần sân cuối",
+      left: "Cánh trái",
+      centre: "Giữa",
+      right: "Cánh phải",
+      legend: {
+        player: "Cầu thủ",
+        ball: "Bóng",
+        goal: "Bàn thắng",
+        shot: "Sút trúng đích",
+        miss: "Trượt",
+      },
+      xg: "xG {n}",
+      names: "Tên cầu thủ",
+    },
     shout: {
       "shot-saved": "CỨU THUA!",
       "shot-wide": "SẸT CỘT!",

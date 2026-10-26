@@ -1264,6 +1264,23 @@ const hi: typeof en = {
       etHalf: "अतिरिक्त समय: हाफ़-टाइम",
       shootoutClock: "पेनल्टी शूटआउट",
     },
+    pitch: {
+      build: "बिल्ड-अप",
+      mid: "मिडफ़ील्ड",
+      final: "अंतिम तिहाई",
+      left: "बायाँ विंग",
+      centre: "केंद्र",
+      right: "दायाँ विंग",
+      legend: {
+        player: "खिलाड़ी",
+        ball: "गेंद",
+        goal: "गोल",
+        shot: "निशाने पर शॉट",
+        miss: "चूका",
+      },
+      xg: "xG {n}",
+      names: "खिलाड़ियों के नाम",
+    },
     shout: {
       "shot-saved": "बचा लिया!",
       "shot-wide": "बाहर!",

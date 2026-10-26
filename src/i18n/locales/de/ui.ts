@@ -1271,6 +1271,23 @@ const de: typeof en = {
       etHalf: "Verlängerung: Halbzeit",
       shootoutClock: "Elfmeterschießen",
     },
+    pitch: {
+      build: "Aufbau",
+      mid: "Mittelfeld",
+      final: "Letztes Drittel",
+      left: "Linke Seite",
+      centre: "Mitte",
+      right: "Rechte Seite",
+      legend: {
+        player: "Spieler",
+        ball: "Ball",
+        goal: "Tor",
+        shot: "Schuss aufs Tor",
+        miss: "Vergeben",
+      },
+      xg: "xG {n}",
+      names: "Spielernamen",
+    },
     shout: {
       "shot-saved": "GEHALTEN!",
       "shot-wide": "DANEBEN!",

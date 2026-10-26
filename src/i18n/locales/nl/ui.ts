@@ -1268,6 +1268,23 @@ const nl: typeof en = {
       etHalf: "Verlenging: rust",
       shootoutClock: "Strafschoppenserie",
     },
+    pitch: {
+      build: "Opbouw",
+      mid: "Middenveld",
+      final: "Laatste derde",
+      left: "Linkerflank",
+      centre: "Midden",
+      right: "Rechterflank",
+      legend: {
+        player: "Speler",
+        ball: "Bal",
+        goal: "Doelpunt",
+        shot: "Schot op doel",
+        miss: "Gemist",
+      },
+      xg: "xG {n}",
+      names: "Spelersnamen",
+    },
     shout: {
       "shot-saved": "GERED!",
       "shot-wide": "NAAST!",

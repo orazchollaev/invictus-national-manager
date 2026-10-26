@@ -1260,6 +1260,23 @@ const ar: typeof en = {
       etHalf: "الوقت الإضافي: الاستراحة",
       shootoutClock: "ركلات الترجيح",
     },
+    pitch: {
+      build: "بناء اللعب",
+      mid: "وسط الملعب",
+      final: "الثلث الأخير",
+      left: "الجناح الأيسر",
+      centre: "الوسط",
+      right: "الجناح الأيمن",
+      legend: {
+        player: "لاعب",
+        ball: "الكرة",
+        goal: "هدف",
+        shot: "تسديدة على المرمى",
+        miss: "ضائعة",
+      },
+      xg: "xG {n}",
+      names: "أسماء اللاعبين",
+    },
     shout: {
       "shot-saved": "تصدٍّ!",
       "shot-wide": "بعيدة!",

@@ -1270,6 +1270,23 @@ const pl: typeof en = {
       etHalf: "Dogrywka: przerwa",
       shootoutClock: "Rzuty karne",
     },
+    pitch: {
+      build: "Rozegranie",
+      mid: "Pomoc",
+      final: "Ostatnia tercja",
+      left: "Lewa strona",
+      centre: "Środek",
+      right: "Prawa strona",
+      legend: {
+        player: "Zawodnik",
+        ball: "Piłka",
+        goal: "Gol",
+        shot: "Strzał celny",
+        miss: "Niecelny",
+      },
+      xg: "xG {n}",
+      names: "Nazwiska zawodników",
+    },
     shout: {
       "shot-saved": "OBRONIONE!",
       "shot-wide": "NIECELNIE!",

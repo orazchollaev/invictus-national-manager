@@ -1267,6 +1267,23 @@ const id: typeof en = {
       etHalf: "Perpanjangan waktu: jeda",
       shootoutClock: "Adu penalti",
     },
+    pitch: {
+      build: "Membangun serangan",
+      mid: "Lini tengah",
+      final: "Sepertiga akhir",
+      left: "Sayap kiri",
+      centre: "Tengah",
+      right: "Sayap kanan",
+      legend: {
+        player: "Pemain",
+        ball: "Bola",
+        goal: "Gol",
+        shot: "Tembakan tepat sasaran",
+        miss: "Meleset",
+      },
+      xg: "xG {n}",
+      names: "Nama pemain",
+    },
     shout: {
       "shot-saved": "DITEPIS!",
       "shot-wide": "MELEBAR!",

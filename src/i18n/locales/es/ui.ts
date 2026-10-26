@@ -1267,6 +1267,23 @@ const es: typeof en = {
       etHalf: "Prórroga: descanso",
       shootoutClock: "Tanda de penaltis",
     },
+    pitch: {
+      build: "Salida de balón",
+      mid: "Mediocampo",
+      final: "Último tercio",
+      left: "Banda izquierda",
+      centre: "Centro",
+      right: "Banda derecha",
+      legend: {
+        player: "Jugador",
+        ball: "Balón",
+        goal: "Gol",
+        shot: "Tiro a puerta",
+        miss: "Fallado",
+      },
+      xg: "xG {n}",
+      names: "Nombres de los jugadores",
+    },
     shout: {
       "shot-saved": "¡PARADÓN!",
       "shot-wide": "¡FUERA!",

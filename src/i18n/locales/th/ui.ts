@@ -1260,6 +1260,23 @@ const th: typeof en = {
       etHalf: "ต่อเวลาพิเศษ: พักครึ่ง",
       shootoutClock: "ดวลจุดโทษ",
     },
+    pitch: {
+      build: "การสร้างเกม",
+      mid: "กองกลาง",
+      final: "สามส่วนสุดท้าย",
+      left: "ปีกซ้าย",
+      centre: "กลาง",
+      right: "ปีกขวา",
+      legend: {
+        player: "ผู้เล่น",
+        ball: "ลูกบอล",
+        goal: "ประตู",
+        shot: "ยิงตรงกรอบ",
+        miss: "ยิงพลาด",
+      },
+      xg: "xG {n}",
+      names: "ชื่อผู้เล่น",
+    },
     shout: {
       "shot-saved": "เซฟได้!",
       "shot-wide": "ออกข้าง!",

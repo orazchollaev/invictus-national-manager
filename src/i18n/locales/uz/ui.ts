@@ -1270,6 +1270,23 @@ const uz: typeof en = {
       etHalf: "Qo'shimcha vaqt: tanaffus",
       shootoutClock: "Penaltilar seriyasi",
     },
+    pitch: {
+      build: "Hujum qurish",
+      mid: "O'rta chiziq",
+      final: "Oxirgi uchdan bir",
+      left: "Chap qanot",
+      centre: "Markaz",
+      right: "O'ng qanot",
+      legend: {
+        player: "O'yinchi",
+        ball: "To'p",
+        goal: "Gol",
+        shot: "Aniq zarba",
+        miss: "O'tkazib yuborilgan",
+      },
+      xg: "xG {n}",
+      names: "O'yinchi ismlari",
+    },
     shout: {
       "shot-saved": "SEYV!",
       "shot-wide": "YONIDAN!",

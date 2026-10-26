@@ -1266,6 +1266,23 @@ const ptBR: typeof en = {
       etHalf: "Prorrogação: intervalo",
       shootoutClock: "Disputa de pênaltis",
     },
+    pitch: {
+      build: "Construção",
+      mid: "Meio-campo",
+      final: "Terço final",
+      left: "Lado esquerdo",
+      centre: "Centro",
+      right: "Lado direito",
+      legend: {
+        player: "Jogador",
+        ball: "Bola",
+        goal: "Gol",
+        shot: "Chute no alvo",
+        miss: "Errado",
+      },
+      xg: "xG {n}",
+      names: "Nomes dos jogadores",
+    },
     shout: {
       "shot-saved": "DEFENDEU!",
       "shot-wide": "PARA FORA!",

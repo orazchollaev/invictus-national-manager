@@ -1271,6 +1271,23 @@ const it: typeof en = {
       etHalf: "Supplementari: intervallo",
       shootoutClock: "Lotteria dei rigori",
     },
+    pitch: {
+      build: "Costruzione",
+      mid: "Centrocampo",
+      final: "Ultimo terzo",
+      left: "Fascia sinistra",
+      centre: "Centro",
+      right: "Fascia destra",
+      legend: {
+        player: "Giocatore",
+        ball: "Palla",
+        goal: "Gol",
+        shot: "Tiro in porta",
+        miss: "Sbagliato",
+      },
+      xg: "xG {n}",
+      names: "Nomi dei giocatori",
+    },
     shout: {
       "shot-saved": "PARATA!",
       "shot-wide": "FUORI!",

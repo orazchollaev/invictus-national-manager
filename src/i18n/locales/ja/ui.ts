@@ -1261,6 +1261,23 @@ const ja: typeof en = {
       etHalf: "延長戦: ハーフタイム",
       shootoutClock: "PK戦",
     },
+    pitch: {
+      build: "ビルドアップ",
+      mid: "中盤",
+      final: "ファイナルサード",
+      left: "左サイド",
+      centre: "中央",
+      right: "右サイド",
+      legend: {
+        player: "選手",
+        ball: "ボール",
+        goal: "ゴール",
+        shot: "枠内シュート",
+        miss: "外れ",
+      },
+      xg: "xG {n}",
+      names: "選手名",
+    },
     shout: {
       "shot-saved": "セーブ！",
       "shot-wide": "枠外！",

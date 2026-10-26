@@ -1275,6 +1275,23 @@ const fr: typeof en = {
       etHalf: "Prolongation : mi-temps",
       shootoutClock: "Séance de tirs au but",
     },
+    pitch: {
+      build: "Construction",
+      mid: "Milieu",
+      final: "Dernier tiers",
+      left: "Aile gauche",
+      centre: "Axe",
+      right: "Aile droite",
+      legend: {
+        player: "Joueur",
+        ball: "Ballon",
+        goal: "But",
+        shot: "Tir cadré",
+        miss: "Raté",
+      },
+      xg: "xG {n}",
+      names: "Noms des joueurs",
+    },
     shout: {
       "shot-saved": "ARRÊTÉ !",
       "shot-wide": "À CÔTÉ !",
