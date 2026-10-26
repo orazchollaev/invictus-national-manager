@@ -90,7 +90,12 @@ const counter = computed({
 </template>
 
 <style scoped>
+/* The sheet is a flex column: the form takes what is left and scrolls inside it. */
 .form {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-3) var(--sp-3) calc(var(--sp-3) + var(--safe-bottom));
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
