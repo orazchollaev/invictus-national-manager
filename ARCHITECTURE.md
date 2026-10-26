@@ -42,7 +42,7 @@ next match (Settings → Continue moves on) — painting each day.
   so editing these lists never changes the players.
 
 Every nation gets 80 players drawn from its strength. The best of them are real
-(`scripts/data/real-players`: about 1,400, from 40 for the biggest nations to one or two
+(`scripts/data/real-players`: about 1,800, from 40 for the biggest nations to one or two
 for the smallest), each name changed a little (Cristiano Rolando), at his real club. The
 rest of the pool — back-ups and youngsters — is fictional. A nation's real players keep
 their order and gaps but are moved together to the strength its Elo gives it, so the
