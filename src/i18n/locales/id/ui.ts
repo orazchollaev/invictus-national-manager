@@ -233,6 +233,7 @@ const id: typeof en = {
       drawReady: "Undian sudah siap",
       drawReadyHint: "{label} · tonton untuk tahu siapa lawan kita",
       inbox: "Kotak masuk",
+      overview: "Pertandingan dan grup",
       waiting: "Menunggu Anda",
       unread: "{n} belum dibaca",
       all: "Semua",
@@ -383,6 +384,8 @@ const id: typeof en = {
     stats: {
       title: "Statistik",
       none: "Statistik muncul setelah pertandingan pertama dimainkan.",
+      showAll: "Tampilkan semua",
+      showLess: "Tampilkan lebih sedikit",
       sofar: "sejauh ini",
       minApps:
         "Rating, kiper, pemain muda, dan tim terbaik turnamen menghitung pemain dengan minimal {n} penampilan.",
@@ -561,6 +564,10 @@ const id: typeof en = {
     pauseOnKey: "Jeda saat gol dan kartu merah",
     fullCommentary: "Komentar lengkap",
     fullCommentaryHint: "Termasuk pelanggaran, tendangan sudut, dan offside",
+    assist: "Tingkat asisten",
+    assistBeginner: "Pemula",
+    assistManager: "Manajer",
+    assistExpert: "Ahli",
     moreOptions: "Opsi lainnya",
     about: "Tentang",
     aboutBy: "oleh",
@@ -1086,6 +1093,7 @@ const id: typeof en = {
       assistantNote:
         "Asisten Anda memilih sebelas pemain untuk setiap laga. Matikan ini di Pengaturan untuk memilih sendiri.",
       bestXI: "XI terbaik",
+      customize: "Sesuaikan",
       chemistry: "Kimia tim",
       chemistryNote: "Pemain mendapat atau kehilangan sedikit dari rekan di sebelahnya",
       noTies: "Tidak ada persahabatan erat atau permusuhan di sebelas pemain ini.",

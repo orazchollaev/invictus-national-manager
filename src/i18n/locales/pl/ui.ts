@@ -232,6 +232,7 @@ const pl: typeof en = {
       drawReady: "Losowanie jest gotowe",
       drawReadyHint: "{label} · obejrzyj je, by zobaczyć, z kim zagramy",
       inbox: "Skrzynka",
+      overview: "Mecze i grupa",
       waiting: "Czeka na ciebie",
       unread: "{n} nieprzeczytanych",
       all: "Wszystkie",
@@ -383,6 +384,8 @@ const pl: typeof en = {
     stats: {
       title: "Statystyki",
       none: "Statystyki pojawią się po pierwszych meczach.",
+      showAll: "Pokaż wszystko",
+      showLess: "Pokaż mniej",
       sofar: "na razie",
       minApps:
         "Oceny, bramkarze, młodzi i jedenastka turnieju liczą zawodników z co najmniej {n} meczami.",
@@ -563,6 +566,10 @@ const pl: typeof en = {
     pauseOnKey: "Pauza przy golach i czerwonych kartkach",
     fullCommentary: "Pełny komentarz",
     fullCommentaryHint: "Także faule, rzuty rożne i spalone",
+    assist: "Poziom asystenta",
+    assistBeginner: "Początkujący",
+    assistManager: "Trener",
+    assistExpert: "Ekspert",
     moreOptions: "Więcej opcji",
     about: "O aplikacji",
     aboutBy: "autor",
@@ -1089,6 +1096,7 @@ const pl: typeof en = {
       assistantNote:
         "Asystent wybiera jedenastkę na każdy mecz. Wyłącz to w Ustawieniach, aby wybierać samodzielnie.",
       bestXI: "Najlepsza XI",
+      customize: "Dostosuj",
       chemistry: "Chemia",
       chemistryNote: "Zawodnicy zyskują lub tracą nieco przez to, z kim grają obok siebie",
       noTies: "W tej jedenastce nie ma bliskich więzi ani zadrażnień.",

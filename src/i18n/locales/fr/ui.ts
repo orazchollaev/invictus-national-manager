@@ -235,6 +235,7 @@ const fr: typeof en = {
       drawReady: "Le tirage est prêt",
       drawReadyHint: "{label} · regardez-le pour savoir qui nous affrontons",
       inbox: "Messages",
+      overview: "Matchs et groupe",
       waiting: "En attente",
       unread: "{n} non lus",
       all: "Tous",
@@ -387,6 +388,8 @@ const fr: typeof en = {
     stats: {
       title: "Statistiques",
       none: "Les statistiques apparaissent après les premiers matchs.",
+      showAll: "Tout afficher",
+      showLess: "Afficher moins",
       sofar: "à ce jour",
       minApps:
         "Les notes, gardiens, jeunes et l'équipe type comptent les joueurs ayant au moins {n} matchs.",
@@ -565,6 +568,10 @@ const fr: typeof en = {
     pauseOnKey: "Pause sur les buts et les cartons rouges",
     fullCommentary: "Commentaires complets",
     fullCommentaryHint: "Aussi les fautes, corners et hors-jeu",
+    assist: "Niveau de l'assistant",
+    assistBeginner: "Débutant",
+    assistManager: "Entraîneur",
+    assistExpert: "Expert",
     moreOptions: "Plus d'options",
     about: "À propos",
     aboutBy: "par",
@@ -1092,6 +1099,7 @@ const fr: typeof en = {
       assistantNote:
         "Votre adjoint choisit les onze pour chaque match. Désactivez-le dans les paramètres pour le faire vous-même.",
       bestXI: "Meilleur onze",
+      customize: "Personnaliser",
       chemistry: "Alchimie",
       chemistryNote: "Les joueurs gagnent ou perdent un peu selon ceux qui jouent à leurs côtés",
       noTies: "Aucun lien étroit ni brouille dans ce onze.",

@@ -233,6 +233,7 @@ const vi: typeof en = {
       drawReady: "Lễ bốc thăm đã sẵn sàng",
       drawReadyHint: "{label} · xem để biết chúng ta gặp đối thủ nào",
       inbox: "Hộp thư",
+      overview: "Trận đấu và bảng",
       waiting: "Đang chờ bạn",
       unread: "{n} chưa đọc",
       all: "Tất cả",
@@ -384,6 +385,8 @@ const vi: typeof en = {
     stats: {
       title: "Thống kê",
       none: "Thống kê xuất hiện sau những trận đầu tiên.",
+      showAll: "Hiện tất cả",
+      showLess: "Ẩn bớt",
       sofar: "cho đến nay",
       minApps:
         "Điểm số, thủ môn, cầu thủ trẻ và đội hình tiêu biểu tính các cầu thủ có ít nhất {n} trận.",
@@ -562,6 +565,10 @@ const vi: typeof en = {
     pauseOnKey: "Tạm dừng khi có bàn thắng và thẻ đỏ",
     fullCommentary: "Bình luận đầy đủ",
     fullCommentaryHint: "Cả các tình huống phạm lỗi, phạt góc và việt vị",
+    assist: "Mức trợ lý",
+    assistBeginner: "Người mới",
+    assistManager: "Huấn luyện viên",
+    assistExpert: "Chuyên gia",
     moreOptions: "Tùy chọn khác",
     about: "Giới thiệu",
     aboutBy: "bởi",
@@ -1087,6 +1094,7 @@ const vi: typeof en = {
       assistantNote:
         "Trợ lý chọn đội hình xuất phát cho mỗi trận. Tắt tính năng này trong Cài đặt để tự chọn.",
       bestXI: "Đội hình mạnh nhất",
+      customize: "Tùy chỉnh",
       chemistry: "Sự ăn ý",
       chemistryNote: "Cầu thủ được lợi hoặc thiệt đôi chút từ những người đá cạnh họ",
       noTies: "Không có mối thân thiết hay mâu thuẫn nào trong đội hình này.",

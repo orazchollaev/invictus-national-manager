@@ -233,6 +233,7 @@ const de: typeof en = {
       drawReady: "Die Auslosung steht bereit",
       drawReadyHint: "{label} · sieh sie dir an, um unsere Gegner zu erfahren",
       inbox: "Posteingang",
+      overview: "Spiele und Gruppe",
       waiting: "Wartet auf dich",
       unread: "{n} ungelesen",
       all: "Alle",
@@ -385,6 +386,8 @@ const de: typeof en = {
     stats: {
       title: "Statistiken",
       none: "Statistiken erscheinen nach den ersten Spielen.",
+      showAll: "Alle anzeigen",
+      showLess: "Weniger anzeigen",
       sofar: "bisher",
       minApps:
         "Noten, Torhüter, junge Spieler und die Elf des Turniers zählen Spieler mit mindestens {n} Einsätzen.",
@@ -563,6 +566,10 @@ const de: typeof en = {
     pauseOnKey: "Bei Toren und Roten Karten pausieren",
     fullCommentary: "Volle Kommentierung",
     fullCommentaryHint: "Auch Fouls, Ecken und Abseits",
+    assist: "Assistentenstufe",
+    assistBeginner: "Einsteiger",
+    assistManager: "Trainer",
+    assistExpert: "Experte",
     moreOptions: "Weitere Optionen",
     about: "Über",
     aboutBy: "von",
@@ -1089,6 +1096,7 @@ const de: typeof en = {
       assistantNote:
         "Dein Co-Trainer wählt für jedes Spiel die Elf aus. Schalte das in den Einstellungen aus, um selbst zu wählen.",
       bestXI: "Beste Elf",
+      customize: "Anpassen",
       chemistry: "Chemie",
       chemistryNote: "Spieler gewinnen oder verlieren etwas durch ihre Nebenleute",
       noTies: "Keine engen Freundschaften oder Feindschaften in dieser Elf.",

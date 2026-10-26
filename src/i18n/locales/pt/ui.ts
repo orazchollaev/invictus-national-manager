@@ -232,6 +232,7 @@ const pt: typeof en = {
       drawReady: "O sorteio está pronto",
       drawReadyHint: "{label} · assista para ver quem enfrentaremos",
       inbox: "Caixa de entrada",
+      overview: "Jogos e grupo",
       waiting: "À sua espera",
       unread: "{n} não lidas",
       all: "Todas",
@@ -383,6 +384,8 @@ const pt: typeof en = {
     stats: {
       title: "Estatísticas",
       none: "As estatísticas aparecem depois dos primeiros jogos.",
+      showAll: "Mostrar tudo",
+      showLess: "Mostrar menos",
       sofar: "até agora",
       minApps:
         "Notas, guarda-redes, jovens e a equipa do torneio contam jogadores com pelo menos {n} jogos.",
@@ -561,6 +564,10 @@ const pt: typeof en = {
     pauseOnKey: "Pausar em gols e cartões vermelhos",
     fullCommentary: "Narração completa",
     fullCommentaryHint: "Faltas, escanteios e impedimentos também",
+    assist: "Nível do assistente",
+    assistBeginner: "Iniciante",
+    assistManager: "Treinador",
+    assistExpert: "Especialista",
     moreOptions: "Mais opções",
     about: "Sobre",
     aboutBy: "por",
@@ -1085,6 +1092,7 @@ const pt: typeof en = {
       assistantNote:
         "Seu auxiliar escolhe os onze de cada partida. Desative isso em Configurações para escolher você mesmo.",
       bestXI: "Melhor XI",
+      customize: "Personalizar",
       chemistry: "Entrosamento",
       chemistryNote: "Jogadores ganham ou perdem um pouco com quem joga ao lado",
       noTies: "Nenhuma amizade próxima ou rivalidade neste time.",

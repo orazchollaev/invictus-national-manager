@@ -229,6 +229,7 @@ export default {
       drawReady: "The draw is ready",
       drawReadyHint: "{label} · watch it to see who we face",
       inbox: "Inbox",
+      overview: "Fixtures and group",
       waiting: "Waiting for you",
       unread: "{n} unread",
       all: "All",
@@ -380,6 +381,8 @@ export default {
     stats: {
       title: "Stats",
       none: "Stats appear once the first matches have been played.",
+      showAll: "Show all",
+      showLess: "Show less",
       sofar: "so far",
       minApps:
         "Ratings, keepers, young players and the team of the tournament count players with at least {n} appearances.",
@@ -558,6 +561,10 @@ export default {
     pauseOnKey: "Pause on goals and red cards",
     fullCommentary: "Full commentary",
     fullCommentaryHint: "Fouls, corners and offsides as well",
+    assist: "Assistant level",
+    assistBeginner: "Beginner",
+    assistManager: "Manager",
+    assistExpert: "Expert",
     moreOptions: "More options",
     about: "About",
     aboutBy: "by",
@@ -1080,6 +1087,7 @@ export default {
       assistantNote:
         "Your assistant picks the eleven for each match. Turn this off in Settings to choose it yourself.",
       bestXI: "Best XI",
+      customize: "Customize",
       chemistry: "Chemistry",
       chemistryNote: "Players gain or lose a little from those they play beside",
       noTies: "No close ties or feuds in this eleven.",

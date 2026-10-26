@@ -233,6 +233,7 @@ const es: typeof en = {
       drawReady: "El sorteo está listo",
       drawReadyHint: "{label} · velo para saber a quién nos enfrentamos",
       inbox: "Bandeja de entrada",
+      overview: "Partidos y grupo",
       waiting: "Esperando tu respuesta",
       unread: "{n} sin leer",
       all: "Todos",
@@ -384,6 +385,8 @@ const es: typeof en = {
     stats: {
       title: "Estadísticas",
       none: "Las estadísticas aparecen tras los primeros partidos.",
+      showAll: "Mostrar todo",
+      showLess: "Mostrar menos",
       sofar: "hasta ahora",
       minApps:
         "Las notas, porteros, jóvenes y el once del torneo cuentan jugadores con al menos {n} partidos.",
@@ -562,6 +565,10 @@ const es: typeof en = {
     pauseOnKey: "Pausar en goles y tarjetas rojas",
     fullCommentary: "Narración completa",
     fullCommentaryHint: "También faltas, córners y fuera de juego",
+    assist: "Nivel del asistente",
+    assistBeginner: "Principiante",
+    assistManager: "Entrenador",
+    assistExpert: "Experto",
     moreOptions: "Más opciones",
     about: "Acerca de",
     aboutBy: "por",
@@ -1086,6 +1093,7 @@ const es: typeof en = {
       assistantNote:
         "Tu asistente elige el once de cada partido. Desactívalo en Ajustes para elegirlo tú.",
       bestXI: "Mejor once",
+      customize: "Personalizar",
       chemistry: "Química",
       chemistryNote: "Los jugadores ganan o pierden un poco según con quién juegan",
       noTies: "No hay lazos estrechos ni enemistades en este once.",

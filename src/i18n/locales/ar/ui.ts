@@ -230,6 +230,7 @@ const ar: typeof en = {
       drawReady: "القرعة جاهزة",
       drawReadyHint: "{label} · شاهدها لتعرف من سنواجه",
       inbox: "البريد",
+      overview: "المباريات والمجموعة",
       waiting: "بانتظارك",
       unread: "{n} غير مقروءة",
       all: "الكل",
@@ -381,6 +382,8 @@ const ar: typeof en = {
     stats: {
       title: "الإحصائيات",
       none: "تظهر الإحصائيات بعد أولى المباريات.",
+      showAll: "عرض الكل",
+      showLess: "عرض أقل",
       sofar: "حتى الآن",
       minApps:
         "التقييمات والحراس واللاعبون الشباب وتشكيلة البطولة تحتسب اللاعبين الذين خاضوا {n} مباريات على الأقل.",
@@ -558,6 +561,10 @@ const ar: typeof en = {
     pauseOnKey: "إيقاف مؤقت عند الأهداف والبطاقات الحمراء",
     fullCommentary: "تعليق كامل",
     fullCommentaryHint: "مع الأخطاء والركنيات والتسللات أيضًا",
+    assist: "مستوى المساعد",
+    assistBeginner: "مبتدئ",
+    assistManager: "مدرب",
+    assistExpert: "خبير",
     moreOptions: "المزيد من الخيارات",
     about: "حول",
     aboutBy: "بواسطة",
@@ -1079,6 +1086,7 @@ const ar: typeof en = {
       assistantNote:
         "يختار مساعدك التشكيلة الأساسية لكل مباراة. أوقف ذلك من الإعدادات لتختارها بنفسك.",
       bestXI: "أفضل تشكيلة",
+      customize: "تخصيص",
       chemistry: "الانسجام",
       chemistryNote: "يكسب اللاعبون أو يخسرون قليلًا ممن يلعبون بجانبهم",
       noTies: "لا صداقات وثيقة ولا خصومات في هذه التشكيلة.",

@@ -232,6 +232,7 @@ const hi: typeof en = {
       drawReady: "ड्रॉ तैयार है",
       drawReadyHint: "{label} · देखें कि हमारा सामना किससे होगा",
       inbox: "इनबॉक्स",
+      overview: "मैच और ग्रुप",
       waiting: "आपका इंतज़ार",
       unread: "{n} अपठित",
       all: "सभी",
@@ -383,6 +384,8 @@ const hi: typeof en = {
     stats: {
       title: "आँकड़े",
       none: "पहले मैच खेले जाने के बाद आँकड़े दिखेंगे।",
+      showAll: "सभी दिखाएँ",
+      showLess: "कम दिखाएँ",
       sofar: "अब तक",
       minApps:
         "रेटिंग, गोलकीपर, युवा खिलाड़ी और टूर्नामेंट की टीम में कम से कम {n} मैच खेले खिलाड़ी गिने जाते हैं।",
@@ -561,6 +564,10 @@ const hi: typeof en = {
     pauseOnKey: "गोल और रेड कार्ड पर रोकें",
     fullCommentary: "पूरी कमेंट्री",
     fullCommentaryHint: "फ़ाउल, कॉर्नर और ऑफ़साइड भी",
+    assist: "सहायक स्तर",
+    assistBeginner: "शुरुआती",
+    assistManager: "मैनेजर",
+    assistExpert: "विशेषज्ञ",
     moreOptions: "और विकल्प",
     about: "के बारे में",
     aboutBy: "द्वारा",
@@ -1083,6 +1090,7 @@ const hi: typeof en = {
       assistantNote:
         "आपका असिस्टेंट हर मैच के लिए इलेवन चुनता है। खुद चुनने के लिए इसे सेटिंग्स में बंद करें।",
       bestXI: "सर्वश्रेष्ठ XI",
+      customize: "अनुकूलित करें",
       chemistry: "केमिस्ट्री",
       chemistryNote: "साथ खेलने वालों से खिलाड़ियों को थोड़ा फ़ायदा या नुकसान होता है",
       noTies: "इस इलेवन में कोई करीबी रिश्ता या झगड़ा नहीं है।",

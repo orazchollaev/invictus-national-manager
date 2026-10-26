@@ -233,6 +233,7 @@ const uz: typeof en = {
       drawReady: "Qur'a tayyor",
       drawReadyHint: "{label} · kim bilan o'ynashimizni bilish uchun ko'ring",
       inbox: "Xabarlar",
+      overview: "O'yinlar va guruh",
       waiting: "Sizni kutmoqda",
       unread: "{n} ta o'qilmagan",
       all: "Hammasi",
@@ -384,6 +385,8 @@ const uz: typeof en = {
     stats: {
       title: "Statistika",
       none: "Statistika birinchi o'yinlardan keyin paydo bo'ladi.",
+      showAll: "Hammasini ko'rsatish",
+      showLess: "Kamroq ko'rsatish",
       sofar: "hozircha",
       minApps:
         "Baho, darvozabon, yosh o'yinchi va turnir terma jamoasi uchun kamida {n} ta o'yin kerak.",
@@ -562,6 +565,10 @@ const uz: typeof en = {
     pauseOnKey: "Gol va qizil kartochkada pauza qilish",
     fullCommentary: "To'liq sharh",
     fullCommentaryHint: "Qoidabuzarliklar, burchak to'plari va ofsaydlar ham",
+    assist: "Yordamchi darajasi",
+    assistBeginner: "Boshlovchi",
+    assistManager: "Murabbiy",
+    assistExpert: "Ekspert",
     moreOptions: "Boshqa sozlamalar",
     about: "Ilova haqida",
     aboutBy: "muallif",
@@ -1089,6 +1096,7 @@ const uz: typeof en = {
       assistantNote:
         "Yordamchingiz har bir o'yin uchun o'nbirlikni tanlaydi. O'zingiz tanlash uchun buni Sozlamalarda o'chiring.",
       bestXI: "Eng yaxshi o'nbirlik",
+      customize: "Sozlash",
       chemistry: "Hamjihatlik",
       chemistryNote: "O'yinchilar yonida o'ynayotganlariga qarab biroz yutadi yoki yo'qotadi",
       noTies: "Bu o'nbirlikda yaqin do'stlik yoki nizolar yo'q.",

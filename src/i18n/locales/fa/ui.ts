@@ -233,6 +233,7 @@ const fa: typeof en = {
       drawReady: "قرعه‌کشی آماده است",
       drawReadyHint: "{label} · ببینید با چه کسی روبه‌رو می‌شویم",
       inbox: "صندوق پیام",
+      overview: "بازی‌ها و گروه",
       waiting: "منتظر شماست",
       unread: "{n} خوانده‌نشده",
       all: "همه",
@@ -384,6 +385,8 @@ const fa: typeof en = {
     stats: {
       title: "آمار",
       none: "آمار پس از اولین بازی‌ها نمایش داده می‌شود.",
+      showAll: "نمایش همه",
+      showLess: "نمایش کمتر",
       sofar: "تا اینجا",
       minApps:
         "امتیاز، دروازه‌بان، بازیکن جوان و تیم منتخب تورنمنت بازیکنانی با حداقل {n} بازی را می‌شمارند.",
@@ -562,6 +565,10 @@ const fa: typeof en = {
     pauseOnKey: "توقف در گل و کارت قرمز",
     fullCommentary: "گزارش کامل",
     fullCommentaryHint: "خطاها، کرنرها و آفسایدها هم گزارش شوند",
+    assist: "سطح دستیار",
+    assistBeginner: "مبتدی",
+    assistManager: "مربی",
+    assistExpert: "حرفه‌ای",
     moreOptions: "گزینه‌های بیشتر",
     about: "درباره",
     aboutBy: "توسط",
@@ -1085,6 +1092,7 @@ const fa: typeof en = {
       assistantNote:
         "دستیار شما ۱۱ نفر هر بازی را انتخاب می‌کند. برای انتخاب دستی، این گزینه را در تنظیمات خاموش کنید.",
       bestXI: "بهترین ۱۱ نفر",
+      customize: "سفارشی‌سازی",
       chemistry: "شیمی تیمی",
       chemistryNote: "بازیکنان از کسانی که کنارشان بازی می‌کنند کمی تأثیر مثبت یا منفی می‌گیرند",
       noTies: "در این ۱۱ نفر رابطه نزدیک یا اختلافی وجود ندارد.",

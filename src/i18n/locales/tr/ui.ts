@@ -232,6 +232,7 @@ const tr: typeof en = {
       drawReady: "Kura hazır",
       drawReadyHint: "{label} · kimle eşleştiğimizi görmek için izle",
       inbox: "Gelen kutusu",
+      overview: "Maçlar ve grup",
       waiting: "Seni bekleyenler",
       unread: "{n} okunmamış",
       all: "Tümü",
@@ -383,6 +384,8 @@ const tr: typeof en = {
     stats: {
       title: "İstatistikler",
       none: "İlk maçlar oynandıktan sonra istatistikler görünür.",
+      showAll: "Tümünü göster",
+      showLess: "Daha az göster",
       sofar: "şu ana kadar",
       minApps:
         "Reyting, kaleci, genç oyuncu ve turnuvanın 11'i için en az {n} maça çıkmış olmak gerekir.",
@@ -561,6 +564,10 @@ const tr: typeof en = {
     pauseOnKey: "Gol ve kırmızı kartlarda duraklat",
     fullCommentary: "Tam anlatım",
     fullCommentaryHint: "Fauller, kornerler ve ofsaytlar da",
+    assist: "Asistan seviyesi",
+    assistBeginner: "Yeni başlayan",
+    assistManager: "Teknik direktör",
+    assistExpert: "Uzman",
     moreOptions: "Daha fazla seçenek",
     about: "Hakkında",
     aboutBy: "tarafından",
@@ -1086,6 +1093,7 @@ const tr: typeof en = {
       assistantNote:
         "Yardımcın her maç için ilk onbiri seçer. Kendin seçmek için bunu Ayarlar'dan kapat.",
       bestXI: "En iyi 11",
+      customize: "Özelleştir",
       chemistry: "Uyum",
       chemistryNote: "Oyuncular, yanında oynadıklarından az da olsa fayda görür ya da kaybeder",
       noTies: "Bu onbirde yakın bir bağ ya da husumet yok.",

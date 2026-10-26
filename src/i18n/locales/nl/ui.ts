@@ -233,6 +233,7 @@ const nl: typeof en = {
       drawReady: "De loting is klaar",
       drawReadyHint: "{label} · bekijk hem om te zien tegen wie we spelen",
       inbox: "Inbox",
+      overview: "Wedstrijden en groep",
       waiting: "Wacht op jou",
       unread: "{n} ongelezen",
       all: "Alle",
@@ -384,6 +385,8 @@ const nl: typeof en = {
     stats: {
       title: "Statistieken",
       none: "Statistieken verschijnen na de eerste wedstrijden.",
+      showAll: "Alles tonen",
+      showLess: "Minder tonen",
       sofar: "tot nu toe",
       minApps:
         "Cijfers, keepers, jonge spelers en het elftal van het toernooi tellen spelers met minstens {n} wedstrijden.",
@@ -562,6 +565,10 @@ const nl: typeof en = {
     pauseOnKey: "Pauzeer bij doelpunten en rode kaarten",
     fullCommentary: "Volledig commentaar",
     fullCommentaryHint: "Ook overtredingen, hoekschoppen en buitenspel",
+    assist: "Assistentniveau",
+    assistBeginner: "Beginner",
+    assistManager: "Coach",
+    assistExpert: "Expert",
     moreOptions: "Meer opties",
     about: "Over",
     aboutBy: "door",
@@ -1087,6 +1094,7 @@ const nl: typeof en = {
       assistantNote:
         "Je assistent kiest het elftal voor elke wedstrijd. Zet dit uit in de instellingen om het zelf te kiezen.",
       bestXI: "Beste elftal",
+      customize: "Aanpassen",
       chemistry: "Chemie",
       chemistryNote: "Spelers worden een beetje beter of slechter van wie naast ze spelen",
       noTies: "Geen hechte banden of vetes in dit elftal.",

@@ -234,6 +234,7 @@ const it: typeof en = {
       drawReady: "Il sorteggio è pronto",
       drawReadyHint: "{label} · guardalo per scoprire chi affronteremo",
       inbox: "Posta",
+      overview: "Partite e girone",
       waiting: "In attesa di te",
       unread: "{n} da leggere",
       all: "Tutti",
@@ -385,6 +386,8 @@ const it: typeof en = {
     stats: {
       title: "Statistiche",
       none: "Le statistiche appaiono dopo le prime partite.",
+      showAll: "Mostra tutto",
+      showLess: "Mostra meno",
       sofar: "finora",
       minApps:
         "Voti, portieri, giovani e la squadra del torneo contano i giocatori con almeno {n} presenze.",
@@ -563,6 +566,10 @@ const it: typeof en = {
     pauseOnKey: "Pausa su gol ed espulsioni",
     fullCommentary: "Telecronaca completa",
     fullCommentaryHint: "Anche falli, calci d'angolo e fuorigioco",
+    assist: "Livello assistente",
+    assistBeginner: "Principiante",
+    assistManager: "Allenatore",
+    assistExpert: "Esperto",
     moreOptions: "Altre opzioni",
     about: "Informazioni",
     aboutBy: "di",
@@ -1090,6 +1097,7 @@ const it: typeof en = {
       assistantNote:
         "Il tuo vice sceglie gli undici per ogni partita. Disattivalo nelle Impostazioni per sceglierli tu.",
       bestXI: "Migliore undici",
+      customize: "Personalizza",
       chemistry: "Intesa",
       chemistryNote: "I giocatori guadagnano o perdono un po' in base ai compagni vicini",
       noTies: "Nessun legame stretto o screzio in questa formazione.",
