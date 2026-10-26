@@ -341,6 +341,14 @@ export const UEFA_REST: Record<string, string> = {
     ST R | Vitali | Lisakovitch | 1998-02-08 | 70 | -
     GK R | Fyodor | Lapoukhov | 2003-07-23 | 68 | -
     CM R | Valeri | Gromykka | 1997-01-23 | 68 | -
+    CM R | Yevgeny | Yablonskyy | 1995-05-10 | 64 | GRE:A. Tripoli
+    CB R | Kiryl | Pyachenin | 1997-03-18 | 62 | K. Samara
+    CB R | Vladislav | Malkevichh | 1999-12-04 | 62 | Ekaterinburg
+    ST R | German | Barkovskyy | 2002-06-25 | 62 | -
+    ST R | Ruslan | Myalkovskyy | 2006-05-07 | 62/74 | L. Moskva
+    GK R | Fyodor | Lapoukhovv | 2003-06-20 | 62/70 | C. Sofia
+    CM R | Aleksandr | Selyavaa | 1993-05-17 | 62 | D. Minsk
+    CM R | Daniil | Galyataa | 2007-02-02 | 60/74 | A. Limassol
   `,
   LUX: `
     CM,DM R | Leandro | Barreyro | 2000-01-03 | 78 | B. Lisboa
@@ -363,7 +371,17 @@ export const UEFA_REST: Record<string, string> = {
     AM,LW L | Bakhtiyar | Zainutdinoff | 1998-04-02 | 74 | -
     CM R | Islambek | Kuatt | 1993-01-12 | 70 | Astana
     ST R | Abat | Aimbetoff | 1995-08-07 | 70 | Astana
+    CB R | Nuraly | Alipp | 1999-12-22 | 70 | Z. St Petersburg
     GK R | Aleksandr | Zarutzkiy | 2001-01-01 | 68 | -
+    ST R | Islam | Chesnokovv | 1999-11-21 | 66 | K. Samara
+    CM R | Bauyrzhan | Islamkhann | 1993-02-23 | 66 | Astana
+    ST R | Galymzhan | Kenzhebekk | 2003-02-12 | 64/70 | A. Grozny
+    CB R | Serhiy | Malyii | 1990-06-05 | 62 | Shymkent
+    CB R | Yan | Vorogovskyy | 1996-08-07 | 62 | Astana
+    CB R | Alibek | Kasymm | 1998-05-27 | 62 | Astana
+    CM R | Dinmukhamed | Karamann | 2000-06-26 | 62 | Astana
+    ST R | Maksim | Samorodovv | 2002-06-29 | 62/68 | A. Grozny
+    CM R | Alexander | Shirobokovv | 2003-01-02 | 62/68 | K. Almaty
   `,
   ARM: `
     AM,CM R | Henrikh | Mkhitarian | 1989-01-21 | 79 | I. Milano

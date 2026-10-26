@@ -114,19 +114,51 @@ export const AFC: Record<string, string> = {
     ST R | Yazan | Al-Naimatt | 1999-06-04 | 73 | -
     ST R | Ali | Olwann | 2000-03-26 | 72 | -
     CB R | Yazan | Al-Arabb | 1996-01-31 | 71 | Seoul
+    CM R | Nizar | Al-Rashdann | 1999-03-23 | 68 | W. Casablanca
+    ST R | Mohammad | Abu_Zrayyq | 1997-12-30 | 68 | R. Casablanca
+    AM R | Ali | Azaizeh | 2004-04-13 | 64/72 | M. Alger
+    ST R | Tammer | Bany_Odehh | 2003-10-19 | 64/72 | West Brom A
+    CB R | Mohannad | Abu_Tahaa | 2003-02-02 | 64/70 | -
+    CB R | Hadi | Al-Hourany | 2000-03-14 | 63 | Sétif
+    CM R | Amer | Jamouss | 2002-07-03 | 62 | Erbil
+    GK R | Yazeed | Abulailaa | 1993-01-08 | 62 | H. Irbid
   `,
   UAE: `
     LW,AM L | Fábio | Lyma | 1993-06-30 | 72 | W. Dubai
     AM R | Harib | Abdala | 2002-01-01 | 70 | S. Dubai
     GK R | Khalid | Eissa | 1989-09-15 | 69 | Al Ain
+    LW R | Richard | Akonnorr | 2004-02-06 | 68/75 | Göztepe
+    CM R | Nicolás | Giménezz | 1996-01-16 | 66 | W. Dubai
+    ST R | Ali | Salehh | 2000-01-22 | 66 | W. Dubai
+    CB R | Khalifa | Al_Hammady | 1998-11-07 | 66 | J. Abu Dhabi
+    CM R | Luanzinho | Silvaa | 2000-04-21 | 64 | Sharjah
+    CM R | Isam | Faizz | 2000-03-06 | 64 | N. Dubai
+    CB R | Rúben | Canedoo | 2001-10-19 | 64 | J. Abu Dhabi
   `,
   PLE: `
     ST R | Oday | Dabagh | 1998-12-03 | 72 | Aberdeen
+    ST R | Assad | Al_Hamlawii | 2000-10-27 | 64 | U. Craiova
+    CM R | Hamed | Hamdann | 2000-10-03 | 64 | -
+    ST R | Tamer | Seyamm | 1992-11-25 | 64 | Shamal
+    CM R | Adam | Kaiedd | 2002-03-02 | 64 | Zamalek
+    CB R | Yaser | Hamedd | 1997-12-09 | 62 | Khor
+    CM R | Ayham | Shhadee | 2000-12-15 | 62 | V. Mostar
+    CM R | Ameed | Sawaftaa | 2000-07-10 | 62 | Port Said
+    CB R | Milad | Termaninii | 1998-05-08 | 60 | Shamal
   `,
   CHN: `
     ST R | Lei | Wuu | 1991-11-19 | 70 | Shanghai P
     ST R | Yuning | Zhangg | 1997-01-05 | 69 | Beijing
     GK R | Junling | Yann | 1991-01-28 | 68 | Shanghai P
+    CB R | Tyias | Browningg | 1994-05-27 | 66 | Shanghai P
+    ST R | Shihao | Weii | 1995-04-08 | 66 | Chengdu
+    CB R | Yang | Liu | 1995-06-17 | 64 | Shandong
+    CB R | Zhunyi | Gaoo | 1995-08-21 | 64 | Shandong
+    CB R | Zhen | Weii | 1997-01-12 | 64 | Shanghai P
+    CM R | Shangyuan | Wangg | 1993-06-02 | 64 | Zhengzhou
+    ST R | Wenneng | Xiee | 2001-02-06 | 64 | Shandong
+    GK R | Junling | Liuu | 1990-06-25 | 62 | Chengdu
+    CM R | Tianyi | Gaoo | 1998-07-01 | 62 | Shanghai S
   `,
   IDN: `
     GK R | Emil | Audéro | 1997-01-18 | 75 | Cremona
@@ -141,6 +173,12 @@ export const AFC: Record<string, string> = {
   THA: `
     AM R | Chanathip | Songkrasyn | 1993-10-05 | 66 | Buriram
     LW R | Supachok | Sarachatt | 1998-05-22 | 66 | Buriram
+    ST R | Supachai | Chaidedd | 1998-12-01 | 66 | Buriram
+    CM R | Sarach | Yooyenn | 1992-05-30 | 64 | Pathum Thani
+    CB R | Nicholas | Mickelsonn | 1999-07-24 | 64 | Elversberg
+    ST R | Teerasak | Poeiphimaii | 2002-09-21 | 62 | Bangkok P
+    CB R | Kritsada | Kamann | 1999-03-18 | 62 | Pathum Thani
+    GK R | Patiwat | Khammaii | 1994-12-24 | 62 | Bangkok U
   `,
   VIE: `
     AM L | Quang_Hải | Nguyễnn | 1997-04-12 | 68 | CA Hà Nội
@@ -148,5 +186,106 @@ export const AFC: Record<string, string> = {
   IND: `
     ST R | Sunil | Chetri | 1984-08-03 | 60 | Bengaluru
     GK R | Gurpreet_Singh | Sandu | 1992-02-03 | 60 | Bengaluru
+  `,
+  OMA: `
+    CM R | Salaah | Al-Yahyaey | 1998-08-17 | 68 | -
+    ST R | Issam | Al-Sabbhi | 1997-05-01 | 67 | -
+    ST R | Mohammed | Al-Ghafry | 1997-05-17 | 65 | Buraimi
+    CM R | Arshad | Al-Alawy | 2000-04-12 | 64/68 | Seeb
+    CM R | Harib | Al-Saadee | 1993-09-23 | 64 | Buraimi
+    CB R | Ghanim | Al-Habashy | 1998-08-04 | 63 | Buraimi
+    CM R | Zahir | Al-Aghbary | 1999-05-28 | 63 | Seeb
+    CM R | Abdullah | Fawazz | 1996-07-03 | 62 | Seeb
+  `,
+  SYR: `
+    ST R | Omar | Al_Somahh | 1989-03-23 | 76 | W. Abu Dhabi
+    CB R | Aiham | Ousoo | 2000-01-09 | 74 | Charleroi
+    ST R | Mahmoud | Al_Aswadd | 2003-09-14 | 70/76 | Salmiya
+    CB R | Ahmad | Faqqa | 2003-01-10 | 68/74 | Degerfors
+    ST R | Mahmoud | Al-Mawass | 1993-01-01 | 68 | Duhok
+    CM R | Can | Moustfaa | 2004-11-19 | 66/74 | Nürnberg
+    ST R | Noah | Shamounn | 2002-12-08 | 66/72 | Kalmar
+    GK R | Elias | Hadayya | 1998-08-21 | 66 | Sandefjord
+    ST R | Mohammad | Al_Hallakk | 1999-11-26 | 65 | -
+    GK R | Ahmad | Madanya | 1990-01-01 | 62 | Homs
+  `,
+  BHR: `
+    ST R | Hashim | Sayed_Issa | 1998-04-03 | 66 | A. Manama
+    ST R | Mahdi | Abduljabarr | 1991-06-25 | 65 | Riffa
+    CM R | Ali | Madann | 1995-11-30 | 65 | Riffa
+    ST R | Mohamed | Al-Romaihy | 1990-09-09 | 64 | Khaldiya
+    CB R | Waleed | Al_Hayamm | 1988-11-04 | 63 | Muharraq
+    CM R | Kamil | Al-Aswadd | 1994-04-08 | 63 | Riffa
+    CM R | Abbas | Al-Asfoorr | 1999-02-02 | 62 | Riffa
+    CB R | Amine | Benadi | 1993-05-09 | 62 | Muharraq
+    CB R | Hamad | Al-Shamsann | 1997-09-29 | 62 | Riffa
+    GK R | Ebrahim | Lutfallah | 1992-09-24 | 60 | A. Manama
+  `,
+  TJK: `
+    GK R | Rustam | Yatimovv | 1998-07-13 | 68 | Rostov
+    CM R | Parvizdzhon | Umarbayevv | 1994-11-01 | 68 | L. Plovdiv
+    CM R | Ehson | Panjshanbee | 1999-05-12 | 68 | Dushanbe
+    ST R | Rustam | Soirovv | 2002-09-12 | 68/74 | Dushanbe
+    CB R | Vahdat | Hanonovv | 2000-07-25 | 67 | Dushanbe
+    ST R | Shervoni | Mabatshoeff | 2000-12-04 | 67 | Dushanbe
+    CM R | Alisher | Dzhalilovv | 1993-08-29 | 66 | Dushanbe
+    CB R | Tabrez | Islomovv | 1998-06-06 | 66 | Dushanbe
+    CM R | Amirbek | Juraboeff | 1996-04-13 | 65 | Dushanbe
+    CB R | Sodikjon | Kurbonovv | 2003-01-19 | 65/72 | Dushanbe
+  `,
+  KGZ: `
+    CM R | Gulzhigit | Alykulovv | 2000-11-25 | 68 | D. Minsk
+    CM R | Erbol | Atabayevv | 2001-08-15 | 68 | L. Zagreb
+    CM R | Beknaz | Almazbekovv | 2005-06-23 | 66/75 | R. Lviv
+    ST R | Gulzhigit | Borubaevv | 2000-04-22 | 66 | Grodno
+    CM R | Odilzhon | Abdurakhmanovv | 1996-03-18 | 65 | Thanh Hóa
+    ST R | Ernist | Batyrkanovv | 1998-02-21 | 64 | D. Bishkek
+    CM R | Adil | Kadyrzhanovv | 2000-07-14 | 62 | D. Bishkek
+    GK R | Kurmanbek | Nurlanbekovv | 2004-04-01 | 60/68 | D. Bishkek
+  `,
+  LBN: `
+    ST R | Husseyn | Chakroun | 2004-11-10 | 66/74 | Hannover
+    CB R | Pedro | Budibb | 2004-04-07 | 64/74 | Pachuca
+    CM R | Mahmoud | Zbibb | 2004-02-29 | 64/72 | Ah. Beirut
+    ST R | Khalil | Baderr | 1999-07-27 | 64 | A. Beirut
+    CM R | Ahmad | Kheir_El_Dinn | 1995-07-07 | 63 | A. Beirut
+    GK R | Mostafa | Matarr | 1995-09-10 | 62 | N. Beirut
+    CB R | Khalil | Khamiss | 1995-01-12 | 62 | N. Beirut
+    CB R | Mohammad | El_Hayeck | 2000-02-19 | 62 | N. Beirut
+    GK R | Antoine | Al_Douayhy | 1999-03-18 | 60 | S. Beirut
+    ST R | Samy | Merhegg | 2006-12-06 | 60/72 | Alverca
+  `,
+  KUW: `
+    CM R | Fawaz | Ayedhh | 1997-02-21 | 64 | Salmiya
+    CM R | Muath | Al-Enezzi | 2003-07-16 | 63/70 | Salmiya
+    ST R | Yousef | Nassser | 1990-10-09 | 63 | -
+    ST R | Eid | Al-Rashidy | 1999-05-25 | 63 | -
+    ST R | Shabaib | Al-Khaldy | 1998-08-11 | 62 | -
+    CB R | Fahad | Al-Hajery | 1991-11-10 | 62 | -
+    GK R | Khaled | Al-Rashidee | 1987-04-20 | 62 | -
+    GK R | Abdulrahman | Al-Fadhly | 2001-01-23 | 60 | Salmiya
+  `,
+  PHI: `
+    CB R | Paul | Tabinass | 2002-07-05 | 68/74 | D. Zagreb
+    CB R | Jefferson | Tabinass | 1998-08-07 | 64 | Selangor
+    ST R | André | Leipoldd | 2001-11-12 | 64 | -
+    GK R | Michael | Falkesgaardd | 1991-04-09 | 64 | Bangkok P
+    CM R | Oskari | Kekkonenn | 1999-09-24 | 62 | Sabah
+    ST R | Bjørn | Kristensenn | 2002-05-04 | 62 | -
+    CB R | Scott | Woodss | 2000-05-07 | 62 | Boeung Ket
+    ST R | Sebastian | Rasmussenn | 2002-06-17 | 62 | -
+    CM R | Cole | Mrowkaa | 2006-04-26 | 58/72 | Columbus
+  `,
+  MAS: `
+    ST R | Bérgson | Silvaa | 1991-02-09 | 66 | Johor
+    ST R | Arif | Aimann | 2002-05-04 | 66/72 | Johor
+    CB R | La'Vere | Corbin-Onng | 1991-04-22 | 66 | Johor
+    CB R | Dion | Coolss | 1996-06-04 | 66 | C. Osaka
+    CM R | Stuart | Wilkinn | 1998-03-12 | 64 | Johor
+    CB R | Syahmi | Safarii | 1998-02-05 | 64 | Johor
+    CM R | Manuel | Hidalgoo | 1999-05-03 | 64 | Johor
+    ST R | Faisal | Halimm | 1998-01-07 | 64 | Selangor
+    GK R | Syihan | Hazmii | 1996-02-22 | 62 | Johor
+    CM R | Syahir | Bashahh | 2001-09-16 | 62/68 | Selangor
   `,
 }

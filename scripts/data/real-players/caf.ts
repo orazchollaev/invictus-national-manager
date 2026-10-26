@@ -227,15 +227,38 @@ export const CAF: Record<string, string> = {
     ST R | Pierre-Emerick | Aubameyangg | 1989-06-18 | 77 | O. Marseille
     LW R | Denis | Buanga | 1994-11-11 | 77 | Los Angeles
     CM,DM R | Mario | Leminna | 1993-09-01 | 76 | G. Saray
+    CM R | Didier | Ndongg | 1994-06-17 | 66 | -
+    ST R | Orphé | Mbinaa | 2000-11-02 | 66 | A. Limassol
+    ST R | Shavy | Babickaa | 2000-06-01 | 66 | Angers
+    CB R | Aaron | Appindangoyee | 1992-02-20 | 66 | Sivas
+    CB R | Anthony | Oyonno | 2001-04-12 | 64 | Frosinone
+    CB R | Jérémy | Oyonoo | 2001-04-12 | 64 | Spezia
+    CB R | Urie-Michel | Mboulaa | 2003-04-30 | 64/72 | Metz
+    CB R | Jacques | Ekomiéé | 2003-08-19 | 64/72 | Wrexham
+    ST R | Rody | Effagge | 2004-04-11 | 64/72 | Guingamp
   `,
   ANG: `
     LW R | Zito | Luvumbbo | 2002-03-09 | 75 | R. Mallorca
     RB R | Clinton | Matta | 1992-11-07 | 74 | O. Lyon
+    CB R | David | Carmoo | 1999-07-19 | 72 | O. Piraeus
+    ST R | Chico | Banzaa | 1998-12-17 | 68 | Zamalek
+    CB R | Kialonda | Gaspaar | 1997-09-27 | 68 | Lecce
+    CM R | Randy | Ntekaa | 1997-12-06 | 68 | R. Vallecano
+    ST R | Zini | Silvaa | 2002-07-03 | 66/72 | A. Athína
+    CM R | Beni | Mukendii | 2002-05-21 | 66/72 | V. Guimarães
+    CB R | Pedro | Bondoo | 2004-11-16 | 66/74 | Famalicão
+    CB R | Jonathan | Buatuu | 1993-09-27 | 66 | G. Vicente
+    ST R | Felício | Milsonn | 1999-10-12 | 66 | J. Abu Dhabi
   `,
   ZAM: `
     ST R | Patson | Dakka | 1998-10-09 | 75 | Leicester C
     LW R | Lameck | Bandda | 2001-01-29 | 74 | Lecce
     ST R | Fashion | Sakalla | 1997-03-14 | 73 | Majmaah
+    ST R | Kingstone | Mutandwaa | 2003-01-05 | 64/72 | S. Genève
+    CM R | Gamphani | Lunguu | 1998-09-19 | 64 | Orlando P
+    CM R | Miguel | Chaiwaa | 2004-06-07 | 62/72 | H. Leith
+    ST R | Albert | Kangwandaa | 1999-04-07 | 62 | Y. Dar
+    CM R | Joseph | Litetaa | 2006-02-22 | 58/74 | Cagliari
   `,
   GAM: `
     RW,LW L | Yankuba | Mintê | 2004-07-22 | 78/84 | Brighton
@@ -246,14 +269,223 @@ export const CAF: Record<string, string> = {
   `,
   MOZ: `
     LB L | Reinildo | Mandavva | 1994-01-21 | 74 | Sunderland
+    CM R | Geny | Catamoo | 2001-01-26 | 72 | S. Lisboa
+    CM R | Luís | Miquissonee | 1995-07-25 | 68 | A. Cairo
+    CB R | Bruno | Langaa | 1997-10-31 | 66 | Q. Ağdam
+    CM R | Guima | Silvaa | 1995-11-14 | 62 | Zirə
+    CB R | Mexer | Bastoss | 1987-09-08 | 62 | -
+    CM R | Witi | Mutaa | 1996-08-26 | 62 | P. Yerevan
+    CB R | Diogo | Calilaa | 1998-10-10 | 60 | M. Fès
+    CM R | Manuel | Kambalaa | 1991-08-21 | 60 | Polokwane
   `,
   KEN: `
     ST R | Michael | Olungga | 1994-03-26 | 73 | Duhail
+    CM R | Duke | Abuyaa | 1994-03-23 | 64 | Y. Dar
+    CB R | Rooney | Onyangoo | 2001-08-08 | 62 | -
+    CM R | Timothy | Oumaa | 2004-06-10 | 62/70 | Charlton A
+    ST R | Job | Ochiengg | 2003-01-17 | 60/70 | R. Sociedad
+    CB R | Vincent | Harperr | 2000-09-22 | 60 | -
+    CM R | Richard | Odadaa | 2000-11-25 | 60 | -
+    CM R | Austin | Odhiamboo | 1999-12-16 | 60 | N. Beirut
+    CB R | Manzur | Okwaroo | 2006-03-23 | 58/72 | S. Reims
+    CM R | Amos | Nondii | 1999-02-10 | 58 | P. Tirana
   `,
   CTA: `
     DM R | Geoffrey | Kondogbiá | 1993-02-15 | 75 | O. Marseille
   `,
   TAN: `
     ST R | Mbwana | Samata | 1992-12-23 | 72 | -
+  `,
+  UGA: `
+    CM R | Abdoulaye | Sissakko | 1998-05-26 | 71 | Sint-Truiden
+    CM R | Dieudonné_Gaucho | Debohy | 2001-01-15 | 71 | R. Częstochowa
+    CB R | Herbert | Bockhorm | 1995-01-31 | 70 | Magdeburg
+    CM R | Allan | Okelo | 2000-07-04 | 70 | F. Rabat
+    CB R | Aziz | Kayondoo | 2002-10-06 | 69/75 | Liberec
+    GK R | Denis | Onyangoo | 1985-05-15 | 68 | Mamelodi S
+    CM R | Travis | Mutyabba | 2005-08-07 | 67/76 | Sfax
+    CB R | Souleymane | Diabi | 1999-10-08 | 66 | Winterthur
+    CB R | Rogers | Torachh | 2003-06-23 | 66/72 | Constantine
+    CB R | Toby | Sibbik | 1999-05-23 | 66 | -
+  `,
+  BEN: `
+    CM R | Junior | Olaytan | 2002-05-09 | 74/80 | Beşiktaş
+    GK R | Saturnin | Allagbee | 1993-11-22 | 72 | -
+    ST R | Aiyegun | Tosinn | 1998-06-26 | 72 | Lorient
+    CM R | Hassane | Imouranne | 2003-04-08 | 70/77 | G. Zürich
+    ST R | Olatoundji | Tessilimy | 1998-02-18 | 70 | -
+    CM R | Sessi | D'Almeyda | 1995-11-20 | 70 | N. Bakı
+    CM R | Mattéo | Ahlinvy | 1999-07-02 | 70 | Constanța
+    CB R | Tamimou | Ouorrou | 2003-05-03 | 69/76 | C. Sofia
+    CB R | Rachid | Moumminy | 2004-10-27 | 67/75 | Sumqayıt
+    CB R | Yohan | Rochee | 1997-07-07 | 65 | -
+  `,
+  MAD: `
+    CM R | Rayan | Ravelosson | 1997-01-16 | 72 | Y. Bern
+    CB R | Mathieu | Acapandiéé | 2004-12-14 | 69/78 | H. Split
+    CM R | Loïc | Lapoussinn | 1996-03-27 | 68 | -
+    ST R | Johan | N'Zzi | 1995-01-23 | 66 | Sakhnin
+    ST R | Ryan | Pontty | 1998-06-22 | 66 | Rodez
+    ST R | Bryan | Adinanny | 2000-03-13 | 65 | Kortrijk
+    CB R | Sandro | Trémouletté | 1999-11-18 | 64 | Surdulica
+    ST R | Hakim | Abdallahh | 1998-01-09 | 64 | -
+  `,
+  EQG: `
+    CB R | Saúl | Cocco | 1999-02-09 | 74 | Torino
+    CM R | Santiago | Enemee | 2000-09-29 | 70 | AC Praha
+    CM R | Álex | Balbboa | 2001-03-06 | 68 | R. Valladolid
+    ST R | Dorian | Juniorr | 2001-05-12 | 66 | Viborg
+    GK R | Jesús | Owonno | 2001-03-01 | 66 | -
+    ST R | Cristian | Makatté | 2002-09-21 | 64 | Lier
+    GK R | Manuel | Sapungaa | 1992-11-23 | 64 | Sekhukhune
+    ST R | Enrique | Esonno | 2003-10-17 | 62/70 | Nõmme
+  `,
+  COM: `
+    ST R | Faïz | Selemanni | 1993-11-14 | 70 | Q. Doha
+    CM R | Zaydou | Youssoufff | 1999-07-11 | 70 | F. Hofuf
+    CM R | Youssouf | M'Changamaa | 1990-08-29 | 70 | -
+    ST R | Rafiki | Saïdd | 2000-03-15 | 68/76 | Wolverhampton W
+    CB R | Saïd | Bakkari | 1994-09-22 | 68 | S. Rotterdam
+    CM R | Iyad | Mohammedd | 2001-03-05 | 68 | C. Pia
+    CM R | Rémy | Vitaa | 2001-04-01 | 68 | Tondela
+    CB R | Abdel-Hakim | Abdalah | 1997-08-18 | 65 | Guingamp
+    CB R | Kenan | Toibiboo | 2004-12-09 | 64/72 | Cádiz
+    CB R | Ismaël | Bouraa | 2000-08-14 | 64 | Troyes
+  `,
+  LBY: `
+    DM R | Moatasem | Al-Musratti | 1996-04-06 | 72 | H. Verona
+    CB R | Ali | Youssoff | 2001-07-09 | 66/73 | Nantes
+    ST R | Ismael | Tajouri-Shraddi | 1994-03-28 | 66 | A. Tripoli
+    ST R | Ezoo | El_Maremy | 1998-08-22 | 64 | A. Tripoli
+    CM R | Osamah | Al-Shuraimy | 2001-02-20 | 64 | C. Africain
+    GK R | Murad | Al-Wuheeshy | 1997-02-28 | 62 | A. Benghazi
+    CB R | Muhanad | Madyenn | 1994-03-25 | 60 | N. Benghazi
+    GK R | Mohamed | Darebby | 2003-05-05 | 58/68 | I. Tripoli
+  `,
+  MTN: `
+    ST R | Aboubakary | Koïtaa | 1998-09-20 | 72 | A. Athína
+    CM R | Abdoullah | Baa | 2003-07-31 | 70/76 | Sunderland
+    ST R | Djeidi | Gassamaa | 2003-09-10 | 70/78 | Glasgow R
+    ST R | Dawda | Camarra | 2002-11-04 | 68/74 | Alverca
+    CM R | Oumar | Ngomm | 2004-03-09 | 66/74 | Lecce
+    GK R | Mamadou | Dioppe | 2000-01-03 | 66 | Auxerre
+    CB R | Jordan | Lefortt | 1993-08-09 | 66 | Angers
+    CB R | Lamine | Baa | 1997-08-24 | 65 | Ś. Wrocław
+    CB R | Baïla | Diallo | 2001-06-24 | 64 | Granada
+    ST R | Pape_Ndiaga | Yadee | 2000-01-05 | 64 | Cherkasy
+  `,
+  SDN: `
+    CM R | Ammar | Taifoor | 1997-04-12 | 64 | Sfax
+    ST R | Mohamed | Eissa | 1994-07-12 | 63 | -
+    ST R | Yaser | Muzmell | 1992-01-01 | 62 | H. Omdurman
+    CM R | Walieldin | Khedrr | 1995-09-15 | 62 | H. Omdurman
+    ST R | Abo | Eissa | 1996-01-05 | 62 | -
+    GK R | Ali | Abu_Eshreen | 1989-12-06 | 62 | H. Omdurman
+    CB R | Mohamed | Eringg | 1997-10-20 | 60 | H. Omdurman
+    CM R | Salah | Adell | 1995-04-03 | 60 | H. Omdurman
+  `,
+  TOG: `
+    ST R | Kévin | Denkeyy | 2000-11-30 | 76/80 | Cincinnati
+    CB R | Kévin | Bomma | 2002-11-20 | 72/78 | R. Salzburg
+    CB R | Djené | Dakonamm | 1991-12-31 | 72 | Getafe
+    ST R | Kodjo | Fo-Dohh_Laba | 1992-01-27 | 68 | Sharjah
+    CM R | Sadik | Fofanna | 2003-05-16 | 68/74 | Lecce
+    CM R | Samsondin | Ourro | 2000-03-02 | 67 | Dunajská Streda
+    CB R | Pierre | Nadjombee | 2003-05-10 | 66/72 | Magdeburg
+    CB R | Izak | Akakpoo | 2004-02-28 | 66/74 | Lorient
+    CB R | Steven | Nadorr | 2002-06-23 | 66/72 | Modena
+    CM R | Dermane | Karimm | 2003-12-26 | 66/72 | Troyes
+    ST R | Mansour | Ouro-Taggba | 2004-12-17 | 66/74 | Bochum
+    CM R | Kodjo | Aziangbee | 2003-12-14 | 66/72 | Shanghai P
+  `,
+  NAM: `
+    ST R | Peter | Shalulilee | 1993-03-23 | 72 | Y. Dar
+    CM R | Deon | Hottoo | 1990-10-29 | 68 | Orlando P
+    ST R | Bethuel | Muzeuu | 2000-02-22 | 64 | Sekhukhune
+    CB R | Riaan | Hanamubb | 1995-02-08 | 62 | -
+    CB R | Ivan | Kamberippa | 1994-02-03 | 60 | Gaborone U
+    CB R | Paulus | Amutenyaa | 2002-07-22 | 60 | Gaborone U
+    ST R | David | Ndeunyemaa | 2002-08-22 | 60 | Jwaneng
+    GK R | Mervin | Kasetuura | 1997-12-26 | 58 | -
+  `,
+  SLE: `
+    ST R | Sullay | Kaikaii | 1995-08-26 | 66 | -
+    CB R | Alex | Banguraa | 1999-07-13 | 66/70 | Middlesbrough
+    ST R | Josh | Koromaa | 1998-11-09 | 64 | -
+    CM R | Azeem | Abdulaii | 2002-12-09 | 64/70 | H. Leith
+    CM R | Tyrese | Fornahh | 1999-09-11 | 64 | -
+    CB R | Osman | Kakayy | 1997-08-25 | 64 | Košice
+    CM R | Idris | Kanuu | 1999-12-05 | 62 | -
+    CB R | Juma | Bahh | 2006-04-11 | 62/74 | Augsburg
+    CB R | Abdoulie | Kabiaa | 2001-01-27 | 62 | Minsk
+    CM R | Momoh | Kamaraa | 2005-05-06 | 60/72 | Borås
+  `,
+  RWA: `
+    CM R | Djihad | Bizimanaa | 1996-12-12 | 64 | Constantine
+    CB R | Emmanuel | Imanishimwee | 1995-02-02 | 62 | -
+    ST R | Abeddy | Biramahiree | 1998-10-04 | 62 | -
+    CM R | Noam | Emerann | 2002-09-24 | 62/68 | -
+    CM R | Samuel | Gueulettee | 2000-05-19 | 62 | -
+    CB R | Leroy-Jacques | Mickelss | 1995-06-25 | 62 | -
+    GK R | Fiacre | Ntwarri | 1999-09-25 | 62 | -
+    CB R | Gilbert | Mugishaa | 1996-07-18 | 60 | Jwaneng
+    CB R | Darryl | Nkulikiyimanaa | 2005-05-24 | 60/72 | S. Liège
+    GK R | Adolphe | Hakizimanaa | 2002-02-05 | 58 | A. Kigali
+  `,
+  MWI: `
+    ST R | Gabadinho | Mhangoo | 1992-09-27 | 66 | Blantyre W
+    ST R | Yann | Kouakouu | 1999-08-17 | 64 | M. Lubumbashi
+    CM R | Charles | Petroo | 2001-02-08 | 62 | -
+    ST R | Patrick | Mwaungulu | 2002-02-18 | 62 | M. Lubumbashi
+    CM R | Yankho | Singoo | 2000-04-01 | 62 | Blantyre B
+    CM R | Blessings | Singinii | 1995-07-19 | 60 | Blantyre W
+    ST R | Lanjesi | Nkhomaa | 2002-05-27 | 60 | -
+    ST R | Richard | Mbuluu | 1994-01-25 | 60 | -
+  `,
+  LBR: `
+    CB R | Sampson | Dwehh | 2001-10-10 | 66/72 | V. Plzeň
+    CB R | Mark | Pabaii | 2000-09-30 | 64 | Koper
+    CM R | Oscar | Dorleyy | 1998-07-19 | 64 | -
+    CB R | Natus | Swenn | 2004-11-18 | 62/70 | S. Tiraspol
+    CM R | Solomon | Twehh | 2004-08-30 | 62/70 | -
+    ST R | Edward | Ledlumm | 1999-06-15 | 62 | Chlef
+    CB R | Prince | Baldee | 1998-03-23 | 60 | -
+    ST R | Peter | Wilsonn | 1996-10-09 | 60 | -
+    GK R | Amos | Wessehh | 2000-12-19 | 58 | -
+  `,
+  GNB: `
+    ST R | Álvaro | Djalóo | 1999-08-16 | 74 | A. Bilbao
+    ST R | Beto | Bercique | 1998-01-31 | 74 | Firenze
+    ST R | Mama | Baldéé | 1995-11-06 | 72 | S. Brest
+    CM R | Alfa | Semedoo | 1997-08-30 | 70 | -
+    CM R | Dálcio | Gomess | 1996-05-22 | 68 | A. Lefkosia
+    ST R | Franculino | Djúú | 2004-06-28 | 68/76 | Trabzon
+    CM R | Ronaldo | Vieiraa | 1998-07-19 | 66 | San Jose
+    CM R | Panutche | Camaráa | 1997-02-28 | 66 | Dundee U
+    CM R | Mamadi | Camaráa | 2003-12-31 | 66/72 | Kayseri
+    ST R | Mauro | Rodriguess | 2001-04-15 | 64 | B. Plovdiv
+    CB R | Opa | Sangantéé | 1991-02-01 | 64 | Dunkerque
+    CM R | Renato | Nhagaa | 2007-03-23 | 62/76 | G. Saray
+  `,
+  CGO: `
+    CM R | Antoine | Makoumbouu | 1998-07-18 | 70 | S. Genova
+    ST R | Thievy | Bifoumaa | 1992-05-13 | 66 | P. Tehran
+    CB R | Morgan | Poatyy | 1997-07-15 | 66 | Lausanne
+    CB R | Bradley | Mazikouu | 1996-06-02 | 66 | S. Genève
+    CB R | Yhoan | Andzouanaa | 1996-12-13 | 66 | Konya
+    CM R | Gaius | Makoutaa | 1997-07-25 | 66 | Alanya
+    CB R | Kévin | Mouangaa | 2000-07-24 | 64 | Kasımpaşa
+    ST R | Mons | Bassouaminaa | 1998-05-28 | 64 | M. Funchal
+    CM R | Chandrel | Massangaa | 1999-08-17 | 62 | Eyüp
+    CB R | Christ | Makossoo | 2004-05-09 | 62/72 | Auxerre
+  `,
+  ETH: `
+    ST R | Gatoch | Panomm | 1994-06-12 | 62 | -
+    CM R | Abel | Yalewv | 1996-03-23 | 60 | -
+    CB R | Yared | Bayehh | 1995-01-22 | 58 | Hawassa
+    CM R | Habtamu | Tekestee | 1998-09-11 | 56 | Gondar
+    CB R | Mignot | Debebee | 1995-09-02 | 56 | Gondar
+    CB R | Asrat | Tunjoo | 1996-11-29 | 56 | Dire Dawa
+    GK R | Abubeker | Nuraa | 2000-09-11 | 56 | Adama
   `,
 }

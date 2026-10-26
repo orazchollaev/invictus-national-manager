@@ -137,13 +137,39 @@ export const CONCACAF: Record<string, string> = {
     RB R | Aaron | Herrerra | 1997-06-06 | 71 | D.C. U
     ST R | Rubio | Rubim | 1996-03-01 | 70 | -
     LW R | Óscar | Santiss | 1999-03-25 | 69 | C. Guatemala
+    ST R | Darwin | Lomm | 1997-07-14 | 62 | S. La Paz
+    ST R | Arquímides | Ordóñezz | 2003-08-05 | 62/70 | -
+    ST R | Olger | Escobarr | 2006-09-11 | 60/74 | Montréal
+    CM R | Stheven | Robless | 1995-11-10 | 60 | C. Guatemala
+    CM R | Matt | Evanss | 2006-05-25 | 58/72 | W. Tirol
+    GK R | Kenderson | Navarroo | 2002-02-25 | 58 | M. Guatemala
+    CM R | José | Rosaless | 1993-06-24 | 58 | Antigua
+    CB R | José_Carlos | Pintoo | 1993-06-16 | 58 | C. Guatemala
+    ST R | Rudy | Muñozz | 2005-02-06 | 58/70 | M. Guatemala
   `,
   SLV: `
     RB R | Alex | Roldánn | 1996-07-28 | 70 | Seattle
     GK R | Mario | Gonzáles | 1997-04-06 | 66 | -
+    ST R | Brayan | Gill | 2001-06-28 | 66 | Kaliningrad
+    ST R | Nathan | Ordazz | 2004-01-12 | 64/72 | D.C. U
+    CM R | Christian | Martínezz | 1994-08-12 | 60 | San Carlos
+    ST R | Styven | Vásquezz | 2002-10-29 | 60 | -
+    CM R | Mayer | Gill | 2003-09-07 | 60/68 | -
+    CB R | Julio | Sibriánn | 1996-07-17 | 58 | A. San Salvador
+    GK R | Mario | Gonzálezz | 1997-05-20 | 58 | A. San Salvador
+    CB R | Henry | Romeroo | 1991-10-17 | 56 | A. San Salvador
   `,
   TRI: `
     ST,RW R | Levi | Garsia | 1997-11-20 | 73 | S. Moskva
+    ST R | Roald | Mitchelll | 2003-01-13 | 64/70 | Viborg
+    ST R | Tyrese | Spicerr | 2000-12-04 | 64 | Orlando C
+    CM R | Dantaye | Gilbertt | 2004-12-03 | 62/70 | B. Ostrava
+    CB R | Kobi | Henryy | 2004-04-26 | 62/70 | R. Salt Lake
+    ST R | Dante | Sealyy | 2003-04-17 | 62/70 | Montréal
+    CB R | Déron | Paynee | 2002-09-25 | 62/68 | Volendam
+    ST R | Molik | Khann | 2004-04-08 | 62 | -
+    CB R | Rio | Cardiness | 2006-01-07 | 60/72 | Bristol C
+    ST R | Ryan | Telferr | 1994-05-04 | 60 | Halifax
   `,
   DOM: `
     LB L | Junior | Fyrpo | 1996-08-22 | 75 | B. Sevilla
@@ -154,5 +180,17 @@ export const CONCACAF: Record<string, string> = {
   `,
   BER: `
     ST R | Nahki | Wels | 1990-06-01 | 68 | -
+  `,
+  NCA: `
+    ST R | Jaime | Morenoo | 1995-03-30 | 64 | Kuopio
+    ST R | Bancy | Hernándezz | 2000-06-27 | 62 | S. Tibás
+    ST R | Ariagner | Smithh | 1998-12-13 | 62 | Panevėžys
+    ST R | Byron | Bonillaa | 1993-08-30 | 60 | Estelí
+    ST R | Ariel | Arauzz | 2001-05-30 | 60 | Heredia
+    CM R | Jonathan | Moncadaa | 1998-01-03 | 60 | C. Guatemala
+    CM R | Jason | Coronell | 1993-10-06 | 58 | Estelí
+    CM R | Marlon | Lópezz | 1992-11-02 | 58 | Estelí
+    CB R | Óscar | Acevedoo | 1997-03-18 | 58 | Estelí
+    GK R | Jason | Vegaa | 1995-11-06 | 58 | San Carlos
   `,
 }
