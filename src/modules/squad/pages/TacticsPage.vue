@@ -8,7 +8,6 @@ import {
   AppButtonGroup,
   AppCard,
   AppField,
-  AppSectionHeader,
   AppSelect,
   AppSheet,
   AppSubTabBar,
@@ -75,7 +74,7 @@ const formationChosen = ref(!setup)
 const selectedSlot = ref<number | null>(null)
 
 /** Leaving with edits that were never saved would play the old eleven; ask first. */
-const baseline = JSON.stringify(team.value)
+let baseline = JSON.stringify(team.value)
 let saved = false
 onBeforeRouteLeave(async () => {
   if (saved || JSON.stringify(team.value) === baseline) return true
@@ -184,6 +183,12 @@ function auto() {
   team.value.setPieceTakerId = sheet.setPieceTakerId
 }
 
+// A beginner's first visit opens on the staff's recommendation instead of a blank sheet.
+if (setup && settings.assistLevel === "beginner") {
+  auto()
+  baseline = JSON.stringify(team.value)
+}
+
 const xiOptions = computed(() =>
   [...inXI.value].map((id) => ({
     value: id,
@@ -272,63 +277,71 @@ async function save() {
     />
 
     <AppCard padding="md" class="chemistry">
-      <AppSectionHeader :title="t('squad.tactics.chemistry')" />
-      <div class="spirit">
-        <strong>{{ $tx(spiritLabel(spirit)) }}</strong>
-        <span class="tie-note">{{ t("squad.tactics.chemistryNote") }}</span>
-      </div>
-      <ul v-if="ties.length" class="ties">
-        <li v-for="tie in ties" :key="tie.key" class="tie" :class="`tie--${tie.kind}`">
-          <span class="tie-points">{{ signed(tie.points) }}</span>
-          {{ tie.text }}
-        </li>
-      </ul>
-      <p v-else class="tie-note">{{ t("squad.tactics.noTies") }}</p>
+      <details>
+        <summary class="fold-title">
+          {{ t("squad.tactics.chemistry") }} · {{ $tx(spiritLabel(spirit)) }}
+        </summary>
+        <div class="fold-body">
+          <span class="tie-note">{{ t("squad.tactics.chemistryNote") }}</span>
+          <ul v-if="ties.length" class="ties">
+            <li v-for="tie in ties" :key="tie.key" class="tie" :class="`tie--${tie.kind}`">
+              <span class="tie-points">{{ signed(tie.points) }}</span>
+              {{ tie.text }}
+            </li>
+          </ul>
+          <p v-else class="tie-note">{{ t("squad.tactics.noTies") }}</p>
+        </div>
+      </details>
     </AppCard>
 
     <AppCard padding="md" class="instructions">
       <AppField :label="t('squad.tactics.mentality')" layout="stack">
         <AppSelect v-model="mentality" :options="mentalityOptions()" />
       </AppField>
-      <AppField :label="t('squad.tactics.pressing')" layout="stack">
-        <AppButtonGroup v-model="pressing" block :options="pressingOptions()" />
-      </AppField>
-      <AppField :label="t('squad.tactics.tempo')" layout="stack">
-        <AppButtonGroup v-model="tempo" block :options="tempoOptions()" />
-      </AppField>
-      <AppField :label="t('squad.tactics.line')" layout="stack">
-        <AppButtonGroup v-model="line" block :options="lineOptions()" />
-      </AppField>
-      <AppField :label="t('squad.tactics.width')" layout="stack">
-        <AppButtonGroup v-model="width" block :options="widthOptions()" />
-      </AppField>
-      <AppField :label="t('squad.tactics.counter')" layout="row">
-        <AppToggle v-model="counter" :aria-label="t('squad.tactics.counter')" />
-      </AppField>
-      <AppField :label="t('squad.tactics.captain')" layout="stack">
-        <AppSelect
-          :model-value="team.captainId ?? ''"
-          :options="xiOptions"
-          :placeholder="t('squad.tactics.choose')"
-          @update:model-value="(v) => (team.captainId = v)"
-        />
-      </AppField>
-      <AppField :label="t('squad.tactics.penalties')" layout="stack">
-        <AppSelect
-          :model-value="team.penaltyTakerId ?? ''"
-          :options="xiOptions"
-          :placeholder="t('squad.tactics.choose')"
-          @update:model-value="(v) => (team.penaltyTakerId = v)"
-        />
-      </AppField>
-      <AppField :label="t('squad.tactics.setPieces')" layout="stack">
-        <AppSelect
-          :model-value="team.setPieceTakerId ?? ''"
-          :options="xiOptions"
-          :placeholder="t('squad.tactics.choose')"
-          @update:model-value="(v) => (team.setPieceTakerId = v)"
-        />
-      </AppField>
+      <details class="custom">
+        <summary class="fold-title">{{ t("squad.tactics.customize") }}</summary>
+        <div class="fold-body">
+          <AppField :label="t('squad.tactics.pressing')" layout="stack">
+            <AppButtonGroup v-model="pressing" block :options="pressingOptions()" />
+          </AppField>
+          <AppField :label="t('squad.tactics.tempo')" layout="stack">
+            <AppButtonGroup v-model="tempo" block :options="tempoOptions()" />
+          </AppField>
+          <AppField :label="t('squad.tactics.line')" layout="stack">
+            <AppButtonGroup v-model="line" block :options="lineOptions()" />
+          </AppField>
+          <AppField :label="t('squad.tactics.width')" layout="stack">
+            <AppButtonGroup v-model="width" block :options="widthOptions()" />
+          </AppField>
+          <AppField :label="t('squad.tactics.counter')" layout="row">
+            <AppToggle v-model="counter" :aria-label="t('squad.tactics.counter')" />
+          </AppField>
+          <AppField :label="t('squad.tactics.captain')" layout="stack">
+            <AppSelect
+              :model-value="team.captainId ?? ''"
+              :options="xiOptions"
+              :placeholder="t('squad.tactics.choose')"
+              @update:model-value="(v) => (team.captainId = v)"
+            />
+          </AppField>
+          <AppField :label="t('squad.tactics.penalties')" layout="stack">
+            <AppSelect
+              :model-value="team.penaltyTakerId ?? ''"
+              :options="xiOptions"
+              :placeholder="t('squad.tactics.choose')"
+              @update:model-value="(v) => (team.penaltyTakerId = v)"
+            />
+          </AppField>
+          <AppField :label="t('squad.tactics.setPieces')" layout="stack">
+            <AppSelect
+              :model-value="team.setPieceTakerId ?? ''"
+              :options="xiOptions"
+              :placeholder="t('squad.tactics.choose')"
+              @update:model-value="(v) => (team.setPieceTakerId = v)"
+            />
+          </AppField>
+        </div>
+      </details>
     </AppCard>
 
     <StickyCta above-nav>
@@ -418,9 +431,20 @@ async function save() {
   gap: var(--sp-2);
 }
 
-.spirit {
+.fold-title {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.fold-body {
   display: flex;
   flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.custom {
+  margin-top: var(--sp-1);
 }
 
 .tie-note {
