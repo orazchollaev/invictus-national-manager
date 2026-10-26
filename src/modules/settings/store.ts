@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { detectLocale, setLocale, type Locale } from "@/i18n"
 
 export type Theme = "light" | "dark"
@@ -9,6 +9,47 @@ export type LiveMatchSpeed = 1 | 2 | 4
 export type AdvanceStep = 1 | 7 | 30 | "match"
 /** When the game saves itself: after every change, once a game week/month, or never. */
 export type AutoSave = "always" | "weekly" | "monthly" | "off"
+
+/** How much of the job the assistant takes: one choice that sets the switches below it. */
+export type AssistLevel = "beginner" | "manager" | "expert"
+
+interface Assist {
+  assistantPicks: boolean
+  watchDraws: boolean
+  assistantBoard: boolean
+  assistantPress: boolean
+  showIntake: boolean
+  quietNotices: boolean
+}
+
+const ASSIST: Record<AssistLevel, Assist> = {
+  // The assistant does the paperwork; the user picks tactics and plays the matches.
+  beginner: {
+    assistantPicks: true,
+    watchDraws: false,
+    assistantBoard: true,
+    assistantPress: true,
+    showIntake: false,
+    quietNotices: true,
+  },
+  manager: {
+    assistantPicks: false,
+    watchDraws: true,
+    assistantBoard: false,
+    assistantPress: false,
+    showIntake: true,
+    quietNotices: true,
+  },
+  // Every decision stops the game, as it comes.
+  expert: {
+    assistantPicks: false,
+    watchDraws: true,
+    assistantBoard: false,
+    assistantPress: false,
+    showIntake: true,
+    quietNotices: false,
+  },
+}
 
 export const useSettingsStore = defineStore("settings", () => {
   const theme = ref<Theme>("dark")
@@ -33,6 +74,29 @@ export const useSettingsStore = defineStore("settings", () => {
   const pauseOnKeyEvents = ref(true)
   /** Show the minor commentary lines (fouls, corners, offsides) in the feed. */
   const verboseCommentary = ref(true)
+
+  /** The level the switches add up to, or "custom" when they match none. */
+  const assistRefs = {
+    assistantPicks,
+    watchDraws,
+    assistantBoard,
+    assistantPress,
+    showIntake,
+    quietNotices,
+  }
+  const assistLevel = computed<AssistLevel | "custom">(
+    () =>
+      (Object.keys(ASSIST) as AssistLevel[]).find((level) =>
+        (Object.keys(assistRefs) as (keyof Assist)[]).every(
+          (key) => assistRefs[key].value === ASSIST[level][key]
+        )
+      ) ?? "custom"
+  )
+
+  function setAssistLevel(level: AssistLevel) {
+    for (const key of Object.keys(assistRefs) as (keyof Assist)[])
+      assistRefs[key].value = ASSIST[level][key]
+  }
 
   // Saves from when 10× existed: fall back to the fastest speed left.
   watch(
@@ -83,6 +147,8 @@ export const useSettingsStore = defineStore("settings", () => {
     quietNotices,
     pauseOnKeyEvents,
     verboseCommentary,
+    assistLevel,
+    setAssistLevel,
     resetAll,
   }
 })

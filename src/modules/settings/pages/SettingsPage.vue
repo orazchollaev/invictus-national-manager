@@ -9,6 +9,7 @@ import { flagUrl } from "@/lib/flags"
 import {
   useSettingsStore,
   type AdvanceStep,
+  type AssistLevel,
   type AutoSave,
   type LiveMatchSpeed,
   type Theme,
@@ -56,6 +57,18 @@ const aboutOpen = ref(false)
     </AppCard>
 
     <AppCard padding="md" class="group">
+      <AppField :label="t('settings.assist')" layout="stack">
+        <AppButtonGroup
+          :model-value="settings.assistLevel"
+          block
+          :options="[
+            { value: 'beginner', label: t('settings.assistBeginner') },
+            { value: 'manager', label: t('settings.assistManager') },
+            { value: 'expert', label: t('settings.assistExpert') },
+          ]"
+          @update:model-value="(v) => settings.setAssistLevel(v as AssistLevel)"
+        />
+      </AppField>
       <AppField :label="t('settings.advance')" layout="stack">
         <AppButtonGroup
           :model-value="String(settings.advanceStep)"
