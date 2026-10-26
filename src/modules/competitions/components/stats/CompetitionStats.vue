@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { AppEmptyState, AppSectionHeader } from "@/components/ui"
+import { AppEmptyState, AppSubTabBar } from "@/components/ui"
+import { resolveText } from "@/i18n/text"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { msg } from "@/engine/text"
 import { positionGroup } from "@/engine/players/ability"
@@ -51,6 +52,15 @@ const lines = computed(() =>
 
 const show = (r: LeaderRow, stat: Stat) => (stat === "rating" ? r[stat].toFixed(1) : r[stat])
 const title = (kind: string) => msg(`award.${kind}`)
+
+/** One chart at a time: those with someone on them, and the team of the tournament. */
+const tabs = computed(() => [
+  ...charts.value.map((c) => c.kind),
+  ...(lines.value.length ? ["xi"] : []),
+])
+const picked = ref("")
+const tab = computed(() => (tabs.value.includes(picked.value) ? picked.value : tabs.value[0]))
+const chart = computed(() => charts.value.find((c) => c.kind === tab.value))
 </script>
 
 <template>
@@ -81,11 +91,17 @@ const title = (kind: string) => msg(`award.${kind}`)
       </div>
     </RouterLink>
 
-    <section v-for="c in charts" :key="c.kind" class="chart">
-      <AppSectionHeader :title="$tx(title(c.kind))" />
+    <AppSubTabBar
+      :model-value="tab"
+      :options="tabs.map((k) => ({ value: k, label: resolveText(title(k)) }))"
+      size="sm"
+      @update:model-value="(v) => (picked = v)"
+    />
+
+    <section v-if="chart" class="chart">
       <div class="list">
         <RouterLink
-          v-for="(r, i) in c.rows"
+          v-for="(r, i) in chart.rows"
           :key="r.id"
           :to="`/player/${r.id}`"
           class="row"
@@ -94,14 +110,13 @@ const title = (kind: string) => msg(`award.${kind}`)
           <span class="rank">{{ i + 1 }}</span>
           <NationFlag :id="r.nation" :size="20" />
           <span class="name">{{ r.name }}</span>
-          <span class="sub">{{ show(r, c.sub) }} {{ t(STAT_LABEL[c.sub]) }}</span>
-          <strong class="main">{{ show(r, c.main) }}</strong>
+          <span class="sub">{{ show(r, chart.sub) }} {{ t(STAT_LABEL[chart.sub]) }}</span>
+          <strong class="main">{{ show(r, chart.main) }}</strong>
         </RouterLink>
       </div>
     </section>
 
-    <section v-if="lines.length" class="chart">
-      <AppSectionHeader :title="$tx(title('xi'))" />
+    <section v-else-if="tab === 'xi'" class="chart">
       <div class="list">
         <template v-for="l in lines" :key="l.group">
           <div class="group">{{ t(`squad.pos.${l.group}`) }}</div>
