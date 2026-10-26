@@ -390,7 +390,20 @@ const pl: typeof en = {
       matches: "{n} mecz | {n} meczów",
       host: "Zorganizuj turniej",
     },
+    stats: {
+      title: "Statystyki",
+      none: "Statystyki pojawią się po pierwszych meczach.",
+      sofar: "na razie",
+      minApps:
+        "Oceny, bramkarze, młodzi i jedenastka turnieju liczą zawodników z co najmniej {n} meczami.",
+      apps: "mecze",
+      goals: "gole",
+      assists: "asysty",
+      rating: "ocena",
+      clean: "czyste konta",
+    },
     detail: {
+      tables: "Tabele",
       hosts: "Gospodarze",
       finalsHosts: "Gospodarze turnieju finałowego",
       qualifyingFor: "Eliminacje do",

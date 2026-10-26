@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "De bond luistert pas bij een vertrouwen van {n}% of meer",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Je legt de lat hoger",
       body: 'Je hebt de bond meer beloofd: "{text}". Lever het, dan vergeten ze het niet.',
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team} wint de {label} en vult die plek in de loting.",
     },
   },
+  award: {
+    scorer: "Topscorer",
+    assister: "Assistkoning",
+    rating: "Best beoordeelde speler",
+    keeper: "Meeste clean sheets",
+    player: "Speler van het toernooi",
+    young: "Beste jonge speler",
+    xi: "Elftal van het toernooi",
+  },
   ms: {
+    topScorer: "Een van je spelers was topscorer van een toernooi.",
+    bestPlayer: "Een van je spelers werd speler van het toernooi.",
     wins: "{n} overwinningen als bondscoach.",
     goals: "Je teams hebben {n} doelpunten gemaakt.",
     clean: "{n} keer de nul gehouden.",

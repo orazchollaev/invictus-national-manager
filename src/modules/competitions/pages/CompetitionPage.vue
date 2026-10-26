@@ -6,6 +6,8 @@ import { AppButton, AppCard, AppEmptyState, AppSectionHeader, AppSubTabBar } fro
 import { PageShell } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { FixtureRow, StandingsTable } from "@/modules/competitions/components/tables"
+import { CompetitionStats } from "@/modules/competitions/components/stats"
+import { leadersOf } from "@/engine/competition/stats"
 import { compName, stageLabel } from "@/i18n/text"
 import { useWorldStore } from "@/modules/world/store"
 import { competitionDef } from "@/engine/competition/defs"
@@ -49,6 +51,13 @@ const qualifying = world.derive(
 const hosts = computed(() =>
   inst.value?.hosts.length ? inst.value.hosts : (finals.value?.hosts ?? [])
 )
+
+const view = ref<"table" | "stats">("table")
+/** The charts so far, or the final ones once the competition has ended. */
+const leaders = world.derive((w) => {
+  const c = w.state.competitions[String(route.params.id)]
+  return c ? (c.leaders ?? leadersOf(c, w.state.players, w.state.date)) : null
+}, null)
 
 const stageKey = ref("")
 watch(
@@ -204,117 +213,135 @@ function advance(tie: Tie) {
     </AppCard>
 
     <AppSubTabBar
-      v-if="inst.stages.length > 1"
-      :model-value="stageKey"
-      :options="inst.stages.map((s) => ({ value: s.key, label: stageLabel(s.name) }))"
-      size="sm"
-      @update:model-value="(v) => (stageKey = v)"
+      :model-value="view"
+      :options="[
+        { value: 'table', label: t('competitions.detail.tables') },
+        { value: 'stats', label: t('competitions.stats.title') },
+      ]"
+      @update:model-value="(v) => (view = v as 'table' | 'stats')"
     />
 
-    <AppButton
-      v-if="
-        stage &&
-        stage.status !== 'waiting' &&
-        (stage.groups
-          ? stage.groups.length > 1
-          : stage.drawn !== false && (stage.rounds?.[0]?.ties.length ?? 0) > 1)
-      "
-      variant="tonal"
-      @click="router.push(`/draw/${inst.id}/${stage.key}`)"
-    >
-      {{ t("competitions.detail.watchDraw") }}
-    </AppButton>
-
-    <AppEmptyState
-      v-if="!stage || stage.status === 'waiting'"
-      :title="t('competitions.detail.notDrawn')"
-      :description="
-        plan ? t('competitions.detail.drawOn', { date: formatDate(plan.drawDate) }) : ''
-      "
+    <CompetitionStats
+      v-if="view === 'stats' && leaders"
+      :leaders="leaders"
+      :mine="world.me"
+      :final="inst.status === 'done'"
     />
 
-    <template v-else-if="stage.groups">
-      <p v-if="note" class="note">{{ t(note) }}</p>
-      <AppButton
-        v-if="best"
-        :variant="showBest ? 'tonal' : 'outlined'"
-        class="best-toggle"
-        @click="showBest = !showBest"
-      >
-        {{ t(best.title) }}
-      </AppButton>
-      <StandingsTable
-        v-if="best && showBest"
-        :rows="best.rows"
-        :title="t(best.title)"
-        :cut="best.places"
-        :hosts="hosts"
-        class="best"
+    <template v-else>
+      <AppSubTabBar
+        v-if="inst.stages.length > 1"
+        :model-value="stageKey"
+        :options="inst.stages.map((s) => ({ value: s.key, label: stageLabel(s.name) }))"
+        size="sm"
+        @update:model-value="(v) => (stageKey = v)"
       />
-      <div v-for="tb in tables" :key="tb.group.name" class="group">
-        <StandingsTable
-          :rows="tb.rows"
-          :title="
-            tb.group.name.length <= 2 ? t('common.group', { name: tb.group.name }) : tb.group.name
-          "
-          :zones="tb.zones"
-          :outlook="tb.outlook"
-          :hosts="hosts"
-        />
-        <button
-          class="toggle"
-          @click="openGroup = openGroup === tb.group.name ? null : tb.group.name"
-        >
-          {{
-            openGroup === tb.group.name
-              ? t("competitions.detail.hide")
-              : t("competitions.detail.show")
-          }}
-        </button>
-        <div v-if="openGroup === tb.group.name" class="fixtures">
-          <FixtureRow
-            v-for="f in groupFixtures(tb.group.fixtures)"
-            :key="f.id"
-            :fixture="f"
-            show-date
-          />
-        </div>
-      </div>
-    </template>
 
-    <template v-else-if="stage.rounds">
-      <template v-for="r in stage.rounds" :key="r.name">
-        <AppSectionHeader v-if="r.ties.length" :title="$stage(r.name)" />
-        <div v-if="r.ties.length" class="fixtures">
-          <template v-for="tie in r.ties" :key="tie.id">
+      <AppButton
+        v-if="
+          stage &&
+          stage.status !== 'waiting' &&
+          (stage.groups
+            ? stage.groups.length > 1
+            : stage.drawn !== false && (stage.rounds?.[0]?.ties.length ?? 0) > 1)
+        "
+        variant="tonal"
+        @click="router.push(`/draw/${inst.id}/${stage.key}`)"
+      >
+        {{ t("competitions.detail.watchDraw") }}
+      </AppButton>
+
+      <AppEmptyState
+        v-if="!stage || stage.status === 'waiting'"
+        :title="t('competitions.detail.notDrawn')"
+        :description="
+          plan ? t('competitions.detail.drawOn', { date: formatDate(plan.drawDate) }) : ''
+        "
+      />
+
+      <template v-else-if="stage.groups">
+        <p v-if="note" class="note">{{ t(note) }}</p>
+        <AppButton
+          v-if="best"
+          :variant="showBest ? 'tonal' : 'outlined'"
+          class="best-toggle"
+          @click="showBest = !showBest"
+        >
+          {{ t(best.title) }}
+        </AppButton>
+        <StandingsTable
+          v-if="best && showBest"
+          :rows="best.rows"
+          :title="t(best.title)"
+          :cut="best.places"
+          :hosts="hosts"
+          class="best"
+        />
+        <div v-for="tb in tables" :key="tb.group.name" class="group">
+          <StandingsTable
+            :rows="tb.rows"
+            :title="
+              tb.group.name.length <= 2 ? t('common.group', { name: tb.group.name }) : tb.group.name
+            "
+            :zones="tb.zones"
+            :outlook="tb.outlook"
+            :hosts="hosts"
+          />
+          <button
+            class="toggle"
+            @click="openGroup = openGroup === tb.group.name ? null : tb.group.name"
+          >
+            {{
+              openGroup === tb.group.name
+                ? t("competitions.detail.hide")
+                : t("competitions.detail.show")
+            }}
+          </button>
+          <div v-if="openGroup === tb.group.name" class="fixtures">
             <FixtureRow
-              v-for="f in groupFixtures(tie.fixtures)"
+              v-for="f in groupFixtures(tb.group.fixtures)"
               :key="f.id"
               :fixture="f"
               show-date
             />
-            <div v-if="advance(tie)" class="advance">
-              <NationFlag :id="advance(tie)!.team" :size="16" name="short" />
-              {{ t("competitions.detail.advance") }}
-              <span v-if="advance(tie)!.text">· {{ advance(tie)!.text }}</span>
-            </div>
-            <div v-if="!tie.fixtures.length && tie.winner" class="bye">
-              <NationFlag :id="tie.winner" :size="16" name />
-              · {{ t("competitions.detail.bye") }}
-            </div>
-          </template>
+          </div>
         </div>
       </template>
-      <template v-if="stage.thirdPlace">
-        <AppSectionHeader :title="t('competitions.detail.thirdPlace')" />
-        <div class="fixtures">
-          <FixtureRow
-            v-for="f in groupFixtures(stage.thirdPlace.fixtures)"
-            :key="f.id"
-            :fixture="f"
-            show-date
-          />
-        </div>
+
+      <template v-else-if="stage.rounds">
+        <template v-for="r in stage.rounds" :key="r.name">
+          <AppSectionHeader v-if="r.ties.length" :title="$stage(r.name)" />
+          <div v-if="r.ties.length" class="fixtures">
+            <template v-for="tie in r.ties" :key="tie.id">
+              <FixtureRow
+                v-for="f in groupFixtures(tie.fixtures)"
+                :key="f.id"
+                :fixture="f"
+                show-date
+              />
+              <div v-if="advance(tie)" class="advance">
+                <NationFlag :id="advance(tie)!.team" :size="16" name="short" />
+                {{ t("competitions.detail.advance") }}
+                <span v-if="advance(tie)!.text">· {{ advance(tie)!.text }}</span>
+              </div>
+              <div v-if="!tie.fixtures.length && tie.winner" class="bye">
+                <NationFlag :id="tie.winner" :size="16" name />
+                · {{ t("competitions.detail.bye") }}
+              </div>
+            </template>
+          </div>
+        </template>
+        <template v-if="stage.thirdPlace">
+          <AppSectionHeader :title="t('competitions.detail.thirdPlace')" />
+          <div class="fixtures">
+            <FixtureRow
+              v-for="f in groupFixtures(stage.thirdPlace.fixtures)"
+              :key="f.id"
+              :fixture="f"
+              show-date
+            />
+          </div>
+        </template>
       </template>
     </template>
   </PageShell>

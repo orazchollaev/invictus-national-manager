@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "Dewan hanya akan mendengar jika kepercayaan {n}% atau lebih",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Anda menaikkan standar",
       body: 'Anda berjanji kepada federasi untuk mencapai lebih: "{text}". Penuhi janji itu, dan mereka tidak akan melupakannya.',
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team} memenangi {label} dan mengisi tempat itu dalam undian.",
     },
   },
+  award: {
+    scorer: "Top skor",
+    assister: "Top assist",
+    rating: "Pemain dengan rating terbaik",
+    keeper: "Clean sheet terbanyak",
+    player: "Pemain terbaik turnamen",
+    young: "Pemain muda terbaik",
+    xi: "Tim terbaik turnamen",
+  },
   ms: {
+    topScorer: "Salah satu pemain Anda menjadi top skor turnamen.",
+    bestPlayer: "Salah satu pemain Anda dinobatkan sebagai pemain terbaik turnamen.",
     wins: "{n} kemenangan sebagai pelatih timnas.",
     goals: "Tim Anda telah mencetak {n} gol.",
     clean: "{n} laga tanpa kebobolan.",

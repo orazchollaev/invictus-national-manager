@@ -386,7 +386,20 @@ export default {
       matches: "{n} match | {n} matches",
       host: "Host a tournament",
     },
+    stats: {
+      title: "Stats",
+      none: "Stats appear once the first matches have been played.",
+      sofar: "so far",
+      minApps:
+        "Ratings, keepers, young players and the team of the tournament count players with at least {n} appearances.",
+      apps: "apps",
+      goals: "goals",
+      assists: "assists",
+      rating: "rating",
+      clean: "clean sheets",
+    },
     detail: {
+      tables: "Tables",
       hosts: "Hosts",
       finalsHosts: "Finals hosts",
       qualifyingFor: "Qualifying for",

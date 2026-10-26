@@ -391,7 +391,20 @@ const vi: typeof en = {
       matches: "{n} trận | {n} trận",
       host: "Đăng cai một giải đấu",
     },
+    stats: {
+      title: "Thống kê",
+      none: "Thống kê xuất hiện sau những trận đầu tiên.",
+      sofar: "cho đến nay",
+      minApps:
+        "Điểm số, thủ môn, cầu thủ trẻ và đội hình tiêu biểu tính các cầu thủ có ít nhất {n} trận.",
+      apps: "trận",
+      goals: "bàn",
+      assists: "kiến tạo",
+      rating: "điểm",
+      clean: "giữ sạch lưới",
+    },
     detail: {
+      tables: "Bảng đấu",
       hosts: "Chủ nhà",
       finalsHosts: "Chủ nhà vòng chung kết",
       qualifyingFor: "Vòng loại cho",

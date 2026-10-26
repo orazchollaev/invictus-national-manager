@@ -1,4 +1,4 @@
-import type { Confed, ISODate } from "../types"
+import type { Confed, ISODate, Position } from "../types"
 import type { Side } from "../match/types"
 import type { Text } from "../text"
 
@@ -148,6 +148,55 @@ export interface CompetitionInstance {
   outcome: CompetitionOutcome
   /** An invitational tournament's teams and format. */
   invitational?: InvitationalSetup
+  /** Each player's tally while it is on; dropped for `leaders` when it ends. */
+  stats?: Record<string, PlayerTally>
+  /** The charts and the team of the tournament, cut when it ended. */
+  leaders?: CompetitionLeaders
+}
+
+/** One player's running figures in one competition. */
+export interface PlayerTally {
+  /** The position he first played there. */
+  pos: Position
+  /** Appearances, minutes, goals, assists. */
+  a: number
+  m: number
+  g: number
+  s: number
+  /** Sum of ratings from games of 30 minutes or more, and how many there were. */
+  r: number
+  rn: number
+  /** Clean sheets kept in goal. */
+  cs: number
+}
+
+/** A line of a chart: one player's whole tournament. */
+export interface LeaderRow {
+  id: string
+  name: string
+  nation: string
+  pos: Position
+  apps: number
+  goals: number
+  assists: number
+  rating: number
+  clean: number
+}
+
+export interface CompetitionLeaders {
+  /** The day they were worked out. */
+  on: ISODate
+  /** Appearances needed to be rated, kept or picked. */
+  minApps: number
+  scorers: LeaderRow[]
+  assisters: LeaderRow[]
+  ratings: LeaderRow[]
+  keepers: LeaderRow[]
+  young: LeaderRow[]
+  /** The team of the tournament, goalkeeper first, then defenders, midfielders, forwards. */
+  xi: LeaderRow[]
+  /** The player of the tournament. */
+  player: LeaderRow | null
 }
 
 export interface Standing {

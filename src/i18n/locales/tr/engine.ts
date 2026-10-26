@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "Yönetim yalnızca %{n} ve üzeri güvenle dinler",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Çıtayı yükseltiyorsunuz",
       body: 'Federasyona daha fazlasını vaat ettiniz: "{text}". Sözünüzü tutun, unutmayacaklardır.',
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team}, {label} turnuvasını kazandı ve kuradaki o yeri doldurdu.",
     },
   },
+  award: {
+    scorer: "Gol kralı",
+    assister: "Asist kralı",
+    rating: "En yüksek reytingli oyuncu",
+    keeper: "En çok gol yemeyen kaleci",
+    player: "Turnuvanın oyuncusu",
+    young: "En iyi genç oyuncu",
+    xi: "Turnuvanın 11'i",
+  },
   ms: {
+    topScorer: "Oyuncularından biri turnuvanın gol kralı oldu.",
+    bestPlayer: "Oyuncularından biri turnuvanın oyuncusu seçildi.",
     wins: "Milli takım teknik direktörü olarak {n} galibiyet.",
     goals: "Takımların {n} gol attı.",
     clean: "{n} kalesini gole kapatma.",

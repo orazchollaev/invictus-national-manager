@@ -124,6 +124,8 @@ const DEEDS: { group: AchievementGroup; id: string; key: string }[] = [
   { group: "moments", id: "comeback", key: "ms.comeback" },
   { group: "moments", id: "shootout", key: "ms.shootout" },
   { group: "moments", id: "hat-trick", key: "ms.hatTrick" },
+  { group: "moments", id: "top-scorer", key: "ms.topScorer" },
+  { group: "moments", id: "best-player", key: "ms.bestPlayer" },
 ]
 
 /** Record a milestone unless it was earned before. Returns whether it is new. */

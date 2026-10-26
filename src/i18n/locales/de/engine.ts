@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "Der Vorstand hört nur zu, wenn das Vertrauen bei mindestens {n} % liegt",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Du legst die Latte höher",
       body: "Du hast dem Verband mehr versprochen: „{text}“. Liefere, und er wird es nicht vergessen.",
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team} gewinnt {label} und füllt diesen Platz in der Auslosung.",
     },
   },
+  award: {
+    scorer: "Torschützenkönig",
+    assister: "Vorlagenkönig",
+    rating: "Bestbewerteter Spieler",
+    keeper: "Meiste Zu-Null-Spiele",
+    player: "Spieler des Turniers",
+    young: "Bester junger Spieler",
+    xi: "Elf des Turniers",
+  },
   ms: {
+    topScorer: "Einer deiner Spieler wurde Torschützenkönig eines Turniers.",
+    bestPlayer: "Einer deiner Spieler wurde zum Spieler des Turniers gewählt.",
     wins: "{n} Siege als Nationaltrainer.",
     goals: "Deine Teams haben {n} Tore erzielt.",
     clean: "{n} Spiele ohne Gegentor.",

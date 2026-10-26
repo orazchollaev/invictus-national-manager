@@ -19,6 +19,10 @@ const engine: typeof en = {
     lowerNeeds: "협회는 신임도가 {n}% 이상일 때만 요청을 들어줍니다",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "기준을 높였습니다",
       body: '협회에 더 높은 목표를 약속했습니다: "{text}". 약속을 지키면 협회가 기억할 것입니다.',
@@ -262,7 +266,18 @@ const engine: typeof en = {
       body: "{team}이(가) {label}에서 승리해 추첨의 빈자리를 채웁니다.",
     },
   },
+  award: {
+    scorer: "득점왕",
+    assister: "도움왕",
+    rating: "최고 평점 선수",
+    keeper: "최다 클린시트",
+    player: "대회 최우수 선수",
+    young: "최우수 유망주",
+    xi: "대회 베스트 11",
+  },
   ms: {
+    topScorer: "선수 한 명이 대회 득점왕에 올랐습니다.",
+    bestPlayer: "선수 한 명이 대회 최우수 선수로 선정되었습니다.",
     wins: "국가대표 감독으로서 {n}승.",
     goals: "팀이 통산 {n}골을 넣었습니다.",
     clean: "{n}경기 무실점.",

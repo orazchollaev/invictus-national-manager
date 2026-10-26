@@ -19,6 +19,10 @@ const engine = {
     lowerNeeds: "The board will only listen with confidence of {n}% or more",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "You raise the bar",
       body: 'You have promised the federation more: "{text}". Deliver, and they will not forget it.',
@@ -262,7 +266,18 @@ const engine = {
       body: "{team} win the {label} and fill that place in the draw.",
     },
   },
+  award: {
+    scorer: "Top scorer",
+    assister: "Top assister",
+    rating: "Best rated player",
+    keeper: "Most clean sheets",
+    player: "Player of the tournament",
+    young: "Best young player",
+    xi: "Team of the tournament",
+  },
   ms: {
+    topScorer: "One of your players was a tournament's top scorer.",
+    bestPlayer: "One of your players was named player of the tournament.",
     wins: "{n} wins as an international head coach.",
     goals: "Your teams have scored {n} goals.",
     clean: "{n} clean sheets.",

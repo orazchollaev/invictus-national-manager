@@ -19,6 +19,10 @@ const engine: typeof en = {
     lowerNeeds: "協会は信頼度が{n}%以上ある場合にのみ耳を傾けます",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "ハードルを上げた",
       body: "協会により多くを約束しました: 「{text}」。結果を出せば、協会は忘れません。",
@@ -262,7 +266,18 @@ const engine: typeof en = {
       body: "{team}が{label}を制し、抽選の枠を埋めました。",
     },
   },
+  award: {
+    scorer: "得点王",
+    assister: "アシスト王",
+    rating: "最高評価の選手",
+    keeper: "最多クリーンシート",
+    player: "大会MVP",
+    young: "最優秀若手選手",
+    xi: "大会ベスト11",
+  },
   ms: {
+    topScorer: "選手の一人が大会の得点王になりました。",
+    bestPlayer: "選手の一人が大会MVPに選ばれました。",
     wins: "代表監督として{n}勝。",
     goals: "チームが通算{n}ゴールを挙げました。",
     clean: "{n}試合で無失点。",

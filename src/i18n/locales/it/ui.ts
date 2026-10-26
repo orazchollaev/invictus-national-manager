@@ -391,7 +391,20 @@ const it: typeof en = {
       matches: "{n} partita | {n} partite",
       host: "Organizza un torneo",
     },
+    stats: {
+      title: "Statistiche",
+      none: "Le statistiche appaiono dopo le prime partite.",
+      sofar: "finora",
+      minApps:
+        "Voti, portieri, giovani e la squadra del torneo contano i giocatori con almeno {n} presenze.",
+      apps: "presenze",
+      goals: "gol",
+      assists: "assist",
+      rating: "voto",
+      clean: "porte inviolate",
+    },
     detail: {
+      tables: "Tabelle",
       hosts: "Paesi ospitanti",
       finalsHosts: "Paesi ospitanti della fase finale",
       qualifyingFor: "Qualificazioni a",

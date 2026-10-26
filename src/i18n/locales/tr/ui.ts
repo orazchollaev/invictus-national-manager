@@ -389,7 +389,20 @@ const tr: typeof en = {
       matches: "{n} maç | {n} maç",
       host: "Turnuva düzenle",
     },
+    stats: {
+      title: "İstatistikler",
+      none: "İlk maçlar oynandıktan sonra istatistikler görünür.",
+      sofar: "şu ana kadar",
+      minApps:
+        "Reyting, kaleci, genç oyuncu ve turnuvanın 11'i için en az {n} maça çıkmış olmak gerekir.",
+      apps: "maç",
+      goals: "gol",
+      assists: "asist",
+      rating: "reyting",
+      clean: "gol yemeden",
+    },
     detail: {
+      tables: "Tablolar",
       hosts: "Ev sahipleri",
       finalsHosts: "Final ev sahipleri",
       qualifyingFor: "Elemeleri:",

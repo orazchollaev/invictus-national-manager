@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "Ban lãnh đạo chỉ lắng nghe khi mức tín nhiệm từ {n}% trở lên",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Bạn nâng cao tiêu chuẩn",
       body: 'Bạn đã hứa với liên đoàn nhiều hơn: "{text}". Hãy thực hiện được, họ sẽ không quên điều đó.',
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team} vô địch {label} và lấp vào vị trí đó trong lễ bốc thăm.",
     },
   },
+  award: {
+    scorer: "Vua phá lưới",
+    assister: "Vua kiến tạo",
+    rating: "Cầu thủ điểm cao nhất",
+    keeper: "Giữ sạch lưới nhiều nhất",
+    player: "Cầu thủ xuất sắc nhất giải",
+    young: "Cầu thủ trẻ xuất sắc nhất",
+    xi: "Đội hình tiêu biểu của giải",
+  },
   ms: {
+    topScorer: "Một cầu thủ của bạn là vua phá lưới của một giải đấu.",
+    bestPlayer: "Một cầu thủ của bạn được chọn là cầu thủ xuất sắc nhất giải.",
     wins: "{n} trận thắng trên cương vị HLV đội tuyển.",
     goals: "Các đội của bạn đã ghi {n} bàn.",
     clean: "{n} trận giữ sạch lưới.",

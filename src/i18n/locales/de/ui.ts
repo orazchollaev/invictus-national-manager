@@ -392,7 +392,20 @@ const de: typeof en = {
       matches: "{n} Spiel | {n} Spiele",
       host: "Turnier ausrichten",
     },
+    stats: {
+      title: "Statistiken",
+      none: "Statistiken erscheinen nach den ersten Spielen.",
+      sofar: "bisher",
+      minApps:
+        "Noten, Torhüter, junge Spieler und die Elf des Turniers zählen Spieler mit mindestens {n} Einsätzen.",
+      apps: "Spiele",
+      goals: "Tore",
+      assists: "Vorlagen",
+      rating: "Note",
+      clean: "Zu-Null-Spiele",
+    },
     detail: {
+      tables: "Tabellen",
       hosts: "Gastgeber",
       finalsHosts: "Gastgeber der Endrunde",
       qualifyingFor: "Qualifikation für",

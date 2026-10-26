@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "Zarząd wysłucha Cię tylko przy zaufaniu na poziomie co najmniej {n}%",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Podnosisz poprzeczkę",
       body: "Obiecałeś federacji więcej: „{text}”. Dotrzymaj słowa, a tego nie zapomną.",
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team} wygrywa rozgrywki ({label}) i zajmuje to miejsce w losowaniu.",
     },
   },
+  award: {
+    scorer: "Król strzelców",
+    assister: "Król asyst",
+    rating: "Najwyżej oceniany zawodnik",
+    keeper: "Najwięcej czystych kont",
+    player: "Zawodnik turnieju",
+    young: "Najlepszy młody zawodnik",
+    xi: "Jedenastka turnieju",
+  },
   ms: {
+    topScorer: "Jeden z twoich zawodników został królem strzelców turnieju.",
+    bestPlayer: "Jeden z twoich zawodników został zawodnikiem turnieju.",
     wins: "{n} zwycięstw jako selekcjoner.",
     goals: "Twoje drużyny strzeliły {n} goli.",
     clean: "{n} meczów bez straconej bramki.",

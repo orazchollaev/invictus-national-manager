@@ -389,7 +389,20 @@ const pt: typeof en = {
       matches: "{n} partida | {n} partidas",
       host: "Organizar torneio",
     },
+    stats: {
+      title: "Estatísticas",
+      none: "As estatísticas aparecem depois dos primeiros jogos.",
+      sofar: "até agora",
+      minApps:
+        "Notas, guarda-redes, jovens e a equipa do torneio contam jogadores com pelo menos {n} jogos.",
+      apps: "jogos",
+      goals: "golos",
+      assists: "assistências",
+      rating: "nota",
+      clean: "jogos sem sofrer",
+    },
     detail: {
+      tables: "Tabelas",
       hosts: "Anfitriões",
       finalsHosts: "Anfitriões da fase final",
       qualifyingFor: "Classificatória para",

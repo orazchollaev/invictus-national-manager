@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "A diretoria só ouve com confiança de {n}% ou mais",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Você eleva a barra",
       body: 'Você prometeu mais à federação: "{text}". Cumpra, e eles não esquecerão.',
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team} vence a disputa ({label}) e ocupa essa vaga no sorteio.",
     },
   },
+  award: {
+    scorer: "Artilheiro",
+    assister: "Líder de assistências",
+    rating: "Jogador com melhor nota",
+    keeper: "Mais jogos sem sofrer gols",
+    player: "Melhor jogador do torneio",
+    young: "Melhor jovem",
+    xi: "Seleção do torneio",
+  },
   ms: {
+    topScorer: "Um dos seus jogadores foi o artilheiro de um torneio.",
+    bestPlayer: "Um dos seus jogadores foi eleito o melhor do torneio.",
     wins: "{n} vitórias como técnico de seleção.",
     goals: "Suas equipes marcaram {n} gols.",
     clean: "{n} jogos sem sofrer gols.",

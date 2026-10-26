@@ -114,6 +114,8 @@ import {
   youthObjective,
 } from "../career/career"
 import { checkMilestones } from "../career/milestones"
+import { finishLeaders } from "../career/awards"
+import { recordStats } from "../competition/stats"
 import { arrangePress, assistantPress, dropStalePress } from "../career/press"
 import {
   coachesMonthly,
@@ -1186,6 +1188,8 @@ export class World {
     // Players: debuts and landmarks, then caps, goals, minutes and bans served.
     if (this.isUserFixture(f)) playerMoments(this, f, report)
     recordCleanSheets(report, (id) => s.players[id])
+    const tournament = s.competitions[f.compId]
+    if (tournament) recordStats(tournament, report)
     for (const line of report.lines) {
       const p = s.players[line.playerId]
       if (!p) continue
@@ -1556,6 +1560,7 @@ export class World {
     this.resolvePlaceholders(id)
     const inst = this.state.competitions[id]
     if (inst) reputationAfter(inst, this.state.nations)
+    if (inst) finishLeaders(this, inst)
     afterCompetition(this, id)
   }
 

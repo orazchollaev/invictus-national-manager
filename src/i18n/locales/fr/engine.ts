@@ -20,6 +20,10 @@ const engine: typeof en = {
     lowerNeeds: "La direction n'écoutera qu'avec une confiance de {n} % ou plus",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Vous placez la barre plus haut",
       body: "Vous avez promis plus à la fédération : « {text} ». Tenez parole, elle ne l'oubliera pas.",
@@ -263,7 +267,18 @@ const engine: typeof en = {
       body: "{team} remporte {label} et occupe cette place dans le tirage.",
     },
   },
+  award: {
+    scorer: "Meilleur buteur",
+    assister: "Meilleur passeur",
+    rating: "Joueur le mieux noté",
+    keeper: "Plus de clean sheets",
+    player: "Meilleur joueur du tournoi",
+    young: "Meilleur jeune",
+    xi: "Équipe type du tournoi",
+  },
   ms: {
+    topScorer: "Un de vos joueurs a été meilleur buteur d'un tournoi.",
+    bestPlayer: "Un de vos joueurs a été élu meilleur joueur d'un tournoi.",
     wins: "{n} victoires comme sélectionneur.",
     goals: "Vos équipes ont marqué {n} buts.",
     clean: "{n} matchs sans encaisser de but.",

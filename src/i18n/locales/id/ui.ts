@@ -389,7 +389,20 @@ const id: typeof en = {
       matches: "{n} laga",
       host: "Gelar turnamen",
     },
+    stats: {
+      title: "Statistik",
+      none: "Statistik muncul setelah pertandingan pertama dimainkan.",
+      sofar: "sejauh ini",
+      minApps:
+        "Rating, kiper, pemain muda, dan tim terbaik turnamen menghitung pemain dengan minimal {n} penampilan.",
+      apps: "laga",
+      goals: "gol",
+      assists: "assist",
+      rating: "rating",
+      clean: "clean sheet",
+    },
     detail: {
+      tables: "Klasemen",
       hosts: "Tuan rumah",
       finalsHosts: "Tuan rumah putaran final",
       qualifyingFor: "Kualifikasi untuk",

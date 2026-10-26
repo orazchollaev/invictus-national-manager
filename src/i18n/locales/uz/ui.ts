@@ -391,7 +391,20 @@ const uz: typeof en = {
       matches: "{n} o'yin | {n} o'yin",
       host: "Turnir o'tkazish",
     },
+    stats: {
+      title: "Statistika",
+      none: "Statistika birinchi o'yinlardan keyin paydo bo'ladi.",
+      sofar: "hozircha",
+      minApps:
+        "Baho, darvozabon, yosh o'yinchi va turnir terma jamoasi uchun kamida {n} ta o'yin kerak.",
+      apps: "o'yin",
+      goals: "gol",
+      assists: "assist",
+      rating: "baho",
+      clean: "quruq o'yin",
+    },
     detail: {
+      tables: "Jadvallar",
       hosts: "Mezbonlar",
       finalsHosts: "Final bosqichi mezbonlari",
       qualifyingFor: "Saralash:",

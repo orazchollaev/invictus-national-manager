@@ -391,7 +391,20 @@ const nl: typeof en = {
       matches: "{n} wedstrijd | {n} wedstrijden",
       host: "Organiseer een toernooi",
     },
+    stats: {
+      title: "Statistieken",
+      none: "Statistieken verschijnen na de eerste wedstrijden.",
+      sofar: "tot nu toe",
+      minApps:
+        "Cijfers, keepers, jonge spelers en het elftal van het toernooi tellen spelers met minstens {n} wedstrijden.",
+      apps: "wedstrijden",
+      goals: "doelpunten",
+      assists: "assists",
+      rating: "cijfer",
+      clean: "clean sheets",
+    },
     detail: {
+      tables: "Standen",
       hosts: "Gastheren",
       finalsHosts: "Gastheren van de eindronde",
       qualifyingFor: "Kwalificatie voor",

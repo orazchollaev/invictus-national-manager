@@ -21,6 +21,10 @@ const engine: typeof en = {
     lowerNeeds: "Rahbariyat faqat ishonch {n}% yoki undan yuqori bo'lsa quloq soladi",
   },
   news: {
+    award: {
+      title: "{award}: {name}",
+      body: "{comp}: {award} — {name} ({nation}).",
+    },
     raise: {
       title: "Siz darajani ko'tarmoqdasiz",
       body: "Siz federatsiyaga ko'proq va'da berdingiz: \"{text}\". Uddalang, ular buni unutmaydi.",
@@ -264,7 +268,18 @@ const engine: typeof en = {
       body: "{team} {label} da g'olib bo'ldi va qur'adagi o'rinni to'ldirdi.",
     },
   },
+  award: {
+    scorer: "Eng yaxshi to'purar",
+    assister: "Eng yaxshi assistent",
+    rating: "Eng yuqori baholangan o'yinchi",
+    keeper: "Eng ko'p quruq o'yin",
+    player: "Turnirning eng yaxshi o'yinchisi",
+    young: "Eng yaxshi yosh o'yinchi",
+    xi: "Turnir terma jamoasi",
+  },
   ms: {
+    topScorer: "O'yinchilaringizdan biri turnirning eng yaxshi to'purari bo'ldi.",
+    bestPlayer: "O'yinchilaringizdan biri turnirning eng yaxshi o'yinchisi deb topildi.",
     wins: "Terma jamoa murabbiyi sifatida {n} ta g'alaba.",
     goals: "Jamoalaringiz {n} ta gol urdi.",
     clean: "{n} ta o'yinda gol o'tkazilmadi.",
