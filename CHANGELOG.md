@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.0.8](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.7...v0.0.8) (2026-10-27)
+
+### 🚀 New Features
+
+- add push notifications with link support ([7f71f05](https://github.com/orazchollaev/invictus-national-manager/commit/7f71f0563de838206ba247e7ee939bb31c125952))
+- **career:** add achievements page and shorten career page ([904cfe9](https://github.com/orazchollaev/invictus-national-manager/commit/904cfe982c9529dd29ea366e850e20559fbff5f9))
+- **competitions:** add live tournament stats tab with top scorers, assisters and team of the tournament ([8013129](https://github.com/orazchollaev/invictus-national-manager/commit/80131293731b6e7a4f0f3b3b47fc7734d2952a5a))
+- **competitions:** let each stats chart expand to its full length ([b28409d](https://github.com/orazchollaev/invictus-national-manager/commit/b28409d4b39371c1b41032ba866d223304f18d6b))
+- **competitions:** split tournament stats into inner tabs ([c7bf012](https://github.com/orazchollaev/invictus-national-manager/commit/c7bf012d95f451c883f49f1b9d4e10810b1583e4))
+- **core:** add quiet notices that wait on the home screen ([1223dda](https://github.com/orazchollaev/invictus-national-manager/commit/1223dda6416c82e5207c058a02c9a680b29512fa))
+- **data:** add real clubs for the smaller nations ([6b71a83](https://github.com/orazchollaev/invictus-national-manager/commit/6b71a83a55974683ebd9dfed7d039cd38c9ae669))
+- **data:** add real players for 44 nations ([1aee022](https://github.com/orazchollaev/invictus-national-manager/commit/1aee022c20cfe2b5eada0132b05532fb58f84778))
+- **i18n:** add live pitch captions, legend and name toggle strings ([c2c34cb](https://github.com/orazchollaev/invictus-national-manager/commit/c2c34cbcf0845f0a77263389c6e3fb11d02cc3d4))
+- **i18n:** add strings for assistant level, overview, stats and tactics ([86bef2d](https://github.com/orazchollaev/invictus-national-manager/commit/86bef2daa02245920d7aab56a9f19419dc096311))
+- **match:** show players, shots and the move on the live pitch ([fb92f03](https://github.com/orazchollaev/invictus-national-manager/commit/fb92f03dbadf26d03d16e11f484e623c60ff9b8b))
+- **press:** add press conferences before tournaments and March/September windows ([9e94f22](https://github.com/orazchollaev/invictus-national-manager/commit/9e94f22d053287fe6f74ffe65432b9820db6276f))
+- **settings:** add about modal ([ac76c39](https://github.com/orazchollaev/invictus-national-manager/commit/ac76c39d880809dfa118e25a309c4a809a368990))
+- **settings:** add assistant level presets ([1581800](https://github.com/orazchollaev/invictus-national-manager/commit/1581800d80aa543a4333e125856110ec431e467e))
+- **settings:** fold assistant options under more options ([3fe7a37](https://github.com/orazchollaev/invictus-national-manager/commit/3fe7a3739989043af36af85163e5e6d2d2f37698))
+
+### 🐛 Bug Fixes
+
+- **match:** pad the live tactics sheet ([8544bfa](https://github.com/orazchollaev/invictus-national-manager/commit/8544bfa8ade3f3fd631296d7cd9516c0ed92e154))
+- **match:** place the ball by third and drop the move and trail lines from the pitch ([efedcbd](https://github.com/orazchollaev/invictus-national-manager/commit/efedcbd38f1ef97465f48ab4bbcbf935cfffa82c))
+
+### ♻️ Refactoring
+
+- **competitions:** show tournament stats as sections instead of tabs ([feda902](https://github.com/orazchollaev/invictus-national-manager/commit/feda90282dda6d2907e7e4db3ddb6bd8b3f2d645))
+- **core:** drop home quick actions and show one alert at a time ([0bff887](https://github.com/orazchollaev/invictus-national-manager/commit/0bff88755270d2903773e0340ad5214feeb9df89))
+- **core:** drop the invitational hint and move waiting notices lower on home ([49130a0](https://github.com/orazchollaev/invictus-national-manager/commit/49130a067999a1ae58ffffd34da7ca37118eaf9a))
+- **core:** fold the match strip and group into an overview on home ([852e9fb](https://github.com/orazchollaev/invictus-national-manager/commit/852e9fb598ec3b9e41b5f417fbb423123b5b0591))
+- **layout:** remove settings button from the header ([d5c12c5](https://github.com/orazchollaev/invictus-national-manager/commit/d5c12c5d0dcc625afb3b335d60eb109887587b32))
+- **squad:** fold chemistry and detailed instructions on the tactics page ([b135600](https://github.com/orazchollaev/invictus-national-manager/commit/b135600d03b926cdf6e1226ad916d7f67f0f6b49))
+- **squad:** use a position dropdown instead of a second tab bar ([aae092b](https://github.com/orazchollaev/invictus-national-manager/commit/aae092bfed1bb3bc229cba44a028c13f144c69e4))
+- **ui:** drop android design, replace backdrop blur with color-mix, fix tabs and control height ([1ab93ee](https://github.com/orazchollaev/invictus-national-manager/commit/1ab93ee2e22a017398c3ec8c69b75a405af1bf64))
+
+### 🔧 Maintenance
+
+- bump gradle version ([a43d418](https://github.com/orazchollaev/invictus-national-manager/commit/a43d418b274b8db446d7026648b157c15c3092e6))
+- **deps:** update minor dependencies ([65e9acc](https://github.com/orazchollaev/invictus-national-manager/commit/65e9acc9cc888fc841856a6388afde1840822f11))
+
+### 📚 Documentation
+
+- update real player count ([c08d05d](https://github.com/orazchollaev/invictus-national-manager/commit/c08d05dbf32fbc83ef25eac5a3fd52113a337e10))
+
 ## [0.0.7](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.6...v0.0.7) (2026-10-21)
 
 ### 🚀 New Features
