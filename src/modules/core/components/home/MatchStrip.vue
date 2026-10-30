@@ -68,9 +68,9 @@ const strip = world.derive<Cell[]>((w) => {
       :style="c.tone ? { '--tone': c.tone } : undefined"
     >
       <span class="date">{{ c.date }}</span>
-      <NationFlag :id="c.opp" :size="18" name="short" />
-      <span v-if="c.score" class="foot score">{{ c.score }}</span>
-      <span v-else class="foot">{{ c.venue }}</span>
+      <NationFlag :id="c.opp" :size="28" name="short" />
+      <span v-if="c.score" class="pill score">{{ c.score }}</span>
+      <span v-else class="pill">{{ c.venue }}</span>
     </RouterLink>
   </nav>
 </template>
@@ -79,10 +79,12 @@ const strip = world.derive<Cell[]>((w) => {
 .strip {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(60px, 1fr);
-  gap: var(--sp-1-5);
+  grid-auto-columns: minmax(64px, 1fr);
   overflow-x: auto;
   scrollbar-width: none;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  background: var(--surface);
 }
 
 .strip::-webkit-scrollbar {
@@ -93,39 +95,56 @@ const strip = world.derive<Cell[]>((w) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--sp-1);
+  gap: var(--sp-2);
   min-width: 0;
-  padding: var(--sp-2) var(--sp-1);
-  border-radius: var(--radius);
-  border: 1px solid var(--border-light);
-  background: var(--surface);
+  padding: var(--sp-3) var(--sp-1);
   color: var(--text);
   text-decoration: none;
   font-size: var(--fs-xs);
 }
 
-.cell--past {
-  border-color: color-mix(in srgb, var(--tone) 50%, transparent);
-  background: color-mix(in srgb, var(--tone) 8%, var(--surface));
+.cell + .cell {
+  border-inline-start: 1px solid var(--border-light);
+}
+
+.cell:hover {
+  text-decoration: none;
+  color: var(--text);
+}
+
+.cell:active {
+  background: var(--bg-hover);
 }
 
 .cell :deep(.nation) {
   flex-direction: column;
-  gap: 2px;
+  gap: var(--sp-1);
 }
 
 .cell :deep(.nation-name) {
   font-weight: 700;
+  font-size: var(--fs-sm);
 }
 
-.date,
-.foot {
+.date {
   color: var(--text-muted);
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.score {
-  font-weight: 800;
+.pill {
+  padding: 2px var(--sp-2);
+  border-radius: var(--radius-pill);
+  background: var(--fill-1);
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pill.score {
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
   color: var(--tone);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 </style>
