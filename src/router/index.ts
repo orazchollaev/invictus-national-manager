@@ -32,6 +32,7 @@ const router = createRouter({
     { path: "/mods/:id", component: () => import("../modules/mods/pages/ModEditorPage.vue") },
     { path: "/home", component: () => import("../modules/core/pages/HomePage.vue") },
     { path: "/career", component: () => import("../modules/career/pages/CareerPage.vue") },
+    { path: "/career/offers", component: () => import("../modules/career/pages/JobOffersPage.vue") },
     {
       path: "/career/achievements",
       component: () => import("../modules/career/pages/AchievementsPage.vue"),

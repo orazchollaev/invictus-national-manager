@@ -2,7 +2,7 @@
 import { computed, reactive } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
-import { ChevronRight, Trophy, UserRound } from "@lucide/vue"
+import { Briefcase, ChevronRight, Trophy, UserRound } from "@lucide/vue"
 import { AppButton, AppCard, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -37,21 +37,6 @@ function latest<T>(key: keyof typeof LIMITS, list: T[]): T[] {
   return expanded[key] ? list : list.slice(0, LIMITS[key])
 }
 const more = (key: keyof typeof LIMITS, total: number) => !expanded[key] && total > LIMITS[key]
-
-async function accept(nationId: string) {
-  const name = nationName(nationId)
-  const leaving = career.value?.nationId
-    ? t("career.acceptLeaving", { name: nationName(career.value.nationId) })
-    : ""
-  if (
-    !(await showConfirm(t("career.acceptConfirm", { name, leaving }), {
-      confirmLabel: t("career.accept"),
-    }))
-  )
-    return
-  world.takeJob(nationId)
-  router.push("/home")
-}
 
 async function resign() {
   const id = career.value?.nationId
@@ -123,6 +108,12 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
         <span class="item-label">{{ t("career.profile") }}</span>
         <ChevronRight :size="18" class="item-chevron" />
       </RouterLink>
+      <RouterLink to="/career/offers" class="item">
+        <Briefcase :size="20" class="item-icon" />
+        <span class="item-label">{{ t("career.jobOffers") }}</span>
+        <span class="item-count">{{ career.offers.length }}</span>
+        <ChevronRight :size="18" class="item-chevron" />
+      </RouterLink>
       <RouterLink to="/career/achievements" class="item">
         <Trophy :size="20" class="item-icon" />
         <span class="item-label">{{ t("career.achievements") }}</span>
@@ -135,22 +126,6 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
       <strong>{{ t("career.finalWarning") }}</strong>
       {{ t("career.ultimatum", { n: career.ultimatum.matches }, career.ultimatum.matches) }}
     </div>
-
-    <template v-if="career?.offers.length">
-      <AppSectionHeader :title="t('career.jobOffers')" />
-      <AppCard v-for="o in career.offers" :key="o.nationId" padding="md" class="offer">
-        <NationFlag :id="o.nationId" :size="32" name link />
-        <span class="muted">{{ t("career.until", { date: formatDate(o.expires) }) }}</span>
-        <div class="offer-actions">
-          <AppButton variant="text" @click="world.turnDown(o.nationId)">
-            {{ t("career.decline") }}
-          </AppButton>
-          <AppButton variant="filled" @click="accept(o.nationId)">
-            {{ t("career.accept") }}
-          </AppButton>
-        </div>
-      </AppCard>
-    </template>
 
     <AppSectionHeader id="objectives" :title="t('career.objectives')" />
     <ObjectiveList :objectives="latest('objectives', objectives)" />
@@ -360,25 +335,6 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 .warning strong {
   display: block;
   color: var(--danger);
-}
-
-.offer :deep(.card-body) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp-2);
-}
-
-.offer :deep(.nation) {
-  flex: 1;
-  font-weight: 700;
-}
-
-.offer-actions {
-  display: flex;
-  gap: var(--sp-2);
-  width: 100%;
-  justify-content: flex-end;
 }
 
 .list {

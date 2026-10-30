@@ -96,7 +96,7 @@ function go(i: Interrupt) {
   else if (i.kind === "review") router.push(`/career/review/${i.id}`)
   else if (i.kind === "sacked") router.push("/career/farewell")
   // Anything else new shows as a popup where the user is.
-  else if (i.kind === "offer" && !i.nationId) router.push("/career")
+  else if (i.kind === "offer" && !i.nationId) router.push("/career/offers")
 }
 
 async function proceed() {
@@ -137,7 +137,7 @@ const cta = computed(() => {
         <div class="panel-title">{{ t("core.home.outOfWork") }}</div>
         <p class="muted">{{ t("core.home.outOfWorkHint") }}</p>
       </div>
-      <AppButton variant="tonal" @click="router.push('/career')">
+      <AppButton variant="tonal" @click="router.push('/career/offers')">
         {{ t("core.home.offers", { n: career?.offers.length ?? 0 }) }}
       </AppButton>
     </section>
