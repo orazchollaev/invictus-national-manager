@@ -16,7 +16,7 @@ const { setTheme } = useStatusBar()
 watch(() => settings.theme, setTheme, { immediate: true })
 
 const router = useRouter()
-const ROOT_PATHS = ["/home", "/squad", "/competitions", "/inbox", "/more", "/menu"]
+const ROOT_PATHS = ["/home", "/squad", "/competitions", "/fixtures", "/more", "/menu"]
 
 /** Full-screen flows hide the bottom navigation. */
 const FULLSCREEN = [
@@ -31,6 +31,14 @@ const FULLSCREEN = [
 // Without a game loaded there is nothing for the header or the tabs to open.
 const hideNav = computed(
   () => !world.world || FULLSCREEN.some((p) => p.test(router.currentRoute.value.path))
+)
+
+// With the header showing, it pads the status bar itself (so it is painted
+// under it from the start); <html> pads it only on header-less screens.
+watch(
+  hideNav,
+  (hidden) => document.documentElement.classList.toggle("header-pads", !hidden),
+  { immediate: true }
 )
 
 let backButtonListener: (() => void) | null = null

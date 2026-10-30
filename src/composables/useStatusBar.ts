@@ -2,17 +2,16 @@ import { Capacitor } from "@capacitor/core"
 import type { Theme } from "@/modules/settings/store"
 
 /**
- * Native status-bar tint. The colours must match `--bg` in
- * assets/style/variables.css or the status bar reads as a slightly
- * different shade than the page behind it — they had drifted once
- * already (#f8fafc / #16181f vs the real --bg).
+ * Native status-bar tint. The colours must match `--surface` in
+ * assets/style/design.css: the header sits under the status bar and is
+ * painted with it, so any other shade shows as a band.
  *
  * They are duplicated rather than read from CSS because this runs
  * before paint and the Capacitor bridge needs a plain hex string.
  */
 const THEME_COLORS: Record<Theme, { color: string; dark: boolean }> = {
-  light: { color: "#eceeea", dark: false },
-  dark: { color: "#16181a", dark: true },
+  light: { color: "#ffffff", dark: false },
+  dark: { color: "#1c1c1e", dark: true },
 }
 
 export function useStatusBar() {
