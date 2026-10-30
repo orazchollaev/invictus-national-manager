@@ -439,13 +439,13 @@ const pitchSlots = computed(() => {
         <div class="team">
           <NationFlag :id="fixture.home" :size="52" />
           <strong>{{ $nation(fixture.home) }}</strong>
-          <span v-if="rankOf(fixture.home)" class="muted">#{{ rankOf(fixture.home) }}</span>
+          <span class="muted">#{{ rankOf(fixture.home) || "-" }}</span>
         </div>
         <span class="vs">{{ t("match.page.vs") }}</span>
         <div class="team">
           <NationFlag :id="fixture.away" :size="52" />
           <strong>{{ $nation(fixture.away) }}</strong>
-          <span v-if="rankOf(fixture.away)" class="muted">#{{ rankOf(fixture.away) }}</span>
+          <span class="muted">#{{ rankOf(fixture.away) || "-" }}</span>
         </div>
       </div>
       <p class="muted venue">
