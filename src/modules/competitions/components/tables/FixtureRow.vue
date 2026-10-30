@@ -49,11 +49,15 @@ const comp = computed(() =>
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3);
   border-bottom: 1px solid var(--border-light);
   color: var(--text);
   text-decoration: none;
   font-size: var(--fs-sm);
+}
+
+.fx:active {
+  background: var(--bg-hover);
 }
 
 .fx--mine {
@@ -63,6 +67,7 @@ const comp = computed(() =>
 .fx-date {
   width: 48px;
   color: var(--text-muted);
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -70,6 +75,7 @@ const comp = computed(() =>
   flex: 1;
   min-width: 0;
   display: flex;
+  font-weight: 700;
 }
 
 .fx-team--home {
@@ -81,7 +87,10 @@ const comp = computed(() =>
 }
 
 .fx-score {
-  min-width: 44px;
+  min-width: 52px;
+  padding: 2px var(--sp-2);
+  border-radius: var(--radius-pill);
+  background: var(--fill-1);
   text-align: center;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -90,8 +99,9 @@ const comp = computed(() =>
 .fx-comp {
   width: 72px;
   text-align: end;
-  color: var(--text-muted);
+  color: var(--accent);
   font-size: var(--fs-xs);
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { CalendarDays, ListOrdered, Medal } from "@lucide/vue"
-import { AppButton, AppCard, AppChip, AppSectionHeader, AppSubTabBar } from "@/components/ui"
+import { AppCard, AppChip, AppSectionHeader, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
@@ -60,21 +59,6 @@ function hostOf(c: CompetitionInstance): string | undefined {
 
 <template>
   <PageShell :title="t('competitions.title')">
-    <div class="links">
-      <AppButton variant="tonal" @click="$router.push('/rankings')">
-        <ListOrdered :size="16" />
-        {{ t("competitions.list.ranking") }}
-      </AppButton>
-      <AppButton variant="tonal" @click="$router.push('/calendar')">
-        <CalendarDays :size="16" />
-        {{ t("competitions.list.calendar") }}
-      </AppButton>
-      <AppButton variant="tonal" @click="$router.push('/honours')">
-        <Medal :size="16" />
-        {{ t("competitions.list.honours") }}
-      </AppButton>
-    </div>
-
     <template v-if="mine.length">
       <AppSectionHeader :title="t('competitions.list.yours')" />
       <RouterLink v-for="c in mine" :key="c.id" :to="`/competitions/${c.id}`" class="comp">
@@ -124,7 +108,7 @@ function hostOf(c: CompetitionInstance): string | undefined {
                 {{ c.start.slice(0, 4) }}
               </div>
             </div>
-            <NationFlag v-if="c.outcome.winner" :id="c.outcome.winner" :size="22" />
+            <NationFlag v-if="c.outcome.winner" :id="c.outcome.winner" :size="26" />
             <NationFlag v-else-if="hostOf(c)" :id="hostOf(c)!" :size="18" />
           </RouterLink>
         </div>
@@ -141,8 +125,13 @@ function hostOf(c: CompetitionInstance): string | undefined {
 }
 
 .comp {
+  display: block;
   color: inherit;
   text-decoration: none;
+}
+
+.comp + .comp {
+  margin-top: var(--sp-2);
 }
 
 .comp-row {
@@ -162,19 +151,25 @@ function hostOf(c: CompetitionInstance): string | undefined {
 }
 
 .list {
-  border-radius: var(--radius);
-  background: var(--surface);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-3);
-  border-bottom: 1px solid var(--border-light);
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
   color: var(--text);
   text-decoration: none;
+}
+
+.row:active {
+  background: var(--bg-hover);
 }
 
 .row-text {

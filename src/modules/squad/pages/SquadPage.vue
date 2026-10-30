@@ -146,8 +146,19 @@ const list = computed(() => {
 }
 
 .list {
-  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.list :deep(.prow) {
+  padding: var(--sp-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   background: var(--surface);
-  overflow: hidden;
+}
+
+.list :deep(.prow:active) {
+  background: var(--bg-hover);
 }
 </style>
