@@ -3,7 +3,7 @@ import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
 import { AppCard, AppEmptyState, AppSectionHeader } from "@/components/ui"
-import { PageShell, StatPill } from "@/modules/core/components"
+import { PageShell, ProfileHero, StatTiles } from "@/modules/core/components"
 import { PersonFace } from "@/modules/core/components/face"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { useWorldStore } from "@/modules/world/store"
@@ -71,37 +71,33 @@ const subtitle = computed(() => {
 
 <template>
   <PageShell v-if="coach" :title="coach.name" :subtitle="subtitle" back>
-    <AppCard padding="md" class="head">
-      <PersonFace :coach="coach.coach" :manager="coach.manager" :size="112" />
-      <dl class="facts">
-        <dt>{{ t("coaches.profile.nationality") }}</dt>
-        <dd><NationFlag :id="coach.nationality" :size="18" name link /></dd>
-        <dt>{{ t("coaches.profile.job") }}</dt>
-        <dd>
-          <NationFlag v-if="coach.nationId" :id="coach.nationId" :size="18" name link />
-          <span v-else-if="coach.retired" class="muted">
-            {{ t("coaches.profile.retiredOn", { date: formatDate(coach.retired) }) }}
-          </span>
-          <span v-else class="muted">{{ t("coaches.profile.outOfWork") }}</span>
-        </dd>
-        <template v-if="coach.born">
-          <dt>{{ t("coaches.profile.born") }}</dt>
-          <dd>{{ formatDate(coach.born) }}</dd>
-        </template>
-        <dt>{{ t("coaches.profile.reputation") }}</dt>
-        <dd>
-          <StatPill
-            :value="Math.round(coach.reputation)"
-            :tone="abilityTone(coach.reputation)"
-            wide
-          />
-        </dd>
-        <template v-if="coach.confidence !== undefined">
-          <dt>{{ t("coaches.profile.confidence") }}</dt>
-          <dd>{{ Math.round(coach.confidence) }}%</dd>
-        </template>
-      </dl>
-    </AppCard>
+    <ProfileHero>
+      <template #face>
+        <PersonFace :coach="coach.coach" :manager="coach.manager" :size="72" />
+      </template>
+      <NationFlag :id="coach.nationality" :size="22" name link />
+      <NationFlag v-if="coach.nationId" :id="coach.nationId" :size="18" name link />
+      <span v-else-if="coach.retired" class="muted">
+        {{ t("coaches.profile.retiredOn", { date: formatDate(coach.retired) }) }}
+      </span>
+      <span v-else class="muted">{{ t("coaches.profile.outOfWork") }}</span>
+      <span v-if="coach.born" class="muted">
+        {{ t("coaches.profile.born") }} · {{ formatDate(coach.born) }}
+      </span>
+    </ProfileHero>
+
+    <StatTiles
+      :items="[
+        {
+          label: t('coaches.profile.reputation'),
+          value: Math.round(coach.reputation),
+          tone: abilityTone(coach.reputation),
+        },
+        ...(coach.confidence !== undefined
+          ? [{ label: t('coaches.profile.confidence'), value: `${Math.round(coach.confidence)}%` }]
+          : []),
+      ]"
+    />
     <p v-if="coach.available" class="note">
       {{ t("coaches.profile.availableFrom", { date: formatDate(coach.available) }) }}
     </p>
@@ -146,33 +142,6 @@ const subtitle = computed(() => {
 </template>
 
 <style scoped>
-.head :deep(.card-body) {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-}
-
-.facts {
-  flex: 1;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: var(--sp-1-5) var(--sp-3);
-  margin: 0;
-  min-width: 0;
-}
-
-.facts dt {
-  color: var(--text-muted);
-  font-size: var(--fs-sm);
-}
-
-.facts dd {
-  margin: 0;
-  font-weight: 600;
-  min-width: 0;
-}
-
 .note {
   margin: 0;
   font-size: var(--fs-sm);
@@ -197,6 +166,8 @@ const subtitle = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .when,
@@ -212,5 +183,9 @@ const subtitle = computed(() => {
 .muted {
   color: var(--text-muted);
   font-weight: 400;
+}
+.stint:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 </style>

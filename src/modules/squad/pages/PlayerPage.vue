@@ -14,7 +14,7 @@ import {
 import { AppCard, AppChip, AppEmptyState, AppSectionHeader } from "@/components/ui"
 import { archetypeOf, badgesOf } from "@/engine/players/archetypes"
 import { relationsOf, signed } from "@/modules/squad/utils/chemistry"
-import { PageShell, StatPill } from "@/modules/core/components"
+import { PageShell, ProfileHero, StatTiles } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PersonFace } from "@/modules/core/components/face"
 import { AttributesCard } from "@/modules/squad/components/attributes"
@@ -117,24 +117,24 @@ onBeforeUnmount(() => chart?.destroy())
     "
     back
   >
-    <AppCard padding="md" class="head">
-      <PersonFace :player="p" :size="84" class="face" />
-      <NationFlag :id="p.nationId" :size="40" name link />
-      <div class="head-stats">
-        <div class="stat">
-          <span class="stat-label">{{ t("squad.player.ability") }}</span>
-          <StatPill :value="Math.round(p.ca)" :tone="abilityTone(p.ca)" wide />
-        </div>
-        <div class="stat">
-          <span class="stat-label">{{ t("squad.player.potential") }}</span>
-          <span class="stat-value">{{ potential[0] }}–{{ potential[1] }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">{{ t("squad.player.capsGoals") }}</span>
-          <span class="stat-value">{{ p.caps }} / {{ p.goals }}</span>
-        </div>
+    <ProfileHero>
+      <template #face><PersonFace :player="p" :size="72" /></template>
+      <NationFlag :id="p.nationId" :size="22" name link />
+      <div class="chips">
+        <AppChip variant="accent" size="sm">{{ p.pos }}</AppChip>
+        <AppChip v-if="injured" variant="danger" size="sm">{{ t("squad.player.fitness") }}</AppChip>
+        <AppChip v-if="p.banned" variant="danger" size="sm">{{ t("squad.player.suspended") }}</AppChip>
       </div>
-    </AppCard>
+      <span class="muted">{{ club?.name ?? "—" }}</span>
+    </ProfileHero>
+
+    <StatTiles
+      :items="[
+        { label: t('squad.player.ability'), value: Math.round(p.ca), tone: abilityTone(p.ca) },
+        { label: t('squad.player.potential'), value: `${potential[0]}–${potential[1]}` },
+        { label: t('squad.player.capsGoals'), value: `${p.caps} / ${p.goals}` },
+      ]"
+    />
 
     <AppCard padding="md">
       <AppSectionHeader :title="t('squad.player.style')" />
@@ -236,37 +236,10 @@ onBeforeUnmount(() => chart?.destroy())
 </template>
 
 <style scoped>
-.head :deep(.card-body) {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: var(--sp-3);
-}
-
-.face {
-  grid-row: span 2;
-}
-
-.head-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-2);
-}
-
-.stat {
+.chips {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-.stat-label {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-}
-
-.stat-value {
-  font-weight: 700;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
 }
 
 .style-name {
@@ -335,7 +308,7 @@ onBeforeUnmount(() => chart?.destroy())
 .facts {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--sp-1-5) var(--sp-3);
+  gap: var(--sp-2) var(--sp-4);
   margin: 0;
 }
 
