@@ -159,7 +159,8 @@ const countdown = computed(() => {
 
 .comp {
   margin-top: var(--sp-2);
-  font-weight: 700;
+  font-size: var(--fs-md);
+  font-weight: 800;
 }
 
 .label {
@@ -172,7 +173,10 @@ const countdown = computed(() => {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--sp-2);
-  margin: var(--sp-4) 0;
+  margin: var(--sp-3) 0;
+  padding: var(--sp-4) var(--sp-2);
+  border-radius: var(--radius-lg);
+  background: var(--fill-1);
   color: var(--text);
   text-decoration: none;
 }
@@ -195,7 +199,11 @@ const countdown = computed(() => {
 }
 
 .team-rank {
+  padding: 1px var(--sp-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
   font-size: var(--fs-xs);
+  font-weight: 700;
   color: var(--text-muted);
 }
 
@@ -209,8 +217,11 @@ const countdown = computed(() => {
 }
 
 .vs small {
+  padding: 2px var(--sp-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
   font-size: var(--fs-xs);
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
 }
 

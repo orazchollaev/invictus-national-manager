@@ -94,16 +94,17 @@ const tone = (i: number) => {
 
 <style scoped>
 .table {
-  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   overflow: hidden;
 }
 
 .table-title {
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border-light);
   font-weight: 700;
-  font-size: var(--fs-sm);
-  background: var(--surface-2);
+  font-size: var(--fs-md);
 }
 
 .row {
@@ -111,7 +112,7 @@ const tone = (i: number) => {
   grid-template-columns: 22px minmax(0, 1fr) repeat(4, 22px) 32px 30px;
   align-items: center;
   gap: 4px;
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) calc(var(--sp-3) - 4px);
   border-bottom: 1px solid var(--border-light);
   border-inline-start: 4px solid var(--zone, transparent);
   font-size: var(--fs-sm);
@@ -122,9 +123,13 @@ const tone = (i: number) => {
 }
 
 .row.head {
+  padding-block: var(--sp-2);
+  background: var(--fill-1);
   color: var(--text-muted);
   font-size: var(--fs-xs);
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   border-inline-start-color: transparent;
 }
 
@@ -146,6 +151,12 @@ const tone = (i: number) => {
 
 .mine {
   background: var(--accent-subtle);
+  font-weight: 700;
+}
+
+.mine .pos {
+  color: var(--accent);
+  font-weight: 800;
 }
 
 .cut {
@@ -153,14 +164,28 @@ const tone = (i: number) => {
 }
 
 .pts {
+  justify-self: center;
+  min-width: 28px;
+  padding: 1px var(--sp-1);
+  border-radius: var(--radius-pill);
+  background: var(--fill-1);
   font-weight: 800;
+}
+
+.row.head .pts {
+  background: none;
+}
+
+.mine .pts {
+  background: var(--accent);
+  color: var(--surface);
 }
 
 .legend {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-1) var(--sp-3);
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
   font-size: var(--fs-xs);
   color: var(--text-muted);
 }

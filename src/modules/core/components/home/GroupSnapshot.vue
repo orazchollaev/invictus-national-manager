@@ -62,8 +62,5 @@ const snapshot = world.derive((w) => {
   display: block;
   color: inherit;
   text-decoration: none;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
 }
 </style>
