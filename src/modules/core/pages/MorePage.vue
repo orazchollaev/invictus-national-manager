@@ -4,7 +4,7 @@ import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
 import {
   Briefcase,
-  CalendarDays,
+  Mail,
   FolderOpen,
   Landmark,
   LogOut,
@@ -29,7 +29,6 @@ const link = (to: string, icon: Component, key: string) => ({
   to,
   icon,
   label: t(`core.more.${key}`),
-  hint: t(`core.more.${key}Hint`),
 })
 
 /** Grouped by what the player is after; each group is its own card. */
@@ -39,7 +38,7 @@ const groups = [
   // The world around it.
   [
     link("/rankings", ListOrdered, "ranking"),
-    link("/calendar", CalendarDays, "calendar"),
+    { to: "/inbox", icon: Mail, label: t("nav.inbox") },
     link("/honours", Medal, "honours"),
     link("/stadiums", Landmark, "stadiums"),
     link("/invitational", Trophy, "invitational"),
@@ -72,7 +71,6 @@ async function saveAndExit() {
         <component :is="i.icon" :size="20" class="icon" />
         <span class="text">
           <span class="label">{{ i.label }}</span>
-          <span class="hint">{{ i.hint }}</span>
         </span>
       </RouterLink>
     </AppCard>
@@ -81,21 +79,18 @@ async function saveAndExit() {
         <Save :size="20" class="icon" />
         <span class="text">
           <span class="label">{{ t("core.more.saveGame") }}</span>
-          <span class="hint">{{ t("core.more.saveGameHint") }}</span>
         </span>
       </button>
       <button class="item" @click="saveAndExit">
         <FolderOpen :size="20" class="icon" />
         <span class="text">
           <span class="label">{{ t("core.more.saveExit") }}</span>
-          <span class="hint">{{ t("core.more.saveExitHint") }}</span>
         </span>
       </button>
       <button class="item danger" @click="exitWithoutSaving">
         <LogOut :size="20" class="icon" />
         <span class="text">
           <span class="label">{{ t("core.more.exitNoSave") }}</span>
-          <span class="hint">{{ t("core.more.exitNoSaveHint") }}</span>
         </span>
       </button>
     </AppCard>
@@ -125,7 +120,7 @@ async function saveAndExit() {
   align-items: center;
   gap: var(--sp-3);
   width: 100%;
-  padding: var(--sp-3);
+  padding: var(--sp-4) var(--sp-3);
   border: none;
   border-bottom: 1px solid var(--border-light);
   background: none;
@@ -162,8 +157,4 @@ button.item:active:not(:disabled) {
   font-weight: 600;
 }
 
-.hint {
-  font-size: var(--fs-sm);
-  color: var(--text-muted);
-}
 </style>
