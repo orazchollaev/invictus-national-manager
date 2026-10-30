@@ -80,8 +80,8 @@ const router = createRouter({
       component: () => import("../modules/competitions/pages/InvitationalPage.vue"),
     },
     {
-      path: "/calendar",
-      component: () => import("../modules/competitions/pages/CalendarPage.vue"),
+      path: "/fixtures",
+      component: () => import("../modules/competitions/pages/FixturesPage.vue"),
     },
 
     { path: "/coaches", component: () => import("../modules/coaches/pages/CoachesPage.vue") },
@@ -93,6 +93,7 @@ const router = createRouter({
       component: () => import("../modules/stadiums/pages/StadiumsPage.vue"),
     },
 
+    { path: "/calendar", redirect: "/fixtures" },
     { path: "/inbox", component: () => import("../modules/news/pages/InboxPage.vue") },
     { path: "/more", component: () => import("../modules/core/pages/MorePage.vue") },
     { path: "/settings", component: () => import("../modules/settings/pages/SettingsPage.vue") },

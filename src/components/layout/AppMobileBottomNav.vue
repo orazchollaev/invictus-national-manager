@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { House, Users, Trophy, Mail, Menu } from "@lucide/vue"
+import { House, Users, Trophy, CalendarDays, Menu } from "@lucide/vue"
 import { useI18n } from "vue-i18n"
 import { useNavActive } from "@/composables/useNavActive"
 
@@ -10,7 +10,7 @@ const items = [
   { to: "/home", icon: House, label: () => t("nav.home") },
   { to: "/squad", icon: Users, label: () => t("nav.squad") },
   { to: "/competitions", icon: Trophy, label: () => t("nav.competitions") },
-  { to: "/inbox", icon: Mail, label: () => t("nav.inbox") },
+  { to: "/fixtures", icon: CalendarDays, label: () => t("nav.fixtures") },
   { to: "/more", icon: Menu, label: () => t("nav.more") },
 ]
 </script>
