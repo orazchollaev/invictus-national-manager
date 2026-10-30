@@ -2,7 +2,7 @@
 import { computed, reactive } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
-import { Trophy } from "@lucide/vue"
+import { ChevronRight, Trophy, UserRound } from "@lucide/vue"
 import { AppButton, AppCard, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -76,7 +76,7 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 
 <template>
   <PageShell back :title="t('career.title')" :subtitle="career?.managerName">
-    <RouterLink v-if="career" to="/coach/me" class="profile">
+    <section v-if="career" class="hero">
       <PersonFace
         :manager="{
           name: career.managerName,
@@ -85,35 +85,50 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
           seed: world.state?.seed ?? 0,
           face: career.face,
         }"
-        :size="36"
+        :size="56"
         head
       />
-      {{ t("career.profile") }}
-    </RouterLink>
-    <RouterLink v-if="career" to="/career/achievements" class="profile">
-      <Trophy :size="20" />
-      {{ t("career.achievements") }}
-      <span class="muted">{{ milestones.length }}</span>
-    </RouterLink>
-    <AppCard v-if="career" padding="md" class="stats">
+      <div class="hero-text">
+        <div class="hero-name">{{ career.managerName }}</div>
+        <NationFlag v-if="career.nationId" :id="career.nationId" :size="18" name />
+      </div>
+    </section>
+
+    <div v-if="career" class="stats">
       <div class="stat">
-        <span class="muted">{{ t("career.confidence") }}</span>
-        <strong>{{ career.nationId ? `${career.confidence}%` : "—" }}</strong>
+        <span class="stat-label">{{ t("career.confidence") }}</span>
+        <strong class="stat-value">{{ career.nationId ? `${career.confidence}%` : "—" }}</strong>
       </div>
       <div class="stat">
-        <span class="muted">{{ t("career.support") }}</span>
-        <strong>{{ career.nationId ? `${Math.round(career.support ?? 55)}%` : "—" }}</strong>
+        <span class="stat-label">{{ t("career.support") }}</span>
+        <strong class="stat-value">
+          {{ career.nationId ? `${Math.round(career.support ?? 55)}%` : "—" }}
+        </strong>
       </div>
       <div class="stat">
-        <span class="muted">{{ t("career.reputation") }}</span>
-        <strong>{{ Math.round(career.reputation) }}</strong>
+        <span class="stat-label">{{ t("career.reputation") }}</span>
+        <strong class="stat-value">{{ Math.round(career.reputation) }}</strong>
       </div>
       <div class="stat">
-        <span class="muted">{{ t("career.contractUntil") }}</span>
-        <strong>
+        <span class="stat-label">{{ t("career.contractUntil") }}</span>
+        <strong class="stat-value stat-value--date">
           {{ career.nationId && career.contractUntil ? formatDate(career.contractUntil) : "—" }}
         </strong>
       </div>
+    </div>
+
+    <AppCard v-if="career" padding="none" class="menu">
+      <RouterLink to="/coach/me" class="item">
+        <UserRound :size="20" class="item-icon" />
+        <span class="item-label">{{ t("career.profile") }}</span>
+        <ChevronRight :size="18" class="item-chevron" />
+      </RouterLink>
+      <RouterLink to="/career/achievements" class="item">
+        <Trophy :size="20" class="item-icon" />
+        <span class="item-label">{{ t("career.achievements") }}</span>
+        <span class="item-count">{{ milestones.length }}</span>
+        <ChevronRight :size="18" class="item-chevron" />
+      </RouterLink>
     </AppCard>
 
     <div v-if="career?.ultimatum" class="warning">
@@ -198,11 +213,15 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
     <div class="list">
       <div v-for="(h, i) in latest('record', history)" :key="i" class="row">
         <NationFlag :id="h.nationId" :size="22" name />
-        <StatPill v-if="h.left" :value="t(LEFT[h.left])" :tone="leftTone(h.left)" />
-        <span class="muted">
+        <span class="row-text row-text--end">
+          <StatPill v-if="h.left" :value="t(LEFT[h.left])" :tone="leftTone(h.left)" />
+          <small class="muted">
+            {{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}
+          </small>
+        </span>
+        <span class="record-line muted">
           {{ t("career.record_line", { p: h.played, w: h.won, d: h.drawn, l: h.lost }) }}
         </span>
-        <span class="muted">{{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}</span>
       </div>
     </div>
     <AppButton
@@ -221,16 +240,30 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 </template>
 
 <style scoped>
-.profile {
+.hero {
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  color: var(--accent);
-  font-weight: 600;
-  text-decoration: none;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
 }
 
-.stats :deep(.card-body) {
+.hero-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.hero-name {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--sp-2);
@@ -239,7 +272,76 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 .stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.stat-label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.stat-value {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value--date {
+  font-size: var(--fs-md);
+  line-height: 1.8;
+}
+
+.menu {
+  overflow: hidden;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-3);
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:active {
+  background: var(--bg-hover);
+}
+
+.item-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.item-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+.item-count {
+  padding: 1px var(--sp-2);
+  border-radius: var(--radius-pill);
+  background: var(--fill-1);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.item-chevron {
+  color: var(--text-muted);
 }
 
 .muted {
@@ -248,14 +350,15 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 }
 
 .warning {
-  padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--radius);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--danger);
   background: color-mix(in srgb, var(--danger) 12%, var(--surface));
   font-size: var(--fs-sm);
 }
 
 .warning strong {
+  display: block;
   color: var(--danger);
 }
 
@@ -279,7 +382,8 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 }
 
 .list {
-  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   overflow: hidden;
 }
@@ -287,9 +391,13 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
 .row {
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-3);
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
   border-bottom: 1px solid var(--border-light);
+}
+
+.row:last-child {
+  border-bottom: none;
 }
 
 .row.link {
@@ -297,8 +405,13 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
   text-decoration: none;
 }
 
+.row.link:active {
+  background: var(--bg-hover);
+}
+
 .row :deep(.nation) {
   flex: 1;
+  font-weight: 600;
 }
 
 .row-text {
@@ -306,6 +419,19 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
   min-width: 0;
   display: flex;
   flex-direction: column;
+  font-weight: 600;
+}
+
+.row-text--end {
+  flex: 0 0 auto;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.record-line {
+  min-width: 72px;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
 }
 
 .resign {
@@ -324,7 +450,7 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
   align-items: center;
   gap: var(--sp-1);
   padding: var(--sp-3) var(--sp-2);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: linear-gradient(180deg, var(--gold-faint), var(--surface));
   border: 1px solid var(--gold-soft);
   text-align: center;

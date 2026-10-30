@@ -37,7 +37,8 @@ const statusTone = (s: string) =>
 
 <style scoped>
 .list {
-  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   overflow: hidden;
 }
@@ -46,12 +47,17 @@ const statusTone = (s: string) =>
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
   border-bottom: 1px solid var(--border-light);
+}
+
+.row:last-child {
+  border-bottom: none;
 }
 
 .row-text {
   flex: 1;
+  font-weight: 600;
   min-width: 0;
   display: flex;
   flex-direction: column;
