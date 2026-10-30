@@ -105,11 +105,11 @@ const link = (f: Fixture) => (f.result ? `/report/${f.id}` : `/match/${f.id}`)
 .month {
   margin: var(--sp-3) 0 var(--sp-2);
   padding-inline: var(--sp-1);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .list {

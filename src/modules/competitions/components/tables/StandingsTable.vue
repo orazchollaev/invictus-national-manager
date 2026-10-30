@@ -103,8 +103,11 @@ const tone = (i: number) => {
 .table-title {
   padding: var(--sp-3) var(--sp-4);
   border-bottom: 1px solid var(--border-light);
+  font-size: var(--fs-xs);
   font-weight: 700;
-  font-size: var(--fs-md);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text);
 }
 
 .row {

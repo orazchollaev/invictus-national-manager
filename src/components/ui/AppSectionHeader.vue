@@ -38,7 +38,7 @@ defineProps<{
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--text);
 }
 
 .section-header-actions {

@@ -174,7 +174,7 @@ function toggle(kind: string) {
   font-size: var(--fs-xs);
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
 .hero-name {
@@ -242,7 +242,7 @@ function toggle(kind: string) {
   font-size: var(--fs-xs);
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
 .more {

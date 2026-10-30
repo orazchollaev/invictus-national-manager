@@ -75,7 +75,7 @@ const champion = computed(() =>
   font-size: var(--fs-xs);
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   animation: pop 0.5s var(--ease) both;
 }
 

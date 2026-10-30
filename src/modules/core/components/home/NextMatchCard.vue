@@ -137,9 +137,9 @@ const countdown = computed(() => {
 .eyebrow {
   font-size: var(--fs-xs);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--text);
 }
 
 .head-right {
@@ -160,7 +160,7 @@ const countdown = computed(() => {
 .comp {
   margin-top: var(--sp-2);
   font-size: var(--fs-md);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .label {
