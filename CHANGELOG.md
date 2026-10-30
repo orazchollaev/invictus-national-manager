@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.1.0](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.8...v0.1.0) (2026-10-30)
+
+### 🚀 New Features
+
+- always show home match strip and group, redesign strip ([cbedabe](https://github.com/orazchollaev/invictus-national-manager/commit/cbedabec7c22e821b3360da1a42aa49b0749f7f1))
+- fixtures tab replaces inbox in bottom nav ([65b4072](https://github.com/orazchollaev/invictus-national-manager/commit/65b4072d6ca7440bb478734f9405a2247dd1e2b8))
+- move inbox to more and drop its descriptions ([85c42b8](https://github.com/orazchollaev/invictus-national-manager/commit/85c42b85abb44895d8e8035771c9445e2e560a2e))
+- move job offers to their own career page ([751ffcc](https://github.com/orazchollaev/invictus-national-manager/commit/751ffcc9648c43b051a4ed37d852e236ba9a813b))
+- redesign career page ([2002de4](https://github.com/orazchollaev/invictus-national-manager/commit/2002de4edb346f78df74cc83da85a6adb8fc7595))
+- redesign fixture rows, competitions list and squad list ([61d48c0](https://github.com/orazchollaev/invictus-national-manager/commit/61d48c032545f6bc700a4012af23fa9d187e6ba7))
+- redesign next match card and standings table ([75ad194](https://github.com/orazchollaev/invictus-national-manager/commit/75ad194843e4a5af314132e492d50cff8098757a))
+- share a hero and stat tiles between player and coach pages ([f399fc7](https://github.com/orazchollaev/invictus-national-manager/commit/f399fc7705a9dc898f47626f8cf926576be54326))
+- show a dash for unranked teams on the match page ([853dd52](https://github.com/orazchollaev/invictus-national-manager/commit/853dd5280e8629979257b87cc3a8c55898e67b4f))
+
+### 🐛 Bug Fixes
+
+- header and status bar share one colour ([481a688](https://github.com/orazchollaev/invictus-national-manager/commit/481a6886772da562b0d7b5a6fe818b485d40e3a8))
+
+### 🔧 Maintenance
+
+- bump gradle version to 0.1.0 ([86d873a](https://github.com/orazchollaev/invictus-national-manager/commit/86d873a0b53fcf84b2e3506367acd6acd50c7778))
+- update locale strings ([596833a](https://github.com/orazchollaev/invictus-national-manager/commit/596833a22f8981d7728f336c54b623551abc830e))
+
+### 🎨 Styles
+
+- unify section title weight, spacing and colour ([07055d9](https://github.com/orazchollaev/invictus-national-manager/commit/07055d9586f1d6fd0b22fe88ff8d8168afa313a0))
+
 ## [0.0.8](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.7...v0.0.8) (2026-10-27)
 
 ### 🚀 New Features
