@@ -1,7 +1,8 @@
 /**
  * The other confederations' championships and their qualifying:
- *  - Africa Cup of Nations: 2027 (Kenya, Tanzania, Uganda; 19 June – 17 July), then
- *    every four years from 2028 (CAF, December 2025). 2027 qualifying is the real draw.
+ *  - Africa Cup of Nations: 2027 (Kenya, Tanzania, Uganda; 19 June – 17 July), then 2028,
+ *    2031 and 2033 and every two years after (CAF, October 2026: the four-year cycle was
+ *    dropped, no edition in a World Cup year). 2027 qualifying is the real draw.
  *    Hosts play qualifying too; a group with a host sends only its best other team.
  *  - AFC Asian Cup: 2027 in Saudi Arabia (7 January – 5 February, real groups), then
  *    every four years. The top two of each World Cup qualifying second-round group
@@ -19,7 +20,7 @@ import { iso } from "@/engine/calendar/dates"
 import { slots, window } from "@/engine/calendar/windows"
 import { AFCON_2027_QUALIFYING, ASIAN_CUP_2027, AWARDED_HOSTS } from "@/data/start"
 import { finalsDef, qualifierDef } from "./builders"
-import { everyNYears, pickHosts } from "./helpers"
+import { afconYears, everyNYears, pickHosts } from "./helpers"
 import { afcFirstRoundLosers, afcSecondRound } from "./fifa"
 
 function hostsOf(key: string, ctx: CompContext, pool: string[], count = 1) {
@@ -28,8 +29,13 @@ function hostsOf(key: string, ctx: CompContext, pool: string[], count = 1) {
 
 // ── Africa ──────────────────────────────────────────────────────────────────
 
-const afconYears = (from: number, to: number) =>
-  [2027, ...everyNYears(2028, 4)(from, to)].filter((y) => y >= from && y <= to)
+/**
+ * Qualifying is played in the autumn two years before the finals; the 2028 edition
+ * follows 2027 at once (autumn 2027), and the one after a World Cup year (2027, 2031,
+ * 2035) is qualified for in that autumn and the March after the World Cup.
+ */
+const afconAfterWorldCup = (y: number) => y % 4 === 3
+const afconQualYear = (y: number) => (y === 2028 ? 2027 : afconAfterWorldCup(y) ? y - 1 : y - 2)
 const caf = (ctx: CompContext) =>
   ctx.ranked((t) => ctx.confedMember(t) && ctx.confedOf(t) === "CAF")
 
@@ -99,16 +105,23 @@ export const afconQualifying: CompetitionDef = qualifierDef({
   groups: () => 12,
   groupSize: 4,
   fixedGroups: (y) => (y === 2027 ? AFCON_2027_QUALIFYING : undefined),
-  // The lowest ranked play two-legged ties in the June window before the groups.
-  prelimDates: (y) => slots(y === 2028 ? 2027 : y - 2, ["jun"]),
-  prelimDrawDate: (y) => iso(y === 2028 ? 2027 : y - 2, 3, 1),
-  groupDrawDate: (y) => (y === 2027 ? "2026-07-01" : y === 2028 ? "2027-07-15" : iso(y - 2, 7, 15)),
+  // The lowest ranked play two-legged ties before the groups: in June, or after a World
+  // Cup year in March (the World Cup fills June, and its qualifying the windows before).
+  prelimDates: (y) =>
+    afconAfterWorldCup(y) ? slots(y - 1, ["mar"]) : slots(afconQualYear(y), ["jun"]),
+  prelimDrawDate: (y) => (afconAfterWorldCup(y) ? iso(y - 1, 1, 15) : iso(afconQualYear(y), 3, 1)),
+  groupDrawDate: (y) =>
+    y === 2027
+      ? "2026-07-01"
+      : afconAfterWorldCup(y)
+        ? iso(y - 1, 7, 20)
+        : iso(afconQualYear(y), 7, 15),
   groupDates: (y) => {
-    if (y === 2027) {
-      const sep = window(2026, "sep").slots
-      return [sep[0], sep[1], ...slots(2026, ["nov"]), ...slots(2027, ["mar"])]
+    if (afconAfterWorldCup(y)) {
+      const sep = window(y - 1, "sep").slots
+      return [sep[0], sep[1], ...slots(y - 1, ["nov"]), ...slots(y, ["mar"])]
     }
-    return y === 2028 ? slots(2027, ["sep", "nov"]) : slots(y - 2, ["sep", "nov"])
+    return slots(afconQualYear(y), ["sep", "nov"])
   },
   qualify: afconQualify,
 })

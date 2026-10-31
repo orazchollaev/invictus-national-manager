@@ -17,6 +17,20 @@ export function everyNYears(first: number, n: number) {
   }
 }
 
+const AFCON_YEARS = [2027, 2028, 2031, 2033]
+
+/**
+ * Africa Cup of Nations years (CAF, October 2026): back to a two-year cycle, with 2027,
+ * 2028, 2031 and 2033 confirmed — none in a World Cup year — and every odd year after.
+ */
+export function afconYears(from: number, to: number): number[] {
+  const out = AFCON_YEARS.filter((y) => y >= from && y <= to)
+  for (let y = 2035; y <= to; y += 2) if (y >= from) out.push(y)
+  return out
+}
+
+export const isAfconYear = (y: number) => afconYears(y, y).length > 0
+
 /** Every year from `first`, skipping years `skip` says no to. */
 export function yearly(first: number, skip: (y: number) => boolean = () => false) {
   return (from: number, to: number) => {

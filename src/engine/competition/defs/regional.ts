@@ -25,7 +25,7 @@ import type { CompContext, CompetitionDef } from "../runtime"
 import { ASEAN_CUP_2026, AWARDED_HOSTS } from "@/data/start"
 import { finishers, knockoutResult, standingsOf } from "../runtime"
 import { finalsDef, type FinalsOptions } from "./builders"
-import { everyNYears, pickHosts, yearly } from "./helpers"
+import { everyNYears, isAfconYear, pickHosts, yearly } from "./helpers"
 
 type RegionalOptions = Omit<
   FinalsOptions,
@@ -300,7 +300,7 @@ export const cosafaCup = regional({
   confed: "CAF",
   name: (y) => `COSAFA Cup ${y}`,
   // Not in Africa Cup of Nations years.
-  editions: yearly(2029, (y) => y % 4 === 0),
+  editions: yearly(2029, isAfconYear),
   teams: 12,
   groups: 3,
   perGroup: 1,
@@ -336,7 +336,8 @@ export const wafuCup = regional({
   short: "WAFU Cup",
   confed: "CAF",
   name: (y) => `WAFU Zone Cup ${y}`,
-  editions: everyNYears(2029, 2),
+  // Not in Africa Cup of Nations years either: both are played in June.
+  editions: yearly(2029, (y) => y % 2 === 0 || isAfconYear(y)),
   teams: 12,
   groups: 4,
   perGroup: 1,
