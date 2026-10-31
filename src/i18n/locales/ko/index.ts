@@ -1,11 +1,11 @@
 import type { LocaleModule } from "../types"
+import meta from "./meta"
 import commentary from "./commentary"
 import engine from "./engine"
 import ui from "./ui"
 
 const ko: LocaleModule = {
-  name: "한국어",
-  flag: "kr",
+  ...meta,
   messages: { ...ui, ...engine },
   commentary,
 }

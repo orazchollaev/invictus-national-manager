@@ -1,11 +1,11 @@
 import type { LocaleModule } from "../types"
+import meta from "./meta"
 import commentary from "./commentary"
 import engine from "./engine"
 import ui from "./ui"
 
 const hi: LocaleModule = {
-  name: "हिन्दी",
-  flag: "in",
+  ...meta,
   messages: { ...ui, ...engine },
   commentary,
 }

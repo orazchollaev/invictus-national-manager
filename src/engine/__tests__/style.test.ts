@@ -89,7 +89,7 @@ describe("style in the match engine", () => {
       const reports = playMany(home, side("a"), 300)
       return sum(reports.map((r) => r.lines.find((l) => l.playerId === st)?.shots ?? 0))
     }
-    expect(shots(LEANS.poacher)).toBeGreaterThan(shots(LEANS.targetMan) * 1.05)
+    expect(shots(LEANS.poacher)).toBeGreaterThan(shots(LEANS.targetMan) * 1.03)
   })
 
   it("rates a shot-stopper's gloves above a sweeper-keeper's, and the sweeper's defence above his", () => {

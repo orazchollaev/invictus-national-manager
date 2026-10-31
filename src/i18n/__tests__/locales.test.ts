@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 import clubRows from "@/data/clubs.json"
 import nations from "@/data/nations.json"
 import playerRows from "@/data/players.json"
@@ -6,7 +6,7 @@ import { COMPETITION_DEFS } from "@/engine/competition/defs"
 import type { NationDef } from "@/engine/types"
 import { clubsFromRows, createWorld, type ClubRow, type PlayerRow } from "@/engine/world/create"
 import type { Msg, Text } from "@/engine/text"
-import { i18n, LOCALES, setLocale } from "@/i18n"
+import { i18n, loadLocale, LOCALES, setLocale } from "@/i18n"
 import { resolveText } from "@/i18n/text"
 
 type Tree = { [k: string]: string | Tree }
@@ -21,6 +21,9 @@ const flatten = (tree: Tree, prefix = ""): Record<string, string> =>
 const placeholders = (s: string) => [...new Set(s.match(/\{\w+\}/g) ?? [])].sort()
 
 const messages = (code: string) => flatten(i18n.global.getLocaleMessage(code) as Tree)
+
+// Only English ships in the startup chunk; every other language loads on demand.
+beforeAll(() => Promise.all(LOCALES.map((l) => loadLocale(l.value))))
 
 describe("locales", () => {
   const en = messages("en")
@@ -84,8 +87,8 @@ describe("engine text in the world", () => {
   const looksLikeKey = (s: string) => /^[a-z@][\w-]*(\.[\w-]+)+$/.test(s)
 
   for (const { value: code } of LOCALES) {
-    it(`${code} reads every news item, objective, name and label`, () => {
-      setLocale(code)
+    it(`${code} reads every news item, objective, name and label`, async () => {
+      await setLocale(code)
       try {
         expect(texts.length).toBeGreaterThan(100)
         for (const t of texts) {
@@ -94,14 +97,14 @@ describe("engine text in the world", () => {
           expect(looksLikeKey(out), `${code}: ${JSON.stringify(t as Msg)} → ${out}`).toBe(false)
         }
       } finally {
-        setLocale("en")
+        await setLocale("en")
       }
     })
   }
 })
 
 describe("stage names", () => {
-  it("are translated wherever the engine can name a stage", () => {
+  it("are translated wherever the engine can name a stage", async () => {
     const world = createWorld(
       { seed: 5, start: "2026-09-01", managerName: "T", nationality: "TUR", nationId: "TUR" },
       { nations: nations as NationDef[], clubs: clubsFromRows(clubRows as ClubRow[]) },
@@ -115,14 +118,14 @@ describe("stage names", () => {
       }
     // Every definition's stages, planned for a year it is run.
     const same = new Set(["Final", "Play-In"])
-    setLocale("pt")
+    await setLocale("pt")
     try {
       const missing = [...names].filter(
         (n) => !same.has(n) && resolveText({ k: "@stage", p: { name: n } }) === n
       )
       expect(missing).toEqual([])
     } finally {
-      setLocale("en")
+      await setLocale("en")
     }
   })
 })

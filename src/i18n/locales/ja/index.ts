@@ -1,11 +1,11 @@
 import type { LocaleModule } from "../types"
+import meta from "./meta"
 import commentary from "./commentary"
 import engine from "./engine"
 import ui from "./ui"
 
 const ja: LocaleModule = {
-  name: "日本語",
-  flag: "jp",
+  ...meta,
   messages: { ...ui, ...engine },
   commentary,
 }

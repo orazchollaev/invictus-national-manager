@@ -22,5 +22,8 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 2000,
+    // Flags are ~1 KB SVGs; inlined as base64 they would all sit in the startup
+    // chunk. As files only the ones on screen are read.
+    assetsInlineLimit: (file) => (file.endsWith(".svg") ? false : undefined),
   },
 })

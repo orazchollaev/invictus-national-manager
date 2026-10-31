@@ -5,5 +5,5 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <img src="/logo.png" :alt="t('app.name')" />
+  <img src="/logo.webp" :alt="t('app.name')" />
 </template>

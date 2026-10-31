@@ -23,7 +23,7 @@ const CREDITS = [
   <AppModal :title="t('settings.about')" width="425px" @close="$emit('close')">
     <div class="about">
       <div class="about-logos">
-        <img src="/logo.png" alt="invictus dev" class="about-logo" />
+        <img src="/logo.webp" alt="invictus dev" class="about-logo" />
         <img src="/logo/shiftfn-logo.webp" alt="shiftfn dev" class="about-logo" />
       </div>
 
