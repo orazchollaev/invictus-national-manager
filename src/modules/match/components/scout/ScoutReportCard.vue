@@ -46,10 +46,7 @@ const who = { you: "match.scout.you", them: "match.scout.them" }
               <span class="player-pos">{{ player(k.playerId)?.pos }}</span>
             </span>
             <span class="player-note">
-              {{ $tx(k.note) }} · {{ $tx(k.archetype) }}
-              <template v-if="k.role && $tx(k.role) !== $tx(k.archetype)">
-                ({{ $tx(k.role) }})
-              </template>
+              {{ $tx(k.note) }}
             </span>
           </span>
         </RouterLink>

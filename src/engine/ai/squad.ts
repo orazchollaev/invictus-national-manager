@@ -6,9 +6,7 @@ import type { ISODate, Player, Position } from "../types"
 import { FORMATIONS } from "../match/formations"
 import type { Formation, SheetSlot, TeamSheet, Tactics } from "../match/types"
 import { ageOn, matchAbility, positionFit, positionGroup } from "../players/ability"
-import { archetypeOf } from "../players/archetypes"
 import { deriveSeed } from "../rng"
-import { suggestedRole } from "../match/roles"
 
 export const SQUAD_SIZE = { window: 26, tournament: 26, min: 23 }
 
@@ -160,16 +158,6 @@ export function pickTakers(squad: Player[], xi: SheetSlot[]) {
   return { penaltyTakerId: pen?.id, setPieceTakerId: setPiece?.id, captainId: captain?.id }
 }
 
-/** Give each slot the role that suits the player in it, where one does. */
-export function pickRoles(squad: Player[], xi: SheetSlot[]): SheetSlot[] {
-  const byId = new Map(squad.map((p) => [p.id, p]))
-  return xi.map((slot) => {
-    const p = byId.get(slot.playerId)
-    const role = p ? suggestedRole(archetypeOf(p), slot.pos) : undefined
-    return role ? { ...slot, role } : slot
-  })
-}
-
 /**
  * How a coach sets his team up: the weak sit deep and counter, the strong push up and
  * play wide, the rest follow a habit that is theirs and stays the same.
@@ -207,7 +195,7 @@ export function aiTeamSheet(
     tactics?.formation ??
     favourite ??
     bestFormation(squad, date, ["4-2-3-1", "4-3-3", "4-4-2", "3-5-2", "4-1-4-1", "5-3-2"])
-  const xi = pickRoles(squad, pickXI(squad, formation, date))
+  const xi = pickXI(squad, formation, date)
   return {
     nationId,
     xi,

@@ -1,39 +1,19 @@
 /**
- * What kind of player somebody is, beyond a number. His archetype is a label read off
- * his attributes (the type of player he is strongest at being for his position), and
- * his style, the small shifts in a match, comes from the same attributes: a quick winger
- * breaks away more, a good header of the ball wins more corners. Nothing is stored.
+ * What kind of player somebody is, beyond a number. His style, the small shifts in a
+ * match, comes from his attributes: a quick winger breaks away more, a good header of
+ * the ball wins more corners. Nothing is stored.
  *
  * Every factor is 1 (or 0 for points) when his attributes are what his position and
  * overall predict, so a squad of mixed types plays like an average one and only
  * lopsided squads feel different.
  */
 import { msg, type Msg } from "../text"
-import type { ISODate, Player, Position } from "../types"
+import type { ISODate, Player } from "../types"
 import { clamp } from "../rng"
 import { ageOn } from "./ability"
-import { deviation, ensureAttrs, type Attr } from "./attributes"
+import { deviation, type Attr } from "./attributes"
 
-export type Archetype =
-  | "shot-stopper"
-  | "sweeper-keeper"
-  | "stopper"
-  | "ball-playing-defender"
-  | "defensive-full-back"
-  | "attacking-full-back"
-  | "ball-winner"
-  | "deep-playmaker"
-  | "box-to-box"
-  | "playmaker"
-  | "creator"
-  | "shadow-striker"
-  | "winger"
-  | "inside-forward"
-  | "target-man"
-  | "poacher"
-  | "complete-forward"
-
-/** What a style (an archetype, a role, or both together) changes in a match. */
+/** What a player's style changes in a match. */
 export interface Modifiers {
   /** Multiplies his share of the side's defence, midfield and attack. */
   unit: [number, number, number]
@@ -70,92 +50,7 @@ export const NEUTRAL: Modifiers = {
   drain: 1,
 }
 
-export interface ArchetypeDef {
-  positions: Position[]
-  /** The attributes that make a player this type, with how much each counts. */
-  keys: Partial<Record<Attr, number>>
-  /** Points taken off his lean, so the all-rounder is only picked when nothing else stands out. */
-  handicap?: number
-}
-
-export const ARCHETYPES: Record<Archetype, ArchetypeDef> = {
-  "shot-stopper": { positions: ["GK"], keys: { reflexes: 1, oneOnOne: 0.8, positioning: 0.6 } },
-  "sweeper-keeper": { positions: ["GK"], keys: { distribution: 1, agility: 0.8, aerial: 0.4 } },
-  stopper: { positions: ["CB"], keys: { tackling: 1, strength: 0.7, heading: 0.7 } },
-  "ball-playing-defender": {
-    positions: ["CB"],
-    keys: { passing: 1, vision: 0.8, dribbling: 0.5 },
-  },
-  "defensive-full-back": {
-    positions: ["LB", "RB"],
-    keys: { tackling: 1, strength: 0.6, stamina: 0.5 },
-  },
-  "attacking-full-back": {
-    positions: ["LB", "RB"],
-    keys: { pace: 1, dribbling: 0.8, passing: 0.7, stamina: 0.4 },
-  },
-  "ball-winner": { positions: ["DM"], keys: { tackling: 1, strength: 0.7, stamina: 0.5 } },
-  "deep-playmaker": { positions: ["DM"], keys: { passing: 1, vision: 0.9 } },
-  "box-to-box": { positions: ["CM"], keys: { stamina: 1, tackling: 0.6, shooting: 0.6 } },
-  playmaker: { positions: ["CM"], keys: { passing: 1, vision: 0.9, dribbling: 0.5 } },
-  creator: { positions: ["AM"], keys: { passing: 1, vision: 0.9, dribbling: 0.7 } },
-  "shadow-striker": { positions: ["AM"], keys: { finishing: 1, shooting: 0.8, pace: 0.4 } },
-  winger: { positions: ["LW", "RW"], keys: { pace: 1, acceleration: 0.8, dribbling: 0.8 } },
-  "inside-forward": {
-    positions: ["LW", "RW"],
-    keys: { finishing: 1, shooting: 0.8, dribbling: 0.6 },
-  },
-  "target-man": { positions: ["ST"], keys: { heading: 1, strength: 0.8, jumping: 0.8 } },
-  poacher: { positions: ["ST"], keys: { finishing: 1, acceleration: 0.5, vision: 0.5 } },
-  "complete-forward": {
-    positions: ["ST"],
-    keys: { finishing: 0.4, passing: 0.4, dribbling: 0.4, pace: 0.3, strength: 0.3 },
-    handicap: 2,
-  },
-}
-
-const BY_POSITION: Record<Position, Archetype[]> = (() => {
-  const out = {} as Record<Position, Archetype[]>
-  for (const [id, d] of Object.entries(ARCHETYPES) as [Archetype, ArchetypeDef][])
-    for (const pos of d.positions) (out[pos] ??= []).push(id)
-  return out
-})()
-
-/** The archetypes a position can have. */
-export function archetypesFor(pos: Position): Archetype[] {
-  return BY_POSITION[pos]
-}
-
 type Styled = Pick<Player, "id" | "pos" | "ca" | "attrs">
-
-/** His archetype: the type of player, for his natural position, his attributes lean towards. */
-export function archetypeOf(p: Styled): Archetype {
-  const candidates = BY_POSITION[p.pos]
-  const subject = p.attrs ? p : withAttrs(p)
-  let best = candidates[0]
-  let top = -Infinity
-  for (const id of candidates) {
-    const d = ARCHETYPES[id]
-    let sum = 0
-    let weight = 0
-    for (const [key, w] of Object.entries(d.keys) as [Attr, number][]) {
-      sum += deviation(subject, key) * w
-      weight += w
-    }
-    const score = sum / weight - (d.handicap ?? 0)
-    if (score > top) {
-      top = score
-      best = id
-    }
-  }
-  return best
-}
-
-function withAttrs(p: Styled): Styled {
-  const copy = { ...p } as Player
-  ensureAttrs(copy)
-  return copy
-}
 
 /** Scales a deviation (in attribute points) into a factor around 1. */
 function factor(points: number, per: number, lo = 0.7, hi = 1.4): number {

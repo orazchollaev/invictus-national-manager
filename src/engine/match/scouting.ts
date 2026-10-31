@@ -7,8 +7,7 @@
 import type { Player } from "../types"
 import { msg, type Msg } from "../text"
 import { matchAbility, positionGroup } from "../players/ability"
-import { archetypeOf, playerStyle } from "../players/archetypes"
-import { combineStyle } from "./roles"
+import { playerStyle } from "../players/style"
 import { firing, instructionsOf, meet, styleOf, type PlayStyle, type Rule } from "./matchup"
 import type { Formation, Level, Tactics, TeamSheet } from "./types"
 
@@ -37,8 +36,6 @@ export interface KeyPlayer {
   reason: KeyReason
   /** What to say about him. */
   note: Msg
-  archetype: Msg
-  role: Msg | null
 }
 
 /** The players to watch in a sheet, and the one place to hit. */
@@ -60,11 +57,9 @@ export function keyPlayers(
       playerId: x.p.id,
       reason,
       note: msg(`scout.reason.${reason}`),
-      archetype: msg(`arch.${archetypeOf(x.p)}.label`),
-      role: x.slot.role ? msg(`role.${x.slot.role}.label`) : null,
     })
   }
-  const style = (x: (typeof picks)[number]) => combineStyle(playerStyle(x.p), x.slot.role)
+  const style = (x: (typeof picks)[number]) => playerStyle(x.p)
   const best = (xs: typeof picks, value: (x: (typeof picks)[number]) => number) =>
     xs.reduce<(typeof picks)[number] | undefined>(
       (a, b) => (!a || value(b) > value(a) ? b : a),

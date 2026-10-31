@@ -254,5 +254,5 @@ function refill(state: MatchState, s: Side, out: MatchEvent[]) {
   if (forwards.length < 2) return
   const leaving = weakestOf(forwards) ?? forwards[0]
   const joining = replacement(side, slot, -1)
-  if (joining) bringOn(state, s, leaving, joining, out, slot, null)
+  if (joining) bringOn(state, s, leaving, joining, out, slot)
 }

@@ -13,11 +13,9 @@ import { advantage } from "../match/scouting"
 import { teamUnits } from "../match/engine"
 import type { Formation, Level, Tactics } from "../match/types"
 import { playMatch } from "../match/engine"
-import { archetypesFor } from "../players/archetypes"
-import type { Position } from "../types"
 import { playMany, setupOf, sideOf, stateOf } from "./helpers"
 
-const first = (pos: Position) => archetypesFor(pos)[0]
+const first = () => undefined
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
 const LEVELS: Level[] = [0, 1, 2]
 

@@ -4,10 +4,9 @@
  */
 import type { ISODate, Player, Position } from "../types"
 import { pickWeighted, type Rng } from "../rng"
-import type { Archetype, Modifiers } from "../players/archetypes"
+import type { Modifiers } from "../players/style"
 import type { Multipliers } from "./matchup"
 import { LANES, laneAffinity, laneOfSlot } from "./lanes"
-import type { Role } from "./roles"
 import type {
   Lane,
   MatchEvent,
@@ -24,20 +23,13 @@ export interface LivePlayer {
   id: string
   natural: Position
   alt: Position[]
-  arch: Archetype
-  /** What his attributes do in a match, before any role. */
-  style: Modifiers
-  /** What the manager asks of his slot, if anything. */
-  role: Role | null
-  /** Style and role together, worked out again whenever either changes. */
+  /** What his attributes do in a match. */
   mod: Modifiers
-  /** His role suits his archetype, so he plays above himself. */
-  suited: boolean
   /** What his team mates on the pitch give him, from his bonds with them. */
   bond: number
   slot: Position
   base: number
-  /** His strength this minute: ability, fit, fatigue, nerve, role and bonds together. */
+  /** His strength this minute: ability, fit, fatigue, nerve and bonds together. */
   eff: number
   /** How well he fits `fitFor`, the slot it was last worked out for. */
   fit: number

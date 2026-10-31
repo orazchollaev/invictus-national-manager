@@ -11,7 +11,6 @@ import type {
   Tactics,
 } from "../match/types"
 import type { Position } from "../types"
-import { archetypesFor } from "../players/archetypes"
 import {
   levelSetup as setupFor,
   playLevel as playLevels,
@@ -285,7 +284,7 @@ describe("the game state", () => {
 })
 
 describe("transitions", () => {
-  const first = (pos: Parameters<typeof archetypesFor>[0]) => archetypesFor(pos)[0]
+  const first = () => undefined
   const moveShare = (rs: MatchReport[], side: Side, move: "counter" | "press") => {
     const shots = shotsOf(rs).filter((e) => e.side === side)
     return shots.filter((e) => e.move === move).length / shots.length
@@ -362,7 +361,7 @@ describe("stoppage time", () => {
 })
 
 describe("the AI coach", () => {
-  const first = (pos: Parameters<typeof archetypesFor>[0]) => archetypesFor(pos)[0]
+  const first = () => undefined
 
   /** Changes made while the ball was in play, as distinct stoppages, for one side. */
   function windowsUsed(events: MatchEvent[], side: Side): number {
@@ -398,7 +397,7 @@ describe("the AI coach", () => {
   function fullBench(prefix: string): TestSide {
     const side = sideOf(prefix, first)
     const extra = (["CB", "DM", "RB", "LB", "CM", "AM", "RW", "LW", "ST"] as Position[]).map(
-      (pos, i) => playerWith(`${prefix}x${i}-`, pos, first(pos), 67)
+      (pos, i) => playerWith(`${prefix}x${i}-`, pos, undefined, 67)
     )
     return {
       players: [...side.players, ...extra],

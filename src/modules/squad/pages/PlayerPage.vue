@@ -12,7 +12,7 @@ import {
   Filler,
 } from "chart.js"
 import { AppCard, AppChip, AppEmptyState, AppSectionHeader } from "@/components/ui"
-import { archetypeOf, badgesOf } from "@/engine/players/archetypes"
+import { badgesOf } from "@/engine/players/style"
 import { relationsOf, signed } from "@/modules/squad/utils/chemistry"
 import { PageShell, ProfileHero, StatTiles } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -39,7 +39,6 @@ const club = computed(() => (p.value ? world.world?.clubs.get(p.value.clubId) : 
 const potential = computed(() => (p.value ? potentialRange(p.value, world.date) : [0, 0]))
 const injured = computed(() => !!p.value?.injury && p.value.injury.until > world.date)
 
-const archId = computed(() => archetypeOf(p.value ?? { id: "", pos: "CM", ca: 50 }))
 const badges = computed(() => (p.value ? badgesOf(p.value, world.date) : []))
 
 /** His bonds with the rest of his nation's players. */
@@ -123,7 +122,9 @@ onBeforeUnmount(() => chart?.destroy())
       <div class="chips">
         <AppChip variant="accent" size="sm">{{ p.pos }}</AppChip>
         <AppChip v-if="injured" variant="danger" size="sm">{{ t("squad.player.fitness") }}</AppChip>
-        <AppChip v-if="p.banned" variant="danger" size="sm">{{ t("squad.player.suspended") }}</AppChip>
+        <AppChip v-if="p.banned" variant="danger" size="sm">
+          {{ t("squad.player.suspended") }}
+        </AppChip>
       </div>
       <span class="muted">{{ club?.name ?? "—" }}</span>
     </ProfileHero>
@@ -136,11 +137,8 @@ onBeforeUnmount(() => chart?.destroy())
       ]"
     />
 
-    <AppCard padding="md">
-      <AppSectionHeader :title="t('squad.player.style')" />
-      <div class="style-name">{{ t(`arch.${archId}.label`) }}</div>
-      <p class="style-blurb">{{ t(`arch.${archId}.blurb`) }}</p>
-      <ul v-if="badges.length" class="badges">
+    <AppCard v-if="badges.length" padding="md">
+      <ul class="badges">
         <li v-for="b in badges" :key="b.id">
           <AppChip variant="accent" size="sm">{{ $tx(b.label) }}</AppChip>
           <span class="badge-text">{{ $tx(b.text) }}</span>
@@ -240,11 +238,6 @@ onBeforeUnmount(() => chart?.destroy())
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-1);
-}
-
-.style-name {
-  font-weight: 700;
-  color: var(--accent);
 }
 
 .style-blurb {

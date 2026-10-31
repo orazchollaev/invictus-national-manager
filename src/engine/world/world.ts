@@ -35,8 +35,6 @@ import { deriveSeed, makeRng, pick, shuffle, streamFor } from "../rng"
 import { playMatch } from "../match/engine"
 import type { MatchReport, SheetSlot, Side, Tactics, TeamSheet } from "../match/types"
 import { advise, scoutReport, type ScoutReport } from "../match/scouting"
-import { suggestedRole, validRole } from "../match/roles"
-import { archetypeOf } from "../players/archetypes"
 import { expectedResult, rankingUpdate } from "../ranking"
 import {
   aiMentality,
@@ -1066,11 +1064,7 @@ export class World {
       const pick = ut.xi[i]
       if (pick && ids.has(pick.playerId) && !used.has(pick.playerId)) {
         used.add(pick.playerId)
-        return {
-          playerId: pick.playerId,
-          pos,
-          role: validRole(pick.role, pos) ? pick.role : undefined,
-        }
+        return { playerId: pick.playerId, pos }
       }
       return null
     })
@@ -1084,7 +1078,7 @@ export class World {
         )[0]
       if (best) {
         used.add(best.id)
-        xi[i] = { playerId: best.id, pos, role: suggestedRole(archetypeOf(best), pos) }
+        xi[i] = { playerId: best.id, pos }
       }
     })
     const sheetXi = xi.filter((s): s is SheetSlot => !!s)

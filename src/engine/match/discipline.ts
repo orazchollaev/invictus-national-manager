@@ -140,7 +140,7 @@ export function sendOff(
     const stand = side.pitch.reduce((a, b) =>
       DEFENDER_WEIGHT[a.slot] > DEFENDER_WEIGHT[b.slot] ? a : b
     )
-    assign(stand, "GK", null)
+    assign(stand, "GK")
   }
   refreshOutfield(side)
   // The AI coach fills a hole at the back (or in goal) with a defender off the bench.

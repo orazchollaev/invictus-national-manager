@@ -18,9 +18,7 @@ import {
 import { pickXI } from "../ai/squad"
 import { createMatch, substitute, step } from "../match/engine"
 import { playMany, setupOf, sideOf, stateOf } from "./helpers"
-import { archetypesFor } from "../players/archetypes"
 import { makePlayer } from "./helpers"
-import type { Position } from "../types"
 
 const p = (id: string, extra: Partial<Player> = {}) =>
   makePlayer(id, "CM", 70, { clubId: `club-${id}`, ...extra })
@@ -146,7 +144,7 @@ function isolatedPair(kind: BondKind, prefix: string, others: Player[]): [Player
 }
 
 describe("bonds in the match engine", () => {
-  const first = (pos: Position) => archetypesFor(pos)[0]
+  const first = () => undefined
 
   /** The home side with two slots handed to `extra`, which are given the slots' positions. */
   function withPlayers(extra: Player[], slots = [1, 2]) {
@@ -230,7 +228,7 @@ describe("bonds in the match engine", () => {
 
 describe("bonds stay in step through a match", () => {
   it("match what each player on the pitch is owed after every minute, substitutions and red cards included", () => {
-    const first = (pos: Position) => archetypesFor(pos)[0]
+    const first = () => undefined
     let checked = 0
     let changes = 0
     for (let seed = 1; seed <= 25; seed++) {

@@ -5,7 +5,6 @@
  */
 import type { Position } from "../types"
 import { positionFit } from "../players/ability"
-import type { Role } from "./roles"
 import { FORMATIONS } from "./formations"
 import type { Formation, MatchEvent, Side, Tactics } from "./types"
 import { assign, effective, rebond } from "./strength"
@@ -62,8 +61,7 @@ export function bringOn(
   leaving: LivePlayer,
   joining: LivePlayer,
   out: MatchEvent[],
-  slot: Position = leaving.slot,
-  role: Role | null = slot === leaving.slot ? leaving.role : null
+  slot: Position = leaving.slot
 ): MatchEvent {
   const side = sideOf(state, s)
   side.subsUsed++
@@ -74,7 +72,7 @@ export function bringOn(
   }
   side.lastChange = when
   leaving.off = state.minute
-  assign(joining, slot, role)
+  assign(joining, slot)
   joining.on = state.minute
   joining.started = false
   joining.eff = effective(joining, !!state.setup.bigMatch)
@@ -111,7 +109,7 @@ export function setSlot(state: MatchState, s: Side, playerId: string, slot: Posi
   const side = sideOf(state, s)
   const p = side.pitch.find((x) => x.id === playerId)
   if (!p) return
-  assign(p, slot, null)
+  assign(p, slot)
   refreshOutfield(side)
 }
 
@@ -147,7 +145,7 @@ export function changeFormation(state: MatchState, s: Side, formation: Formation
       }
     }
     if (best) {
-      assign(best, role, null)
+      assign(best, role)
       free.delete(best)
     }
   }

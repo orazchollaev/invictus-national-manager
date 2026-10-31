@@ -27,7 +27,6 @@ import { useWorldStore } from "@/modules/world/store"
 import { FORMATIONS, FORMATION_LIST } from "@/engine/match/formations"
 import { aiTeamSheet, pickBench } from "@/engine/ai/squad"
 import { matchAbility, positionFit, positionGroup } from "@/engine/players/ability"
-import type { Role } from "@/engine/match/roles"
 import type { Formation, Level, Mentality, Tactics } from "@/engine/match/types"
 import type { Player, PositionGroup } from "@/engine/types"
 import type { UserTeam } from "@/engine/world/types"
@@ -35,7 +34,7 @@ import { showAlert, showConfirm } from "@/composables/useDialog"
 import { unavailableIn } from "@/modules/squad/utils/availability"
 import { spiritLabel, spiritOf } from "@/engine/players/bonds"
 import { bondLines, chemistryWith, signed } from "@/modules/squad/utils/chemistry"
-import { carryFormation, placePlayer, roleChoices, setSlotRole } from "@/modules/squad/utils/lineup"
+import { carryFormation, placePlayer } from "@/modules/squad/utils/lineup"
 import { useSettingsStore } from "@/modules/settings/store"
 
 const { t } = useI18n()
@@ -124,7 +123,7 @@ const candidates = computed(() => {
 function choose(p: Player) {
   const i = selectedSlot.value
   if (i === null) return
-  team.value.xi = placePlayer(team.value.xi, positions.value, i, p.id, player)
+  team.value.xi = placePlayer(team.value.xi, positions.value, i, p.id)
   selectedSlot.value = null
 }
 
@@ -143,26 +142,6 @@ function chem(p: Player): number {
   const i = selectedSlot.value
   const holder = i === null || !slots.value[i] ? undefined : player(slots.value[i]!)
   return chemistryWith(p, eleven.value, holder)
-}
-
-const roleLabels = computed(() =>
-  positions.value.map((_, i) => {
-    const r = team.value.xi[i]?.role
-    return r ? t(`role.${r}.label`) : null
-  })
-)
-
-/** The roles the tapped slot can ask for, and what the current choice means for its player. */
-const slotRoles = computed(() => {
-  const i = selectedSlot.value
-  if (i === null) return null
-  const id = slots.value[i]
-  return roleChoices(positions.value[i], id ? player(id) : undefined, team.value.xi[i]?.role)
-})
-
-function setRole(role: Role | undefined) {
-  const i = selectedSlot.value
-  if (i !== null) team.value.xi = setSlotRole(team.value.xi, positions.value, i, role)
 }
 
 function auto() {
@@ -224,7 +203,7 @@ const tempo = computed({
 async function save() {
   if (!formationChosen.value) return showAlert(t("squad.tactics.chooseFormation"))
   const xi = FORMATIONS[team.value.tactics.formation]
-    .map((pos, i) => ({ playerId: slots.value[i] ?? "", pos, role: team.value.xi[i]?.role }))
+    .map((pos, i) => ({ playerId: slots.value[i] ?? "", pos }))
     .filter((s) => s.playerId)
   if (xi.length < 11) return showAlert(t("squad.tactics.fillAll"))
   const blocked = unavailableIn(
@@ -272,7 +251,6 @@ async function save() {
       :slots="slots"
       :player="player"
       :selected="selectedSlot"
-      :role-labels="roleLabels"
       @select="(i) => (selectedSlot = i)"
     />
 
@@ -355,33 +333,6 @@ async function save() {
       max-height-mobile="85dvh"
       @close="selectedSlot = null"
     >
-      <div v-if="slotRoles" class="role-pick">
-        <div class="role-label">{{ t("squad.tactics.role") }}</div>
-        <div class="role-chips">
-          <button class="role-chip" :class="{ on: !slotRoles.current }" @click="setRole(undefined)">
-            {{ t("squad.tactics.standard") }}
-          </button>
-          <button
-            v-for="r in slotRoles.options"
-            :key="r.id"
-            class="role-chip"
-            :class="{ on: slotRoles.current === r.id }"
-            @click="setRole(r.id)"
-          >
-            {{ r.label }}
-            <span v-if="r.suits" class="role-suits" :title="t('squad.tactics.suitsStyle')">★</span>
-          </button>
-        </div>
-        <p class="role-blurb">
-          {{ slotRoles.blurb }}
-          <strong v-if="slotRoles.suited">
-            {{ t("squad.tactics.suits", { style: slotRoles.style }) }}
-          </strong>
-          <template v-else-if="slotRoles.style && slotRoles.current">
-            {{ t("squad.tactics.notStyle", { style: slotRoles.style }) }}
-          </template>
-        </p>
-      </div>
       <div class="pick-filter">
         <AppSubTabBar
           :model-value="groupFilter"
@@ -492,50 +443,6 @@ async function save() {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
-}
-
-.role-pick {
-  flex-shrink: 0;
-  padding: var(--sp-2) var(--sp-3);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.role-label {
-  margin-bottom: var(--sp-1);
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-}
-
-.role-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-1);
-}
-
-.role-chip {
-  padding: 4px 10px;
-  border: 1px solid var(--border-light);
-  border-radius: 999px;
-  background: none;
-  color: inherit;
-  font-size: var(--fs-xs);
-}
-
-.role-chip.on {
-  border-color: var(--accent);
-  background: var(--accent-subtle);
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.role-suits {
-  color: var(--gold);
-}
-
-.role-blurb {
-  margin: var(--sp-1) 0 0;
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
 }
 
 .pick-filter {

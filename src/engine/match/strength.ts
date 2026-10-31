@@ -2,7 +2,7 @@
  * What each player and each side is worth on the pitch right now. Strength comes from
  * the eleven, not from a team rating: each player contributes to defence, midfield and
  * attack according to the slot he fills, shaded by how well he fits it, how tired he
- * is, what his role and team mates give him, and his nerve on a big night.
+ * is, what his team mates give him, and his nerve on a big night.
  *
  * Each player's strength is worked out once at the start of a minute (`refreshMinute`)
  * and read from there by everything that happens in it.
@@ -11,7 +11,6 @@ import type { Position } from "../types"
 import { clamp } from "../rng"
 import { positionFit } from "../players/ability"
 import { BOND_LIMITS } from "../players/bonds"
-import { ROLE_SUIT_BONUS, combineStyle, suitsRole, validRole, type Role } from "./roles"
 import { playOf } from "./matchup"
 import { FORMATION_LIST } from "./formations"
 import type { Side, Tactics } from "./types"
@@ -136,12 +135,9 @@ export const FINISH_BONUS: Record<Position, number> = {
 
 // ── Players ─────────────────────────────────────────────────────────────────
 
-/** Put a player in a slot with a role (or none) and work out what that does to him. */
-export function assign(p: LivePlayer, slot: Position, role: Role | null | undefined) {
+/** Put a player in a slot. */
+export function assign(p: LivePlayer, slot: Position) {
   p.slot = slot
-  p.role = validRole(role, slot) ? role : null
-  p.mod = combineStyle(p.style, p.role)
-  p.suited = suitsRole(p.arch, p.role)
 }
 
 export function effective(p: LivePlayer, bigMatch: boolean): number {
@@ -152,9 +148,8 @@ export function effective(p: LivePlayer, bigMatch: boolean): number {
   const fit = p.fit
   const fatigue = 0.88 + 0.12 * (p.stamina / 100)
   const nerve = bigMatch ? (p.bigMatch - 10) * 0.3 : 0
-  const suit = (p.suited ? ROLE_SUIT_BONUS : 0) + p.bond // role and team mates
   const hurt = p.injured ? 0.5 : 1
-  return Math.max(1, (p.base + nerve + suit) * fit * fatigue * hurt)
+  return Math.max(1, (p.base + nerve + p.bond) * fit * fatigue * hurt)
 }
 
 /** Finishing: all-round strength shaded by the slot and his style. */

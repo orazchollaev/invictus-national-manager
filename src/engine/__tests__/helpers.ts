@@ -2,9 +2,7 @@ import type { Player, Position } from "../types"
 import { FORMATIONS } from "../match/formations"
 import type { Formation, MatchReport, Tactics, TeamSheet } from "../match/types"
 import { createMatch, playMatch, type MatchState } from "../match/engine"
-import { ARCHETYPES, archetypeOf, archetypesFor, type Archetype } from "../players/archetypes"
 import { attrKeys, expected, fitTo, type Attr, type Attrs } from "../players/attributes"
-import type { Role } from "../match/roles"
 
 /** Attributes with no style at all: exactly what his position and overall predict. */
 export function plainAttrs(pos: Position, ca: number): Attrs {
@@ -92,18 +90,38 @@ export function makeTeam(prefix: string, ca: number, formation: Formation = "4-2
   return { players, sheet }
 }
 
-// ── Sides built from archetypes and roles ───────────────────────────────────
+// ── Sides built from players who lean on some attributes ────────────────────
 
-/** A player of `pos` whose attributes make him `want`: its key attributes pushed well above his position's. */
-export function playerWith(prefix: string, pos: Position, want: Archetype, ca = 70): Player {
+/** Attributes a player is pushed above his position's by, with how much each counts. */
+export type Lean = Partial<Record<Attr, number>>
+
+/** Leans that stand for the kinds of player a test needs; no lean is the plain player. */
+export const LEANS = {
+  poacher: { finishing: 1, acceleration: 0.5, vision: 0.5 },
+  targetMan: { heading: 1, strength: 0.8, jumping: 0.8 },
+  shotStopper: { reflexes: 1, oneOnOne: 0.8, positioning: 0.6 },
+  sweeperKeeper: { distribution: 1, agility: 0.8, aerial: 0.4 },
+  stopper: { tackling: 1, strength: 0.7, heading: 0.7 },
+  ballPlayer: { passing: 1, vision: 0.8, dribbling: 0.5 },
+  defensiveFullBack: { tackling: 1, strength: 0.6, stamina: 0.5 },
+  attackingFullBack: { pace: 1, dribbling: 0.8, passing: 0.7, stamina: 0.4 },
+  ballWinner: { tackling: 1, strength: 0.7, stamina: 0.5 },
+  deepPlaymaker: { passing: 1, vision: 0.9 },
+  creator: { passing: 1, vision: 0.9, dribbling: 0.7 },
+  shadowStriker: { finishing: 1, shooting: 0.8, pace: 0.4 },
+  winger: { pace: 1, acceleration: 0.8, dribbling: 0.8 },
+  insideForward: { finishing: 1, shooting: 0.8, dribbling: 0.6 },
+} satisfies Record<string, Lean>
+
+/** A player of `pos` whose attributes lean on `lean`: pushed well above his position's. */
+export function playerWith(prefix: string, pos: Position, lean?: Lean, ca = 70): Player {
   const id = `${prefix}0`
   const p = makePlayer(id, pos, ca, { clubId: id })
   // Every other attribute gives a little back, so he still adds up to `ca`.
   const raw = plainAttrs(pos, ca)
-  for (const [key, w] of Object.entries(ARCHETYPES[want].keys) as [Attr, number][])
+  for (const [key, w] of Object.entries(lean ?? {}) as [Attr, number][])
     raw[key] = (raw[key] ?? ca) + 14 * w
   p.attrs = fitTo(raw, pos, ca)
-  if (archetypeOf(p) !== want) throw new Error(`attributes do not make a ${want}`)
   return p
 }
 
@@ -113,29 +131,25 @@ export interface TestSide {
 }
 
 /**
- * A side whose players each have the archetype `choose` names for their role, in the
- * formation given, with `role` (if any) asked of each slot and `tactics` on top.
+ * A side whose players each lean as `choose` says for their position, in the formation
+ * given, with `tactics` on top.
  */
 export function sideOf(
   prefix: string,
-  choose: (pos: Position) => Archetype,
-  options: {
-    formation?: Formation
-    role?: (pos: Position) => Role | undefined
-    tactics?: Partial<Tactics>
-  } = {}
+  choose: (pos: Position) => Lean | undefined = () => undefined,
+  options: { formation?: Formation; tactics?: Partial<Tactics> } = {}
 ): TestSide {
   const formation = options.formation ?? "4-2-3-1"
   const roles = FORMATIONS[formation]
   const players = roles.map((pos, i) => playerWith(`${prefix}${i}-`, pos, choose(pos)))
   const bench = (["GK", "CB", "CM", "ST"] as Position[]).map((pos, i) =>
-    playerWith(`${prefix}b${i}-`, pos, archetypesFor(pos)[0], 67)
+    playerWith(`${prefix}b${i}-`, pos, undefined, 67)
   )
   return {
     players: [...players, ...bench],
     sheet: {
       nationId: prefix,
-      xi: roles.map((pos, i) => ({ playerId: players[i].id, pos, role: options.role?.(pos) })),
+      xi: roles.map((pos, i) => ({ playerId: players[i].id, pos })),
       bench: bench.map((p) => p.id),
       tactics: { formation, mentality: 0, pressing: 1, tempo: 1, ...options.tactics },
     },

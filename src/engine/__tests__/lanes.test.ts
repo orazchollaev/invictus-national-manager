@@ -10,12 +10,11 @@ import {
 } from "../match/lanes"
 import { FORMATIONS } from "../match/formations"
 import type { Lane, MatchEvent } from "../match/types"
-import { archetypesFor } from "../players/archetypes"
-import { POSITIONS, type Position } from "../types"
+import { POSITIONS } from "../types"
 import { playMany, sideOf, stateOf } from "./helpers"
 import { step } from "../match/engine"
 
-const first = (pos: Position) => archetypesFor(pos)[0]
+const first = () => undefined
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
 
 describe("lanes", () => {

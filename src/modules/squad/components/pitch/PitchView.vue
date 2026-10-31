@@ -16,8 +16,6 @@ const props = defineProps<{
   slots: (string | null)[]
   player: (id: string) => Player | undefined
   selected?: number | null
-  /** The role asked of each slot, shown instead of the position where there is one. */
-  roleLabels?: (string | null)[]
   /** Rating per player (live match), shown instead of ability. */
   ratings?: Record<string, number>
 }>()
@@ -97,7 +95,7 @@ function fitClass(i: number) {
         </span>
       </span>
       <span class="slot-name">{{ slots[i] ? player(slots[i]!)?.last : roles[i] }}</span>
-      <span class="slot-role">{{ roleLabels?.[i] ?? roles[i] }}</span>
+      <span class="slot-role">{{ roles[i] }}</span>
     </button>
   </div>
 </template>

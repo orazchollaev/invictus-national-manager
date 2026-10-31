@@ -16,7 +16,6 @@ import {
   traitsOf,
 } from "../match/scouting"
 import type { Formation, Level, Tactics } from "../match/types"
-import { archetypesFor } from "../players/archetypes"
 import { plainAttrs, sideOf } from "./helpers"
 
 const tactics = (formation: Formation = "4-2-3-1", extra: Partial<Tactics> = {}): Tactics => ({
@@ -27,7 +26,7 @@ const tactics = (formation: Formation = "4-2-3-1", extra: Partial<Tactics> = {})
   ...extra,
 })
 
-const first = (pos: Position) => archetypesFor(pos)[0]
+const first = () => undefined
 
 describe("traitsOf", () => {
   it("calls a plain side balanced", () => {
@@ -85,14 +84,6 @@ describe("keyPlayers", () => {
     byId.get(side.sheet.xi[at("AM")].playerId)!.ca = 95
     const ids = keyPlayers(side.sheet, lookup).map((k) => k.playerId)
     expect(new Set(ids).size).toBe(ids.length)
-  })
-
-  it("says what kind of player and in which role", () => {
-    const { side, lookup } = squad()
-    side.sheet.xi[side.sheet.xi.findIndex((s) => s.pos === "ST")].role = "poacher"
-    const out = keyPlayers(side.sheet, lookup)
-    for (const k of out) expect(say(k.archetype).length).toBeGreaterThan(0)
-    expect(out.some((k) => k.role && say(k.role) === "Poacher")).toBe(true)
   })
 
   it("has nothing to say about players it cannot find", () => {

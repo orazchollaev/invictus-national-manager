@@ -7,10 +7,8 @@ import i18n from "@/i18n"
 import { makePlayer, sideOf } from "@/engine/__tests__/helpers"
 import { msg } from "@/engine/text"
 import { resolveText as say } from "@/i18n/text"
-import { archetypesFor } from "@/engine/players/archetypes"
 import { scoutReport, type MatchupLine, type ScoutReport } from "@/engine/match/scouting"
 import type { Tactics } from "@/engine/match/types"
-import type { Position } from "@/engine/types"
 import ScoutReportCard from "../components/scout/ScoutReportCard.vue"
 import { matchupNotes } from "../utils/scout"
 
@@ -85,7 +83,7 @@ async function render(report: ScoutReport, assisted = false, players = new Map()
 }
 
 describe("ScoutReportCard", () => {
-  const first = (pos: Position) => archetypesFor(pos)[0]
+  const first = () => undefined
   const tactics: Tactics = { formation: "4-2-3-1", mentality: 0, pressing: 1, tempo: 1, line: 2 }
 
   function reportAgainst(counter: boolean) {
@@ -129,28 +127,6 @@ describe("ScoutReportCard", () => {
     const html = await render(calm, false, byId)
     expect(html).toContain("No changes needed")
     expect(html).not.toContain("Apply to my tactics")
-  })
-
-  it("names a role only when it adds something to the player's style", async () => {
-    const { report, byId } = reportAgainst(false)
-    const same = {
-      ...report,
-      key: [
-        { ...report.key[0], archetype: msg("arch.poacher.label"), role: msg("role.poacher.label") },
-      ],
-    }
-    expect(await render(same, false, byId)).not.toContain("(Poacher)")
-    const other = {
-      ...report,
-      key: [
-        {
-          ...report.key[0],
-          archetype: msg("arch.poacher.label"),
-          role: msg("role.target-man.label"),
-        },
-      ],
-    }
-    expect(await render(other, false, byId)).toContain("(Target man)")
   })
 
   it("copes with a player who is gone", async () => {

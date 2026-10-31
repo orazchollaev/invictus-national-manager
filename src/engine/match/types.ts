@@ -1,5 +1,4 @@
 import type { Position } from "../types"
-import type { Role } from "./roles"
 
 export type Side = "home" | "away"
 
@@ -38,10 +37,8 @@ export interface Tactics {
 
 export interface SheetSlot {
   playerId: string
-  /** The role the slot asks for, which may differ from the player's own position. */
+  /** The position the slot asks for, which may differ from the player's own. */
   pos: Position
-  /** What the manager asks of the slot; none is the plain version of the position. */
-  role?: Role
 }
 
 export interface TeamSheet {

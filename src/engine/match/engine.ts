@@ -21,10 +21,9 @@
 import type { ISODate, Player, Position } from "../types"
 import { clamp, makeRng, type Rng } from "../rng"
 import { ageOn, matchAbility } from "../players/ability"
-import { TIRES_EARLY_AGE, archetypeOf, playerStyle } from "../players/archetypes"
+import { TIRES_EARLY_AGE, playerStyle } from "../players/style"
 import { ensureAttrs } from "../players/attributes"
 import { BOND_POINTS, bondBetween } from "../players/bonds"
-import type { Role } from "./roles"
 import type { MatchEvent, MatchReport, Side, TeamSheet } from "./types"
 import { assign, rebond, refreshMinute } from "./strength"
 import { knocks, refereeStrictness } from "./discipline"
@@ -71,21 +70,14 @@ function livePlayer(
   slot: Position,
   date: ISODate,
   started: boolean,
-  minute: number,
-  role?: Role
+  minute: number
 ): LivePlayer {
   ensureAttrs(p)
-  const arch = archetypeOf(p)
-  const style = playerStyle(p)
   const live: LivePlayer = {
     id: p.id,
     natural: p.pos,
     alt: p.alt,
-    arch,
-    style,
-    role: null,
-    mod: style,
-    suited: false,
+    mod: playerStyle(p),
     bond: 0,
     slot,
     base: matchAbility(p),
@@ -117,7 +109,7 @@ function livePlayer(
     conceded: 0,
     ratingAdj: 0,
   }
-  assign(live, slot, role)
+  assign(live, slot)
   return live
 }
 
@@ -137,7 +129,7 @@ function bondPointsFor(setup: MatchSetup): LiveSide["bondPoints"] {
 
 function buildSide(sheet: TeamSheet, setup: MatchSetup, rng: Rng): LiveSide {
   const pitch = sheet.xi.map((s) =>
-    livePlayer(setup.player(s.playerId), s.pos, setup.date, true, 0, s.role)
+    livePlayer(setup.player(s.playerId), s.pos, setup.date, true, 0)
   )
   const bench = sheet.bench.map((id) => {
     const p = setup.player(id)
@@ -352,7 +344,7 @@ function prepare(state: MatchState, s: Side, out: MatchEvent[], extra: boolean) 
     (extra ? EXTRA_TIME_DRAIN : 1)
   for (const p of side.pitch) {
     const own =
-      drain * p.style.drain * (p.age >= TIRES_EARLY_AGE ? 1.12 : 1) * (p.slot === "GK" ? 0.3 : 1)
+      drain * p.mod.drain * (p.age >= TIRES_EARLY_AGE ? 1.12 : 1) * (p.slot === "GK" ? 0.3 : 1)
     p.stamina = Math.max(0, p.stamina - own)
   }
 }

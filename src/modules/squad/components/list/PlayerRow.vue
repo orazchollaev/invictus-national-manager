@@ -3,7 +3,6 @@ import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { Ban, Cross, TrendingDown, TrendingUp } from "@lucide/vue"
 import type { Player } from "@/engine/types"
-import { archetypeOf } from "@/engine/players/archetypes"
 import { StatPill } from "@/modules/core/components"
 import { PersonFace } from "@/modules/core/components/face"
 import { abilityTone, age, positionTone } from "@/modules/core/utils/format"
@@ -22,7 +21,6 @@ const world = useWorldStore()
 const date = computed(() => world.date)
 const club = computed(() => world.world?.clubs.get(props.player.clubId))
 const injured = computed(() => !!props.player.injury && props.player.injury.until > date.value)
-const archId = computed(() => archetypeOf(props.player))
 </script>
 
 <template>
@@ -40,7 +38,6 @@ const archId = computed(() => archetypeOf(props.player))
         <Cross v-if="injured" :size="14" class="prow-icon prow-icon--injury" />
         <Ban v-if="player.banned" :size="14" class="prow-icon prow-icon--ban" />
       </div>
-      <div class="prow-style">{{ t(`arch.${archId}.label`) }}</div>
       <div v-if="!compact" class="prow-sub">
         {{ age(player, date) }} · {{ club?.name ?? t("squad.freeAgent") }}
         <template v-if="player.caps">· {{ t("squad.capsLine", { n: player.caps }) }}</template>
@@ -82,15 +79,6 @@ const archId = computed(() => archetypeOf(props.player))
   display: flex;
   align-items: center;
   gap: 4px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.prow-style {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--accent);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
