@@ -42,6 +42,7 @@ const injured = computed(() => !!props.player.injury && props.player.injury.unti
         {{ age(player, date) }} · {{ club?.name ?? t("squad.freeAgent") }}
         <template v-if="player.caps">· {{ t("squad.capsLine", { n: player.caps }) }}</template>
       </div>
+      <slot name="extra" />
     </div>
     <TrendingUp v-if="player.form >= 2" :size="16" class="prow-form up" />
     <TrendingDown v-else-if="player.form <= -2" :size="16" class="prow-form down" />

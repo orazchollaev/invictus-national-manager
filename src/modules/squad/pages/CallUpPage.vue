@@ -158,22 +158,24 @@ async function confirm() {
         @click="toggle(p)"
       >
         <PlayerRow :player="p" static>
+          <template #extra>
+            <div v-if="unavailableReason(p)" class="reason">{{ unavailableReason(p) }}</div>
+            <div v-else-if="ties(p).length" class="ties">
+              <span
+                v-for="r in ties(p).slice(0, 3)"
+                :key="r.player.id"
+                :class="r.kind === 'feud' ? 'tie tie--feud' : 'tie'"
+              >
+                {{ t(`bond.${r.kind}`) }}: {{ r.player.last }}
+              </span>
+            </div>
+            <div v-else-if="p.banned" class="reason">{{ t("squad.callup.suspendedNext") }}</div>
+          </template>
           <template #trailing>
             <StatPill :value="Math.round(p.ca)" :tone="abilityTone(p.ca)" />
             <span class="check"><Check v-if="selected.has(p.id)" :size="16" /></span>
           </template>
         </PlayerRow>
-        <div v-if="unavailableReason(p)" class="reason">{{ unavailableReason(p) }}</div>
-        <div v-else-if="ties(p).length" class="ties">
-          <span
-            v-for="r in ties(p).slice(0, 3)"
-            :key="r.player.id"
-            :class="r.kind === 'feud' ? 'tie tie--feud' : 'tie'"
-          >
-            {{ t(`bond.${r.kind}`) }}: {{ r.player.last }}
-          </span>
-        </div>
-        <div v-else-if="p.banned" class="reason">{{ t("squad.callup.suspendedNext") }}</div>
       </button>
     </div>
 
@@ -219,8 +221,6 @@ async function confirm() {
 }
 
 .reason {
-  margin-top: -6px;
-  padding: 0 var(--sp-3) var(--sp-2) 48px;
   font-size: var(--fs-xs);
   color: var(--danger);
 }
@@ -228,9 +228,7 @@ async function confirm() {
 .ties {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-top: -6px;
-  padding: 0 var(--sp-3) var(--sp-2) 48px;
+  gap: 0 var(--sp-2);
   font-size: var(--fs-xs);
 }
 
