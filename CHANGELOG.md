@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.0](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.8...v0.1.0) (2026-10-30)
+## [0.1.0 - The First Whistle](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.8...v0.1.0) (2026-10-30)
 
 ### 🚀 New Features
 
