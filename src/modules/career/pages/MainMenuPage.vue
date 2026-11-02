@@ -72,28 +72,24 @@ async function resume() {
         <Plus :size="22" />
         <span class="item-text">
           <span class="item-label">{{ t("career.menu.newGame") }}</span>
-          <span class="item-hint">{{ t("career.menu.newGameHint") }}</span>
         </span>
       </button>
       <button class="item" :disabled="!hasSaves" @click="router.push('/load')">
         <FolderOpen :size="22" />
         <span class="item-text">
           <span class="item-label">{{ t("career.menu.loadGame") }}</span>
-          <span class="item-hint">{{ t("career.menu.loadGameHint") }}</span>
         </span>
       </button>
       <button class="item" @click="router.push('/mods')">
         <Wrench :size="22" />
         <span class="item-text">
           <span class="item-label">{{ t("career.menu.mods") }}</span>
-          <span class="item-hint">{{ t("career.menu.modsHint") }}</span>
         </span>
       </button>
       <button class="item" @click="router.push('/settings')">
         <Settings :size="22" />
         <span class="item-text">
           <span class="item-label">{{ t("career.menu.settings") }}</span>
-          <span class="item-hint">{{ t("career.menu.settingsHint") }}</span>
         </span>
       </button>
     </div>

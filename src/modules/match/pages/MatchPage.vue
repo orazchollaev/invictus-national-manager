@@ -50,6 +50,7 @@ import type { Msg } from "@/engine/text"
 import { laneCounts } from "@/engine/match/lanes"
 import { FORMATIONS } from "@/engine/match/formations"
 import { dotsFor, shotMarks } from "@/modules/match/utils/shape"
+import { simFrame } from "@/engine/match/sim"
 import { formatDate } from "@/i18n/dates"
 import { resultLetter } from "@/modules/core/utils/format"
 import { useHaptic } from "@/composables/useHaptic"
@@ -361,14 +362,16 @@ const flash = computed<{
 })
 
 /** Both elevens in their places on the pitch, and every shot taken so far. */
+const liveFrame = computed(() => (match.value ? simFrame(match.value) : null))
 const pitchDots = computed(() => {
   const m = match.value
-  return m
-    ? {
-        home: dotsFor(m.home.tactics.formation, m.home.pitch),
-        away: dotsFor(m.away.tactics.formation, m.away.pitch),
-      }
-    : undefined
+  if (!m) return undefined
+  // A match on the pitch simulation stands where its men really are.
+  if (liveFrame.value) return { home: liveFrame.value.home, away: liveFrame.value.away }
+  return {
+    home: dotsFor(m.home.tactics.formation, m.home.pitch),
+    away: dotsFor(m.away.tactics.formation, m.away.pitch),
+  }
 })
 const shots = computed(() => shotMarks(match.value?.events ?? []))
 
@@ -589,6 +592,8 @@ const pitchSlots = computed(() => {
         :flash="flash"
         :banner="banner"
         :dots="pitchDots"
+        :live="!!liveFrame"
+        :live-ball="liveFrame?.ball ?? null"
         :shots="shots"
         :spotlight="spotlight"
         :mine="mine"

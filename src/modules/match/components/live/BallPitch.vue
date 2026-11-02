@@ -25,6 +25,10 @@ const props = defineProps<{
   banner?: { key: number; title: string; text: string; color: string } | null
   /** Each side's players, in the places their formation gives them. */
   dots?: Record<Side, Dot[]>
+  /** Real live positions from the pitch simulation, instead of the formation's. */
+  live?: boolean
+  /** The ball's own real place, in the home side's attacking frame. */
+  liveBall?: Spot | null
   /** Every shot so far, where it was taken. */
   shots?: ShotMark[]
   /** Who the latest event is about: his dot is lit and named. */
@@ -42,12 +46,14 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-/** Home attacks to the right, away to the left; the ball is in its own third, midfield or the final third. */
+/** Where the ball is: on its real place when the simulation gives it, else in its own third. */
 const x = computed(() => {
+  if (props.liveBall) return props.liveBall.x
   const reach = { 1: 30, 2: 52, 3: 78 }[props.ball.depth]
   return props.ball.side === "home" ? reach : 100 - reach
 })
 const y = computed(() => {
+  if (props.liveBall) return props.liveBall.y
   const top = props.ball.lane === "left" ? 24 : props.ball.lane === "right" ? 76 : 50
   return props.ball.side === "home" ? top : 100 - top
 })
@@ -74,6 +80,8 @@ function forward(side: Side, spot: Spot): number {
 
 /** Screen place of a slot: the away side is the home side turned round. */
 function place(side: Side, spot: Spot): Spot {
+  // Men on real places stand where they are in screen percentages.
+  if (props.live) return { ...spot }
   const x = Math.min(96, Math.max(4, spot.x + forward(side, spot)))
   return side === "home" ? { x, y: spot.y } : { x: 100 - x, y: 100 - spot.y }
 }
