@@ -49,8 +49,7 @@ import { surname } from "@/engine/players/ability"
 import type { Msg } from "@/engine/text"
 import { laneCounts } from "@/engine/match/lanes"
 import { FORMATIONS } from "@/engine/match/formations"
-import { dotsFor, shotMarks } from "@/modules/match/utils/shape"
-import { simFrame } from "@/engine/match/sim"
+import { dotsFor } from "@/modules/match/utils/shape"
 import { formatDate } from "@/i18n/dates"
 import { resultLetter } from "@/modules/core/utils/format"
 import { useHaptic } from "@/composables/useHaptic"
@@ -320,76 +319,43 @@ const aggregate = computed<[number, number] | undefined>(() => {
   return agg ? [agg[0] + score.value[0], agg[1] + score.value[1]] : undefined
 })
 
-/** Each nation's colour; when the two clash the away side plays in white. */
+/** How far apart two #rrggbb colours look, on a 0–441 scale; 441 when either is not a hex. */
+function colorGap(a: string, b: string): number {
+  const rgb = (c: string) => {
+    const m = /^#([0-9a-f]{6})$/i.exec(c.trim())
+    if (!m) return null
+    const n = parseInt(m[1], 16)
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+  }
+  const x = rgb(a)
+  const y = rgb(b)
+  if (!x || !y) return a.toLowerCase() === b.toLowerCase() ? 0 : 441
+  return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2])
+}
+
+/** Each nation's colour; when the two are too alike the away side wears white (dark against a pale home side). */
 const colors = computed<[string, string]>(() => {
   const f = fixture.value
   const w = world.world
-  if (!f || !w) return ["var(--accent)", "var(--pitch-token-text)"]
+  if (!f || !w) return ["var(--accent)", "var(--pitch-ink)"]
   const h = w.def(f.home).color
   const a = w.def(f.away).color
-  return [h, h.toLowerCase() === a.toLowerCase() ? "var(--pitch-token-text)" : a]
+  if (colorGap(h, a) >= 110) return [h, a]
+  return [h, colorGap(h, "#ffffff") < 140 ? "var(--pitch-token-text)" : "var(--pitch-ink)"]
 })
 
-const SHOUTS = new Set<MatchEventKind>([
-  "shot-saved",
-  "shot-wide",
-  "shot-blocked",
-  "woodwork",
-  "big-chance-missed",
-  "corner",
-  "penalty-awarded",
-  "pen-miss",
-  "pen-saved",
-])
 const GOAL_KINDS = new Set<MatchEventKind>(["goal", "pen-goal", "own-goal"])
 
-/** A pop on the ball for the latest event, if it was a shot or a goal. */
-const flash = computed<{
-  key: number
-  kind: "goal" | "shot"
-  side?: Side
-  label?: string
-  xg?: number
-} | null>(() => {
-  const evs = match.value?.events
-  const last = evs?.[evs.length - 1]
-  if (!evs || !last) return null
-  const side = last.side ?? undefined
-  if (GOAL_KINDS.has(last.kind)) return { key: evs.length, kind: "goal", side }
-  return SHOUTS.has(last.kind)
-    ? { key: evs.length, kind: "shot", side, label: t(`match.shout.${last.kind}`), xg: last.xg }
-    : null
-})
-
-/** Both elevens in their places on the pitch, and every shot taken so far. */
-const liveFrame = computed(() => (match.value ? simFrame(match.value) : null))
+/** Both elevens in their places on the pitch. */
 const pitchDots = computed(() => {
   const m = match.value
-  if (!m) return undefined
-  // A match on the pitch simulation stands where its men really are.
-  if (liveFrame.value) return { home: liveFrame.value.home, away: liveFrame.value.away }
-  return {
-    home: dotsFor(m.home.tactics.formation, m.home.pitch),
-    away: dotsFor(m.away.tactics.formation, m.away.pitch),
-  }
+  return m
+    ? {
+        home: dotsFor(m.home.tactics.formation, m.home.pitch),
+        away: dotsFor(m.away.tactics.formation, m.away.pitch),
+      }
+    : undefined
 })
-const shots = computed(() => shotMarks(match.value?.events ?? []))
-
-/** The player the latest shot, goal or chance is about. */
-const spotlight = computed(() => {
-  const evs = match.value?.events
-  const last = evs?.[evs.length - 1]
-  if (!evs || !last?.side || !last.playerId || last.kind === "own-goal") return null
-  if (!GOAL_KINDS.has(last.kind) && !SHOUTS.has(last.kind)) return null
-  return {
-    key: evs.length,
-    index: evs.length - 1,
-    side: last.side,
-    id: last.playerId,
-    name: names.player(last.playerId),
-  }
-})
-
 /** The strip across the pitch when the latest event is a goal. */
 const banner = computed(() => {
   const evs = match.value?.events
@@ -589,13 +555,8 @@ const pitchSlots = computed(() => {
         :away="fixture.away"
         :home-color="colors[0]"
         :away-color="colors[1]"
-        :flash="flash"
         :banner="banner"
         :dots="pitchDots"
-        :live="!!liveFrame"
-        :live-ball="liveFrame?.ball ?? null"
-        :shots="shots"
-        :spotlight="spotlight"
         :mine="mine"
         :name-of="names.player"
       />

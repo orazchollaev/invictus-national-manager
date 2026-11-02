@@ -4,7 +4,7 @@
  * these into screen positions, mirroring them for the away side.
  */
 import { FORMATIONS } from "@/engine/match/formations"
-import type { Formation, MatchEvent, MatchEventKind, ShotType, Side } from "@/engine/match/types"
+import type { Formation } from "@/engine/match/types"
 import type { Position } from "@/engine/types"
 
 export interface Spot {
@@ -15,16 +15,6 @@ export interface Spot {
 /** A player on the pitch and where his slot puts him. */
 export interface Dot extends Spot {
   id: string
-}
-
-/** A shot, goal or save, put where it was taken. */
-export interface ShotMark extends Spot {
-  /** Index of the event, which is also its key. */
-  key: number
-  kind: MatchEventKind
-  side: Side
-  playerId?: string
-  xg?: number
 }
 
 const LEFT = new Set<Position>(["LB", "LW"])
@@ -64,54 +54,5 @@ export function dotsFor(formation: Formation, pitch: readonly { id: string; slot
     if (!p) return []
     used.add(p.id)
     return [{ id: p.id, ...spots[i] }]
-  })
-}
-
-const SHOT_KINDS = new Set<MatchEventKind>([
-  "goal",
-  "pen-goal",
-  "shot-saved",
-  "shot-wide",
-  "shot-blocked",
-  "woodwork",
-  "big-chance-missed",
-  "pen-miss",
-  "pen-saved",
-])
-
-/** How far from the goal line each kind of shot is taken. */
-const REACH: Record<ShotType, number> = {
-  long: 26,
-  box: 15,
-  close: 8,
-  header: 11,
-  "one-on-one": 10,
-  "free-kick": 22,
-  rebound: 9,
-}
-
-const PENALTY_REACH = 11
-
-/** Every shot so far, at the end of the pitch its side attacks. */
-export function shotMarks(events: readonly MatchEvent[]): ShotMark[] {
-  return events.flatMap((e, key): ShotMark[] => {
-    if (!e.side || !SHOT_KINDS.has(e.kind)) return []
-    const penalty = e.kind === "pen-goal" || e.kind === "pen-miss" || e.kind === "pen-saved"
-    const reach = penalty ? PENALTY_REACH : REACH[e.shot ?? "box"]
-    const lane = e.lane === "left" ? 32 : e.lane === "right" ? 68 : 50
-    // Marks from the same lane would pile up; a fixed nudge spreads them.
-    const y = penalty ? 50 : lane + ((key * 37) % 11) - 5
-    const home = e.side === "home"
-    return [
-      {
-        key,
-        kind: e.kind,
-        side: e.side,
-        playerId: e.playerId,
-        xg: e.xg,
-        x: home ? 100 - reach : reach,
-        y: home ? y : 100 - y,
-      },
-    ]
   })
 }

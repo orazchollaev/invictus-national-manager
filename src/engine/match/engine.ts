@@ -17,9 +17,6 @@
  * - `changes.ts`: substitutions, shape, instructions, the team talk.
  * - `touchline.ts`: the AI coach.
  * - `shootout.ts` and `report.ts`.
- *
- * A match the user watches plays on the pitch simulation of `sim.ts`; one nobody
- * watches keeps the minute-by-minute game below.
  */
 import type { ISODate, Player, Position } from "../types"
 import { clamp, makeRng, type Rng } from "../rng"
@@ -49,65 +46,15 @@ import {
 export type { LivePlayer, LiveSide, MatchSetup, MatchState, Phase, Units } from "./state"
 export { teamUnits } from "./strength"
 export {
-  changeFormation as changeFormationRaw,
+  changeFormation,
   dismissInjury,
-  setSlot as setSlotRaw,
-  setTactics as setTacticsRaw,
-  substitute as substituteRaw,
+  setSlot,
+  setTactics,
+  substitute,
   teamTalk,
   type TeamTalk,
 } from "./changes"
-import {
-  changeFormation as changeFormationRaw,
-  setSlot as setSlotRaw,
-  setTactics as setTacticsRaw,
-  substitute as substituteRaw,
-} from "./changes"
-import {
-  createSimMatch,
-  isSim,
-  simPlayToEnd,
-  simRoleChange,
-  simStep,
-  simSubstitute,
-  simTacticsChanged,
-} from "./sim"
-import { SIM_POS } from "./sim"
-import type { Formation, Tactics } from "./types"
 export { buildReport } from "./report"
-
-/** The manager's change of shape or instructions: the ledger, then the engine. */
-export function changeFormation(state: MatchState, s: Side, formation: Formation) {
-  const wasSim = isSim(state)
-  changeFormationRaw(state, s, formation)
-  if (wasSim) simTacticsChanged(state, s)
-}
-
-/** The manager's change of players. */
-export function substitute(
-  state: MatchState,
-  s: Side,
-  outId: string,
-  inId: string,
-  out: MatchEvent[] = []
-): MatchEvent | null {
-  if (isSim(state)) return simSubstitute(state, s, outId, inId, out)
-  return substituteRaw(state, s, outId, inId, out)
-}
-
-/** The manager's change of instructions. */
-export function setTactics(state: MatchState, s: Side, tactics: Partial<Tactics>) {
-  const wasSim = isSim(state)
-  setTacticsRaw(state, s, tactics)
-  if (wasSim) simTacticsChanged(state, s)
-}
-
-/** Slide a player on the pitch into another role. */
-export function setSlot(state: MatchState, s: Side, playerId: string, slot: Position) {
-  const wasSim = isSim(state)
-  setSlotRaw(state, s, playerId, slot)
-  if (wasSim && slot in SIM_POS) simRoleChange(state, playerId, slot)
-}
 
 const STAMINA_DRAIN = 0.42
 /** A player's chance of a knock in any minute, for an average injury record. */
@@ -231,7 +178,7 @@ function buildSide(sheet: TeamSheet, setup: MatchSetup, rng: Rng): LiveSide {
   return side
 }
 
-export function createRawMatch(setup: MatchSetup): MatchState {
+export function createMatch(setup: MatchSetup): MatchState {
   const rng = makeRng(setup.seed)
   const home = buildSide(setup.home, setup, rng)
   const away = buildSide(setup.away, setup, rng)
@@ -258,12 +205,6 @@ export function createRawMatch(setup: MatchSetup): MatchState {
   return state
 }
 
-export function createMatch(setup: MatchSetup): MatchState {
-  // A match the manager will watch and step is played on the pitch, not in tables.
-  if (setup.managed) return createSimMatch(setup)
-  return createRawMatch(setup)
-}
-
 // ── The clock ───────────────────────────────────────────────────────────────
 
 const PERIOD_END = { "first-half": 45, "second-half": 90, "et-first": 105, "et-second": 120 }
@@ -285,7 +226,6 @@ function breakChanges(state: MatchState, out: MatchEvent[]) {
 
 /** Play one minute (or one stoppage minute, or a whole shootout). Returns its events. */
 export function step(state: MatchState): MatchEvent[] {
-  if (isSim(state)) return simStep(state)
   const out: MatchEvent[] = []
   switch (state.phase) {
     case "done":
@@ -426,7 +366,6 @@ export function isFinished(state: MatchState): boolean {
 
 /** Play whatever is left of the match without stopping. */
 export function playToEnd(state: MatchState): void {
-  if (isSim(state)) return simPlayToEnd(state)
   // A managed side left alone is looked after by the AI from here on.
   state.setup.managed = null
   state.pendingInjuries = []

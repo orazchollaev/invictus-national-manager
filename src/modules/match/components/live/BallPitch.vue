@@ -2,8 +2,8 @@
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { Tag } from "@lucide/vue"
-import type { Lane, MatchEventKind, Side } from "@/engine/match/types"
-import type { Dot, ShotMark, Spot } from "@/modules/match/utils/shape"
+import type { Lane, Side } from "@/engine/match/types"
+import type { Dot, Spot } from "@/modules/match/utils/shape"
 
 const props = defineProps<{
   /** Who has the ball, which lane they work and how far up the pitch. */
@@ -13,32 +13,10 @@ const props = defineProps<{
   /** Each nation's own colour. */
   homeColor: string
   awayColor: string
-  /** Bumped by something worth a pop: a goal, a shot, a corner. */
-  flash?: {
-    key: number
-    kind: "goal" | "shot"
-    side?: Side
-    label?: string
-    xg?: number
-  } | null
   /** A goal just scored, shown across the pitch for a moment. */
   banner?: { key: number; title: string; text: string; color: string } | null
   /** Each side's players, in the places their formation gives them. */
   dots?: Record<Side, Dot[]>
-  /** Real live positions from the pitch simulation, instead of the formation's. */
-  live?: boolean
-  /** The ball's own real place, in the home side's attacking frame. */
-  liveBall?: Spot | null
-  /** Every shot so far, where it was taken. */
-  shots?: ShotMark[]
-  /** Who the latest event is about: his dot is lit and named. */
-  spotlight?: {
-    key: number
-    index: number
-    side: Side
-    id: string
-    name: string
-  } | null
   /** The side whose players are bigger on the pitch and can be named. */
   mine?: Side | null
   nameOf?: (id: string) => string
@@ -46,21 +24,18 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-/** Where the ball is: on its real place when the simulation gives it, else in its own third. */
+/** Home attacks to the right, away to the left; the ball is in its own third, midfield or the final third. */
 const x = computed(() => {
-  if (props.liveBall) return props.liveBall.x
   const reach = { 1: 30, 2: 52, 3: 78 }[props.ball.depth]
   return props.ball.side === "home" ? reach : 100 - reach
 })
 const y = computed(() => {
-  if (props.liveBall) return props.liveBall.y
   const top = props.ball.lane === "left" ? 24 : props.ball.lane === "right" ? 76 : 50
   return props.ball.side === "home" ? top : 100 - top
 })
 const code = computed(() => (props.ball.side === "home" ? props.home : props.away))
 const team = computed(() => (props.ball.side === "home" ? props.homeColor : props.awayColor))
 const colorOf = (s: Side) => (s === "home" ? props.homeColor : props.awayColor)
-const codeOf = (s: Side) => (s === "home" ? props.home : props.away)
 
 /** In plain words: how far up the pitch the ball is, and down which flank. */
 const ZONE = { 1: "match.pitch.build", 2: "match.pitch.mid", 3: "match.pitch.final" } as const
@@ -80,8 +55,6 @@ function forward(side: Side, spot: Spot): number {
 
 /** Screen place of a slot: the away side is the home side turned round. */
 function place(side: Side, spot: Spot): Spot {
-  // Men on real places stand where they are in screen percentages.
-  if (props.live) return { ...spot }
   const x = Math.min(96, Math.max(4, spot.x + forward(side, spot)))
   return side === "home" ? { x, y: spot.y } : { x: 100 - x, y: 100 - spot.y }
 }
@@ -91,26 +64,9 @@ const players = computed(() =>
     (props.dots?.[side] ?? []).map((d) => ({ id: d.id, side, ...place(side, d) }))
   )
 )
-const dotOf = (id: string | undefined, side: Side) =>
-  id ? players.value.find((p) => p.id === id && p.side === side) : undefined
-const spotDot = computed(() =>
-  props.spotlight ? dotOf(props.spotlight.id, props.spotlight.side) : undefined
-)
 
 /** Names on the pitch are the user's own players, and only when asked for. */
 const showNames = ref(false)
-
-const MARK: Partial<Record<MatchEventKind, string>> = {
-  goal: "goal",
-  "pen-goal": "goal",
-  "shot-saved": "saved",
-  "pen-saved": "saved",
-  "shot-wide": "wide",
-  "big-chance-missed": "wide",
-  "pen-miss": "wide",
-  "shot-blocked": "wide",
-  woodwork: "saved",
-}
 </script>
 
 <template>
@@ -119,33 +75,29 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
       <!-- Each half in its own side's colour: the left goal is the home side's, the right the away side's. -->
       <span class="half half--home" :style="{ background: homeColor }"></span>
       <span class="half half--away" :style="{ background: awayColor }"></span>
-      <svg class="lines" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
-        <rect x="1" y="1" width="198" height="98" />
-        <line x1="100" y1="1" x2="100" y2="99" />
-        <circle cx="100" cy="50" r="13" />
-        <rect x="1" y="26" width="28" height="48" />
-        <rect x="171" y="26" width="28" height="48" />
-        <rect x="1" y="39" width="10" height="22" />
-        <rect x="189" y="39" width="10" height="22" />
+      <!-- The markings are the real pitch's, in metres: 105 × 68. -->
+      <svg class="lines" viewBox="0 0 105 68" preserveAspectRatio="none" aria-hidden="true">
+        <rect x="0.2" y="0.2" width="104.6" height="67.6" />
+        <line x1="52.5" y1="0.2" x2="52.5" y2="67.8" />
+        <circle cx="52.5" cy="34" r="9.15" />
+        <rect x="0.2" y="13.84" width="16.3" height="40.32" />
+        <rect x="88.5" y="13.84" width="16.3" height="40.32" />
+        <rect x="0.2" y="24.84" width="5.3" height="18.32" />
+        <rect x="99.5" y="24.84" width="5.3" height="18.32" />
+        <path d="M16.5 26.69 A9.15 9.15 0 0 1 16.5 41.31" />
+        <path d="M88.5 26.69 A9.15 9.15 0 0 0 88.5 41.31" />
+        <circle class="spot" cx="52.5" cy="34" r="0.5" />
+        <circle class="spot" cx="11" cy="34" r="0.5" />
+        <circle class="spot" cx="94" cy="34" r="0.5" />
+        <rect class="goal" x="0" y="30.34" width="1.6" height="7.32" />
+        <rect class="goal" x="103.4" y="30.34" width="1.6" height="7.32" />
       </svg>
-
-      <!-- Shots are squares and diamonds, players are circles, so the two never read alike. -->
-      <span
-        v-for="m in shots"
-        :key="m.key"
-        class="mark"
-        :class="[`mark--${MARK[m.kind]}`, { 'mark--latest': m.key === spotlight?.index }]"
-        :style="{ left: `${m.x}%`, top: `${m.y}%`, '--c': colorOf(m.side) }"
-      ></span>
 
       <span
         v-for="p in players"
         :key="`${p.side}-${p.id}`"
         class="dot"
-        :class="{
-          'dot--lit': spotlight?.id === p.id && spotlight?.side === p.side,
-          'dot--mine': mine === p.side,
-        }"
+        :class="{ 'dot--mine': mine === p.side }"
         :style="{ left: `${p.x}%`, top: `${p.y}%`, '--c': colorOf(p.side) }"
       >
         <span
@@ -155,15 +107,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
         >
           {{ nameOf(p.id) }}
         </span>
-      </span>
-      <span
-        v-if="spotlight && spotDot"
-        :key="`name-${spotlight.key}`"
-        class="who"
-        :class="[spotDot.y < 24 && 'who--down', lean(spotDot.x)]"
-        :style="{ left: `${spotDot.x}%`, top: `${spotDot.y}%`, '--c': colorOf(spotlight.side) }"
-      >
-        {{ spotlight.name }}
       </span>
 
       <button
@@ -183,17 +126,20 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
         <span>{{ banner.text }}</span>
       </div>
       <div class="ball" :style="{ left: `${x}%`, top: `${y}%` }">
-        <!-- A white ball ringed in the colour of the side that has it. -->
-        <span :key="flash?.key" class="ball-dot" :class="flash && `ball-dot--${flash.kind}`"></span>
-        <span v-if="flash?.label" :key="flash.key" class="shout">
-          <span>
-            <b v-if="flash.side" class="shout-team" :style="{ background: colorOf(flash.side) }">
-              {{ codeOf(flash.side) }}
-            </b>
-            {{ flash.label }}
-          </span>
-          <small v-if="flash.xg">{{ t("match.pitch.xg", { n: flash.xg.toFixed(2) }) }}</small>
-        </span>
+        <span class="ball-shadow"></span>
+        <!-- A football: white, with its black panels. -->
+        <svg class="ball-dot" viewBox="-10 -10 20 20" aria-hidden="true">
+          <circle class="ball-skin" cx="0" cy="0" r="9" />
+          <path
+            class="ball-seam"
+            d="M0 -3.6 L0 -9 M3.4 -1.1 L8.6 -2.8 M2.1 2.9 L5.3 7.3 M-2.1 2.9 L-5.3 7.3 M-3.4 -1.1 L-8.6 -2.8"
+          />
+          <polygon class="ball-panel" points="0,-3.6 3.4,-1.1 2.1,2.9 -2.1,2.9 -3.4,-1.1" />
+          <path
+            class="ball-panel"
+            d="M-4 -8.1 L0 -9 L4 -8.1 L2.2 -6 L-2.2 -6 Z M8.6 -2.8 L9 0.6 L7 2.4 L5.5 -0.2 Z M-8.6 -2.8 L-9 0.6 L-7 2.4 L-5.5 -0.2 Z M5.3 7.3 L1.8 8.9 L0.8 6.7 L3.2 5.2 Z M-5.3 7.3 L-1.8 8.9 L-0.8 6.7 L-3.2 5.2 Z"
+          />
+        </svg>
       </div>
       <span class="tag tag--home" :style="{ background: homeColor }">{{ home }}</span>
       <span class="tag tag--away" :style="{ background: awayColor }">{{ away }}</span>
@@ -203,29 +149,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
       <b class="caption-team" :style="{ background: team }">{{ code }}</b>
       {{ caption }}
     </p>
-
-    <ul class="legend">
-      <li>
-        <i class="dot dot--key"></i>
-        {{ t("match.pitch.legend.player") }}
-      </li>
-      <li>
-        <i class="ball-dot ball-dot--key"></i>
-        {{ t("match.pitch.legend.ball") }}
-      </li>
-      <li>
-        <i class="mark mark--goal mark--key"></i>
-        {{ t("match.pitch.legend.goal") }}
-      </li>
-      <li>
-        <i class="mark mark--saved mark--key"></i>
-        {{ t("match.pitch.legend.shot") }}
-      </li>
-      <li>
-        <i class="mark mark--wide mark--key"></i>
-        {{ t("match.pitch.legend.miss") }}
-      </li>
-    </ul>
   </div>
 </template>
 
@@ -238,10 +161,11 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
 
 .field {
   position: relative;
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 105 / 68;
   border-radius: var(--radius);
   overflow: hidden;
-  background: var(--pitch-a);
+  /* Mown stripes, ten across the length of the pitch. */
+  background: repeating-linear-gradient(90deg, var(--pitch-a) 0 10%, var(--pitch-b) 10% 20%);
 }
 
 /* A faint wash of each side's colour over its half. */
@@ -250,7 +174,7 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   top: 0;
   bottom: 0;
   width: 50%;
-  opacity: 0.14;
+  opacity: 0.12;
   pointer-events: none;
 }
 
@@ -269,7 +193,7 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   height: 100%;
   fill: none;
   stroke: var(--pitch-line);
-  stroke-width: 0.8;
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
@@ -278,16 +202,27 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   vector-effect: non-scaling-stroke;
 }
 
-/* A player is a small disc in his nation's colour; the user's own are a touch larger. */
+.lines .spot {
+  fill: var(--pitch-line);
+  stroke: none;
+}
+
+.lines .goal {
+  fill: color-mix(in srgb, var(--pitch-ink) 25%, transparent);
+  stroke: none;
+}
+
+/* A player is a disc in his nation's colour with a white rim; the user's own are larger. */
 .dot {
   position: absolute;
   z-index: 1;
-  width: 8px;
-  height: 8px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: var(--c);
-  box-shadow: 0 0 0 1.5px var(--pitch-ink);
-  opacity: 0.7;
+  box-shadow:
+    0 0 0 2px var(--pitch-ink),
+    0 2px 4px color-mix(in srgb, var(--pitch-token-text) 55%, transparent);
   transform: translate(-50%, -50%);
   transition:
     left 0.7s var(--ease),
@@ -295,22 +230,15 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
 }
 
 .dot--mine {
-  width: 10px;
-  height: 10px;
-  opacity: 1;
-}
-
-.dot--lit {
-  z-index: 2;
-  opacity: 1;
-  animation: lit 1.2s var(--ease) 2;
+  width: 15px;
+  height: 15px;
 }
 
 .dot-name {
   position: absolute;
   top: 100%;
   left: 50%;
-  margin-top: 3px;
+  margin-top: 4px;
   transform: translateX(-50%);
   color: var(--pitch-ink);
   font-size: 9px;
@@ -325,7 +253,7 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   top: auto;
   bottom: 100%;
   margin-top: 0;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 
 .dot-name.lean-start {
@@ -337,86 +265,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   left: auto;
   right: 0;
   transform: none;
-}
-
-.who {
-  --tx: -50%;
-  --ty: -190%;
-  position: absolute;
-  z-index: 3;
-  padding: 1px var(--sp-2);
-  border-radius: var(--radius-pill);
-  background: var(--c);
-  color: var(--pitch-ink);
-  font-size: var(--fs-xs);
-  font-weight: 800;
-  white-space: nowrap;
-  transform: translate(var(--tx), var(--ty));
-  box-shadow: 0 0 0 1.5px var(--pitch-ink);
-  animation: who 3s var(--ease) both;
-  pointer-events: none;
-}
-
-.who--down {
-  --ty: 90%;
-}
-
-.who.lean-start {
-  --tx: 0%;
-}
-
-.who.lean-end {
-  --tx: -100%;
-}
-
-/* Shots taken so far: squares and diamonds, the shape of the match at each end. */
-.mark {
-  position: absolute;
-  z-index: 1;
-  width: 9px;
-  height: 9px;
-  border-radius: 2px;
-  background: var(--c);
-  border: 1.5px solid var(--pitch-ink);
-  transform: translate(-50%, -50%);
-}
-
-/* A goal is a gold diamond. */
-.mark--goal {
-  width: 15px;
-  height: 15px;
-  background: var(--gold);
-  border-width: 2px;
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-/* A miss is a cross. */
-.mark--wide {
-  background: none;
-  border: none;
-}
-
-.mark--wide::before,
-.mark--wide::after {
-  content: "";
-  position: absolute;
-  inset: 3px -2px;
-  border-top: 2.5px solid var(--c);
-  border-radius: 1px;
-  box-shadow: 0 0 0 0.5px var(--pitch-ink);
-}
-
-.mark--wide::before {
-  transform: rotate(45deg);
-}
-
-.mark--wide::after {
-  transform: rotate(-45deg);
-}
-
-.mark--latest {
-  z-index: 2;
-  animation: ping 1.2s var(--ease) 3;
 }
 
 .names {
@@ -451,61 +299,41 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
     top 0.7s var(--ease);
 }
 
-/* The ball: white, with a dark centre, ringed in the colour of the side that has it. */
+/* The ball: a white football with its black panels, and a shadow on the grass. */
 .ball-dot {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--pitch-ink);
-  box-shadow:
-    0 0 0 3px var(--team),
-    0 1px 5px color-mix(in srgb, var(--pitch-token-text) 55%, transparent);
+  width: 18px;
+  height: 18px;
+  overflow: visible;
   transform: translate(-50%, -50%);
+  filter: drop-shadow(0 1px 1.5px color-mix(in srgb, var(--pitch-token-text) 60%, transparent));
 }
 
-.ball-dot::after {
-  content: "";
+.ball-skin {
+  fill: var(--pitch-ink);
+  stroke: color-mix(in srgb, var(--pitch-token-text) 45%, transparent);
+  stroke-width: 0.8;
+}
+
+.ball-panel {
+  fill: var(--pitch-token-text);
+}
+
+.ball-seam {
+  fill: none;
+  stroke: var(--pitch-token-text);
+  stroke-width: 0.7;
+}
+
+.ball-shadow {
   position: absolute;
-  inset: 4px;
+  width: 16px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--pitch-token-text);
+  background: color-mix(in srgb, var(--pitch-token-text) 35%, transparent);
+  transform: translate(-45%, 4px);
 }
 
-.ball-dot--shot {
-  animation: pop 0.6s var(--ease) 2;
-}
-
-.ball-dot--goal {
-  animation: pop 0.7s var(--ease) 2;
-}
-
-.shout {
-  position: absolute;
-  bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transform: translateX(-50%);
-  padding: 2px var(--sp-2);
-  border-radius: var(--radius-pill);
-  background: var(--pitch-ink);
-  color: var(--pitch-token-text);
-  font-size: var(--fs-xs);
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  animation: shout 1.4s var(--ease) both;
-}
-
-.shout small {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  opacity: 0.75;
-}
-
-.shout-team,
 .caption-team {
   padding: 1px var(--sp-2);
   border-radius: var(--radius-pill);
@@ -513,10 +341,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   font-size: var(--fs-xs);
   font-weight: 800;
   letter-spacing: 0.04em;
-}
-
-.shout-team {
-  margin-inline-end: var(--sp-1);
 }
 
 .banner {
@@ -577,119 +401,6 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
   font-weight: 600;
 }
 
-/* What each shape on the pitch means. */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-1) var(--sp-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-}
-
-.legend li {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1-5);
-}
-
-.legend i {
-  position: relative;
-  flex-shrink: 0;
-  transform: none;
-  --c: var(--accent);
-  --team: var(--accent);
-}
-
-.legend .dot--key {
-  box-shadow: none;
-  opacity: 1;
-}
-
-.legend .ball-dot--key {
-  width: 11px;
-  height: 11px;
-  box-shadow: 0 0 0 2px var(--accent);
-  background: var(--text);
-}
-
-.legend .ball-dot--key::after {
-  inset: 3px;
-  background: var(--surface);
-}
-
-.legend .mark--key {
-  border-color: var(--surface);
-}
-
-.legend .mark--goal {
-  width: 11px;
-  height: 11px;
-  transform: rotate(45deg);
-  margin: 2px;
-}
-
-.legend .mark--wide {
-  width: 10px;
-  height: 10px;
-}
-
-@keyframes pop {
-  50% {
-    transform: translate(-50%, -50%) scale(1.6);
-  }
-}
-
-@keyframes lit {
-  50% {
-    transform: translate(-50%, -50%) scale(1.7);
-  }
-}
-
-@keyframes ping {
-  0% {
-    box-shadow: 0 0 0 0 var(--c);
-  }
-  100% {
-    box-shadow: 0 0 0 14px transparent;
-  }
-}
-
-@keyframes who {
-  0% {
-    opacity: 0;
-  }
-  12%,
-  75% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes shout {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) scale(0.5);
-  }
-  15% {
-    opacity: 1;
-    transform: translateX(-50%) scale(1.2);
-  }
-  25%,
-  80% {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) scale(1);
-  }
-}
-
 @keyframes banner {
   0% {
     opacity: 0;
@@ -716,16 +427,8 @@ const MARK: Partial<Record<MatchEventKind, string>> = {
     transition: none;
   }
 
-  .ball-dot,
-  .shout,
-  .banner,
-  .dot--lit,
-  .mark--latest,
-  .who {
-    animation: none;
-  }
-
   .banner {
+    animation: none;
     opacity: 0;
   }
 }
