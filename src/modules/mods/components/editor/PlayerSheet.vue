@@ -162,7 +162,7 @@ async function remove() {
         :hint="age !== null ? t('mods.player.age', { n: age }) : undefined"
         layout="stack"
       >
-        <input v-model="draft.born" class="input" type="date" min="1960-01-01" max="2015-12-31" />
+        <input v-model="draft.born" class="input" type="date" />
       </AppField>
       <AppField :label="t('mods.player.nation')" layout="stack">
         <span v-if="store.live && !isNew" class="fixed">
