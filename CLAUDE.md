@@ -1,4 +1,4 @@
-# Invictus - National Manager
+# Invictus: National Manager
 
 Vue 3 + TypeScript + Pinia + Capacitor (Android only). Manage one of the 211 FIFA
 members' senior national teams — or one of the 11 outside FIFA that play in a

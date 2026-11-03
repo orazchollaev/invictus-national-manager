@@ -1,7 +1,7 @@
-# Invictus - National Manager
+# Invictus: National Manager
 
 <p align="center">
-  <img src="public/logo.png" alt="Invictus - National Manager logo" width="128" height="128" />
+  <img src="public/logo.png" alt="Invictus: National Manager logo" width="128" height="128" />
 </p>
 
 Take charge of one of 222 senior national teams and lead it through

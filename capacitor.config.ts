@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli"
 
 const config: CapacitorConfig = {
   appId: "com.orazchollaev.invictusnationalmanager",
-  appName: "Invictus - National Manager",
+  appName: "Invictus: National Manager",
   webDir: "dist",
   backgroundColor: "#16181f",
   android: {
