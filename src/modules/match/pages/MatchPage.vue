@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, triggerRef, watch } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
 import {
   ArrowLeftRight,
@@ -32,6 +32,7 @@ import { useWorldStore } from "@/modules/world/store"
 import { useSettingsStore, type LiveMatchSpeed } from "@/modules/settings/store"
 import {
   buildReport,
+  canChange,
   changeFormation,
   createMatch,
   dismissInjury,
@@ -286,6 +287,23 @@ function finish() {
 
 onBeforeUnmount(() => {
   if (timer) clearTimeout(timer)
+})
+
+// Walking out (back button included) must not undo a match that is being played: the rest
+// is played for him and the result counts, or he stays.
+onBeforeRouteLeave(async () => {
+  const m = match.value
+  const f = fixture.value
+  if (!m || !f || m.phase === "done") return true
+  running.value = false
+  if (!(await showConfirm(t("match.page.leaveLive"), { dangerous: true }))) return false
+  playToEnd(m)
+  try {
+    world.finishUserMatch(f, buildReport(m))
+  } catch (e) {
+    console.error(e)
+  }
+  return true
 })
 
 const score = computed<[number, number]>(() =>
@@ -606,6 +624,7 @@ const pitchSlots = computed(() => {
       :side="mySide"
       :name="(id) => names.player(id)"
       :max-subs="match.setup.maxSubs ?? 5"
+      :allowed="canChange(match, mySide)"
       :force-out="forceOut"
       @close="closeSubs"
       @sub="doSub"
