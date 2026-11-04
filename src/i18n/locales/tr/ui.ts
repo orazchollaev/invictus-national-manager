@@ -210,6 +210,8 @@ const tr: typeof en = {
   world: {
     building: "Dünya kuruluyor…",
     loading: "Yükleniyor…",
+    loadFailed:
+      "Bu kayıt açılamadı. Hasarlı olabilir ya da oyunun farklı bir sürümüyle yapılmış olabilir.",
   },
   core: {
     notFound: "Sayfa bulunamadı",
@@ -1231,6 +1233,8 @@ const tr: typeof en = {
       headBack: "Oyuncular sahaya geri dönüyor.",
       shootout: "Penaltı atışları",
       takePens: "Penaltıları at",
+      leaveLive:
+        "Şimdi ayrılırsan maçın kalanı otomatik oynanır ve sonuç geçerli olur. Ayrılmak istiyor musun?",
       report: "Maç raporu",
       pause: "Duraklat",
       play: "Oynat",

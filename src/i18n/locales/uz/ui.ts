@@ -212,6 +212,8 @@ const uz: typeof en = {
   world: {
     building: "Dunyo yaratilmoqda…",
     loading: "Yuklanmoqda…",
+    loadFailed:
+      "Bu saqlanma ochilmadi. U shikastlangan yoki o'yinning boshqa versiyasida yaratilgan bo'lishi mumkin.",
   },
   core: {
     notFound: "Sahifa topilmadi",
@@ -1234,6 +1236,8 @@ const uz: typeof en = {
       headBack: "O'yinchilar maydonga qaytmoqda.",
       shootout: "Penaltilar seriyasi",
       takePens: "Penaltilarni bajarish",
+      leaveLive:
+        "Hozir chiqasizmi? O'yinning qolgan qismi avtomatik o'ynaladi va natija hisobga olinadi.",
       report: "O'yin hisoboti",
       pause: "Pauza",
       play: "Davom etish",

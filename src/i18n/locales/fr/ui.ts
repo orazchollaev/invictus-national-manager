@@ -213,6 +213,8 @@ const fr: typeof en = {
   world: {
     building: "Construction du monde…",
     loading: "Chargement…",
+    loadFailed:
+      "Cette sauvegarde n'a pas pu être ouverte. Elle est peut-être endommagée ou créée par une autre version du jeu.",
   },
   core: {
     notFound: "Page introuvable",
@@ -1239,6 +1241,8 @@ const fr: typeof en = {
       headBack: "Les joueurs retournent sur le terrain.",
       shootout: "Séance de tirs au but",
       takePens: "Tirer les penaltys",
+      leaveLive:
+        "Quitter maintenant ? La fin du match sera jouée automatiquement et le résultat comptera.",
       report: "Compte rendu",
       pause: "Pause",
       play: "Lecture",

@@ -210,6 +210,8 @@ const ptBR: typeof en = {
   world: {
     building: "Construindo o mundo…",
     loading: "Carregando…",
+    loadFailed:
+      "Não foi possível abrir este jogo salvo. Ele pode estar corrompido ou ter sido criado por outra versão do jogo.",
   },
   core: {
     notFound: "Página não encontrada",
@@ -1230,6 +1232,7 @@ const ptBR: typeof en = {
       headBack: "Os jogadores voltam a campo.",
       shootout: "Disputa de pênaltis",
       takePens: "Bater os pênaltis",
+      leaveLive: "Sair agora? O resto da partida será jogado automaticamente e o resultado vale.",
       report: "Relatório da partida",
       pause: "Pausar",
       play: "Jogar",

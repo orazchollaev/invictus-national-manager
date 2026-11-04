@@ -212,6 +212,8 @@ const vi: typeof en = {
   world: {
     building: "Đang xây dựng thế giới…",
     loading: "Đang tải…",
+    loadFailed:
+      "Không thể mở bản lưu này. Có thể nó bị hỏng hoặc được tạo bởi phiên bản khác của trò chơi.",
   },
   core: {
     notFound: "Không tìm thấy trang",
@@ -1232,6 +1234,7 @@ const vi: typeof en = {
       headBack: "Các cầu thủ trở lại sân.",
       shootout: "Loạt sút luân lưu",
       takePens: "Thực hiện loạt sút luân lưu",
+      leaveLive: "Rời đi ngay? Phần còn lại của trận đấu sẽ tự động diễn ra và kết quả được tính.",
       report: "Báo cáo trận đấu",
       pause: "Tạm dừng",
       play: "Chơi",

@@ -211,6 +211,8 @@ const pl: typeof en = {
   world: {
     building: "Budowanie świata…",
     loading: "Wczytywanie…",
+    loadFailed:
+      "Nie udało się otworzyć tego zapisu. Może być uszkodzony albo utworzony w innej wersji gry.",
   },
   core: {
     notFound: "Nie znaleziono strony",
@@ -1234,6 +1236,7 @@ const pl: typeof en = {
       headBack: "Zawodnicy wracają na boisko.",
       shootout: "Rzuty karne",
       takePens: "Wykonaj rzuty karne",
+      leaveLive: "Wyjść teraz? Reszta meczu zostanie rozegrana automatycznie, a wynik się liczy.",
       report: "Relacja z meczu",
       pause: "Pauza",
       play: "Graj",

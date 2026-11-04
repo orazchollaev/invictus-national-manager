@@ -211,6 +211,8 @@ const es: typeof en = {
   world: {
     building: "Construyendo el mundo…",
     loading: "Cargando…",
+    loadFailed:
+      "No se pudo abrir esta partida guardada. Puede estar dañada o haberse creado con otra versión del juego.",
   },
   core: {
     notFound: "Página no encontrada",
@@ -1231,6 +1233,8 @@ const es: typeof en = {
       headBack: "Los jugadores vuelven al campo.",
       shootout: "Tanda de penaltis",
       takePens: "Lanzar los penaltis",
+      leaveLive:
+        "¿Salir ahora? El resto del partido se jugará automáticamente y el resultado contará.",
       report: "Crónica del partido",
       pause: "Pausa",
       play: "Reanudar",

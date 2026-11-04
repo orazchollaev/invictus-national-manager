@@ -210,6 +210,8 @@ const ko: typeof en = {
   world: {
     building: "세계를 만드는 중…",
     loading: "불러오는 중…",
+    loadFailed:
+      "이 저장 데이터를 열 수 없습니다. 손상되었거나 다른 버전의 게임에서 만들어졌을 수 있습니다.",
   },
   core: {
     notFound: "페이지를 찾을 수 없습니다",
@@ -1225,6 +1227,7 @@ const ko: typeof en = {
       headBack: "선수들이 다시 경기장으로 나갑니다.",
       shootout: "승부차기",
       takePens: "승부차기 진행",
+      leaveLive: "지금 나갈까요? 남은 경기는 자동으로 진행되고 결과가 반영됩니다.",
       report: "경기 리포트",
       pause: "일시정지",
       play: "재생",

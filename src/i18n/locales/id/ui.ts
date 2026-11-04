@@ -212,6 +212,8 @@ const id: typeof en = {
   world: {
     building: "Membangun dunia…",
     loading: "Memuat…",
+    loadFailed:
+      "Simpanan ini tidak dapat dibuka. Mungkin rusak atau dibuat oleh versi game yang berbeda.",
   },
   core: {
     notFound: "Halaman tidak ditemukan",
@@ -1231,6 +1233,8 @@ const id: typeof en = {
       headBack: "Para pemain kembali ke lapangan.",
       shootout: "Adu penalti",
       takePens: "Lakukan penalti",
+      leaveLive:
+        "Keluar sekarang? Sisa pertandingan akan dimainkan otomatis dan hasilnya dihitung.",
       report: "Laporan pertandingan",
       pause: "Jeda",
       play: "Putar",

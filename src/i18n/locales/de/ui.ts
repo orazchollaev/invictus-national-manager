@@ -211,6 +211,8 @@ const de: typeof en = {
   world: {
     building: "Die Welt wird aufgebaut …",
     loading: "Lädt …",
+    loadFailed:
+      "Dieser Spielstand konnte nicht geöffnet werden. Er ist möglicherweise beschädigt oder stammt aus einer anderen Version des Spiels.",
   },
   core: {
     notFound: "Seite nicht gefunden",
@@ -1235,6 +1237,8 @@ const de: typeof en = {
       headBack: "Die Spieler gehen wieder raus.",
       shootout: "Elfmeterschießen",
       takePens: "Elfmeter schießen",
+      leaveLive:
+        "Jetzt verlassen? Der Rest des Spiels wird automatisch gespielt und das Ergebnis zählt.",
       report: "Spielbericht",
       pause: "Pause",
       play: "Weiter",

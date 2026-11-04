@@ -212,6 +212,8 @@ const it: typeof en = {
   world: {
     building: "Creazione del mondo…",
     loading: "Caricamento…",
+    loadFailed:
+      "Impossibile aprire questo salvataggio. Potrebbe essere danneggiato o creato da un'altra versione del gioco.",
   },
   core: {
     notFound: "Pagina non trovata",
@@ -1235,6 +1237,8 @@ const it: typeof en = {
       headBack: "I giocatori tornano in campo.",
       shootout: "Lotteria dei rigori",
       takePens: "Calcia i rigori",
+      leaveLive:
+        "Uscire ora? Il resto della partita sarà giocato in automatico e il risultato varrà.",
       report: "Cronaca della partita",
       pause: "Pausa",
       play: "Avvia",

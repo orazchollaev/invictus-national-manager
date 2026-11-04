@@ -208,6 +208,8 @@ export default {
   world: {
     building: "Building the world…",
     loading: "Loading…",
+    loadFailed:
+      "This save could not be opened. It may be damaged or made by a different version of the game.",
   },
   core: {
     notFound: "Page not found",
@@ -1225,6 +1227,8 @@ export default {
       headBack: "The players head back out.",
       shootout: "Penalty shootout",
       takePens: "Take the penalties",
+      leaveLive:
+        "Leave now? The rest of the match will be played automatically and the result will count.",
       report: "Match report",
       pause: "Pause",
       play: "Play",

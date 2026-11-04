@@ -209,6 +209,8 @@ const ja: typeof en = {
   world: {
     building: "世界を構築中…",
     loading: "読み込み中…",
+    loadFailed:
+      "このセーブデータを開けませんでした。破損しているか、別のバージョンで作成された可能性があります。",
   },
   core: {
     notFound: "ページが見つかりません",
@@ -1225,6 +1227,7 @@ const ja: typeof en = {
       headBack: "選手たちがピッチへ戻っていく。",
       shootout: "PK戦",
       takePens: "PKを蹴る",
+      leaveLive: "今すぐ離れますか？試合の残りは自動で進行し、結果は記録されます。",
       report: "試合レポート",
       pause: "一時停止",
       play: "再生",

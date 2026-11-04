@@ -211,6 +211,8 @@ const nl: typeof en = {
   world: {
     building: "De wereld wordt opgebouwd…",
     loading: "Laden…",
+    loadFailed:
+      "Dit opslagbestand kon niet worden geopend. Het is mogelijk beschadigd of gemaakt met een andere versie van het spel.",
   },
   core: {
     notFound: "Pagina niet gevonden",
@@ -1232,6 +1234,8 @@ const nl: typeof en = {
       headBack: "De spelers gaan weer het veld op.",
       shootout: "Strafschoppenserie",
       takePens: "Neem de strafschoppen",
+      leaveLive:
+        "Nu weggaan? De rest van de wedstrijd wordt automatisch gespeeld en de uitslag telt.",
       report: "Wedstrijdverslag",
       pause: "Pauze",
       play: "Afspelen",
