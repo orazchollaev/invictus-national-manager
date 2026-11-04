@@ -10,6 +10,8 @@ const props = defineProps<{
   side: LiveSide
   name: (id: string) => string
   maxSubs: number
+  /** Whether the laws allow a change now (substitutions left and a stoppage window free). */
+  allowed: boolean
   /** Pre-select the player who has to come off (injury). */
   forceOut?: string | null
 }>()
@@ -73,7 +75,7 @@ function pick(inId: string) {
           v-for="p in bench"
           :key="p.id"
           class="row"
-          :disabled="left <= 0"
+          :disabled="left <= 0 || !allowed"
           @click="pick(p.id)"
         >
           <span class="role">{{ p.natural }}</span>

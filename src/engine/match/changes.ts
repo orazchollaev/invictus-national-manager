@@ -10,7 +10,7 @@ import type { Formation, MatchEvent, Side, Tactics } from "./types"
 import { assign, effective, rebond } from "./strength"
 import {
   emit,
-  other,
+  goalDiff,
   refreshOutfield,
   sideOf,
   type LivePlayer,
@@ -97,7 +97,7 @@ export function substitute(
   out: MatchEvent[] = []
 ): MatchEvent | null {
   const side = sideOf(state, s)
-  if (side.subsUsed >= maxSubs(state)) return null
+  if (!canChange(state, side)) return null
   const leaving = side.pitch.find((p) => p.id === outId)
   const joining = side.bench.find((p) => p.id === inId)
   if (!leaving || !joining) return null
@@ -154,6 +154,9 @@ export function changeFormation(state: MatchState, s: Side, formation: Formation
 
 export type TeamTalk = "calm" | "praise" | "demand"
 
+/** Temperament (1–20) from which a player counts as hot-headed, as in `bonds.ts`. */
+const HOT_HEADED = 14
+
 /**
  * The half-time talk. What works depends on the score: praise a side that is
  * ahead, demand more from one that is behind. Hot-headed players can take a
@@ -161,7 +164,7 @@ export type TeamTalk = "calm" | "praise" | "demand"
  */
 export function teamTalk(state: MatchState, s: Side, talk: TeamTalk): number {
   const side = sideOf(state, s)
-  const diff = side.goals - sideOf(state, other(s)).goals
+  const diff = goalDiff(state, s)
   const effect: Record<TeamTalk, number> =
     diff > 0
       ? { praise: 1, calm: 0.6, demand: -0.4 }
@@ -172,7 +175,7 @@ export function teamTalk(state: MatchState, s: Side, talk: TeamTalk): number {
   const everyone = [...side.pitch, ...side.bench]
   for (const p of everyone) {
     let d = effect[talk]
-    if (talk === "demand" && p.temperament <= 6 && state.rng() < 0.35) d = -1
+    if (talk === "demand" && p.temperament >= HOT_HEADED && state.rng() < 0.35) d = -1
     p.base = Math.max(1, p.base + d)
     total += d
   }

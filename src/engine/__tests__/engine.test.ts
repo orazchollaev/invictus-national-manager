@@ -108,6 +108,15 @@ describe("match engine", () => {
     }
   })
 
+  it("holds the manager to three stoppages in play, as it does the AI", () => {
+    const state = createMatch({ ...setupFor(70, 70, 7), managed: "home" })
+    while (state.minute < 60) step(state)
+    state.home.windows = 3
+    state.home.lastChange = "none"
+    expect(substitute(state, "home", "h10", "hb6")).toBeNull()
+    expect(state.home.pitch.some((p) => p.id === "hb6")).toBe(false)
+  })
+
   it("can be stepped and changed by a manager", () => {
     const state = createMatch({ ...setupFor(70, 70, 7), managed: "home" })
     while (state.minute < 60) step(state)

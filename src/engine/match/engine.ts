@@ -46,6 +46,7 @@ import {
 export type { LivePlayer, LiveSide, MatchSetup, MatchState, Phase, Units } from "./state"
 export { teamUnits } from "./strength"
 export {
+  canChange,
   changeFormation,
   dismissInjury,
   setSlot,
