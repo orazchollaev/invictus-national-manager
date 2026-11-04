@@ -425,11 +425,39 @@ export function ambitionChoices(world: World, objectiveId: string): AmbitionChoi
   return out
 }
 
+/** Whether the manager's side has already played in the objective's competition. */
+function underway(world: World, obj: BoardObjective): boolean {
+  const me = world.state.career.nationId
+  for (const f of Object.values(world.state.fixtures)) {
+    if (f.compId === obj.compInstance && f.result && (f.home === me || f.away === me)) return true
+  }
+  return false
+}
+
+/**
+ * The board's wait for a word ends with the first match of the competition, or once the
+ * objective is settled: what was asked stands, so a promise cannot be made (or an
+ * objective talked down) with the result in sight.
+ */
+function closeBoardMeetings(world: World) {
+  for (const obj of world.state.career.objectives) {
+    if (obj.agreed !== false) continue
+    if (obj.status !== "open" || underway(world, obj)) {
+      obj.agreed = true
+      obj.ambition = 0
+    }
+  }
+}
+
 /** The manager's word on an objective. Returns false if the board refuses. */
 export function setAmbition(world: World, objectiveId: string, level: -1 | 0 | 1): boolean {
   const c = world.state.career
   const obj = c.objectives.find((o) => o.id === objectiveId)
   if (!obj || obj.agreed !== false) return false
+  if (obj.status !== "open" || underway(world, obj)) {
+    closeBoardMeetings(world)
+    return false
+  }
   if (level !== 0) {
     if (level === -1 && c.confidence < T.lowerNeeds) return false
     const shifted = shiftObjective(world, obj, level)
@@ -542,6 +570,7 @@ export function checkObjectives(world: World) {
   const career = world.state.career
   const me = career.nationId
   if (!me) return
+  closeBoardMeetings(world)
   let criticalMissed = false
   const judge = (obj: BoardObjective): "met" | "failed" | "open" | null => {
     if (obj.kind === "debuts") return evaluateDebuts(world, obj)
@@ -611,6 +640,7 @@ export function checkObjectives(world: World) {
       if (obj.critical) criticalMissed = true
     }
   }
+  closeBoardMeetings(world)
   maybeSack(world, criticalMissed)
   pressure(world)
 }
@@ -781,16 +811,17 @@ export function afterCompetition(world: World, compId: string) {
   if (inst && me) fansAfterCompetition(world, inst, me)
   if (inst && me && inst.outcome.winner === me) {
     const h = c.history[c.history.length - 1]
-    h?.trophies.push(compText(inst.defId, inst.year))
-    // A tournament of friendlies is a nice thing to win, not a career-maker.
+    // A tournament of friendlies is a nice thing to win, not a career-maker: it is
+    // no trophy for the cabinet or the milestones, which anyone could host and farm.
     const invitational = inst.kind === "invitational"
+    if (!invitational) h?.trophies.push(compText(inst.defId, inst.year))
     nudgeReputation(
       world,
       inst.kind === "world-cup" ? 25 : inst.kind === "continental" ? 12 : invitational ? 1 : 4
     )
     nudgeConfidence(world, invitational ? 3 : 25)
     const comp = compText(inst.defId, inst.year)
-    award(world, "first-trophy", msg("ms.trophy", { comp }))
+    if (!invitational) award(world, "first-trophy", msg("ms.trophy", { comp }))
     if (inst.kind === "world-cup")
       award(world, "world-champion", msg("ms.world", { nation: world.def(me).name, comp }))
     if (inst.kind === "continental")

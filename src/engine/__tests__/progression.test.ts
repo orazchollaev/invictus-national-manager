@@ -128,6 +128,35 @@ describe("the board meeting", () => {
     expect(setAmbition(w, open[0].id, 1)).toBe(false)
   })
 
+  it("closes the meeting once the competition has begun, as the board asked", () => {
+    const w = newWorld("TUR")
+    const c = w.state.career
+    c.objectives = [
+      {
+        id: "fake-2027:qualify",
+        comp: "fake",
+        compInstance: "fake-2027",
+        kind: "qualify",
+        text: "Qualify for the Test Cup",
+        status: "open",
+        critical: true,
+        agreed: false,
+      },
+    ]
+    w.state.fixtures["fake:1"] = {
+      ...fixture(w, "SMR", "qualifier", 3, 0),
+      id: "fake:1",
+      compId: "fake-2027",
+    }
+    w.reindex()
+    c.confidence = 60
+    // With the first match played, the manager can no longer talk the target down.
+    expect(setAmbition(w, "fake-2027:qualify", -1)).toBe(false)
+    expect(c.objectives[0].agreed).toBe(true)
+    expect(c.objectives[0].ambition).toBe(0)
+    expect(c.confidence).toBe(60)
+  })
+
   it("raises and lowers objectives one step", () => {
     const w = newWorld("TUR")
     const reach: BoardObjective = {
@@ -201,7 +230,6 @@ describe("a broken promise", () => {
   it("costs confidence and falls back to the board's own target", () => {
     const w = newWorld("TUR")
     const c = w.state.career
-    // A qualifying campaign under way, with one defeat already.
     w.state.competitions["fake-2027"] = {
       id: "fake-2027",
       defId: "fake",
@@ -211,13 +239,6 @@ describe("a broken promise", () => {
       stages: [],
       outcome: {},
     } as unknown as CompetitionInstance
-    w.state.fixtures["fake:1"] = {
-      ...fixture(w, "SMR", "qualifier", 0, 1),
-      id: "fake:1",
-      compId: "fake-2027",
-    }
-    // Fixtures are looked up through the per-nation index, which a hand-added one skips.
-    w.reindex()
     c.objectives = [
       {
         id: "fake-2027:qualify",
@@ -231,7 +252,15 @@ describe("a broken promise", () => {
       },
     ]
     c.confidence = 60
+    // The promise is made before the campaign starts, then the first match is lost.
     expect(setAmbition(w, "fake-2027:qualify", 1)).toBe(true)
+    w.state.fixtures["fake:1"] = {
+      ...fixture(w, "SMR", "qualifier", 0, 1),
+      id: "fake:1",
+      compId: "fake-2027",
+    }
+    // Fixtures are looked up through the per-nation index, which a hand-added one skips.
+    w.reindex()
     checkObjectives(w)
     const obj = c.objectives[0]
     expect(obj.status).toBe("open")
