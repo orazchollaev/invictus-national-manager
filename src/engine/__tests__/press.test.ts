@@ -8,6 +8,7 @@ import type { World } from "../world/world"
 import {
   answerPress,
   assistantPress,
+  expirePress,
   finishPress,
   pressCorps,
   PRESS_TONES,
@@ -69,6 +70,23 @@ describe("press conference", () => {
     // The same squad named again does not call the press again.
     w.aiCallUp("KOR", conf.compId, conf.compId)
     expect(w.state.pendingPress ?? null).toBeNull()
+  })
+
+  it("closes an unanswered conference when the tournament kicks off, at the price of silence", () => {
+    const w = tournamentsOnly("KOR")
+    expect(untilPress(w)).toBe(true)
+    const conf = w.state.pendingPress!
+    const before = w.state.career.confidence
+    expirePress(w)
+    expect(w.state.pendingPress).toBe(conf)
+    const f = Object.values(w.state.fixtures).find(
+      (x) => x.compId === conf.compId && (x.home === "KOR" || x.away === "KOR")
+    )!
+    expect(f).toBeTruthy()
+    f.result = { h: 1, a: 1 }
+    expirePress(w)
+    expect(w.state.pendingPress).toBeNull()
+    expect(w.state.career.confidence).toBeLessThan(before)
   })
 
   it("moves confidence, support and morale by the answer", () => {

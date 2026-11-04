@@ -4,6 +4,7 @@ import clubRows from "@/data/clubs.json"
 import playerRows from "@/data/players.json"
 import type { NationDef } from "../types"
 import { clubsFromRows, createWorld, type ClubRow, type PlayerRow } from "../world/create"
+import { World } from "../world/world"
 import { afconYears } from "../competition/defs/helpers"
 import { formatProblems } from "../competition/invariants"
 
@@ -11,6 +12,32 @@ describe("AFCON every two years (CAF, October 2026)", () => {
   it("is played in 2027, 2028, 2031 and 2033, then every odd year", () => {
     expect(afconYears(2026, 2037)).toEqual([2027, 2028, 2031, 2033, 2035, 2037])
     expect(afconYears(2029, 2032)).toEqual([2031])
+  })
+
+  it("drops an edition the calendar no longer has, and an unknown competition, from an older save", () => {
+    const statics = {
+      nations: nations as NationDef[],
+      clubs: clubsFromRows(clubRows as ClubRow[]),
+    }
+    const w = createWorld(
+      { seed: 3, start: "2026-09-01", managerName: "A", nationality: "TUR", nationId: "TUR" },
+      statics,
+      playerRows as unknown as Record<string, PlayerRow[]>
+    )
+    const keep = w.state.competitions["afcon-2031"]
+    expect(keep).toBeTruthy()
+    w.state.competitions["afcon-2032"] = { ...structuredClone(keep), id: "afcon-2032", year: 2032 }
+    w.state.competitions["gone-2027"] = {
+      ...structuredClone(keep),
+      id: "gone-2027",
+      defId: "gone",
+      year: 2027,
+    }
+    const loaded = new World(JSON.parse(JSON.stringify(w.state)), statics)
+    expect(loaded.state.competitions["afcon-2032"]).toBeUndefined()
+    expect(loaded.state.competitions["gone-2027"]).toBeUndefined()
+    expect(loaded.state.competitions["afcon-2031"]).toBeTruthy()
+    expect(() => loaded.nextDay()).not.toThrow()
   })
 
   it(

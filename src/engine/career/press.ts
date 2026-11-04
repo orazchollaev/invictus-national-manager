@@ -170,7 +170,10 @@ export function arrangePress(world: World, key: string) {
   const topics: { topic: PressTopic; extra?: Partial<PressQuestion> }[] = []
   const rest: typeof topics = [
     { topic: "star", extra: { playerId: best[0].id } },
-    ...(newcomer ? [{ topic: "newcomer" as const, extra: { playerId: newcomer.id } }] : []),
+    // The question is about bringing him "to a tournament", so only a tournament asks it.
+    ...(newcomer && world.state.competitions[key]
+      ? [{ topic: "newcomer" as const, extra: { playerId: newcomer.id } }]
+      : []),
     ...(opp ? [{ topic: "opponent" as const, extra: { opp } }] : []),
     { topic: "fans" },
     ...(form === null ? [] : [{ topic: "form" as const, extra: { good: form } }]),
@@ -187,6 +190,8 @@ export function arrangePress(world: World, key: string) {
 
   const corps = shuffle(rng, pressCorps(world, me))
   c.pressed = [...(c.pressed ?? []), key]
+  // A conference still open is closed first, so ignoring it is not a way out of its cost.
+  if (s.pendingPress) finishPress(world)
   s.pendingPress = {
     compId: key,
     nationId: me,
@@ -338,4 +343,22 @@ export function assistantPress(world: World) {
 export function dropStalePress(world: World) {
   const conf = world.state.pendingPress
   if (conf && conf.nationId !== world.state.career.nationId) world.state.pendingPress = null
+}
+
+/**
+ * A conference left unanswered past the first whistle is over: the questions he let
+ * go cost him as if he had walked out, rather than waiting to be answered after the fact.
+ */
+export function expirePress(world: World) {
+  const conf = world.state.pendingPress
+  if (!conf) return
+  const tournament = !!world.state.competitions[conf.compId]
+  const played = Object.values(world.state.fixtures).some(
+    (f) =>
+      f.result &&
+      f.date > conf.date &&
+      (f.home === conf.nationId || f.away === conf.nationId) &&
+      (!tournament || f.compId === conf.compId)
+  )
+  if (played) finishPress(world)
 }

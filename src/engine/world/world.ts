@@ -114,7 +114,7 @@ import {
 import { checkMilestones } from "../career/milestones"
 import { finishLeaders } from "../career/awards"
 import { recordStats } from "../competition/stats"
-import { arrangePress, assistantPress, dropStalePress } from "../career/press"
+import { arrangePress, assistantPress, dropStalePress, expirePress } from "../career/press"
 import {
   coachesMonthly,
   coachesSeason,
@@ -171,6 +171,7 @@ export class World {
       ensureStadiums(n, this.defs.get(n.id), state.date)
     }
     for (const p of Object.values(state.players)) ensureAttrs(p)
+    this.dropRetiredEditions()
     this.reindex()
     // A long-running save is trimmed on load, not only as time passes.
     pruneOldFixtures(this)
@@ -341,6 +342,31 @@ export class World {
       this.state.nations[t] ? withProjects(this.state.nations[t]) : []
     )
     return hostCheck(grounds, req).score
+  }
+
+  /**
+   * A save made by an older version may hold a competition the game no longer plays: one
+   * whose definition is gone (it would stop the calendar), or an edition the calendar
+   * has since dropped (the AFCON of 2032) that has not kicked off. Both are removed with
+   * their fixtures; editions already played stay in the honours.
+   */
+  private dropRetiredEditions() {
+    const s = this.state
+    const defs = new Map(COMPETITION_DEFS.map((d) => [d.id, d]))
+    const played = new Set<string>()
+    for (const f of Object.values(s.fixtures)) if (f.result) played.add(f.compId)
+    for (const inst of Object.values(s.competitions)) {
+      const def = defs.get(inst.defId)
+      const retired =
+        inst.status !== "done" &&
+        inst.kind !== "invitational" &&
+        !played.has(inst.id) &&
+        !def?.editions(inst.year, inst.year).includes(inst.year)
+      if (def && !retired) continue
+      delete s.competitions[inst.id]
+      for (const f of Object.values(s.fixtures)) if (f.compId === inst.id) delete s.fixtures[f.id]
+      if (s.pendingDraw?.compId === inst.id) s.pendingDraw = null
+    }
   }
 
   /** Create the editions that are due (and not already over). */
@@ -526,6 +552,9 @@ export class World {
   advance(maxDays = 60, quiet = false): Interrupt {
     const waiting = this.pendingInterrupt(quiet)
     if (waiting) return waiting
+    // Out of work, the clock stops for an offer that arrives, not for the ones already
+    // on the table (he has seen those, and may be waiting for a better one).
+    const seen = new Set(this.state.career.offers.map((o) => o.nationId))
     for (let i = 0; i < maxDays; i++) {
       const due = this.userMatchDue()
       if (due) return { kind: "match", fixtureId: due.id }
@@ -534,7 +563,10 @@ export class World {
       if (next) return next
       const match = this.userMatchDue()
       if (match) return { kind: "match", fixtureId: match.id }
-      if (this.state.career.offers.length && this.state.career.nationId === null)
+      if (
+        this.state.career.nationId === null &&
+        this.state.career.offers.some((o) => !seen.has(o.nationId))
+      )
         return { kind: "offer" }
     }
     return { kind: "none" }
@@ -1237,6 +1269,7 @@ export class World {
     // The result counts for the manager before it can finish the competition, so
     // the competition's review sees it.
     this.onResult(f)
+    if (this.isUserFixture(f)) expirePress(this)
     if (f.compId !== "friendly") {
       this.advanceCompetitions(f.compId)
       // Through to the next round: a "reach" objective may be met now.
