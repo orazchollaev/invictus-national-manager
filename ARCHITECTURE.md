@@ -63,14 +63,13 @@ form, home advantage, mentality). Each minute:
   (xG) depends on the edge; the shooter's finishing against the keeper decides it;
 - fouls (pressing, temperament) bring cards and set pieces; players tire and get hurt.
 
-Every player has an **archetype** (`engine/players/archetypes.ts`): Poacher, Target man,
-Ball winner, Sweeper-keeper… drawn once from his id and natural position, so it needs no
-saved state and never changes. It shades his share of the side's defence, midfield and
-attack, who shoots, assists, heads, tackles and fouls, and finishing or shot-stopping by a
-point or two. Factors average out to 1 per position, so mixed squads keep the calibration
-below and only lopsided ones feel different. Badges (Big-game player, Reliable, Erratic,
-Injury-prone, Tires early) are read from character and age and describe effects the engine
-already has.
+Every player has a **style** (`engine/players/style.ts`) read from his attributes. Each
+factor is the gap between an attribute and what his position and overall predict, so it
+needs no saved state. It shades his share of the side's defence, midfield and attack, who
+shoots, assists, heads, tackles and fouls, and finishing or shot-stopping by a point or two.
+Factors average out to 1 per position, so mixed squads keep the calibration below and only
+lopsided ones feel different. Badges (Big-game player, Reliable, Erratic, Injury-prone,
+Tires early) are read from character and age.
 
 **Bonds** (`engine/players/bonds.ts`) say who gets on with whom: club mates, friends by chance,
 feuds rarer and likelier between two hot-headed players. They come from the players' ids and
@@ -85,12 +84,6 @@ attacking team. The lane follows where the side's attacking players are, how wid
 to play, and the flank where the opponent is weakest; the players involved, and the defenders
 who meet them, are those in or near that lane. Attacks, shots, goals and offsides carry it, so
 the feed draws an arrow for each and the stats show where each side attacked from.
-
-Each slot can ask for a **role** (`engine/match/roles.ts`: Stopper, Wing-back, Poacher,
-Pressing forward…). A role reshapes the slot like an archetype does, always as a trade-off,
-and a player whose archetype suits it plays two ability points above himself. A sheet
-without roles plays as before; a role the slot cannot ask for is ignored; changing shape
-mid-match clears them. The AI coach gives each player the role that suits him.
 
 Team instructions (defensive line, width, counter-attack, next to mentality, pressing and
 tempo) are read by `engine/match/matchup.ts`: each has a small cost and benefit of its own,

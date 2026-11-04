@@ -29,12 +29,11 @@ for Android; it also runs in the browser.
 - **Squad and tactics** — call up your squad for each window or tournament, pick the
   eleven, choose from ten formations and set mentality, tempo and pressing. Or let the
   assistant pick the team.
-- **Player styles** — every player is a Poacher, Target man, Ball winner, Sweeper-keeper…
-  with badges for big-game nerve, reliability and fragility. Styles change who scores,
-  creates and tackles, so picking the eleven is more than sorting by rating.
-- **Roles and instructions** — ask each slot for a role (Poacher, Wing-back, Ball winner…),
-  set the defensive line, width and counter-attack. Players whose style suits the role play
-  above themselves, and your way of playing works for or against the opponent's.
+- **Player styles** — every player has attributes (pace, heading, finishing, tackling…) that
+  shape his match: who shoots, creates, heads and tackles. Badges mark big-game nerve and
+  fragility, so picking the eleven is more than sorting by rating.
+- **Instructions** — set the defensive line, width and counter-attack next to mentality,
+  tempo and pressing. Your way of playing works for or against the opponent's.
 - **Scouting reports** — before each match: how the opponent plays, who to watch, which
   matchups favour whom, and what your assistant would change (apply it in one tap).
 - **Attack arrows** — the live feed and the report show which side each attack came down,

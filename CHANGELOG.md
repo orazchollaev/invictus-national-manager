@@ -1,5 +1,39 @@
 # Changelog
 
+## Unreleased
+
+### 🚀 New Features
+
+- AFCON is played every two years (2027, 2028, 2031, 2033, then every odd year)
+
+### 🐛 Bug Fixes
+
+- the manager's substitutions follow the three-stoppage rule, as the AI's do
+- the half-time talk no longer punishes calm players, and counts the aggregate in second legs
+- leaving a live match plays out the rest and keeps the result instead of throwing it away
+- the board's word on an objective closes with the competition's first match, and settled objectives clear their notice
+- an unanswered press conference costs what it should and ends when the tournament starts
+- invitational wins no longer count as trophies or unlock "first trophy"
+- an unemployed manager is stopped only by new offers, not every day
+- saves from older versions drop editions the calendar no longer has and unknown competitions
+- a save that cannot be opened shows a message instead of an unhandled error
+- the assistant's call-up is saved
+
+### ♻️ Refactors
+
+- remove player archetypes and tactical roles; styles come from attributes
+- redesign the match pitch and remove the simulator
+- simplify the main menu by removing action hints
+
+### ⚡ Performance
+
+- lazy-load locales, file-based flags, webp logo
+
+### 🔧 Maintenance
+
+- update app branding name and README logo
+- update dependencies
+
 ## [0.1.0 - The First Whistle](https://github.com/orazchollaev/invictus-national-manager/compare/v0.0.8...v0.1.0) (2026-10-30)
 
 ### 🚀 New Features
