@@ -6,6 +6,7 @@ import { roleAt } from "../players/clubs"
 import { attrsFromCsv, deriveAttrs } from "../players/attributes"
 import { initialNationState, World, type WorldStatics } from "./world"
 import type { WorldState } from "./types"
+import { planU21 } from "./u21"
 import { makeOffers, openStartingJobs, refreshObjectives, setContract } from "../career/career"
 
 export const WORLD_VERSION = 2
@@ -178,7 +179,10 @@ export function createWorld(
   world.clearDraw()
   // Windows whose friendly planning date has passed but which have not started.
   for (const w of windowsForYear(Number(opts.start.slice(0, 4)))) {
-    if (addDays(w.start, -24) < opts.start && w.start >= opts.start) world.arrangeFriendlies(w)
+    if (addDays(w.start, -24) < opts.start && w.start >= opts.start) {
+      world.arrangeFriendlies(w)
+      planU21(world, w)
+    }
   }
   refreshObjectives(world)
   setContract(world)

@@ -128,6 +128,7 @@ import { rivalry } from "./rivals"
 import { recordCleanSheets, recordMatch, recordRanks } from "./records"
 import { expireInvite, maybeInvite, seenInvite } from "./invitational"
 import { pruneOldFixtures } from "./prune"
+import { developmentMinutes, ensureU21, planU21, playU21 } from "./u21"
 
 export interface WorldStatics {
   nations: NationDef[]
@@ -177,6 +178,7 @@ export class World {
     pruneOldFixtures(this)
     ensureCoaches(this)
     ensureCareer(this)
+    ensureU21(this)
     this.settleHeldFriendlies()
   }
 
@@ -656,6 +658,7 @@ export class World {
     const s = this.state
     this.catchUp()
     this.playRestOfDay()
+    playU21(this)
     this.advanceCompetitions()
 
     s.date = addDays(s.date, 1)
@@ -724,6 +727,7 @@ export class World {
     for (const w of [...windowsForYear(yearOf(date)), ...windowsForYear(yearOf(date) + 1)]) {
       if (addDays(w.start, -24) !== date) continue
       this.arrangeFriendlies(w)
+      planU21(this, w)
     }
   }
 
@@ -1359,7 +1363,7 @@ export class World {
           p,
           age,
           tier,
-          p.intlMin ?? 0,
+          developmentMinutes(p),
           rng,
           nationId === me ? USER_EDGE.growth : 0
         )
@@ -1381,6 +1385,7 @@ export class World {
           progress.push(`${fullName(p)} ${gained >= 0 ? "+" : ""}${gained.toFixed(1)}`)
         delete p.intlMin
         delete p.intlRating
+        delete p.u21Min
       }
     }
     this.strengthCache.clear()

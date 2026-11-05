@@ -126,6 +126,11 @@ export interface Player {
   intlMin?: number
   /** International match ratings this season: [sum, count]. */
   intlRating?: [number, number]
+  /** Under-21 appearances and goals, for the manager's own nation. */
+  u21Caps?: number
+  u21Goals?: number
+  /** Under-21 minutes this season: they count half as much as senior ones for development. */
+  u21Min?: number
   history: PlayerSeason[]
 }
 

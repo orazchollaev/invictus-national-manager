@@ -448,6 +448,48 @@ export interface WorldState {
   friendlyRequests: Record<ISODate, string>
   /** The user's own team selection and instructions, kept between matches. */
   userTeam: UserTeam | null
+  /** The under-21 side of the manager's nation (none while he is out of work). */
+  u21?: U21State | null
+}
+
+/**
+ * The manager's nation's under-21 side. Its own coach runs it; the manager watches it
+ * and calls its players up to the senior squad.
+ */
+export interface U21State {
+  nationId: string
+  coach: { first: string; last: string }
+  /** The squad its coach named last. */
+  squad: string[]
+  /** Its friendlies, played and to come, oldest first. */
+  matches: U21Match[]
+}
+
+export interface U21Match {
+  id: string
+  /** The international window it is played in (the window's id). */
+  window: string
+  date: ISODate
+  /** The other nation, whose under-21s it meets. */
+  opp: string
+  /** Played at home. */
+  home: boolean
+  /** Goals for and against the manager's nation. */
+  result?: { gf: number; ga: number }
+  /** Called off: one side could not raise a team. */
+  cancelled?: boolean
+  /** The manager's nation's players who took part. */
+  lines?: U21Line[]
+  /** Goals against, one entry per goal, by the scorer's id. */
+  oppScorers?: string[]
+}
+
+export interface U21Line {
+  playerId: string
+  minutes: number
+  goals: number
+  assists: number
+  rating: number
 }
 
 /** Another federation's invitational tournament, offered to the user's nation. */
