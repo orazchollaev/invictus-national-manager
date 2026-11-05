@@ -17,7 +17,8 @@ const date = computed(() => (world.date ? formatDate(world.date) : ""))
 <template>
   <header class="site-header">
     <div class="header-inner">
-      <RouterLink to="/home" class="brand">
+      <!-- Home has its own tab: the brand opens the nation he manages. -->
+      <RouterLink :to="nation ? `/nation/${nation.id}` : '/home'" class="brand">
         <img v-if="nation" :src="flagUrl(nation.flag)" alt="" class="brand-flag" />
         <span class="brand-name">{{ nation ? $nation(nation.id) : t("app.name") }}</span>
       </RouterLink>
