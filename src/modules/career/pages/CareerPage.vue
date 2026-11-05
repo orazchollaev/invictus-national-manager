@@ -2,7 +2,7 @@
 import { computed, reactive } from "vue"
 import { useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
-import { Briefcase, ChevronRight, Trophy, UserRound } from "@lucide/vue"
+import { Briefcase, ChevronRight, Landmark, Trophy, UserRound } from "@lucide/vue"
 import { AppButton, AppCard, AppSectionHeader } from "@/components/ui"
 import { PageShell, StatPill } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
@@ -102,10 +102,36 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
       </div>
     </div>
 
+    <AppCard v-if="career" padding="md">
+      <AppSectionHeader :title="t('career.numbers.title')" />
+      <dl class="numbers">
+        <dt>{{ t("career.numbers.unbeaten") }}</dt>
+        <dd>
+          {{ t("career.numbers.matches", { n: career.unbeaten ?? 0 }, career.unbeaten ?? 0) }}
+        </dd>
+        <dt>{{ t("career.numbers.goals") }}</dt>
+        <dd>{{ career.tally?.gf ?? 0 }} – {{ career.tally?.ga ?? 0 }}</dd>
+        <dt>{{ t("career.numbers.clean") }}</dt>
+        <dd>{{ career.tally?.clean ?? 0 }}</dd>
+        <dt>{{ t("career.numbers.debuts") }}</dt>
+        <dd>
+          {{ career.debuts ?? 0 }}
+          <span class="muted">
+            {{ t("career.numbers.youth", { n: career.youthDebuts ?? 0 }) }}
+          </span>
+        </dd>
+      </dl>
+    </AppCard>
+
     <AppCard v-if="career" padding="none" class="menu">
       <RouterLink to="/coach/me" class="item">
         <UserRound :size="20" class="item-icon" />
         <span class="item-label">{{ t("career.profile") }}</span>
+        <ChevronRight :size="18" class="item-chevron" />
+      </RouterLink>
+      <RouterLink v-if="career.nationId" to="/career/federation" class="item">
+        <Landmark :size="20" class="item-icon" />
+        <span class="item-label">{{ t("career.federation.title") }}</span>
         <ChevronRight :size="18" class="item-chevron" />
       </RouterLink>
       <RouterLink to="/career/offers" class="item">
@@ -190,9 +216,7 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
         <NationFlag :id="h.nationId" :size="22" name />
         <span class="row-text row-text--end">
           <StatPill v-if="h.left" :value="t(LEFT[h.left])" :tone="leftTone(h.left)" />
-          <small class="muted">
-            {{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}
-          </small>
+          <small class="muted">{{ h.from.slice(0, 4) }}–{{ h.to ? h.to.slice(0, 4) : "" }}</small>
         </span>
         <span class="record-line muted">
           {{ t("career.record_line", { p: h.played, w: h.won, d: h.drawn, l: h.lost }) }}
@@ -236,6 +260,23 @@ const leftTone = (l: string) => (l === "moved" ? "var(--text-muted)" : "var(--da
   font-size: var(--fs-lg);
   font-weight: 700;
   line-height: 1.2;
+}
+
+.numbers {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-2) var(--sp-4);
+  margin: 0;
+}
+
+.numbers dt {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.numbers dd {
+  margin: 0;
+  font-weight: 600;
 }
 
 .stats {
