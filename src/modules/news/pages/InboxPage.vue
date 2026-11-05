@@ -2,18 +2,26 @@
 import { computed, onBeforeUnmount, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { Mail } from "@lucide/vue"
-import { AppEmptyState, AppSubTabBar } from "@/components/ui"
+import { AppChip, AppEmptyState, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
-import type { NewsItem } from "@/engine/world/types"
+import type { NewsItem, NewsKind } from "@/engine/world/types"
 
 const { t } = useI18n()
 const world = useWorldStore()
 const tab = ref("mine")
 const news = world.derive((w) => w.state.news, [] as NewsItem[])
+const kind = ref<NewsKind | null>(null)
+const inTab = computed(() => news.value.filter((n) => (tab.value === "mine" ? n.mine : true)))
+/** The kinds of news in this tab, most frequent first: one chip each. */
+const kinds = computed(() => {
+  const count = new Map<NewsKind, number>()
+  for (const n of inTab.value) count.set(n.kind, (count.get(n.kind) ?? 0) + 1)
+  return [...count.entries()].sort((a, b) => b[1] - a[1]).map(([k]) => k)
+})
 const shown = computed(() =>
-  news.value.filter((n) => (tab.value === "mine" ? n.mine : true)).slice(0, 120)
+  inTab.value.filter((n) => !kind.value || n.kind === kind.value).slice(0, 120)
 )
 
 // Reading the inbox marks it read.
@@ -29,8 +37,20 @@ onBeforeUnmount(() => world.markRead(shown.value.filter((n) => !n.read).map((n) 
         { value: 'all', label: t('inbox.world') },
       ]"
       size="sm"
-      @update:model-value="(v) => (tab = v)"
+      @update:model-value="(v) => ((tab = v), (kind = null))"
     />
+    <div v-if="kinds.length > 1" class="kinds">
+      <button class="kind" @click="kind = null">
+        <AppChip :variant="kind ? 'neutral' : 'accent'" size="sm">
+          {{ t("inbox.kinds.all") }}
+        </AppChip>
+      </button>
+      <button v-for="k in kinds" :key="k" class="kind" @click="kind = k">
+        <AppChip :variant="kind === k ? 'accent' : 'neutral'" size="sm">
+          {{ t(`inbox.kinds.${k}`) }}
+        </AppChip>
+      </button>
+    </div>
     <AppEmptyState v-if="!shown.length" :icon="Mail" :title="t('inbox.empty')" />
     <div v-else class="list">
       <component
@@ -52,6 +72,20 @@ onBeforeUnmount(() => world.markRead(shown.value.filter((n) => !n.read).map((n) 
 </template>
 
 <style scoped>
+.kinds {
+  display: flex;
+  gap: var(--sp-1);
+  overflow-x: auto;
+  padding-bottom: var(--sp-1);
+  scrollbar-width: none;
+}
+
+.kind {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 .list {
   border-radius: var(--radius);
   background: var(--surface);
