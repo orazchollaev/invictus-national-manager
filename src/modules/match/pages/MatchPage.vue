@@ -55,6 +55,7 @@ import { formatDate } from "@/i18n/dates"
 import { resultLetter } from "@/modules/core/utils/format"
 import { useHaptic } from "@/composables/useHaptic"
 import { showConfirm } from "@/composables/useDialog"
+import { headToHead } from "@/modules/nations/utils/headToHead"
 
 const { t } = useI18n()
 const route = useRoute()
@@ -93,6 +94,21 @@ const oppForm = world.derive(
   []
 )
 const rankOf = (id: string) => world.world?.fifaRank(id) ?? 0
+
+/** Every meeting with this opponent on record, from the user's side. */
+const h2h = world.derive(
+  (w) =>
+    opp.value && mine.value ? headToHead(w.fixturesOf(world.me!), world.me!, opp.value) : null,
+  null
+)
+const h2hLast = computed(() => {
+  const f = h2h.value?.last
+  if (!f?.result) return ""
+  return t("match.page.h2hLast", {
+    date: formatDate(f.date),
+    score: `${nationName(f.home)} ${f.result.h}–${f.result.a} ${nationName(f.away)}`,
+  })
+})
 
 /** The staff's report on the opponent, against the tactics the user would play. */
 const scout = world.derive((w) => {
@@ -467,6 +483,25 @@ const pitchSlots = computed(() => {
           t("match.page.coach", { name: world.world?.nation(opp).coach || t("coaches.caretaker") })
         }}
       </div>
+      <div v-if="h2h" class="h2h">
+        <strong>{{ t("match.page.h2h") }}</strong>
+        <template v-if="h2h.played">
+          <span>
+            {{
+              t("match.page.h2hLine", {
+                p: h2h.played,
+                w: h2h.won,
+                d: h2h.drawn,
+                l: h2h.lost,
+                gf: h2h.gf,
+                ga: h2h.ga,
+              })
+            }}
+          </span>
+          <span class="muted">{{ h2hLast }}</span>
+        </template>
+        <span v-else class="muted">{{ t("match.page.h2hNone") }}</span>
+      </div>
     </AppCard>
 
     <ScoutReportCard
@@ -672,6 +707,14 @@ const pitchSlots = computed(() => {
 
 .muted {
   color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.h2h {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--sp-3);
   font-size: var(--fs-sm);
 }
 
