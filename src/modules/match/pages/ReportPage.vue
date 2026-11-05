@@ -63,7 +63,9 @@ const moments = computed(() => {
             : e.k === "r"
               ? "🟥"
               : "✚"
-    out[side].push({ m: e.m, text: `${playerName(e.p)} ${label}`, kind: e.k })
+    const assist =
+      e.k === "g" && e.a ? ` ${t("match.page.assistBy", { name: playerName(e.a) })}` : ""
+    out[side].push({ m: e.m, text: `${playerName(e.p)} ${label}${assist}`, kind: e.k })
   }
   return out
 })
