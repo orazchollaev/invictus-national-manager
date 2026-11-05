@@ -32,7 +32,10 @@ const router = createRouter({
     { path: "/mods/:id", component: () => import("../modules/mods/pages/ModEditorPage.vue") },
     { path: "/home", component: () => import("../modules/core/pages/HomePage.vue") },
     { path: "/career", component: () => import("../modules/career/pages/CareerPage.vue") },
-    { path: "/career/offers", component: () => import("../modules/career/pages/JobOffersPage.vue") },
+    {
+      path: "/career/offers",
+      component: () => import("../modules/career/pages/JobOffersPage.vue"),
+    },
     {
       path: "/career/achievements",
       component: () => import("../modules/career/pages/AchievementsPage.vue"),
@@ -57,6 +60,7 @@ const router = createRouter({
       path: "/squad/prospects",
       component: () => import("../modules/squad/pages/ProspectsPage.vue"),
     },
+    { path: "/u21", component: () => import("../modules/squad/pages/U21Page.vue") },
     { path: "/player/:id", component: () => import("../modules/squad/pages/PlayerPage.vue") },
 
     { path: "/match/:id", component: () => import("../modules/match/pages/MatchPage.vue") },

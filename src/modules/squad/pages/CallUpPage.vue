@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { useRouter } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { Check, Sparkles } from "@lucide/vue"
 import { AppButton, AppChip, AppSubTabBar } from "@/components/ui"
 import { PageShell, StatPill, StickyCta } from "@/modules/core/components"
@@ -17,6 +17,7 @@ import { relationsOf } from "@/modules/squad/utils/chemistry"
 import type { Player } from "@/engine/types"
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const world = useWorldStore()
 
@@ -40,7 +41,14 @@ watch(
   (list) => {
     if (selected.value.size || !world.world || !world.me) return
     const prev = world.world.state.nations[world.me].squad
-    selected.value = new Set(prev.filter((id) => list.some((p) => p.id === id && canPick(p))))
+    const picked = new Set(prev.filter((id) => list.some((p) => p.id === id && canPick(p))))
+    // Sent from the under-21s with a player to bring up: he starts in the squad.
+    const add = list.find((p) => p.id === route.query.add)
+    if (add && canPick(add) && picked.size < 26) {
+      picked.add(add.id)
+      group.value = positionGroup(add.pos)
+    }
+    selected.value = picked
   },
   { immediate: true }
 )

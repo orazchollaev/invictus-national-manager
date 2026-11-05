@@ -2,7 +2,7 @@
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
-import { ClipboardList, Sprout, Users } from "@lucide/vue"
+import { ClipboardList, Shirt, Sprout, Users } from "@lucide/vue"
 import { AppButton, AppEmptyState, AppSearchInput, AppSubTabBar } from "@/components/ui"
 import { PageShell } from "@/modules/core/components"
 import { PlayerRow } from "@/modules/squad/components/list"
@@ -70,6 +70,10 @@ const list = computed(() => {
         @click="router.push('/squad/prospects')"
       >
         <Sprout :size="16" />
+      </AppButton>
+      <AppButton v-if="me" variant="tonal" @click="router.push('/u21')">
+        <Shirt :size="16" />
+        {{ t("u21.short") }}
       </AppButton>
       <AppButton variant="tonal" @click="router.push('/squad/tactics')">
         <ClipboardList :size="16" />
