@@ -18,6 +18,7 @@ import { PageShell, ProfileHero, StatTiles } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PersonFace } from "@/modules/core/components/face"
 import { AttributesCard } from "@/modules/squad/components/attributes"
+import { IntlCareerCard, MatchLogCard, SeasonsCard } from "@/modules/squad/components/career"
 import { useWorldStore } from "@/modules/world/store"
 import { formatDate } from "@/i18n/dates"
 import {
@@ -146,6 +147,10 @@ onBeforeUnmount(() => chart?.destroy())
       </ul>
     </AppCard>
 
+    <IntlCareerCard :player="p" />
+
+    <MatchLogCard :player-id="p.id" />
+
     <AttributesCard :player="p" />
 
     <AppCard padding="md">
@@ -225,6 +230,8 @@ onBeforeUnmount(() => chart?.destroy())
       <AppSectionHeader :title="t('squad.player.development')" />
       <div class="chart"><canvas ref="canvas"></canvas></div>
     </AppCard>
+
+    <SeasonsCard :player="p" />
   </PageShell>
   <AppEmptyState
     v-else
