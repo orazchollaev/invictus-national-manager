@@ -8,7 +8,7 @@ import { NationFlag } from "@/modules/nations/components/badge"
 import { PersonFace } from "@/modules/core/components/face"
 import { formatDate } from "@/i18n/dates"
 import { USER_COACH } from "@/engine/career/coaches"
-import { NationRecords, RivalList } from "@/modules/nations/components/records"
+import { NationRecords, PointsChart, RivalList } from "@/modules/nations/components/records"
 import { PlayerRow } from "@/modules/squad/components/list"
 import { FixtureRow } from "@/modules/competitions/components/tables"
 import { compName, resolveText } from "@/i18n/text"
@@ -200,6 +200,7 @@ const record = computed(() => {
     </template>
 
     <template v-else-if="tab === 'honours'">
+      <PointsChart v-if="rank" :history="nation.pointsHistory" :points="nation.points" />
       <NationRecords :nation-id="def.id" />
       <template v-if="achievements.records.length">
         <AppSectionHeader :title="t('nation.honours.summary')" />
