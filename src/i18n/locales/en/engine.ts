@@ -198,6 +198,11 @@ const engine = {
       title: "{name} on the move",
       body: "{name} joins {club}.",
     },
+    u21: {
+      title: "Under-21s: {home} {score} {away}",
+      body: "Our scorers in the under-21 friendly: {scorers}.",
+      bodyNone: "Our under-21s did not score in the friendly.",
+    },
     prospects: {
       title: "Your prospects this season",
       body: "How the youngsters you are watching developed: {list}.",

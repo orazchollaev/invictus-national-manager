@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} cambia squadra",
       body: "{name} passa a {club}.",
     },
+    u21: {
+      title: "Under 21: {home} {score} {away}",
+      body: "I nostri marcatori nell'amichevole Under 21: {scorers}.",
+      bodyNone: "La nostra Under 21 non ha segnato nell'amichevole.",
+    },
     prospects: {
       title: "I tuoi prospetti in questa stagione",
       body: "Come sono cresciuti i giovani che stai seguendo: {list}.",

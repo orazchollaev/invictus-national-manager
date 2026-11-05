@@ -200,6 +200,11 @@ const engine: typeof en = {
       title: "{name} yangi klubga o'tmoqda",
       body: "{name} {club} ga o'tdi.",
     },
+    u21: {
+      title: "U-21: {home} {score} {away}",
+      body: "U-21 o'rtoqlik o'yinida gol urganlarimiz: {scorers}.",
+      bodyNone: "U-21 jamoamiz o'rtoqlik o'yinida gol urmadi.",
+    },
     prospects: {
       title: "Shu mavsumdagi istiqbolli o'yinchilaringiz",
       body: "Siz kuzatayotgan yoshlar qanday rivojlandi: {list}.",

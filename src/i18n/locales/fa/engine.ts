@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} در حال انتقال",
       body: "{name} به {club} پیوست.",
     },
+    u21: {
+      title: "زیر ۲۱: {home} {score} {away}",
+      body: "گلزنان ما در بازی دوستانهٔ زیر ۲۱: {scorers}.",
+      bodyNone: "تیم زیر ۲۱ ما در بازی دوستانه گل نزد.",
+    },
     prospects: {
       title: "ستاره‌های آینده در این فصل",
       body: "پیشرفت جوانانی که زیر نظر دارید: {list}.",

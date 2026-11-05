@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} đổi bến đỗ",
       body: "{name} gia nhập {club}.",
     },
+    u21: {
+      title: "U21: {home} {score} {away}",
+      body: "Những người ghi bàn của U21 trong trận giao hữu: {scorers}.",
+      bodyNone: "U21 của chúng ta không ghi bàn trong trận giao hữu.",
+    },
     prospects: {
       title: "Các cầu thủ triển vọng của bạn mùa này",
       body: "Các cầu thủ trẻ bạn theo dõi đã phát triển ra sao: {list}.",

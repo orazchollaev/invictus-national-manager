@@ -198,6 +198,11 @@ const engine: typeof en = {
       title: "{name}が移籍",
       body: "{name}が{club}に加入します。",
     },
+    u21: {
+      title: "U-21: {home} {score} {away}",
+      body: "U-21親善試合の得点者: {scorers}。",
+      bodyNone: "U-21は親善試合で得点できなかった。",
+    },
     prospects: {
       title: "今シーズンの有望株",
       body: "注目していた若手の成長ぶり: {list}。",

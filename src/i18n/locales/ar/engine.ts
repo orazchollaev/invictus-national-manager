@@ -198,6 +198,11 @@ const engine: typeof en = {
       title: "{name} ينتقل",
       body: "ينضم {name} إلى {club}.",
     },
+    u21: {
+      title: "تحت 21: {home} {score} {away}",
+      body: "هدّافونا في المباراة الودية لتحت 21: {scorers}.",
+      bodyNone: "لم يسجّل منتخبنا تحت 21 في المباراة الودية.",
+    },
     prospects: {
       title: "مواهبك هذا الموسم",
       body: "كيف تطور الناشئون الذين تتابعهم: {list}.",

@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} maakt een overstap",
       body: "{name} sluit zich aan bij {club}.",
     },
+    u21: {
+      title: "Jong: {home} {score} {away}",
+      body: "Onze doelpuntenmakers in de oefenwedstrijd van Jong: {scorers}.",
+      bodyNone: "Ons Jong-elftal scoorde niet in de oefenwedstrijd.",
+    },
     prospects: {
       title: "Jouw talenten dit seizoen",
       body: "Zo ontwikkelden de jonge spelers die je volgt zich: {list}.",

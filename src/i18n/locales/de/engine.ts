@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} wechselt",
       body: "{name} schließt sich {club} an.",
     },
+    u21: {
+      title: "U21: {home} {score} {away}",
+      body: "Unsere Torschützen im U21-Testspiel: {scorers}.",
+      bodyNone: "Unsere U21 blieb im Testspiel ohne Tor.",
+    },
     prospects: {
       title: "Deine Talente in dieser Saison",
       body: "So haben sich die Youngster entwickelt, die du beobachtest: {list}.",

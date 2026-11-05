@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} yeni takımında",
       body: "{name}, {club} takımına katıldı.",
     },
+    u21: {
+      title: "U21: {home} {score} {away}",
+      body: "U21 hazırlık maçında gollerimiz: {scorers}.",
+      bodyNone: "U21 takımımız hazırlık maçında gol atamadı.",
+    },
     prospects: {
       title: "Bu sezon gençleriniz",
       body: "İzlediğiniz gençler nasıl gelişti: {list}.",

@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} pindah klub",
       body: "{name} bergabung dengan {club}.",
     },
+    u21: {
+      title: "U-21: {home} {score} {away}",
+      body: "Pencetak gol kita di laga uji coba U-21: {scorers}.",
+      bodyNone: "Tim U-21 kita tidak mencetak gol di laga uji coba.",
+    },
     prospects: {
       title: "Pemain muda Anda musim ini",
       body: "Perkembangan para pemain muda yang Anda pantau: {list}.",

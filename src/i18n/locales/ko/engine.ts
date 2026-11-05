@@ -198,6 +198,11 @@ const engine: typeof en = {
       title: "{name} 이적",
       body: "{name} 선수가 {club}에 입단합니다.",
     },
+    u21: {
+      title: "U-21: {home} {score} {away}",
+      body: "U-21 친선경기 득점자: {scorers}.",
+      bodyNone: "U-21 대표팀은 친선경기에서 득점하지 못했다.",
+    },
     prospects: {
       title: "이번 시즌 유망주",
       body: "지켜보던 유망주들의 성장 결과입니다: {list}.",

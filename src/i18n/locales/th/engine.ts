@@ -199,6 +199,11 @@ const engine: typeof en = {
       title: "{name} ย้ายทีม",
       body: "{name} ย้ายไปอยู่กับ {club}",
     },
+    u21: {
+      title: "U21: {home} {score} {away}",
+      body: "ผู้ทำประตูของเราในเกมกระชับมิตร U21: {scorers}",
+      bodyNone: "ทีม U21 ของเรายิงไม่ได้ในเกมกระชับมิตร",
+    },
     prospects: {
       title: "ดาวรุ่งของคุณในฤดูกาลนี้",
       body: "พัฒนาการของเยาวชนที่คุณติดตามอยู่: {list}",
