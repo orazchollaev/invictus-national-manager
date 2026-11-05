@@ -33,9 +33,22 @@ const sections = computed(() =>
       <div class="list">
         <RouterLink v-for="h in s.rows" :key="h.comp" :to="`/competitions/${h.comp}`" class="row">
           <span class="year">{{ h.year }}</span>
-          <span class="winner"><NationFlag :id="h.winner" :size="20" name /></span>
-          <span v-if="h.runnerUp" class="runner">
-            <NationFlag :id="h.runnerUp" :size="16" name="short" />
+          <span class="main">
+            <span class="winner"><NationFlag :id="h.winner" :size="20" name /></span>
+            <span v-if="h.runnerUp || h.third || h.hosts.length" class="meta">
+              <span v-if="h.runnerUp" class="place">
+                {{ t("competitions.honours.runnerUp") }}
+                <NationFlag :id="h.runnerUp" :size="14" name="short" />
+              </span>
+              <span v-if="h.third" class="place">
+                {{ t("competitions.honours.third") }}
+                <NationFlag :id="h.third" :size="14" name="short" />
+              </span>
+              <span v-if="h.hosts.length" class="place">
+                {{ t("competitions.honours.hosts") }}
+                <NationFlag v-for="host in h.hosts" :id="host" :key="host" :size="14" />
+              </span>
+            </span>
           </span>
         </RouterLink>
       </div>
@@ -66,15 +79,30 @@ const sections = computed(() =>
   font-variant-numeric: tabular-nums;
 }
 
-.winner {
+.main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.winner {
   display: flex;
   font-weight: 600;
 }
 
-.runner {
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
   color: var(--text-muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
+}
+
+.place {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
 }
 </style>
