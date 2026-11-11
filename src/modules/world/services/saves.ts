@@ -1,12 +1,36 @@
 /**
- * Three save slots in IndexedDB. The world is one JSON string per slot, with a small
- * meta record beside it so the slot list never has to parse a whole world.
+ * Three save slots in IndexedDB. The world is one gzipped JSON document per slot, with
+ * a small meta record beside it so the slot list never has to parse a whole world.
  */
 import { del, get, set } from "idb-keyval"
 import type { WorldState } from "@/engine/world/types"
 import type { WorldStatics } from "@/engine/world/world"
 
 export const SLOT_COUNT = 3
+
+/**
+ * A world is tens of MB of JSON (every player's attributes and history) but compresses
+ * about 6:1, so it is stored gzipped: less disk, and a much smaller IndexedDB write on
+ * every autosave. A slot written before compression is a plain string and still reads.
+ */
+type Stored = string | Uint8Array | ArrayBuffer
+
+const canCompress = typeof CompressionStream === "function"
+
+export async function pack(json: string): Promise<Stored> {
+  if (!canCompress) return json
+  const stream = new Blob([json]).stream().pipeThrough(new CompressionStream("gzip"))
+  return new Uint8Array(await new Response(stream).arrayBuffer())
+}
+
+export async function unpack(raw: Stored): Promise<string> {
+  if (typeof raw === "string") return raw
+  const bytes = raw instanceof Uint8Array ? raw : new Uint8Array(raw)
+  const stream = new Blob([bytes as Uint8Array<ArrayBuffer>])
+    .stream()
+    .pipeThrough(new DecompressionStream("gzip"))
+  return new Response(stream).text()
+}
 
 export interface SlotMeta {
   slot: number
@@ -62,16 +86,16 @@ export async function saveSlot(
     savedAt: Date.now(),
     version: state.version,
   }
-  await set(dataKey(n), JSON.stringify(state))
+  await set(dataKey(n), await pack(JSON.stringify(state)))
   await set(metaKey(n), meta)
   await set(ACTIVE_KEY, n)
 }
 
 export async function loadSlot(n: number): Promise<WorldState | null> {
-  const raw = (await get(dataKey(n))) as string | undefined
+  const raw = (await get(dataKey(n))) as Stored | undefined
   if (!raw) return null
   await set(ACTIVE_KEY, n)
-  return JSON.parse(raw) as WorldState
+  return JSON.parse(await unpack(raw)) as WorldState
 }
 
 export async function deleteSlot(n: number): Promise<void> {
@@ -95,11 +119,11 @@ export interface SlotStatics extends WorldStatics {
  * a career begins, before its first save.
  */
 export async function setSlotStatics(n: number, statics: SlotStatics | null): Promise<void> {
-  if (statics) await set(staticsKey(n), JSON.stringify(statics))
+  if (statics) await set(staticsKey(n), await pack(JSON.stringify(statics)))
   else await del(staticsKey(n))
 }
 
 export async function loadSlotStatics(n: number): Promise<SlotStatics | null> {
-  const raw = (await get(staticsKey(n))) as string | undefined
-  return raw ? (JSON.parse(raw) as SlotStatics) : null
+  const raw = (await get(staticsKey(n))) as Stored | undefined
+  return raw ? (JSON.parse(await unpack(raw)) as SlotStatics) : null
 }
