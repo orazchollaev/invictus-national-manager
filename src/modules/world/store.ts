@@ -165,16 +165,41 @@ export const useWorldStore = defineStore(
     /** Game date of the last save, for weekly/monthly autosave. */
     let savedOn = ""
 
-    async function save() {
+    async function write() {
       if (!world.value || slot.value === null) return
       const def = nationDef(world.value.state.career.nationId)
+      const date = world.value.state.date
       await saveSlot(
         slot.value,
         world.value.state,
         mod.value?.modName,
         def && { name: def.name, flag: def.flag }
       )
-      savedOn = world.value.state.date
+      savedOn = date
+    }
+
+    /**
+     * One save at a time, and at most one waiting behind it. Autosave fires after every
+     * proceed; serialising and compressing a world takes a while, so saves asked for in
+     * the meantime collapse into one that writes the world as it is when it starts, and
+     * an older world can never land on top of a newer one.
+     */
+    let inFlight: Promise<void> | null = null
+    let queued: Promise<void> | null = null
+    function save(): Promise<void> {
+      if (!inFlight) {
+        inFlight = write().finally(() => {
+          inFlight = null
+        })
+        return inFlight
+      }
+      queued ??= inFlight
+        .catch(() => {})
+        .then(() => {
+          queued = null
+          return save()
+        })
+      return queued
     }
 
     /** Save if the autosave setting says it is time. */
