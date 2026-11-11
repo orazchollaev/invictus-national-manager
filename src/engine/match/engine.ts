@@ -115,14 +115,19 @@ function livePlayer(
 }
 
 function bondPointsFor(setup: MatchSetup): LiveSide["bondPoints"] {
-  const cache = new Map<string, number>()
+  // Keyed lower id → higher id → points. Asked ~110 times per rebond (kickoff and
+  // every change of the eleven), so no key string is built per pair.
+  const cache = new Map<string, Map<string, number>>()
   return (a, b) => {
-    const key = a < b ? `${a}|${b}` : `${b}|${a}`
-    let v = cache.get(key)
+    const low = a < b ? a : b
+    const high = a < b ? b : a
+    let row = cache.get(low)
+    if (!row) cache.set(low, (row = new Map()))
+    let v = row.get(high)
     if (v === undefined) {
       const kind = bondBetween(setup.player(a), setup.player(b))
       v = kind ? BOND_POINTS[kind] : 0
-      cache.set(key, v)
+      row.set(high, v)
     }
     return v
   }
