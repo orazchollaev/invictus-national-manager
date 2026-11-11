@@ -38,7 +38,11 @@ export function pickSquad(
   isReleased: (p: Player) => boolean = () => true
 ): string[] {
   const candidates = pool.filter((p) => available(p, date, isReleased(p)))
-  const value = (p: Player) => selectionValue(p, date) + (previous.includes(p.id) ? 1.5 : 0)
+  // Worked out once per player, not on every comparison of the sorts below.
+  const before = new Set(previous)
+  const values = new Map<Player, number>()
+  for (const p of candidates) values.set(p, selectionValue(p, date) + (before.has(p.id) ? 1.5 : 0))
+  const value = (p: Player) => values.get(p)!
   const byGroup = new Map<string, Player[]>()
   for (const p of candidates) {
     const g = positionGroup(p.pos)
@@ -53,8 +57,9 @@ export function pickSquad(
     chosen.push(...(byGroup.get(g) ?? []).slice(0, want))
   }
   // Top up with the best of the rest (never a fourth keeper).
+  const picked = new Set(chosen)
   const rest = candidates
-    .filter((p) => !chosen.includes(p) && p.pos !== "GK")
+    .filter((p) => !picked.has(p) && p.pos !== "GK")
     .sort((a, b) => value(b) - value(a))
   while (chosen.length < size && rest.length) chosen.push(rest.shift()!)
   return chosen.slice(0, size).map((p) => p.id)
