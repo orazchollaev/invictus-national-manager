@@ -76,7 +76,7 @@ async function render(w: World, path: string, url: string, loader: () => Promise
 }
 
 describe("career pages", () => {
-  it("render the review, career and prospects pages", { timeout: 60000 }, async () => {
+  it("render the review, career and prospects pages", async () => {
     const w = newWorld()
     w.state.career.reviews = [review(w)]
     w.state.pendingReview = "unl-2026"

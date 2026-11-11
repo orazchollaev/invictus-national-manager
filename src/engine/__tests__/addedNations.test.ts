@@ -10,6 +10,7 @@ import { isPlaceholder } from "../competition/placeholders"
 import { competitionDef } from "../competition/defs"
 import { groupStandings } from "../competition/tables"
 import type { World } from "../world/world"
+import { LONGRUN } from "./stretch"
 
 /**
  * Nations a mod adds, in every confederation, played through the same competitions as
@@ -194,7 +195,7 @@ describe("a nation's place on the map", () => {
   })
 })
 
-describe("a world with nations added to every confederation", { timeout: 900000 }, () => {
+describe("a world with nations added to every confederation", () => {
   const w = build(ADDED)
   playUntil(w, "2030-08-15")
   const ids = ADDED.map((n) => n.id)
@@ -255,7 +256,9 @@ describe("a world with nations added to every confederation", { timeout: 900000 
   })
 })
 
-describe.each([
+// The world above holds every one of these nations at once; each alone is the slow
+// matrix, run with LONGRUN=1.
+describe.runIf(LONGRUN).each([
   ["UEFA", [ADDED[0], ADDED[1]]],
   ["CONMEBOL", [ADDED[2]]],
   ["CONCACAF", [ADDED[3], ADDED[4]]],
@@ -263,7 +266,7 @@ describe.each([
   ["AFC", [ADDED[6]]],
   ["OFC", [ADDED[7]]],
 ] as [string, NationDef[]][])("a nation added to %s alone", (_confed, added) => {
-  it("leaves the competitions sound through to 2029", { timeout: 600000 }, () => {
+  it("leaves the competitions sound through to 2029", () => {
     const w = build(added, 11)
     playUntil(w, "2029-09-01")
     expect(
@@ -290,7 +293,7 @@ describe("adding nations to a world", () => {
     expect(Object.keys(a.state.fixtures)).toEqual(Object.keys(b.state.fixtures))
   })
 
-  it("is deterministic with the added nations, too", { timeout: 300000 }, () => {
+  it("is deterministic with the added nations, too", () => {
     const a = build(ADDED, 5)
     const b = build(ADDED, 5)
     playUntil(a, "2027-03-01")

@@ -104,7 +104,7 @@ describe("competitions in the world", () => {
     playerRows as unknown as Record<string, PlayerRow[]>
   )
 
-  it("keep tallies while on and cut the charts when over", { timeout: 120000 }, () => {
+  it("keep tallies while on and cut the charts when over", () => {
     while (w.state.date < "2027-04-01") {
       const i = w.advance(60)
       if (w.settle(i)) continue

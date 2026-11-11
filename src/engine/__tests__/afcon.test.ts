@@ -81,7 +81,8 @@ describe("AFCON every two years (CAF, October 2026)", () => {
         }
       }
       expect(clashes).toEqual([])
-      expect(formatProblems(w).filter((p) => p.includes("afcon"))).toEqual([])
+      // Every format of the bundled world, AFCON's and the rest, through 2031.
+      expect(formatProblems(w)).toEqual([])
     }
   )
 })

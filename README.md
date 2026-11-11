@@ -88,8 +88,9 @@ pnpm dev          # dev server on http://localhost:2010
 | `pnpm gen:world`  | Regenerate `src/data` from `scripts/` (deterministic)           |
 | `pnpm release`    | Bump the version, update `CHANGELOG.md` and tag (`release:dry`) |
 
-The twenty-season soak test is skipped by default. Run it with `LONGRUN=1 pnpm test`
-(or put `LONGRUN=1` in `.env`).
+The slow suites are skipped by default: the twenty-season soak test and the matrices
+that grow or add nations to one confederation at a time (the default run grows all six
+at once). Run them with `LONGRUN=1 pnpm test` (or put `LONGRUN=1` in `.env`).
 
 ### Android
 

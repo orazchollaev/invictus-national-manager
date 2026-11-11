@@ -13,7 +13,7 @@ Full reasoning behind these rules: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 pnpm dev                # vite dev server on :2010
 pnpm lint               # eslint
 pnpm exec vue-tsc -b    # type check
-pnpm test               # vitest run (the 20-season soak test runs with LONGRUN=1)
+pnpm test               # vitest run (LONGRUN=1 adds the 20-season soak and per-confed matrices)
 pnpm build              # vue-tsc -b && vitest run && vite build
 pnpm gen:world          # regenerate src/data from scripts/raw (deterministic)
 ```

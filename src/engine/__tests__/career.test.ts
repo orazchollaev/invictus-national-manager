@@ -17,7 +17,7 @@ function newWorld(nationId: string) {
 }
 
 describe("a manager's first months", () => {
-  it("names squads and plays his own matches minute by minute", { timeout: 120000 }, () => {
+  it("names squads and plays his own matches minute by minute", () => {
     const w = newWorld("TUR")
     let played = 0
     for (let guard = 0; guard < 60 && played < 8; guard++) {

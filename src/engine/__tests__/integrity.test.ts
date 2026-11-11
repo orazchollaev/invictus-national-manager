@@ -5,6 +5,7 @@ import playerRows from "@/data/players.json"
 import type { NationDef } from "../types"
 import { clubsFromRows, createWorld, type ClubRow, type PlayerRow } from "../world/create"
 import { competitionDef } from "../competition/defs"
+import { formatProblems } from "../competition/invariants"
 import { isPlaceholder } from "../competition/placeholders"
 import { groupStandings } from "../competition/tables"
 import type { CompetitionInstance, Fixture, StageState } from "../competition/types"
@@ -151,6 +152,35 @@ describe("tournament integrity", { timeout: 600000 }, () => {
           expect(n, `${id} ${g.name} ${c}: ${g.teams}`).toBeLessThanOrEqual(c === "UEFA" ? 2 : 1)
       }
     }
+  })
+
+  it("plays every competition of the first cycle to completion", () => {
+    const done = comps.filter((c) => c.status === "done").map((c) => c.id)
+    for (const id of [
+      "unl-2026",
+      "asian-cup-2027",
+      "afcon-2027",
+      "euro-2028",
+      "copa-2028",
+      "cnl-2026",
+      "gold-cup-2027",
+      "cnl-2028",
+      "gold-cup-2029",
+      "wcq-uefa-2030",
+      "wcq-caf-2030",
+      "wcq-afc-2030",
+      "wcq-concacaf-2030",
+      "wcq-conmebol-2030",
+      "wc-2030",
+    ])
+      expect(done).toContain(id)
+    expect(w.state.competitions["wc-2030"].stages[0].groups?.flatMap((g) => g.teams)).toHaveLength(
+      48
+    )
+  })
+
+  it("keeps every format invariant", () => {
+    expect(formatProblems(w)).toEqual([])
   })
 
   it("never gives a team more than three home or away matches in a row in a group", () => {

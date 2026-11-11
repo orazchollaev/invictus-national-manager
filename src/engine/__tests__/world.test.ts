@@ -46,30 +46,24 @@ describe("world", () => {
 })
 
 describe("Nations League 2026–27", () => {
-  it(
-    "plays quarter-finals, play-offs and finals, and moves teams between leagues",
-    { timeout: 120000 },
-    () => {
-      const w = newWorld(3)
-      w.state.career.nationId = null
-      while (w.state.date < "2027-07-01") w.nextDay()
-      const unl = w.state.competitions["unl-2026"]
-      const stage = (k: string) => unl.stages.find((s) => s.key === k)!
-      expect(unl.status).toBe("done")
-      expect(stage("quarter-finals").rounds![0].ties).toHaveLength(4)
-      expect(stage("quarter-finals").rounds![0].ties.every((t) => t.fixtures.length === 2)).toBe(
-        true
-      )
-      // A's two best fourths and two worst thirds v B's runners-up; B's fourths v C's runners-up.
-      expect(stage("playoffs").rounds![0].ties.length).toBe(8)
-      expect(stage("finals").rounds![1].ties[0].winner).toBeDefined()
-      // Rebalanced for 2028–29: three leagues of 18, League D gone.
-      const tiers = unl.outcome.tiers!
-      expect(Object.keys(tiers).sort()).toEqual(["A", "B", "C"])
-      expect([tiers.A.length, tiers.B.length, tiers.C.length]).toEqual([18, 18, 18])
-      for (const t of ["MLT", "GIB", "AND", "LTU", "AZE", "LIE"]) expect(tiers.C).toContain(t)
-    }
-  )
+  it("plays quarter-finals, play-offs and finals, and moves teams between leagues", () => {
+    const w = newWorld(3)
+    w.state.career.nationId = null
+    while (w.state.date < "2027-07-01") w.nextDay()
+    const unl = w.state.competitions["unl-2026"]
+    const stage = (k: string) => unl.stages.find((s) => s.key === k)!
+    expect(unl.status).toBe("done")
+    expect(stage("quarter-finals").rounds![0].ties).toHaveLength(4)
+    expect(stage("quarter-finals").rounds![0].ties.every((t) => t.fixtures.length === 2)).toBe(true)
+    // A's two best fourths and two worst thirds v B's runners-up; B's fourths v C's runners-up.
+    expect(stage("playoffs").rounds![0].ties.length).toBe(8)
+    expect(stage("finals").rounds![1].ties[0].winner).toBeDefined()
+    // Rebalanced for 2028–29: three leagues of 18, League D gone.
+    const tiers = unl.outcome.tiers!
+    expect(Object.keys(tiers).sort()).toEqual(["A", "B", "C"])
+    expect([tiers.A.length, tiers.B.length, tiers.C.length]).toEqual([18, 18, 18])
+    for (const t of ["MLT", "GIB", "AND", "LTU", "AZE", "LIE"]) expect(tiers.C).toContain(t)
+  })
 })
 
 describe("Nations League from 2028–29", () => {

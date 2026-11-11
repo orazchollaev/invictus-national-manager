@@ -6,6 +6,14 @@ import { clubsFromRows, createWorld, type ClubRow, type PlayerRow } from "../wor
 import { generateSquad } from "../players/squad"
 import type { World } from "../world/world"
 
+/**
+ * Set LONGRUN=1 for the slow suites: twenty seasons headless, and the matrices that
+ * repeat a check once per confederation.
+ */
+export const LONGRUN = Boolean(
+  (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.LONGRUN
+)
+
 export const BASE = nations as NationDef[]
 export const CONFEDS: Confed[] = ["UEFA", "CONMEBOL", "CONCACAF", "CAF", "AFC", "OFC"]
 const TAG: Record<Confed, string> = {
@@ -63,4 +71,15 @@ export function worldWith(added: NationDef[], seed = 3, start = "2026-09-01"): W
 
 export function playUntil(w: World, date: string) {
   while (w.state.date < date) w.nextDay()
+}
+
+/**
+ * Every confederation grown by `n` made-up FIFA members, played to the end of the 2030
+ * World Cup. A confederation's formats depend on its own size, so one world checks all
+ * six.
+ */
+export function grownAtOnce(n: number): World {
+  const w = worldWith(CONFEDS.flatMap((c) => extraNations(c, n)))
+  playUntil(w, "2030-08-15")
+  return w
 }
