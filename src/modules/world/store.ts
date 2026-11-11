@@ -29,7 +29,6 @@ import {
   type SlotStatics,
 } from "./services/saves"
 import { nationDef, setActiveNations, startingPlayers, statics } from "./services/statics"
-import { loadMod } from "@/modules/mods/services/mods"
 import { clubsFromRows } from "@/engine/world/create"
 import { useSettingsStore } from "@/modules/settings/store"
 import { daysBetween } from "@/engine/calendar/dates"
@@ -115,7 +114,11 @@ export const useWorldStore = defineStore(
       await nextFrame()
       try {
         const { modId, ...rest } = opts
-        const data = modId ? await loadMod(modId) : null
+        // Loaded only for a mod: its parser reaches facesjs, which the app does not
+        // need at startup.
+        const data = modId
+          ? await (await import("@/modules/mods/services/mods")).loadMod(modId)
+          : null
         if (modId && !data) throw new Error(`mod ${modId} not found`)
         const from: SlotStatics | null = data
           ? { modName: data.name, nations: data.nations, clubs: clubsFromRows(data.clubs) }

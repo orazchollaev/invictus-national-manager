@@ -25,5 +25,15 @@ export default defineConfig({
     // Flags are ~1 KB SVGs; inlined as base64 they would all sit in the startup
     // chunk. As files only the ones on screen are read.
     assetsInlineLimit: (file) => (file.endsWith(".svg") ? false : undefined),
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          // facesjs (~300 kB) in a chunk of its own, loaded with the first face drawn
+          // (PersonFace). Left to itself the bundler shares a chunk between it and the
+          // name pools the engine needs at startup, so it came with the app.
+          groups: [{ name: "facesjs", test: /[\\/]node_modules[\\/].*facesjs/ }],
+        },
+      },
+    },
   },
 })

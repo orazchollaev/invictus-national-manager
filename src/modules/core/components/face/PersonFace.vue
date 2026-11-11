@@ -1,8 +1,17 @@
+<script lang="ts">
+let loadedFaces: typeof import("@/lib/faces") | null = null
+let loading: Promise<typeof import("@/lib/faces")> | null = null
+function loadFaces() {
+  loading ??= import("@/lib/faces").then((m) => (loadedFaces = m))
+  return loading
+}
+</script>
+
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from "vue"
 import type { Player } from "@/engine/types"
 import type { Coach, Reporter } from "@/engine/world/types"
-import { faceSvg, type FaceSubject } from "@/lib/faces"
+import type { FaceSubject } from "@/lib/faces"
 import { nationDef } from "@/modules/world/services/statics"
 import { useWorldStore } from "@/modules/world/store"
 
@@ -31,6 +40,11 @@ const props = withDefaults(
 )
 
 const world = useWorldStore()
+
+// facesjs is ~300 kB: loaded with the first face drawn, not with the app.
+type Faces = typeof import("@/lib/faces")
+const faces = shallowRef<Faces | null>(loadedFaces)
+if (!faces.value) void loadFaces().then((m) => (faces.value = m))
 
 function subject(): FaceSubject | null {
   if (props.player) {
@@ -95,7 +109,8 @@ const tint = computed(() => subject()?.color ?? "")
 const svg = computed(() => {
   if (!seen.value) return ""
   const s = subject()
-  return s ? faceSvg(s, props.round ? "round" : props.head ? "card" : "full") : ""
+  const draw = faces.value?.faceSvg
+  return s && draw ? draw(s, props.round ? "round" : props.head ? "card" : "full") : ""
 })
 </script>
 
