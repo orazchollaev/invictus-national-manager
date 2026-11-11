@@ -167,6 +167,12 @@ export class World {
   private busyIndex = new Set<string>()
   private poolIndex = new Map<string, string[]>()
   private strengthCache = new Map<string, number>()
+  /**
+   * `Object.values(state.players)`, kept between calls: with ~18k players that walk costs
+   * tens of ms. Built from `Object.values` so the order (and every draw that follows it)
+   * is the same; dropped whenever a player is added or removed.
+   */
+  private playerCache: Player[] | null = null
   /** nation|window → squad key, cleared whenever fixtures are added. */
   private periodCache = new Map<string, string>()
 
@@ -206,13 +212,19 @@ export class World {
     this.reindex()
   }
 
+  /** Every player in the world, in `Object.values(state.players)` order. */
+  playerList(): Player[] {
+    return (this.playerCache ??= Object.values(this.state.players))
+  }
+
   reindex() {
+    this.playerCache = null
     this.byDate.clear()
     this.byNation.clear()
     this.busyIndex.clear()
     for (const f of Object.values(this.state.fixtures)) this.indexFixture(f)
     this.poolIndex.clear()
-    for (const p of Object.values(this.state.players)) this.addToPool(p)
+    for (const p of this.playerList()) this.addToPool(p)
   }
 
   private indexFixture(f: Fixture) {
@@ -898,9 +910,9 @@ export class World {
       for (const f of this.fixturesOn(d)) {
         if (f.result) continue
         for (const n of [f.home, f.away]) {
-          if (isPlaceholder(n)) continue
+          if (isPlaceholder(n) || due.has(n)) continue
           const key = this.squadKey(f, n)
-          if (this.state.nations[n].squadFor === key || due.has(n)) continue
+          if (this.state.nations[n].squadFor === key) continue
           const inst = this.state.competitions[key]
           due.set(n, {
             key,
@@ -1303,7 +1315,7 @@ export class World {
     const s = this.state
     const rng = streamFor(s.seed, "week", s.date)
     const me = this.userNation
-    for (const p of Object.values(s.players)) {
+    for (const p of this.playerList()) {
       const injury = clubWeek(p, s.date, ageOn(p.born, s.date), rng)
       if (
         injury &&
@@ -1341,7 +1353,7 @@ export class World {
 
   private playersByNation(): Map<string, Player[]> {
     const byNation = new Map<string, Player[]>()
-    for (const p of Object.values(this.state.players)) {
+    for (const p of this.playerList()) {
       const list = byNation.get(p.nationId)
       if (list) list.push(p)
       else byNation.set(p.nationId, [p])
@@ -1443,6 +1455,7 @@ export class World {
         const tier = this.clubs.get(p.clubId)?.tier ?? 5
         if (rng() < retirementChance(p, age, tier)) {
           delete s.players[p.id]
+          this.playerCache = null
           maybeFormerPlayer(this, p)
           if (p.caps >= 10) {
             s.retired.push({
@@ -1496,6 +1509,7 @@ export class World {
           rng
         )
         s.players[id] = p
+        this.playerCache = null
         remaining.push(p)
         if (nationId === me) {
           intake.push(id)

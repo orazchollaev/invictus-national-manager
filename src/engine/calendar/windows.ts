@@ -102,14 +102,16 @@ export function windowAt(date: ISODate): MatchWindow | undefined {
  * for, which throws off the squad key it's named under (world.ts `squadKey`).
  */
 export function windowNear(date: ISODate): MatchWindow | undefined {
-  const w = windowAt(date)
-  if (w) return w
-  for (let d = addDays(date, -1), i = 0; i < 7; i++, d = addDays(d, -1)) {
-    const found = windowAt(d)
-    if (found) return found
-  }
-  return undefined
+  // Asked for every team of every fixture in the next ten days, every day: the
+  // calendar is fixed, so each date is worked out once.
+  if (nearCache.has(date)) return nearCache.get(date)
+  let found = windowAt(date)
+  for (let d = addDays(date, -1), i = 0; !found && i < 7; i++, d = addDays(d, -1))
+    found = windowAt(d)
+  nearCache.set(date, found)
+  return found
 }
+const nearCache = new Map<ISODate, MatchWindow | undefined>()
 
 /** The next window starting on or after a date. */
 export function nextWindow(date: ISODate): MatchWindow {
