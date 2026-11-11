@@ -17,7 +17,7 @@ import {
   type Text,
 } from "../text"
 import { CENTRES } from "@/data/geo"
-import type { Club, Confed, ISODate, NationDef, Player } from "../types"
+import type { Club, Confed, ISODate, NationDef, Player, PlayerSeason } from "../types"
 import type { CompContext } from "../competition/runtime"
 import { advanceCompetition, createInstance } from "../competition/runtime"
 import { advancedFrom, stagesAfter } from "../competition/advance"
@@ -148,6 +148,14 @@ const SQUAD_KEY_TOURNAMENT = new Set(["world-cup", "continental", "regional", "s
  */
 export const USER_EDGE = { match: 0.8, growth: 0.15 } as const
 
+/**
+ * A season entry without its attributes. A new object rather than `delete`, which
+ * would leave tens of thousands of entries as slow, larger dictionary-mode objects.
+ */
+function withoutAttrs(h: PlayerSeason): PlayerSeason {
+  return { season: h.season, ca: h.ca, clubId: h.clubId, caps: h.caps, goals: h.goals }
+}
+
 export class World {
   state: WorldState
   readonly defs = new Map<string, NationDef>()
@@ -171,7 +179,12 @@ export class World {
       ensureFederation(n)
       ensureStadiums(n, this.defs.get(n.id), state.date)
     }
-    for (const p of Object.values(state.players)) ensureAttrs(p)
+    for (const p of Object.values(state.players)) {
+      ensureAttrs(p)
+      // Saves from before only the newest season kept its attributes.
+      for (let i = 0; i < p.history.length - 1; i++)
+        if (p.history[i].attrs) p.history[i] = withoutAttrs(p.history[i])
+    }
     this.dropRetiredEditions()
     this.reindex()
     // A long-running save is trimmed on load, not only as time passes.
@@ -1350,6 +1363,10 @@ export class World {
       for (const p of players) {
         const age = ageOn(p.born, s.date)
         const tier = this.clubs.get(p.clubId)?.tier ?? 5
+        // Only the newest season keeps its attributes (the card's change arrows);
+        // a copy per season was nearly half of a long save.
+        const last = p.history.length - 1
+        if (last >= 0 && p.history[last].attrs) p.history[last] = withoutAttrs(p.history[last])
         p.history.push({
           season: season - 1,
           ca: p.ca,

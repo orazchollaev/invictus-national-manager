@@ -54,7 +54,10 @@ export interface PlayerSeason {
   clubId: string
   caps: number
   goals: number
-  /** His attributes at the start of the season, for the card's change arrows. */
+  /**
+   * His attributes at the start of the season, for the card's change arrows. Kept on
+   * the newest entry only.
+   */
   attrs?: Attrs
 }
 
