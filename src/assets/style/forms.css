@@ -2,7 +2,6 @@
   background: var(--surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  box-shadow: var(--elev-1);
   padding: var(--sp-4);
   margin-bottom: var(--sp-4);
 }
@@ -62,8 +61,8 @@
 /* ── Hint box ────────────────────────────────────────────────── */
 .hint-box {
   padding: var(--sp-2) var(--sp-3);
-  background: var(--bg);
-  border: 1px solid var(--border-light);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  border: 1px solid transparent;
   border-radius: var(--radius);
   font-size: var(--fs-xs);
   color: var(--text-muted);
@@ -148,103 +147,4 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-/* ── Power slider ────────────────────────────────────────────────
-   The 0-100 strength control on the team and player forms. Both draw it in
-   the owner's colour, so the caller sets --power-color on an ancestor. */
-.power-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 20px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-.power-slider:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.power-slider::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(to right, var(--power-color) var(--pct), var(--border) var(--pct));
-}
-.power-slider::-moz-range-track {
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(to right, var(--power-color) var(--pct), var(--border) var(--pct));
-}
-
-.power-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  margin-top: -6px;
-  border-radius: var(--radius-pill);
-  background: var(--surface);
-  border: 3px solid var(--power-color);
-  box-shadow: var(--elev-1);
-  transition: transform var(--dur-fast) var(--ease);
-}
-.power-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-pill);
-  background: var(--surface);
-  border: 3px solid var(--power-color);
-  box-shadow: var(--elev-1);
-}
-
-.power-slider:active::-webkit-slider-thumb {
-  transform: scale(1.15);
-}
-.power-slider:focus-visible::-webkit-slider-thumb {
-  box-shadow: var(--focus-ring);
-}
-.power-slider:focus-visible::-moz-range-thumb {
-  box-shadow: var(--focus-ring);
-}
-
-/* ── Design languages ────────────────────────────────────────────
-   iOS: a hairline track under a large white puck — the thumb is the
-   control, the track is just a line. */
-[data-design="ios"] .power-slider::-webkit-slider-runnable-track {
-  height: 4px;
-}
-[data-design="ios"] .power-slider::-moz-range-track {
-  height: 4px;
-}
-[data-design="ios"] .power-slider::-webkit-slider-thumb {
-  width: 26px;
-  height: 26px;
-  margin-top: -11px;
-  border: none;
-  background: #ffffff;
-  box-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.14),
-    0 3px 8px rgba(0, 0, 0, 0.16);
-}
-[data-design="ios"] .power-slider::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
-  border: none;
-  background: #ffffff;
-  box-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.14),
-    0 3px 8px rgba(0, 0, 0, 0.16);
-}
-[data-design="ios"] .power-slider:active::-webkit-slider-thumb {
-  transform: none;
-}
-
-
-@media (prefers-reduced-motion: reduce) {
-  .power-slider::-webkit-slider-thumb {
-    transition: none;
-  }
 }

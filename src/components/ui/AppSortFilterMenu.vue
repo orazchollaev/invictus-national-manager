@@ -37,6 +37,11 @@ const props = defineProps<{
   sortLabel?: string
   /** Overrides the panel's min-width — a lead section usually needs more room. */
   width?: string
+  /**
+   * False when each sort key already has its one natural direction (e.g. a
+   * server-side "newest" / "most downloaded"): the asc/desc section is hidden.
+   */
+  directional?: boolean
 }>()
 
 const sortKey = defineModel<T>("sortKey", { required: true })
@@ -106,7 +111,7 @@ function onDirSelect(dir: unknown) {
           </RadioGroupItem>
         </RadioGroupRoot>
 
-        <template v-if="filterActive">
+        <template v-if="filterActive && directional !== false">
           <div class="sort-filter-sep" />
           <RadioGroupRoot
             :model-value="sortAsc ? 'asc' : 'desc'"
@@ -153,14 +158,15 @@ function onDirSelect(dir: unknown) {
 
 <!-- Unscoped: PopoverPortal teleports content to <body>, past scoped-attr propagation. -->
 <style>
+/* Same floating, outline-free card as the select menu. */
 .sort-filter-menu {
   z-index: 1000;
   min-width: 168px;
   padding: var(--sp-1);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--elev-2);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  box-shadow: var(--elev-3);
 }
 
 .sort-filter-label {
@@ -185,10 +191,10 @@ function onDirSelect(dir: unknown) {
   width: 100%;
   padding: var(--sp-2) var(--sp-3);
   border: none;
-  border-radius: calc(var(--radius) - 3px);
+  border-radius: 8px;
   background: transparent;
-  font-size: var(--fs-sm);
-  font-weight: 500;
+  font-size: var(--fs-base);
+  font-weight: 400;
   font-family: var(--font-ui);
   color: var(--text);
   cursor: pointer;
@@ -197,13 +203,13 @@ function onDirSelect(dir: unknown) {
   text-align: left;
 }
 
-.sort-filter-item:hover {
+.sort-filter-item:hover,
+.sort-filter-item:active {
   background: var(--bg-hover);
 }
 
 .sort-filter-item[data-state="checked"] {
   color: var(--accent);
-  font-weight: 600;
 }
 
 .sort-filter-item-icon {
@@ -253,23 +259,6 @@ function onDirSelect(dir: unknown) {
     opacity: 0;
     transform: translateY(-4px) scale(0.97);
   }
-}
-
-/* ── Design languages ────────────────────────────────────────────
-   Same treatment as the select menu: a floating, outline-free card. */
-[data-design="ios"] .sort-filter-menu {
-  border-color: transparent;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
-  box-shadow: var(--elev-3);
-}
-[data-design="ios"] .sort-filter-item {
-  border-radius: 8px;
-  font-size: var(--fs-base);
-  font-weight: 400;
-}
-[data-design="ios"] .sort-filter-item:active {
-  background: var(--bg-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {

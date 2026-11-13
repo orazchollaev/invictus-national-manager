@@ -4,18 +4,18 @@
    layout and stacking.
 
    The neutrals, shape, elevation, motion and the heading sizes are NOT
-   here — they differ per platform look and are defined in design.css
-   under [data-design="ios"]. This file does
-   not stand on its own: <html> always carries a data-design value
-   (index.html sets it). */
-/* One height for every field-like control (input, select, segmented group). */
+   here — they are defined in design.css, which re-points this file and
+   loads after it. */
 :root {
+  /* One height for every field-like control (input, select, segmented group). */
   --control-h: 40px;
   --accent: #0b7264;
   --accent-hover: #095c51;
   --accent-subtle: color-mix(in srgb, var(--accent) 10%, transparent);
   --accent-2: #e08b1f;
   --on-accent: #ffffff;
+  /* Switch and slider knobs stay white in both themes. */
+  --knob: #ffffff;
 
   /* ── Status ──────────────────────────────────────────────────── */
   --danger: #d93a30;
@@ -130,7 +130,7 @@
   /* Floating mobile bottom nav. --mobile-nav-offset is the height any
      bottom-anchored element must clear to sit above it: the pill, the
      gap under it, and the system navigation bar. */
-  --mobile-nav-height: 58px;
+  --mobile-nav-height: 56px;
   --mobile-nav-gap: var(--sp-2);
   --mobile-nav-offset: calc(var(--mobile-nav-height) + var(--mobile-nav-gap) + var(--safe-bottom));
 

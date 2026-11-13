@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, type Component } from "vue"
+import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui"
 
 withDefaults(
   defineProps<{
@@ -11,16 +12,23 @@ withDefaults(
   { size: "sm" }
 )
 
-defineEmits<{ "update:modelValue": [value: string] }>()
+const emit = defineEmits<{ "update:modelValue": [value: string] }>()
+
+// A segmented control always has one segment on. Reka's single toggle group
+// lets a second tap on the active item clear it, which arrives here as an
+// empty value; dropping that keeps the current segment selected.
+function onUpdate(value: unknown) {
+  if (typeof value === "string" && value) emit("update:modelValue", value)
+}
 
 // A strip wider than its box scrolls sideways; fade the edge that still has
 // content so the scroll is visible.
-const root = ref<HTMLElement | null>(null)
+const root = ref<{ $el: HTMLElement } | null>(null)
 const fadeStart = ref(false)
 const fadeEnd = ref(false)
 
 function measure() {
-  const el = root.value
+  const el = root.value?.$el
   if (!el) return
   const max = el.scrollWidth - el.clientWidth
   const x = Math.abs(el.scrollLeft)
@@ -31,48 +39,53 @@ function measure() {
 let ro: ResizeObserver | undefined
 onMounted(() => {
   measure()
-  if (typeof ResizeObserver !== "undefined" && root.value) {
+  const el = root.value?.$el
+  if (typeof ResizeObserver !== "undefined" && el) {
     ro = new ResizeObserver(measure)
-    ro.observe(root.value)
+    ro.observe(el)
   }
 })
 onBeforeUnmount(() => ro?.disconnect())
 </script>
 
 <template>
-  <div
+  <ToggleGroupRoot
     ref="root"
+    type="single"
     class="btn-group"
     :class="[
       `btn-group--${size}`,
       { 'btn-group--block': block, 'fade-start': fadeStart, 'fade-end': fadeEnd },
     ]"
+    :model-value="modelValue"
+    @update:model-value="onUpdate"
     @scroll.passive="measure"
   >
-    <button
+    <ToggleGroupItem
       v-for="opt in options"
       :key="opt.value"
-      type="button"
+      :value="opt.value"
       :disabled="opt.disabled"
       :class="{ active: modelValue === opt.value, 'icon-only': opt.icon }"
       :title="opt.icon ? opt.label : undefined"
       :aria-label="opt.icon ? opt.label : undefined"
-      @click="$emit('update:modelValue', opt.value)"
     >
       <component :is="opt.icon" v-if="opt.icon" :size="14" />
       <template v-else>{{ opt.label }}</template>
-    </button>
-  </div>
+    </ToggleGroupItem>
+  </ToggleGroupRoot>
 </template>
 
 <style scoped>
+/* The system segmented control: grey track, white thumb, dark label.
+   The accent never fills a segment. */
 .btn-group {
   display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  gap: 0;
+  padding: 2px;
+  background: var(--fill-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
 }
 
 .btn-group--block {
@@ -93,7 +106,7 @@ onBeforeUnmount(() => ro?.disconnect())
   border: none;
   background: none;
   box-shadow: none;
-  border-radius: calc(var(--radius) - 3px);
+  border-radius: var(--radius-pill);
   font-family: var(--font-ui);
   font-weight: 500;
   color: var(--text-muted);
@@ -126,15 +139,12 @@ onBeforeUnmount(() => ro?.disconnect())
   background: var(--bg-hover);
 }
 
-.btn-group button.active {
-  background: var(--accent);
-  color: var(--on-accent);
-  font-weight: 600;
-  box-shadow: var(--elev-1);
-}
-
+.btn-group button.active,
 .btn-group button.active:hover {
-  background: var(--accent-hover);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-group button:disabled {
@@ -163,26 +173,6 @@ onBeforeUnmount(() => ro?.disconnect())
 .btn-group--md button.icon-only {
   width: 26px;
   height: 26px;
-}
-
-/* ── Design languages ────────────────────────────────────────────
-   iOS: the system segmented control — grey track, white thumb, dark
-   label. The accent never fills a segment there. */
-[data-design="ios"] .btn-group {
-  gap: 0;
-  padding: 2px;
-  border-color: transparent;
-  border-radius: var(--radius-pill);
-  background: var(--fill-1);
-}
-[data-design="ios"] .btn-group button {
-  border-radius: var(--radius-pill);
-}
-[data-design="ios"] .btn-group button.active,
-[data-design="ios"] .btn-group button.active:hover {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-sm);
 }
 
 /* A long strip of options scrolls sideways instead of wrapping onto a second

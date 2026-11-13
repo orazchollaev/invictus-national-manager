@@ -1,22 +1,21 @@
-/* ── Design languages ────────────────────────────────────────────
-   <html> always carries data-design="ios" (see index.html): soft, flat,
-   rounded. variables.css stays the shared baseline this file re-points;
-   the look is not complete without it.
+/* ── Design tokens ───────────────────────────────────────────────
+   The app's one look — soft, glassy, flat, after iOS. variables.css is
+   the shared baseline this re-points; the look is not complete without it.
 
    Only *neutral* tokens move — shape, elevation, type scale, motion and
    the greys. --accent* is user-picked and the status colours (danger /
    success / warning / live / gold / medals / pos-*) carry meaning, so
    both are deliberately left alone.
 
-   This file must stay last in index.css: its [data-design="…"] blocks
-   match the same specificity as [data-theme="dark"], so source order is
-   what makes them win. The combined [data-theme="dark"][data-design="…"]
-   blocks outrank both and hold the dark neutrals. */
+   This file must stay last in index.css: its :root block has the same
+   specificity as variables.css's [data-theme="dark"], so source order is
+   what makes it win, and the [data-theme="dark"] block below then puts
+   the dark neutrals back on top. */
 
 /* ══ iOS ═════════════════════════════════════════════════════════
    Flat white cards on a grey field: depth comes from the background,
    not from shadows. Hairline separators, softer radii, larger text. */
-[data-design="ios"] {
+:root {
   --bg: #f2f2f7;
   --surface: #ffffff;
   --border: #c6c6c8;
@@ -60,7 +59,7 @@
   --dur-slow: 0.45s;
 }
 
-[data-theme="dark"][data-design="ios"] {
+[data-theme="dark"] {
   /* Not pure black: the cards have to read as lifted off the ground,
      and at #000 the whole app looked switched off. */
   --bg: #0e0e10;
@@ -75,105 +74,4 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.55);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.65);
-}
-
-/* ── Form controls ───────────────────────────────────────────────
-   iOS: filled field, no visible border. */
-[data-design="ios"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-[data-design="ios"] select,
-[data-design="ios"] textarea {
-  background: var(--fill-1);
-  border-color: transparent;
-}
-
-[data-design="ios"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
-[data-design="ios"] select:focus,
-[data-design="ios"] textarea:focus {
-  background: var(--surface);
-  border-color: var(--accent);
-}
-
-[data-design="ios"] .phase-tab {
-  flex: 1;
-  justify-content: center;
-  margin-bottom: 0;
-  padding: 6px var(--sp-3);
-  border-bottom: none;
-  border-radius: var(--radius-pill);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-}
-
-[data-design="ios"] .phase-tab[data-state="active"] {
-  border-radius: var(--radius-pill);
-  background-color: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ── Data tables ─────────────────────────────────────────────────
-   iOS: no header fill, hairline rows, right-aligned numbers already come
-   from the table itself. */
-[data-design="ios"] .data-table th {
-  background: transparent;
-  font-size: var(--fs-xs);
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--text-muted);
-}
-
-[data-design="ios"] .data-table td {
-  border-bottom-color: var(--border-light);
-}
-
-/* ── Page titles ─────────────────────────────────────────────────
-   iOS runs a large, tight, heavy title. */
-[data-design="ios"] .page-title,
-[data-design="ios"] .t-header h1 {
-  font-size: var(--fs-xl);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-/* ── Form-card group ─────────────────────────────────────────────
-   The settings/creation forms use .form-card. iOS renders it as an inset
-   grouped list — no shadow, generous corners. */
-[data-design="ios"] .form-card {
-  box-shadow: none;
-}
-
-[data-design="ios"] .hint-box {
-  border-color: transparent;
-  background: color-mix(in srgb, var(--text) 5%, transparent);
-}
-
-/* ── Hand-rolled tables ──────────────────────────────────────────
-   A few screens draw their own <table> instead of AppTable (the
-   simulation results page, the all-time team stats tab). Those live in
-   scoped blocks that load with their route chunk, so these selectors
-   carry an extra element qualifier to outrank them from here. */
-[data-design="ios"] table.srp-table th,
-[data-design="ios"] table.ts-table th,
-[data-design="ios"] table.ts-sub-table th {
-  background: transparent;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 400;
-  border-bottom: 0.5px solid var(--border);
-}
-
-[data-design="ios"] table.srp-table td,
-[data-design="ios"] table.ts-table td,
-[data-design="ios"] table.ts-sub-table td {
-  border-bottom: 0.5px solid var(--border-light);
-}
-
-[data-design="ios"] table.srp-table,
-[data-design="ios"] table.ts-table {
-  font-variant-numeric: tabular-nums;
-}
-
-/* The global .data-table (components.css) gets the same split. */
-[data-design="ios"] table.data-table tbody tr:hover {
-  background: transparent;
 }

@@ -33,12 +33,13 @@ function onUpdate(value: boolean) {
 .toggle-switch {
   flex-shrink: 0;
   position: relative;
-  width: 44px;
-  height: 26px;
+  /* The platform's 51x31 switch: borderless track, large knob. */
+  width: 51px;
+  height: 31px;
   padding: 0;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--border);
-  background: var(--border-light);
+  border: 1px solid transparent;
+  background: var(--fill-3);
   cursor: pointer;
   transition:
     background var(--dur-fast) var(--ease),
@@ -46,7 +47,6 @@ function onUpdate(value: boolean) {
 }
 .toggle-switch[data-state="checked"] {
   background: var(--accent);
-  border-color: var(--accent-hover);
 }
 .toggle-switch:disabled {
   opacity: 0.5;
@@ -60,40 +60,18 @@ function onUpdate(value: boolean) {
 .toggle-knob {
   position: absolute;
   top: 50%;
-  left: 3px;
-  width: 18px;
-  height: 18px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: var(--shadow-sm);
+  background: var(--knob);
+  box-shadow: var(--shadow-md);
   transform: translateY(-50%);
   transition: transform var(--dur-fast) var(--ease);
 }
 .toggle-switch[data-state="checked"] .toggle-knob {
-  transform: translate(18px, -50%);
-}
-
-/* ── Design languages ────────────────────────────────────────────
-   iOS: the platform's 51×31 switch — borderless track, large knob. */
-[data-design="ios"] .toggle-switch {
-  width: 51px;
-  height: 31px;
-  border-color: transparent;
-  background: var(--fill-3);
-}
-[data-design="ios"] .toggle-switch[data-state="checked"] {
-  border-color: transparent;
-}
-[data-design="ios"] .toggle-knob {
-  width: 27px;
-  height: 27px;
-  left: 2px;
-  box-shadow: var(--shadow-md);
-}
-[data-design="ios"] .toggle-switch[data-state="checked"] .toggle-knob {
   transform: translate(20px, -50%);
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .toggle-switch,

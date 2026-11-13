@@ -26,6 +26,11 @@ const props = withDefaults(
     /** Gap between panes while sliding, in px. */
     gap?: number
     duration?: number
+    /**
+     * Tabs too heavy to sit mounted beside the settled pane. They mount only
+     * once a touch starts or they are the slide target.
+     */
+    deferred?: readonly T[]
   }>(),
   { gap: 10, duration: 280 }
 )
@@ -47,6 +52,8 @@ const settled = ref<T>(props.modelValue)
 const target = ref<T | null>(null)
 /** Which settled pane currently has its neighbours mounted. */
 const neighboursFor = ref<T | null>(null)
+/** True from touch start until the pane settles; only then do resting neighbours paint. */
+const armed = ref(false)
 
 const settledIdx = computed(() => props.tabs.indexOf(settled.value))
 
@@ -61,8 +68,12 @@ const rendered = computed(() => {
   if (target.value !== null) keys.add(target.value)
   if (neighboursFor.value === settled.value) {
     const i = settledIdx.value
-    if (i > 0) keys.add(props.tabs[i - 1])
-    if (i < props.tabs.length - 1) keys.add(props.tabs[i + 1])
+    const neighbours = [props.tabs[i - 1], props.tabs[i + 1]]
+    for (const tab of neighbours) {
+      if (tab === undefined) continue
+      if (!armed.value && props.deferred?.includes(tab)) continue
+      keys.add(tab)
+    }
   }
   return props.tabs.filter((tab) => keys.has(tab))
 })
@@ -74,10 +85,24 @@ function slotOf(tab: T): number | null {
   return props.tabs.indexOf(tab) - settledIdx.value
 }
 
+/**
+ * A hidden pane stays parked off to the side. `visibility` alone is not enough: it
+ * is inherited, so any descendant with `transition: all` (or `visibility`) keeps
+ * painting for the length of its transition after the pane is hidden — and a pane
+ * hidden at slot 0 sits right on top of the settled one, so its buttons flashed in
+ * the middle of the screen on every tap.
+ */
+const PARKED = { visibility: "hidden" as const, transform: "translateX(-200%)" }
+
 function paneStyle(tab: T) {
   const slot = slotOf(tab)
-  if (slot === null) return { visibility: "hidden" as const }
+  if (slot === null) return PARKED
   if (slot === 0) return undefined
+  // A resting neighbour with a 3D transform is a permanent full-screen GPU
+  // layer. Next to the ad's own WebView that exhausts tile memory and the
+  // page turns white on Android, so neighbours only paint once a touch starts.
+  // (The parked transform is 2D, which does not promote a layer.)
+  if (target.value === null && !armed.value) return PARKED
   return { transform: `translate3d(calc(${slot} * (100% + ${props.gap}px)), 0, 0)` }
 }
 
@@ -136,6 +161,7 @@ function onTransitionEnd(e: TransitionEvent) {
 function land() {
   if (target.value !== null) settled.value = target.value
   target.value = null
+  armed.value = false
   setTrack("")
   scheduleNeighbours()
 }
@@ -230,6 +256,7 @@ function onTouchStart(e: TouchEvent) {
   if (node?.closest(".no-swipe")) return
   snapToTarget()
   mountNeighboursNow()
+  armed.value = true
   const t = e.touches[0]
   gesture = {
     startX: t.clientX,
@@ -253,6 +280,7 @@ function onTouchMove(e: TouchEvent) {
     if (Math.abs(dx) < LOCK_PX && Math.abs(dy) < LOCK_PX) return
     if (Math.abs(dy) >= Math.abs(dx) || innerScrollerTakes(g.origin, dx)) {
       gesture = null
+      armed.value = false
       return
     }
     g.locked = "x"
@@ -279,7 +307,10 @@ function onTouchEnd(e: TouchEvent) {
   gesture = null
   cancelAnimationFrame(dragFrame)
   dragFrame = 0
-  if (!g || g.locked !== "x") return
+  if (!g || g.locked !== "x") {
+    armed.value = false
+    return
+  }
 
   const first = g.samples[0]
   const last = g.samples[g.samples.length - 1]
@@ -298,7 +329,10 @@ function onTouchEnd(e: TouchEvent) {
 
   if (step === 0 || next === undefined) {
     const ms = scaledDuration(Math.abs(g.dx) / width)
-    animateTrack("translate3d(0, 0, 0)", ms, () => setTrack(""))
+    animateTrack("translate3d(0, 0, 0)", ms, () => {
+      armed.value = false
+      setTrack("")
+    })
     return
   }
 
@@ -311,6 +345,7 @@ function onTouchEnd(e: TouchEvent) {
 function cancelDrag() {
   if (!gesture) return
   gesture = null
+  armed.value = false
   cancelAnimationFrame(dragFrame)
   dragFrame = 0
   setTrack("")

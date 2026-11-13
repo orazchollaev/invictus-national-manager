@@ -73,9 +73,8 @@ defineEmits<{ click: [] }>()
   box-shadow: var(--focus-ring);
 }
 
-/* ── Design languages ────────────────────────────────────────────
-   iOS: press dims, nothing lifts. */
-[data-design="ios"] .config-btn:active {
+/* A press dims; nothing lifts. */
+.config-btn:active {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 6%, var(--bg));
   box-shadow: none;
@@ -116,7 +115,7 @@ defineEmits<{ click: [] }>()
 }
 
 .config-btn-summary {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
