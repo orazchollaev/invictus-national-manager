@@ -19,7 +19,28 @@ const engine: typeof en = {
     lowerNote: "เสียความเชื่อมั่น {cost} ในตอนนี้; รางวัลลดลงครึ่งหนึ่ง",
     lowerNeeds: "คณะกรรมการจะรับฟังก็ต่อเมื่อความเชื่อมั่นถึง {n}% ขึ้นไป",
   },
+  clubLog: {
+    played: "{name} ลงเล่นให้ทีมชาติ {minutes} นาที",
+    playedMany: "นักเตะของสโมสร {n} คนลงเล่นให้ทีมชาติ",
+    injured: "{name} กลับจากภารกิจทีมชาติพร้อมอาการบาดเจ็บ (พัก {days} วัน)",
+    ask: {
+      granted: "คุณขอให้ {name} ได้ลงเล่นมากขึ้น: ตกลง",
+      refused: "คุณขอให้ {name} ได้ลงเล่นมากขึ้น: ปฏิเสธ",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} จะได้ลงเล่นมากขึ้น",
+          body: "{club} ตกลงให้ {name} ได้ลงเล่นมากขึ้นหลังคุณโทรไปคุย",
+        },
+        refused: {
+          title: "{club} ปฏิเสธคุณ",
+          body: "{club} จะไม่เปลี่ยนแผนเรื่อง {name} และไม่พอใจที่ถูกขอ",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

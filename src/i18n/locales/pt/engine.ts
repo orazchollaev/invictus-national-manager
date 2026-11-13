@@ -19,7 +19,28 @@ const engine: typeof en = {
     lowerNote: "Custa {cost} de confiança agora; recompensas pela metade",
     lowerNeeds: "A diretoria só ouve com confiança de {n}% ou mais",
   },
+  clubLog: {
+    played: "{name} jogou {minutes} minutos pela seleção",
+    playedMany: "{n} jogadores do clube jogaram pela seleção",
+    injured: "{name} regressou lesionado do serviço da seleção ({days} dias de paragem)",
+    ask: {
+      granted: "Pediste mais jogos para {name}: aceite",
+      refused: "Pediste mais jogos para {name}: recusado",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} vai jogar mais",
+          body: "{club} aceitou dar mais jogos a {name} após o teu pedido.",
+        },
+        refused: {
+          title: "{club} recusa o teu pedido",
+          body: "{club} não vai mudar os planos para {name} e não gostou de ser abordado.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

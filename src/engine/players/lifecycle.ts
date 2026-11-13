@@ -96,10 +96,13 @@ const ROLE_GROWTH: Record<ClubRole, number> = {
 export const INTL_MINUTES_FULL = 540
 const INTL_BOOST = 0.25
 
+/** A youngster's growth gains this much for each point his club's academy is above 10. */
+const ACADEMY_GROWTH = 0.012
+
 /**
  * One season of development, applied each 1 July. Returns the change in ability.
  * `boost` speeds up growth towards potential (0.15 = 15% faster) — the user's nation
- * gets one.
+ * gets one. `academy` (1–20, 10 = average) is how well his club brings youngsters on.
  */
 export function developSeason(
   p: Player,
@@ -107,7 +110,8 @@ export function developSeason(
   tier: number,
   intlMinutes: number,
   rng: Rng,
-  boost = 0
+  boost = 0,
+  academy = 10
 ): number {
   const a = p.pos === "GK" ? age - 2 : age
   const prof = p.pers.professionalism
@@ -121,6 +125,7 @@ export function developSeason(
       TIER_GROWTH[tier - 1] *
       ROLE_GROWTH[p.role] *
       (1 + INTL_BOOST * Math.min(1, intlMinutes / INTL_MINUTES_FULL)) *
+      (1 + (academy - 10) * ACADEMY_GROWTH) *
       (1 + boost)
     delta = gap * clamp(rate + gauss(rng, 0, 0.06), 0, 0.7)
   } else if (a <= 27) {

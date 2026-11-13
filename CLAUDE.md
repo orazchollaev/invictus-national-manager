@@ -34,14 +34,16 @@ src/
     match/        Minute-by-minute match engine and commentary.
     competition/  Competition runtime and every competition's definition (defs/).
     calendar/     Dates and the FIFA international windows.
-    players/      Ability, development, retirement, youth intake, clubs.
+    players/      Ability, development, retirement, youth intake, the club market.
+    clubs/        Club profiles (city, colours, reputation, academy) and the manager's
+                  goodwill with clubs: who they release for friendlies, who they give minutes.
     ai/           Squad and line-up selection for AI coaches.
     career/       Objectives, confidence, sacking, job offers.
     world/        The world state, the day-by-day loop, federations and stadiums.
   i18n/           vue-i18n setup. One folder per language in locales/<code>/ (index.ts,
                   ui.ts, engine.ts, commentary.ts): a new folder is picked up by itself.
   lib/            Infrastructure adapters (IndexedDB, flags).
-  modules/        Feature modules (career, coaches, competitions, core, match, nations, news,
+  modules/        Feature modules (career, clubs, coaches, competitions, core, match, nations, news,
                   settings, squad, stadiums, world).
   router/
 ```

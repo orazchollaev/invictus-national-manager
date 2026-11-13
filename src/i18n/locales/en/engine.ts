@@ -18,7 +18,28 @@ const engine = {
     lowerNote: "Costs {cost} confidence now; rewards halved",
     lowerNeeds: "The board will only listen with confidence of {n}% or more",
   },
+  clubLog: {
+    played: "{name} played {minutes} minutes for the national team",
+    playedMany: "{n} of the club's players played for the national team",
+    injured: "{name} came back from national duty injured ({days} days out)",
+    ask: {
+      granted: "You asked for more football for {name}: agreed",
+      refused: "You asked for more football for {name}: refused",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} will play more",
+          body: "{club} agreed to give {name} more football after your call.",
+        },
+        refused: {
+          title: "{club} turn you down",
+          body: "{club} will not change their plans for {name}, and did not enjoy being asked.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

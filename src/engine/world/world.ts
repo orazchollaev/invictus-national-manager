@@ -30,7 +30,10 @@ import type {
   Importance,
 } from "../competition/types"
 import { addDays, daysBetween, yearOf } from "../calendar/dates"
-import { windowNear, windowsForYear, type MatchWindow } from "../calendar/windows"
+import { windowAt, windowNear, windowsForYear, type MatchWindow } from "../calendar/windows"
+import { clubsAfterMatch, ensureClubTies } from "../clubs/dealings"
+import { profileOf, type ClubProfile } from "../clubs/profile"
+import { NEUTRAL, relOf, settle, withholds } from "../clubs/ties"
 import { deriveSeed, makeRng, pick, shuffle, streamFor } from "../rng"
 import { playMatch } from "../match/engine"
 import type { MatchReport, SheetSlot, Side, Tactics, TeamSheet } from "../match/types"
@@ -175,6 +178,9 @@ export class World {
   private playerCache: Player[] | null = null
   /** nation|window → squad key, cleared whenever fixtures are added. */
   private periodCache = new Map<string, string>()
+  /** nation|window key → whether its matches in that window are all friendlies. */
+  private friendlyWindows = new Map<string, boolean>()
+  private profiles = new Map<string, ClubProfile>()
 
   constructor(state: WorldState, statics: WorldStatics) {
     this.state = state
@@ -198,6 +204,7 @@ export class World {
     ensureCoaches(this)
     ensureCareer(this)
     ensureU21(this)
+    ensureClubTies(this)
     this.settleHeldFriendlies()
   }
 
@@ -209,7 +216,24 @@ export class World {
     for (const [nationId, tiers] of indexClubs(this.clubs.values()))
       this.clubIndex.set(nationId, tiers)
     this.strengthCache.clear()
+    this.profiles.clear()
     this.reindex()
+  }
+
+  /** Where a club is, how big it is and what it can do; worked out once. */
+  clubProfile(clubId: string): ClubProfile {
+    let profile = this.profiles.get(clubId)
+    if (!profile) {
+      const club = this.clubs.get(clubId)!
+      profile = profileOf(club, this.defs.get(club.nationId))
+      this.profiles.set(clubId, profile)
+    }
+    return profile
+  }
+
+  /** The club's goodwill towards the manager, 0–100. */
+  clubRel(clubId: string): number {
+    return relOf(this.state.clubTies, clubId)
   }
 
   /** Every player in the world, in `Object.values(state.players)` order. */
@@ -229,6 +253,7 @@ export class World {
 
   private indexFixture(f: Fixture) {
     this.periodCache.clear()
+    this.friendlyWindows.clear()
     const list = this.byDate.get(f.date)
     if (list) list.push(f.id)
     else this.byDate.set(f.date, [f.id])
@@ -939,18 +964,48 @@ export class World {
     }
   }
 
-  /** Clubs keep their players for matches outside FIFA dates, unless they play at home. */
-  released(p: Player, compId?: string): boolean {
-    const inst = compId ? this.state.competitions[compId] : undefined
-    if (!inst?.offWindow) return true
+  /**
+   * Why a club will not let a player go, if it will not. Outside FIFA dates the bigger
+   * clubs keep their players unless they play at home. In a window of friendlies only,
+   * a club may keep a star back; the official matches of a window are never refused.
+   * `key` is the squad's key (see squadKey).
+   */
+  releaseBlock(p: Player, compId?: string, key?: string): "off-window" | "friendly" | null {
     const club = this.clubs.get(p.clubId)
-    return !club || club.tier >= 3 || club.nationId === p.nationId
+    if (!club) return null
+    const inst = compId ? this.state.competitions[compId] : undefined
+    const home = club.nationId === p.nationId
+    if (inst?.offWindow && club.tier < 3 && !home) return "off-window"
+    if (key && !this.state.competitions[key] && this.friendliesOnly(p.nationId, key)) {
+      // Only the manager's own dealings are remembered; every other coach starts neutral.
+      const rel = p.nationId === this.userNation ? this.clubRel(club.id) : NEUTRAL
+      const reputation = this.clubProfile(club.id).reputation
+      if (withholds(this.state.seed, p, key, reputation, rel, home)) return "friendly"
+    }
+    return null
+  }
+
+  released(p: Player, compId?: string, key?: string): boolean {
+    return this.releaseBlock(p, compId, key) === null
+  }
+
+  /** Whether a nation's matches in the window named by `key` are friendlies and nothing else. */
+  private friendliesOnly(nationId: string, key: string): boolean {
+    const cacheKey = `${nationId}|${key}`
+    let only = this.friendlyWindows.get(cacheKey)
+    if (only === undefined) {
+      const w = windowAt(key)
+      const fixtures = w ? this.fixturesOf(nationId, w.start, addDays(w.end, 6)) : []
+      only = fixtures.length > 0 && fixtures.every((f) => !this.state.competitions[f.compId])
+      this.friendlyWindows.set(cacheKey, only)
+    }
+    return only
   }
 
   aiCallUp(nationId: string, key: string, compId?: string) {
     const n = this.state.nations[nationId]
     const squad = pickSquad(this.pool(nationId), this.state.date, 26, n.squad, (p) =>
-      this.released(p, compId)
+      this.released(p, compId, key)
     )
     this.setSquad(nationId, key, squad)
   }
@@ -1025,8 +1080,9 @@ export class World {
   expectedSheet(nationId: string, f: Fixture): TeamSheet {
     const n = this.state.nations[nationId]
     if (n.squadFor === this.squadKey(f, nationId)) return this.aiSheet(nationId, f)
+    const key = this.squadKey(f, nationId)
     const ids = pickSquad(this.pool(nationId), f.date, 26, n.squad, (p) =>
-      this.released(p, f.compId)
+      this.released(p, f.compId, key)
     )
     return this.sheetFrom(
       nationId,
@@ -1258,6 +1314,7 @@ export class World {
         p.intlRating = [Math.round((sum + line.rating) * 10) / 10, n + 1]
       }
     }
+    if (this.isUserFixture(f)) clubsAfterMatch(this, f, report)
     // A suspension is served by the nation's next match, whether or not the player
     // is in the squad — otherwise a suspended player could never be picked again.
     const sentOff = new Set(report.lines.filter((l) => l.red).map((l) => l.playerId))
@@ -1340,6 +1397,7 @@ export class World {
   }
 
   private monthEnd() {
+    settle(ensureClubTies(this), this.state.date)
     for (const n of Object.values(this.state.nations)) {
       n.pointsHistory.push([this.state.date, Math.round(n.points * 100) / 100])
       if (n.pointsHistory.length > 240) n.pointsHistory.shift()
@@ -1394,7 +1452,8 @@ export class World {
           tier,
           developmentMinutes(p),
           rng,
-          nationId === me ? USER_EDGE.growth : 0
+          nationId === me ? USER_EDGE.growth : 0,
+          this.clubs.has(p.clubId) ? this.clubProfile(p.clubId).academy : undefined
         )
         const showcase = showcased(p, age)
         const moved = summerMove(p, this.clubs, this.clubIndex, def.confed, age, rng, showcase)

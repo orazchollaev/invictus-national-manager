@@ -61,6 +61,8 @@ const router = createRouter({
       component: () => import("../modules/squad/pages/ProspectsPage.vue"),
     },
     { path: "/u21", component: () => import("../modules/squad/pages/U21Page.vue") },
+    { path: "/clubs", component: () => import("../modules/clubs/pages/ClubsPage.vue") },
+    { path: "/club/:id", component: () => import("../modules/clubs/pages/ClubPage.vue") },
     { path: "/player/:id", component: () => import("../modules/squad/pages/PlayerPage.vue") },
 
     { path: "/match/:id", component: () => import("../modules/match/pages/MatchPage.vue") },

@@ -20,7 +20,28 @@ const engine: typeof en = {
     lowerNote: "Hozir ishonch {cost} ga kamayadi; mukofotlar ikki baravar kamayadi",
     lowerNeeds: "Rahbariyat faqat ishonch {n}% yoki undan yuqori bo'lsa quloq soladi",
   },
+  clubLog: {
+    played: "{name} terma jamoada {minutes} daqiqa o'ynadi",
+    playedMany: "Klubning {n} futbolchisi terma jamoada o'ynadi",
+    injured: "{name} terma jamoadan jarohat bilan qaytdi ({days} kun o'yindan chetda)",
+    ask: {
+      granted: "{name}ga ko'proq o'yin so'radingiz: rozi bo'lishdi",
+      refused: "{name}ga ko'proq o'yin so'radingiz: rad etishdi",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} ko'proq o'ynaydi",
+          body: "{club} so'rovingizdan keyin {name}ga ko'proq o'yin berishga rozi bo'ldi.",
+        },
+        refused: {
+          title: "{club} so'rovingizni rad etdi",
+          body: "{club} {name} bo'yicha rejalarini o'zgartirmaydi va so'ralganidan xursand emas.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

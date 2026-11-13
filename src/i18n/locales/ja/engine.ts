@@ -18,7 +18,28 @@ const engine: typeof en = {
     lowerNote: "今すぐ信頼度が{cost}下がり、報酬は半分になります",
     lowerNeeds: "協会は信頼度が{n}%以上ある場合にのみ耳を傾けます",
   },
+  clubLog: {
+    played: "{name}が代表で{minutes}分プレーした",
+    playedMany: "クラブの選手{n}人が代表でプレーした",
+    injured: "{name}が代表活動で負傷して戻った({days}日離脱)",
+    ask: {
+      granted: "{name}の出場機会増を依頼: 承諾",
+      refused: "{name}の出場機会増を依頼: 拒否",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name}の出場機会が増える",
+          body: "{club}はあなたの電話を受けて、{name}の出場機会を増やすことに同意しました。",
+        },
+        refused: {
+          title: "{club}が依頼を断る",
+          body: "{club}は{name}に関する方針を変えるつもりはなく、依頼されたことを快く思っていません。",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

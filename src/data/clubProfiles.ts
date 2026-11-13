@@ -1,0 +1,201 @@
+/**
+ * What is known about the elite and top-flight clubs (tiers 1 and 2) beyond their name
+ * and level: where they play, when they were founded, their colours and standing. Every
+ * other club gets a profile worked out from its id (engine/clubs/profile.ts), so a
+ * club added by a mod needs nothing here.
+ *
+ * Colours are data (a club's own), not styling; the app only ever paints them as a
+ * stripe or a dot beside the name.
+ */
+
+/**
+ * City, founded, colours, ground, capacity, reputation (1–100: how big the name is),
+ * and — where it is known for its youth system — the academy rating (1–20).
+ */
+export type ClubFacts = [
+  city: string,
+  founded: number,
+  primary: string,
+  secondary: string,
+  ground: string,
+  capacity: number,
+  reputation: number,
+  academy?: number,
+]
+
+export const CLUB_FACTS: Record<string, ClubFacts> = {
+  // Spain
+  "esp-1-0": ["Madrid", 1902, "#ffffff", "#febe10", "Santiago Bernabéu", 83000, 99, 17],
+  "esp-1-1": ["Barcelona", 1899, "#a50044", "#004d98", "Camp Nou", 99000, 97, 20],
+  "esp-1-2": ["Madrid", 1903, "#cb3524", "#272e61", "Metropolitano", 70000, 90, 14],
+  "esp-2-0": ["Bilbao", 1898, "#ee2523", "#ffffff", "San Mamés", 53000, 78, 18],
+  "esp-2-1": ["San Sebastián", 1909, "#0067b1", "#ffffff", "Reale Arena", 39500, 72, 17],
+  "esp-2-2": ["Villarreal", 1923, "#fbe10f", "#005187", "La Cerámica", 23000, 70, 14],
+  "esp-2-3": ["Seville", 1907, "#0bb363", "#ffffff", "Benito Villamarín", 60700, 72, 13],
+  "esp-2-4": ["Seville", 1890, "#f43333", "#ffffff", "Ramón Sánchez-Pizjuán", 43000, 74, 14],
+  "esp-2-5": ["Girona", 1930, "#ef3340", "#ffffff", "Montilivi", 14000, 62, 11],
+  "esp-2-6": ["Valencia", 1919, "#ffffff", "#000000", "Mestalla", 49000, 72, 15],
+  // Argentina
+  "arg-2-0": ["Buenos Aires", 1905, "#0a3a82", "#f5c400", "La Bombonera", 54000, 78, 15],
+  "arg-2-1": ["Buenos Aires", 1901, "#ffffff", "#e30613", "Monumental", 85000, 78, 17],
+  // France
+  "fra-1-0": ["Paris", 1970, "#004170", "#da291c", "Parc des Princes", 47900, 94, 15],
+  "fra-1-1": ["Marseille", 1899, "#2faee0", "#ffffff", "Vélodrome", 67400, 80, 12],
+  "fra-2-0": ["Monaco", 1924, "#e51b22", "#ffffff", "Louis II", 18500, 76, 17],
+  "fra-2-1": ["Lille", 1944, "#e01e13", "#24216a", "Pierre-Mauroy", 50000, 70, 15],
+  "fra-2-2": ["Lyon", 1950, "#1d3f94", "#d3242f", "Groupama Stadium", 59000, 74, 19],
+  "fra-2-3": ["Lens", 1906, "#fdd000", "#e2001a", "Bollaert-Delelis", 38000, 66, 12],
+  "fra-2-4": ["Nice", 1904, "#e4002b", "#000000", "Allianz Riviera", 35600, 66, 14],
+  "fra-2-5": ["Rennes", 1901, "#e13327", "#000000", "Roazhon Park", 29200, 68, 18],
+  "fra-2-6": ["Strasbourg", 1906, "#009fe3", "#ffffff", "La Meinau", 26000, 62, 12],
+  // England
+  "eng-1-0": ["Manchester", 1880, "#6cabdd", "#1c2c5b", "Etihad Stadium", 53400, 96, 16],
+  "eng-1-1": ["London", 1886, "#ef0107", "#ffffff", "Emirates Stadium", 60700, 92, 17],
+  "eng-1-2": ["Liverpool", 1892, "#c8102e", "#ffffff", "Anfield", 61000, 94, 15],
+  "eng-1-3": ["London", 1905, "#034694", "#ffffff", "Stamford Bridge", 40000, 90, 19],
+  "eng-1-4": ["Manchester", 1878, "#da291c", "#fbe122", "Old Trafford", 74000, 92, 18],
+  "eng-1-5": ["Newcastle", 1892, "#241f20", "#ffffff", "St James' Park", 52000, 80, 12],
+  "eng-2-0": ["London", 1882, "#132257", "#ffffff", "Tottenham Hotspur Stadium", 62800, 84, 15],
+  "eng-2-1": ["Birmingham", 1874, "#670e36", "#95bfe5", "Villa Park", 42700, 78, 14],
+  "eng-2-2": ["Brighton", 1901, "#0057b8", "#ffffff", "Amex Stadium", 31800, 70, 14],
+  "eng-2-3": ["Nottingham", 1865, "#dd0000", "#ffffff", "City Ground", 30400, 66, 12],
+  "eng-2-4": ["London", 1905, "#1b458f", "#c4122e", "Selhurst Park", 25800, 66, 15],
+  "eng-2-5": ["London", 1895, "#7a263a", "#1bb1e7", "London Stadium", 62500, 72, 18],
+  "eng-2-6": ["London", 1889, "#e30613", "#ffffff", "Community Stadium", 17250, 62, 12],
+  "eng-2-7": ["Bournemouth", 1899, "#da291c", "#000000", "Vitality Stadium", 11300, 58, 11],
+  "eng-2-8": ["London", 1879, "#ffffff", "#000000", "Craven Cottage", 29600, 62, 12],
+  "eng-2-9": ["Liverpool", 1878, "#003399", "#ffffff", "Everton Stadium", 52800, 68, 14],
+  // Brazil, Morocco
+  "bra-2-0": ["Rio de Janeiro", 1902, "#9f022d", "#00613c", "Maracanã", 78800, 72, 15],
+  "bra-2-1": ["São Paulo", 1914, "#006437", "#ffffff", "Allianz Parque", 43700, 78, 17],
+  "bra-2-2": ["Rio de Janeiro", 1904, "#000000", "#ffffff", "Nilton Santos", 44600, 68, 13],
+  "mar-2-0": ["Casablanca", 1937, "#d91c1c", "#ffffff", "Mohammed V", 45000, 64, 9],
+  // Portugal
+  "por-1-0": ["Lisbon", 1904, "#e30613", "#ffffff", "Estádio da Luz", 64600, 84, 19],
+  "por-1-1": ["Lisbon", 1906, "#00873e", "#ffffff", "José Alvalade", 50000, 80, 20],
+  "por-1-2": ["Porto", 1893, "#003b8e", "#ffffff", "Estádio do Dragão", 50000, 82, 17],
+  "por-2-0": ["Braga", 1921, "#e2001a", "#ffffff", "Estádio Municipal", 30000, 66, 13],
+  "por-2-1": ["Guimarães", 1922, "#ffffff", "#000000", "D. Afonso Henriques", 30000, 58, 14],
+  "por-2-2": ["Famalicão", 1931, "#003a8f", "#ffffff", "Estádio Municipal", 5300, 50, 9],
+  "por-2-3": ["Barcelos", 1924, "#e2001a", "#1b1464", "Cidade de Barcelos", 12500, 48, 9],
+  // Belgium
+  "bel-2-0": ["Bruges", 1891, "#0a62ad", "#000000", "Jan Breydel", 29000, 72, 14],
+  "bel-2-1": ["Brussels", 1897, "#ffd400", "#003a8f", "Joseph Marien", 9400, 62, 11],
+  "bel-2-2": ["Brussels", 1908, "#4b2e83", "#ffffff", "Lotto Park", 22500, 72, 20],
+  "bel-2-3": ["Genk", 1988, "#0054a6", "#ffffff", "Cegeka Arena", 23600, 64, 18],
+  // Netherlands
+  "ned-1-0": ["Eindhoven", 1913, "#e30613", "#ffffff", "Philips Stadion", 35000, 80, 17],
+  "ned-2-0": ["Rotterdam", 1908, "#e30613", "#ffffff", "De Kuip", 47000, 76, 18],
+  "ned-2-1": ["Amsterdam", 1900, "#d2122e", "#ffffff", "Johan Cruijff Arena", 54000, 80, 20],
+  "ned-2-2": ["Alkmaar", 1967, "#e30613", "#ffffff", "AFAS Stadion", 19500, 66, 15],
+  "ned-2-3": ["Enschede", 1965, "#e30613", "#ffffff", "De Grolsch Veste", 30200, 62, 12],
+  // Mexico
+  "mex-2-0": ["Mexico City", 1916, "#ffd700", "#003b7a", "Estadio Azteca", 83000, 74, 12],
+  "mex-2-1": ["Monterrey", 1945, "#00205b", "#ffffff", "Estadio BBVA", 53500, 70, 11],
+  "mex-2-2": ["San Nicolás", 1960, "#fdb913", "#0b3c8a", "Estadio Universitario", 41000, 68, 11],
+  "mex-2-3": ["Toluca", 1917, "#e30613", "#ffffff", "Nemesio Díez", 30000, 62, 11],
+  // Germany
+  "ger-1-0": ["Munich", 1900, "#dc052d", "#ffffff", "Allianz Arena", 75000, 96, 17],
+  "ger-1-1": ["Dortmund", 1909, "#fde100", "#000000", "Signal Iduna Park", 81000, 88, 17],
+  "ger-1-2": ["Leverkusen", 1904, "#e32219", "#000000", "BayArena", 30200, 82, 14],
+  "ger-2-0": ["Leipzig", 2009, "#dd0741", "#ffffff", "Red Bull Arena", 47000, 78, 18],
+  "ger-2-1": ["Frankfurt", 1899, "#e1000f", "#000000", "Deutsche Bank Park", 51500, 70, 13],
+  "ger-2-2": ["Stuttgart", 1893, "#ffffff", "#e32219", "MHPArena", 60000, 70, 17],
+  "ger-2-3": ["Freiburg", 1904, "#000000", "#e30613", "Europa-Park Stadion", 34700, 64, 18],
+  "ger-2-4": ["Wolfsburg", 1945, "#65b32e", "#ffffff", "Volkswagen Arena", 30000, 62, 12],
+  "ger-2-5": ["Sinsheim", 1899, "#1c63b7", "#ffffff", "PreZero Arena", 30150, 62, 18],
+  "ger-2-6": ["Mainz", 1905, "#c3141e", "#ffffff", "Mewa Arena", 33300, 58, 14],
+  "ger-2-7": ["Mönchengladbach", 1900, "#000000", "#00a651", "Borussia-Park", 54000, 64, 15],
+  // Croatia, Switzerland
+  "cro-2-0": ["Zagreb", 1911, "#0a4da2", "#ffffff", "Maksimir", 35000, 58, 17],
+  "cro-2-1": ["Split", 1911, "#ffffff", "#1c3f94", "Poljud", 33000, 56, 15],
+  "sui-2-0": ["Basel", 1893, "#e30613", "#1c3f94", "St. Jakob-Park", 38500, 60, 17],
+  "sui-2-1": ["Bern", 1898, "#ffd700", "#000000", "Wankdorf", 32000, 58, 13],
+  // Italy
+  "ita-1-0": ["Milan", 1908, "#0068a8", "#000000", "San Siro", 75800, 90, 16],
+  "ita-1-1": ["Milan", 1899, "#fb090b", "#000000", "San Siro", 75800, 88, 15],
+  "ita-1-2": ["Naples", 1926, "#12a0d7", "#ffffff", "Stadio Maradona", 54700, 82, 12],
+  "ita-1-3": ["Turin", 1897, "#000000", "#ffffff", "Allianz Stadium", 41500, 88, 18],
+  "ita-2-0": ["Bergamo", 1907, "#1e71b8", "#000000", "Gewiss Stadium", 24950, 78, 20],
+  "ita-2-1": ["Rome", 1927, "#8e1f2f", "#f0bc42", "Stadio Olimpico", 70000, 78, 16],
+  "ita-2-2": ["Rome", 1900, "#87d8f7", "#ffffff", "Stadio Olimpico", 70000, 74, 13],
+  "ita-2-3": ["Como", 1907, "#00529f", "#ffffff", "Giuseppe Sinigaglia", 13600, 54, 8],
+  "ita-2-4": ["Bologna", 1909, "#1a2f48", "#a21c26", "Dall'Ara", 36000, 66, 13],
+  "ita-2-5": ["Florence", 1926, "#5f259f", "#ffffff", "Artemio Franchi", 43000, 68, 15],
+  // The Americas, Asia
+  "usa-2-0": ["Fort Lauderdale", 2018, "#f7b5cd", "#231f20", "Chase Stadium", 21550, 66, 8],
+  "usa-2-1": ["Los Angeles", 2014, "#c39e6d", "#000000", "BMO Stadium", 22000, 58, 8],
+  "jpn-2-0": ["Kobe", 1966, "#a50034", "#ffffff", "Noevir Stadium", 30000, 56, 10],
+  // Scandinavia, Austria
+  "nor-2-0": ["Bodø", 1916, "#fdd000", "#000000", "Aspmyra", 8270, 52, 9],
+  "nor-2-1": ["Bergen", 1908, "#e30613", "#ffffff", "Brann Stadion", 17000, 50, 10],
+  "den-2-0": ["Copenhagen", 1992, "#ffffff", "#003c81", "Parken", 38000, 62, 14],
+  "den-2-1": ["Herning", 1999, "#000000", "#e30613", "MCH Arena", 11800, 56, 17],
+  "aut-2-0": ["Salzburg", 1933, "#e30613", "#ffffff", "Red Bull Arena", 30200, 66, 19],
+  "aut-2-1": ["Graz", 1909, "#000000", "#ffffff", "Merkur Arena", 16400, 54, 12],
+  // Egypt, Turkey
+  "egy-2-0": ["Cairo", 1907, "#e30613", "#ffffff", "Cairo International", 75000, 70, 8],
+  "tur-2-0": ["Istanbul", 1905, "#a90432", "#fdb912", "RAMS Park", 52300, 76, 12],
+  "tur-2-1": ["Istanbul", 1907, "#002d72", "#ffed00", "Şükrü Saracoğlu", 47800, 76, 12],
+  "tur-2-2": ["Istanbul", 1903, "#000000", "#ffffff", "Beşiktaş Park", 42000, 72, 13],
+  "tur-2-3": ["Trabzon", 1967, "#8b1538", "#4cb7e6", "Papara Park", 40800, 60, 10],
+  // Korea, Eastern Europe
+  "kor-2-0": ["Ulsan", 1983, "#1f4ea1", "#fdb913", "Munsu Stadium", 44000, 54, 8],
+  "kor-2-1": ["Jeonju", 1994, "#0b6e3e", "#ffd700", "Jeonju World Cup", 42000, 54, 8],
+  "ukr-2-0": ["Donetsk", 1936, "#f58220", "#000000", "Donbas Arena", 52500, 66, 17],
+  "ukr-2-1": ["Kyiv", 1927, "#ffffff", "#0057b8", "Lobanovskyi Dynamo", 16800, 62, 15],
+  "rus-2-0": ["St Petersburg", 1925, "#00a3e0", "#ffffff", "Gazprom Arena", 67000, 64, 14],
+  "rus-2-1": ["Krasnodar", 2008, "#1d6b2f", "#000000", "Krasnodar Stadium", 34000, 60, 18],
+  "pol-2-0": ["Warsaw", 1916, "#ffffff", "#006633", "Marszałek Piłsudski", 31100, 56, 10],
+  "pol-2-1": ["Poznań", 1922, "#003a8f", "#ffffff", "Enea Stadion", 42800, 52, 12],
+  "swe-2-0": ["Malmö", 1910, "#6cb8e7", "#ffffff", "Eleda Stadion", 22600, 54, 12],
+  "swe-2-1": ["Stockholm", 1889, "#00a651", "#ffffff", "Tele2 Arena", 33000, 50, 12],
+  "srb-2-0": ["Belgrade", 1945, "#e30613", "#ffffff", "Rajko Mitić", 53000, 60, 14],
+  "srb-2-1": ["Belgrade", 1945, "#000000", "#ffffff", "Partizan Stadium", 32000, 56, 14],
+  "sco-2-0": ["Glasgow", 1887, "#009a49", "#ffffff", "Celtic Park", 60800, 66, 13],
+  "sco-2-1": ["Glasgow", 1872, "#1b458f", "#ffffff", "Ibrox", 51700, 66, 13],
+  "gre-2-0": ["Piraeus", 1925, "#e30613", "#ffffff", "Karaiskakis", 32100, 62, 10],
+  "gre-2-1": ["Thessaloniki", 1926, "#000000", "#ffffff", "Toumba", 28700, 56, 10],
+  "cze-2-0": ["Prague", 1892, "#e30613", "#ffffff", "Fortuna Arena", 19370, 58, 12],
+  "cze-2-1": ["Prague", 1893, "#8b1538", "#1c3f94", "Letná", 18900, 58, 13],
+  // The Gulf, China
+  "ksa-2-0": ["Riyadh", 1957, "#0058a3", "#ffffff", "Kingdom Arena", 60000, 74, 8],
+  "ksa-2-1": ["Riyadh", 1955, "#ffd700", "#003a8f", "Al-Awwal Park", 25000, 72, 8],
+  "ksa-2-2": ["Jeddah", 1927, "#ffd700", "#000000", "King Abdullah Sports City", 62000, 70, 8],
+  "qat-2-0": ["Doha", 1969, "#ffffff", "#0a3a82", "Jassim Bin Hamad", 12000, 56, 8],
+  "uae-2-0": ["Al Ain", 1968, "#6f2da8", "#ffffff", "Hazza bin Zayed", 25000, 56, 8],
+  "chn-2-0": ["Shanghai", 2005, "#e30613", "#ffffff", "Pudong Football Stadium", 37000, 52, 8],
+  "chn-2-1": ["Shanghai", 1951, "#1c3f94", "#ffffff", "Hongkou Stadium", 33060, 52, 8],
+}
+
+/** The great local rivalries: each pair is the other's biggest rival. */
+export const DERBIES: [string, string][] = [
+  ["esp-1-0", "esp-1-1"],
+  ["esp-1-2", "esp-1-0"],
+  ["esp-2-3", "esp-2-4"],
+  ["arg-2-0", "arg-2-1"],
+  ["fra-1-0", "fra-1-1"],
+  ["eng-1-0", "eng-1-4"],
+  ["eng-1-2", "eng-2-9"],
+  ["eng-1-1", "eng-2-0"],
+  ["eng-1-3", "eng-2-4"],
+  ["bra-2-0", "bra-2-2"],
+  ["por-1-0", "por-1-1"],
+  ["por-1-2", "por-2-0"],
+  ["ned-2-0", "ned-2-1"],
+  ["mex-2-1", "mex-2-2"],
+  ["ger-1-0", "ger-1-1"],
+  ["ger-2-4", "ger-2-1"],
+  ["ita-1-0", "ita-1-1"],
+  ["ita-1-3", "ita-1-2"],
+  ["ita-2-1", "ita-2-2"],
+  ["tur-2-0", "tur-2-1"],
+  ["tur-2-2", "tur-2-3"],
+  ["kor-2-0", "kor-2-1"],
+  ["srb-2-0", "srb-2-1"],
+  ["sco-2-0", "sco-2-1"],
+  ["gre-2-0", "gre-2-1"],
+  ["cze-2-0", "cze-2-1"],
+  ["ksa-2-0", "ksa-2-1"],
+  ["chn-2-0", "chn-2-1"],
+]

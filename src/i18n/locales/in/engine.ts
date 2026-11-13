@@ -18,7 +18,28 @@ const engine: typeof en = {
     lowerNote: "अभी {cost} भरोसा घटेगा; इनाम आधे",
     lowerNeeds: "बोर्ड तभी सुनेगा जब भरोसा {n}% या उससे ज़्यादा हो",
   },
+  clubLog: {
+    played: "{name} ने राष्ट्रीय टीम के लिए {minutes} मिनट खेले",
+    playedMany: "क्लब के {n} खिलाड़ी राष्ट्रीय टीम के लिए खेले",
+    injured: "{name} राष्ट्रीय ड्यूटी से चोटिल लौटा ({days} दिन बाहर)",
+    ask: {
+      granted: "आपने {name} को ज़्यादा खिलाने को कहा: मान लिया गया",
+      refused: "आपने {name} को ज़्यादा खिलाने को कहा: मना कर दिया गया",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} ज़्यादा खेलेगा",
+          body: "आपके फ़ोन के बाद {club} ने {name} को ज़्यादा खेलने का मौका देने पर हामी भरी।",
+        },
+        refused: {
+          title: "{club} ने आपको मना कर दिया",
+          body: "{club} {name} को लेकर अपनी योजना नहीं बदलेगा, और पूछे जाने से खुश नहीं था।",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

@@ -19,7 +19,28 @@ const engine: typeof en = {
     lowerNote: "Mất {cost} tín nhiệm ngay bây giờ; phần thưởng giảm một nửa",
     lowerNeeds: "Ban lãnh đạo chỉ lắng nghe khi mức tín nhiệm từ {n}% trở lên",
   },
+  clubLog: {
+    played: "{name} đã thi đấu {minutes} phút cho đội tuyển quốc gia",
+    playedMany: "{n} cầu thủ của câu lạc bộ đã thi đấu cho đội tuyển quốc gia",
+    injured: "{name} trở về từ đội tuyển với chấn thương (nghỉ {days} ngày)",
+    ask: {
+      granted: "Bạn đề nghị cho {name} thi đấu nhiều hơn: được đồng ý",
+      refused: "Bạn đề nghị cho {name} thi đấu nhiều hơn: bị từ chối",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} sẽ được ra sân nhiều hơn",
+          body: "{club} đồng ý cho {name} thi đấu nhiều hơn sau cuộc gọi của bạn.",
+        },
+        refused: {
+          title: "{club} từ chối bạn",
+          body: "{club} sẽ không thay đổi kế hoạch với {name}, và không hài lòng vì bị đề nghị.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

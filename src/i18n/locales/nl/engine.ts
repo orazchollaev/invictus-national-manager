@@ -19,7 +19,28 @@ const engine: typeof en = {
     lowerNote: "Kost nu {cost} vertrouwen; beloningen gehalveerd",
     lowerNeeds: "De bond luistert pas bij een vertrouwen van {n}% of meer",
   },
+  clubLog: {
+    played: "{name} speelde {minutes} minuten voor het nationale team",
+    playedMany: "{n} spelers van de club speelden voor het nationale team",
+    injured: "{name} kwam geblesseerd terug van het nationale team ({days} dagen uitgeschakeld)",
+    ask: {
+      granted: "Je vroeg om meer speeltijd voor {name}: ingestemd",
+      refused: "Je vroeg om meer speeltijd voor {name}: geweigerd",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} gaat meer spelen",
+          body: "{club} stemde na je telefoontje in om {name} meer speeltijd te geven.",
+        },
+        refused: {
+          title: "{club} wijst je af",
+          body: "{club} verandert de plannen voor {name} niet en vond de vraag niet prettig.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

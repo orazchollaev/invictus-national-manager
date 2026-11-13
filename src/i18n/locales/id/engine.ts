@@ -19,7 +19,28 @@ const engine: typeof en = {
     lowerNote: "Mengurangi kepercayaan {cost} sekarang; hadiah dipotong setengah",
     lowerNeeds: "Dewan hanya akan mendengar jika kepercayaan {n}% atau lebih",
   },
+  clubLog: {
+    played: "{name} bermain {minutes} menit untuk tim nasional",
+    playedMany: "{n} pemain klub bermain untuk tim nasional",
+    injured: "{name} pulang dari tugas negara dalam keadaan cedera (absen {days} hari)",
+    ask: {
+      granted: "Kamu meminta lebih banyak waktu bermain untuk {name}: disetujui",
+      refused: "Kamu meminta lebih banyak waktu bermain untuk {name}: ditolak",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} akan lebih sering bermain",
+          body: "{club} setuju memberi {name} lebih banyak waktu bermain setelah teleponmu.",
+        },
+        refused: {
+          title: "{club} menolakmu",
+          body: "{club} tidak akan mengubah rencana mereka untuk {name}, dan tidak senang diminta.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

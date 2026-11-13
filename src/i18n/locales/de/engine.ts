@@ -19,7 +19,28 @@ const engine: typeof en = {
     lowerNote: "Kostet jetzt {cost} Vertrauen; Belohnung halbiert",
     lowerNeeds: "Der Vorstand hört nur zu, wenn das Vertrauen bei mindestens {n} % liegt",
   },
+  clubLog: {
+    played: "{name} hat {minutes} Minuten für die Nationalmannschaft gespielt",
+    playedMany: "{n} Spieler des Vereins haben für die Nationalmannschaft gespielt",
+    injured: "{name} kam verletzt vom Länderspiel zurück ({days} Tage Pause)",
+    ask: {
+      granted: "Du hast um mehr Spielzeit für {name} gebeten: zugestimmt",
+      refused: "Du hast um mehr Spielzeit für {name} gebeten: abgelehnt",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} bekommt mehr Spielzeit",
+          body: "{club} hat nach deinem Anruf zugestimmt, {name} mehr Spielzeit zu geben.",
+        },
+        refused: {
+          title: "{club} erteilt dir eine Absage",
+          body: "{club} ändert seine Pläne für {name} nicht und war über die Anfrage nicht erfreut.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

@@ -13,6 +13,7 @@ import {
   Pencil,
   Save,
   Settings,
+  Shield,
   Trophy,
   Users,
 } from "@lucide/vue"
@@ -41,6 +42,7 @@ const groups = [
     { to: "/inbox", icon: Mail, label: t("nav.inbox") },
     link("/honours", Medal, "honours"),
     link("/stadiums", Landmark, "stadiums"),
+    link("/clubs", Shield, "clubs"),
     link("/invitational", Trophy, "invitational"),
   ],
   // The app.
@@ -156,5 +158,4 @@ button.item:active:not(:disabled) {
 .label {
   font-weight: 600;
 }
-
 </style>

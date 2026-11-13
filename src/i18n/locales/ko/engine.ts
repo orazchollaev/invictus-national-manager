@@ -18,7 +18,28 @@ const engine: typeof en = {
     lowerNote: "지금 신임도 {cost} 하락; 보상 절반",
     lowerNeeds: "협회는 신임도가 {n}% 이상일 때만 요청을 들어줍니다",
   },
+  clubLog: {
+    played: "{name} 선수가 대표팀에서 {minutes}분 뛰었습니다",
+    playedMany: "클럽 선수 {n}명이 대표팀에서 뛰었습니다",
+    injured: "{name} 선수가 대표팀 소집 후 부상으로 돌아왔습니다 ({days}일 결장)",
+    ask: {
+      granted: "{name} 선수의 출전 기회 확대를 요청: 수락",
+      refused: "{name} 선수의 출전 기회 확대를 요청: 거절",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} 선수 출전 기회 늘어난다",
+          body: "{club}이(가) 당신의 연락을 받고 {name} 선수의 출전 기회를 늘리기로 했습니다.",
+        },
+        refused: {
+          title: "{club}이(가) 요청을 거절했습니다",
+          body: "{club}은(는) {name} 선수에 대한 계획을 바꾸지 않으며, 요청받은 것을 달가워하지 않았습니다.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",

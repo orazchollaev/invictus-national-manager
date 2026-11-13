@@ -2,6 +2,7 @@ import type { ISODate, Player } from "../types"
 import type { CompetitionInstance, Fixture, InvitationalFormat } from "../competition/types"
 import type { Formation, MatchReport, SheetSlot, Tactics } from "../match/types"
 import type { Text } from "../text"
+import type { ClubTies } from "../clubs/ties"
 
 export interface RecentResult {
   fixture: string
@@ -450,6 +451,8 @@ export interface WorldState {
   userTeam: UserTeam | null
   /** The under-21 side of the manager's nation (none while he is out of work). */
   u21?: U21State | null
+  /** The manager's standing with the clubs of his players; saves from before start empty. */
+  clubTies?: ClubTies
 }
 
 /**

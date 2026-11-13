@@ -53,8 +53,16 @@ watch(
   { immediate: true }
 )
 
+const squadKey = computed(() =>
+  pending.value?.kind === "callup" ? pending.value.squadFor : undefined
+)
+
+function block(p: Player) {
+  return world.world?.releaseBlock(p, compId.value, squadKey.value) ?? null
+}
+
 function released(p: Player) {
-  return world.world?.released(p, compId.value) ?? true
+  return block(p) === null
 }
 
 function canPick(p: Player) {
@@ -63,7 +71,10 @@ function canPick(p: Player) {
 
 function unavailableReason(p: Player): string | null {
   if (p.intlRetired) return t("squad.callup.retired")
-  if (!released(p)) return t("squad.callup.noRelease")
+  const why = block(p)
+  if (why === "friendly")
+    return t("clubs.refuses", { club: world.world?.clubs.get(p.clubId)?.name ?? "" })
+  if (why) return t("squad.callup.noRelease")
   if (!available(p, world.date))
     return t("squad.callup.injuredUntil", { date: formatDate(p.injury!.until) })
   return null

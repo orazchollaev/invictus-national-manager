@@ -10,6 +10,7 @@ import type { Fixture, InvitationalFormat } from "@/engine/competition/types"
 import type { MatchReport } from "@/engine/match/types"
 import { acceptOffer, declineOffer, resign, setAmbition } from "@/engine/career/career"
 import { pickSquad } from "@/engine/ai/squad"
+import { askForMinutes, type AskOutcome } from "@/engine/clubs/dealings"
 import { answerPress, assistantPress, finishPress } from "@/engine/career/press"
 import {
   acceptInvite,
@@ -290,7 +291,7 @@ export const useWorldStore = defineStore(
         w.state.date,
         26,
         w.state.nations[pending.nationId].squad,
-        (p) => w.released(p, compId)
+        (p) => w.released(p, compId, pending.squadFor)
       )
       w.setSquad(pending.nationId, pending.squadFor, ids)
       attendPress(w)
@@ -487,6 +488,18 @@ export const useWorldStore = defineStore(
       void autoSave()
     }
 
+    /** Ask a player's club to give him more football. */
+    function askClub(playerId: string): AskOutcome {
+      const w = world.value
+      if (!w) return { status: "blocked", why: "club" }
+      const out = askForMinutes(w, playerId)
+      if (out.status !== "blocked") {
+        touch()
+        void autoSave()
+      }
+      return out
+    }
+
     /** Put in (or withdraw) the federation's bid to host tournaments of a level. */
     function setBid(level: HostLevel, on: boolean) {
       const c = world.value?.state.career
@@ -556,6 +569,7 @@ export const useWorldStore = defineStore(
       answerInvite,
       seenInvitation,
       toggleWatch,
+      askClub,
       setBid,
       markRead,
       close,

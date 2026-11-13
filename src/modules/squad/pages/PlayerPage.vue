@@ -17,6 +17,7 @@ import { relationsOf, signed } from "@/modules/squad/utils/chemistry"
 import { PageShell, ProfileHero, StatTiles } from "@/modules/core/components"
 import { NationFlag } from "@/modules/nations/components/badge"
 import { PersonFace } from "@/modules/core/components/face"
+import { AskMinutes } from "@/modules/clubs/components/club"
 import { AttributesCard } from "@/modules/squad/components/attributes"
 import { IntlCareerCard, MatchLogCard, SeasonsCard } from "@/modules/squad/components/career"
 import { useWorldStore } from "@/modules/world/store"
@@ -127,7 +128,10 @@ onBeforeUnmount(() => chart?.destroy())
           {{ t("squad.player.suspended") }}
         </AppChip>
       </div>
-      <span class="muted">{{ club?.name ?? "—" }}</span>
+      <RouterLink v-if="club" :to="`/club/${club.id}`" class="club-link">
+        {{ club.name }}
+      </RouterLink>
+      <span v-else class="muted">—</span>
     </ProfileHero>
 
     <StatTiles
@@ -173,7 +177,10 @@ onBeforeUnmount(() => chart?.destroy())
       <dl class="facts">
         <dt>{{ t("squad.player.club") }}</dt>
         <dd>
-          {{ club?.name ?? "—" }}
+          <RouterLink v-if="club" :to="`/club/${club.id}`" class="club-link">
+            {{ club.name }}
+          </RouterLink>
+          <template v-else>—</template>
           <span class="muted">{{ t("squad.player.level", { n: club?.tier ?? "?" }) }}</span>
         </dd>
         <dt>{{ t("squad.player.role") }}</dt>
@@ -215,6 +222,8 @@ onBeforeUnmount(() => chart?.destroy())
         </dd>
       </dl>
     </AppCard>
+
+    <AskMinutes v-if="club && p.nationId === world.me" :player="p" />
 
     <AppCard padding="md">
       <AppSectionHeader :title="t('squad.player.character')" />
@@ -333,6 +342,11 @@ onBeforeUnmount(() => chart?.destroy())
 .muted {
   color: var(--text-muted);
   font-weight: 400;
+}
+
+.club-link {
+  color: var(--accent);
+  text-decoration: none;
 }
 
 .chart {

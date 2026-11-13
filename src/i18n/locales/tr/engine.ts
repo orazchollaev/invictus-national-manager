@@ -19,7 +19,28 @@ const engine: typeof en = {
     lowerNote: "Şimdi {cost} güven kaybettirir; ödüller yarıya iner",
     lowerNeeds: "Yönetim yalnızca %{n} ve üzeri güvenle dinler",
   },
+  clubLog: {
+    played: "{name}, A Milli Takım için {minutes} dakika oynadı",
+    playedMany: "Kulübün {n} oyuncusu A Milli Takım için oynadı",
+    injured: "{name} milli görevden sakat döndü ({days} gün yok)",
+    ask: {
+      granted: "{name} için daha çok forma istedin: kabul edildi",
+      refused: "{name} için daha çok forma istedin: reddedildi",
+    },
+  },
   news: {
+    clubs: {
+      ask: {
+        granted: {
+          title: "{name} daha çok oynayacak",
+          body: "{club}, aramanın ardından {name} için daha çok forma şansı vermeyi kabul etti.",
+        },
+        refused: {
+          title: "{club} seni geri çevirdi",
+          body: "{club}, {name} konusundaki planlarını değiştirmeyecek ve sorulmasından hoşlanmadı.",
+        },
+      },
+    },
     award: {
       title: "{award}: {name}",
       body: "{comp}: {award} — {name} ({nation}).",
