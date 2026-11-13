@@ -18,7 +18,12 @@ const items = [
 ]
 
 const navEl = ref<HTMLElement | null>(null)
-const activeIndex = computed(() => items.findIndex((i) => isNavActive(i.to)))
+/** Tab whose route is open, or -1 on a page the bar does not list. */
+const matchedIndex = computed(() => items.findIndex((i) => isNavActive(i.to)))
+/** Pages the bar does not list are reached through More, so More lights up. */
+const activeIndex = computed(() =>
+  matchedIndex.value >= 0 ? matchedIndex.value : items.length - 1
+)
 /** Fractional tab position while a finger drags the glass lens; null at rest. */
 const dragPos = ref<number | null>(null)
 const dragging = ref(false)
@@ -83,7 +88,7 @@ function endDrag() {
   suppressClick = true
   setTimeout(() => (suppressClick = false), 0)
   const target = items[idx]
-  if (target && idx !== activeIndex.value) router.push(target.to)
+  if (target && idx !== matchedIndex.value) router.push(target.to)
 }
 
 function onClickCapture(e: MouseEvent) {
