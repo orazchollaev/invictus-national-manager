@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.1.1](https://github.com/orazchollaev/invictus-national-manager/compare/v0.1.0...v0.1.1) (2026-11-14)
+
+### 🚀 New Features
+
+- **career:** add career numbers and a federation link ([dd90bcd](https://github.com/orazchollaev/invictus-national-manager/commit/dd90bcdc07cd8321a87b2acd9552047c2d435988))
+- **clubs:** club profiles, club pages and release friction for friendlies ([424c3d3](https://github.com/orazchollaev/invictus-national-manager/commit/424c3d3db6206b480ff1c77ffad4d9a7e1d380ff))
+- **header:** flag opens your own nation page ([693fafc](https://github.com/orazchollaev/invictus-national-manager/commit/693fafcbc2801ee00fb08a0f6b78692ff52f318a))
+- **honours:** show third place and hosts ([ba66b41](https://github.com/orazchollaev/invictus-national-manager/commit/ba66b4160951e3b3b1af4185f2da8c36f5cb7178))
+- **inbox:** filter news by kind ([7d213d9](https://github.com/orazchollaev/invictus-national-manager/commit/7d213d9559239d7d7d929b9d63111fb8fc137157))
+- **match:** show head-to-head before kick-off ([41cc877](https://github.com/orazchollaev/invictus-national-manager/commit/41cc87740938aa4cbc29f32a6a972c6c881518d4))
+- **nation:** add fifa points chart ([693b09e](https://github.com/orazchollaev/invictus-national-manager/commit/693b09e990272aea70d02f37b1ae949f71d30be2))
+- **nav:** highlight more tab on pages outside the bottom bar ([c8f6082](https://github.com/orazchollaev/invictus-national-manager/commit/c8f60820dd5951294fb6574f886c1a36020d3b50))
+- **nav:** icon-only liquid glass bottom nav with draggable lens ([ec7dc82](https://github.com/orazchollaev/invictus-national-manager/commit/ec7dc82ffba5449b72177f55f70368a88a3862b8))
+- play AFCON every two years (2027, 2028, 2031, 2033) ([da671ff](https://github.com/orazchollaev/invictus-national-manager/commit/da671ff1c99487ca9f4c9b94e3d4e9a3cb9ce584))
+- **player:** show international career, match log and seasons ([4d70c23](https://github.com/orazchollaev/invictus-national-manager/commit/4d70c2315dc125544f5ecd379aeb9efe732733c1))
+- **report:** show who assisted each goal ([19296b8](https://github.com/orazchollaev/invictus-national-manager/commit/19296b83967af3ee9bcb2dc4b342a32d4d2bfb2f))
+- **u21:** add an under-21 side that plays friendlies each window ([8c7f256](https://github.com/orazchollaev/invictus-national-manager/commit/8c7f256f0eed13a3016b7b20fd87045a3a65b606))
+- **u21:** add u21 page and call its players up from there ([d24e6bc](https://github.com/orazchollaev/invictus-national-manager/commit/d24e6bc32aab9a9f515f153a8e8d7995caeafe27))
+
+### 🐛 Bug Fixes
+
+- **career:** board talks close at first match, invitationals are not trophies ([1d2426b](https://github.com/orazchollaev/invictus-national-manager/commit/1d2426b6c263ea7cc7a5b6cb96b09426b32a4e6d))
+- **match:** leaving a live match plays it out instead of losing it ([f46757a](https://github.com/orazchollaev/invictus-national-manager/commit/f46757a3b57222fe46f52f59103972b4293e29c9))
+- **match:** subs follow the window rule and half-time talk hits hot heads ([42c4f32](https://github.com/orazchollaev/invictus-national-manager/commit/42c4f328d680e3b390a37980ffc264ed2f9d0a1a))
+- **mods:** remove date limits from player birth date picker ([2cc95e1](https://github.com/orazchollaev/invictus-national-manager/commit/2cc95e1ca34a8ae13ebb6129be90e3c1097da963))
+- show bonds inside the call-up player card ([aebcf33](https://github.com/orazchollaev/invictus-national-manager/commit/aebcf3318122f21d190b2b5c04a406f03aa55e39))
+- **ui:** add missing UI components and styles ([2438f6d](https://github.com/orazchollaev/invictus-national-manager/commit/2438f6dec48fa22e10ef0d15374ec20eb2d1af8a))
+- **world:** press expires at kick-off, offers stop daily, old saves drop dead editions ([6fdff57](https://github.com/orazchollaev/invictus-national-manager/commit/6fdff576260d7b61383a1ba2e80d0ad48d7e73bc))
+- **world:** show a message when a save cannot be opened ([f1d75dc](https://github.com/orazchollaev/invictus-national-manager/commit/f1d75dc4e4cd47af16ea374a3dcd02b15713bf9a))
+
+### ♻️ Refactoring
+
+- redesign match pitch and remove simulator ([954a466](https://github.com/orazchollaev/invictus-national-manager/commit/954a46603df154e864af99a392233c12aaf22e44))
+- remove player archetypes and tactical roles ([ad8e68f](https://github.com/orazchollaev/invictus-national-manager/commit/ad8e68f0d0e5a7523a02bf2587366aaf06a01f20))
+- simplify main menu by removing action hints ([65210eb](https://github.com/orazchollaev/invictus-national-manager/commit/65210eb909ad806aba56b2d9f1ef0ab2cf815653))
+
+### 🔧 Maintenance
+
+- bump gradle version ([a3aa1f4](https://github.com/orazchollaev/invictus-national-manager/commit/a3aa1f4707f125caec3605f579c66ffcaf006a36))
+- **deps:** update dependencies ([4e67d78](https://github.com/orazchollaev/invictus-national-manager/commit/4e67d78c3b46299fe44dd2bc7a96219738eb54e0))
+- **i18n:** add texts for leaving a match and failed saves ([e02047a](https://github.com/orazchollaev/invictus-national-manager/commit/e02047abe5d221334b1e9d4009bfb654b6a08128))
+- **i18n:** add texts for u21 and new stats screens ([afa9878](https://github.com/orazchollaev/invictus-national-manager/commit/afa987809417cecba398cc649b871f90207a6ed6))
+- update app branding name ([5a654b7](https://github.com/orazchollaev/invictus-national-manager/commit/5a654b706985087a4cd0558ff756d50a2cd2e033))
+
+### 📚 Documentation
+
+- **changelog:** update 0.1.0 version name ([77d957b](https://github.com/orazchollaev/invictus-national-manager/commit/77d957b4eb0de81bb01567027de36ffed6284c82))
+- update logo url in README.md ([bcb9559](https://github.com/orazchollaev/invictus-national-manager/commit/bcb95590fab46d067b8875e01ed2a20e5dfb80ed))
+- update readme, architecture and changelog ([d04b229](https://github.com/orazchollaev/invictus-national-manager/commit/d04b229e8d14b0ffb75318040330e8cbf52d78e3))
+
+### ✅ Tests
+
+- speed up slow suites and drop short timeouts ([77884a3](https://github.com/orazchollaev/invictus-national-manager/commit/77884a39e774bebed7bf5dc61c2f1505f99bb56e))
+
 ## Unreleased
 
 ### 🚀 New Features
